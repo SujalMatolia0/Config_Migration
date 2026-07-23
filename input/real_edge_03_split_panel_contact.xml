@@ -1,0 +1,132 @@
+<Workspace xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit" ServerVersion="Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)&#xD;&#xA; CE Version: rnw-release-26-2-0-1-sp2 PL: " ClientVersion="26.2.0.326" Type="Contact" UIType="Contact" IsMultiEdit="False" SpellCheckOnSave="False" SpellCheckAllowCancel="False" BrowserCompatibilityMode="False">
+    <RecordTypes>
+        <RecordType Id="6" Name="Contact" />
+        <RecordType Id="7" Name="Org" />
+        <RecordType Id="1" Name="Incident" />
+        <RecordType Id="5" Name="Opportunity" />
+        <RecordType Id="8" Name="Task" />
+        <RecordType Id="49" Name="Chat" />
+        <RecordType Id="126" Name="Asset" />
+        <RecordType Id="152" Name="Interaction" />
+    </RecordTypes>
+    <Ribbon>
+        <RibbonTab TextLabelName="HOME_LBL">
+            <RibbonGroup TextLabelName="SAVE_CMD">
+                <RibbonButtonItem ItemId="Save" />
+                <RibbonButtonItem ItemId="SaveAndClose" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="ACTIONS_LBL">
+                <RibbonButtonItem ItemId="New" />
+                <RibbonButtonItem ItemId="Refresh" />
+                <RibbonButtonItem ItemId="Appointment" />
+                <RibbonButtonItem ItemId="Print" ButtonSize="Small" />
+                <RibbonButtonItem ItemId="Copy" ButtonSize="Small" />
+                <RibbonButtonItem ItemId="Delete" ButtonSize="Small" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="PROOFING_LBL">
+                <RibbonButtonItem ItemId="SpellCheck" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="INFO_CMD">
+                <RibbonButtonItem ItemId="Info" />
+            </RibbonGroup>
+        </RibbonTab>
+    </Ribbon>
+    <QuickAccessToolbar>
+        <QuickAccessToolbarItem ItemId="New" />
+        <QuickAccessToolbarItem ItemId="Save" />
+        <QuickAccessToolbarItem ItemId="SaveAndClose" />
+        <QuickAccessToolbarItem ItemId="Print" />
+        <QuickAccessToolbarItem ItemId="Bookmark" />
+    </QuickAccessToolbar>
+    <!-- Flag with NO attributes at all — real from Contact.xml -->
+    <Flag />
+    <Info>
+        <InfoItem ObjectId="Contact" FieldId="CId" />
+        <InfoItem ObjectId="Contact" FieldId="Created" />
+        <InfoItem ObjectId="Contact" FieldId="Updated" />
+        <InfoItem ObjectId="Contact" FieldId="RuleState" />
+    </Info>
+    <Rules>
+        <Rule Name="New Rule" Notes="" Active="False">
+            <Triggers>
+                <Trigger Type="EditorLoaded" />
+            </Triggers>
+            <Conditions LogicalExpression="0">
+                <Condition>
+                    <Source Type="Field" TableNode="True">Contact.CtypeId</Source>
+                    <Property>Value</Property>
+                    <Operator>EQ</Operator>
+                    <Value>3</Value>
+                </Condition>
+            </Conditions>
+            <Then>
+                <Action Type="Standard">
+                    <Object Type="MessageBox"></Object>
+                    <Operation>Show</Operation>
+                    <Value Title="Contact Information" Icon="Asterisk">This contact is created through email and may not hold sufficient information in the system</Value>
+                </Action>
+            </Then>
+            <Else />
+        </Rule>
+    </Rules>
+
+    <!--
+        ROOT TABLE containing BOTH top-level Fields (left panel) AND a TabSet (right panel).
+        This is the exact structure from Contact.xml.
+        The TabSet has Row/Column/RowSpan/ColumnSpan positioning it inside the root grid.
+        Top-level Fields sit in Column 0.
+        The parser must distinguish these from tab-level fields.
+    -->
+    <Table RowCount="11" ColumnCount="5" BackColor="Transparent" ForeColor="ControlText" Id="636632414286113724">
+
+        <!-- TabSet positioned in right panel — has Row, Column, RowSpan, ColumnSpan -->
+        <TabSet Row="0" Column="1" RowSpan="11" ColumnSpan="4" Margin="0, 0, 0, 0" TabIndex="14" CanReorderTabs="False" WrapTabs="False" TabDisplayStyle="Regular" Id="636908678919659518">
+
+            <Tab TextColor="" Text="Incidents" Id="636908681376940067">
+                <Table RowCount="1" ColumnCount="1" BackColor="Transparent" ForeColor="ControlText">
+                    <RelationshipItem ItemType="IncidentView" Row="0" Column="0" AcId="9029" ShowRowCount="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" DelayReportExecution="True" ExecuteOnNew="False" TabIndex="0" SearchReportId="0" Id="636908679290650738" />
+                </Table>
+            </Tab>
+
+            <Tab TextColor="Black" Text="Customer360" Id="636908681812694990">
+                <Table RowCount="1" ColumnCount="1" BackColor="Transparent" ForeColor="ControlText">
+                    <Browser Row="0" Column="0" DelayPageLoad="True" SendUrlAsPostData="False" SetFixedHeight="True" ChildBrowsers="False" SuppressErrors="True" Url="https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php?mobile=$contact.phmobile" Height="420" TabIndex="0" Id="636908689046358732" />
+                </Table>
+            </Tab>
+
+            <Tab TextColor="Black" Text="Attachments" Id="636908679362564851">
+                <Table RowCount="1" ColumnCount="1" BackColor="Transparent" ForeColor="ControlText">
+                    <RelationshipItem ItemType="FileAttachments" Row="0" Column="0" TabIndex="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" Id="636908679379055794" />
+                </Table>
+            </Tab>
+
+            <Tab TextColor="Black" Text="Notes" Id="636908679403907216">
+                <Table RowCount="1" ColumnCount="1" BackColor="Transparent" ForeColor="ControlText">
+                    <RelationshipItem ItemType="ContactNotes" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" DefaultChannelForNote="NoDefault" TabIndex="0" Id="636908679421398216" />
+                </Table>
+            </Tab>
+
+            <Tab TextColor="Black" Text="Audit" Id="636908679456970251">
+                <Table RowCount="1" ColumnCount="1" BackColor="Transparent" ForeColor="ControlText">
+                    <RelationshipItem ItemType="ContactAuditLog" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" AcId="9050" TabIndex="0" ShowReadTransactions="False" ExecuteOnNew="False" Id="636908679483641776" />
+                </Table>
+            </Tab>
+
+        </TabSet>
+
+        <!-- TitleBar in root Table left panel — real from Contact.xml -->
+        <TitleBar Row="1" Column="0" TextAlign="MiddleLeft" Font="Microsoft Sans Serif, 7.8pt, style=Bold" ForeColor="Black" Height="19" Margin="3, 0, 3, 22" Text="Customer Details" BackColor="255, 194, 14" Id="636632414113030871" />
+
+        <!-- Top-level Fields in Column 0 — real from Contact.xml -->
+        <Field Row="2" Column="0" ObjectId="Contact" FieldId="Title" TabIndex="19" SpellCheck="False" Multiline="False" TrimTextWhitespace="True" AcceptsReturn="False" />
+        <Field Row="3" Column="0" ObjectId="Contact" FieldId="Name.First" TabIndex="16" SpellCheck="False" Multiline="False" TrimTextWhitespace="True" AcceptsReturn="False" Id="636984392060169799" />
+        <Field Row="4" Column="0" ObjectId="Contact" FieldId="Name.Last" TabIndex="17" SpellCheck="False" Multiline="False" TrimTextWhitespace="True" AcceptsReturn="False" />
+        <Field Row="5" Column="0" ObjectId="Contact" FieldId="Addr" TabIndex="18" Height="21" />
+        <Field Row="6" Column="0" ObjectId="Contact" FieldId="PhOffice" TabIndex="4" LabelText="&amp;Mobile Phone" DefaultPhoneType="1" Id="636632413451106202" />
+        <Field Row="7" Column="0" ObjectId="Contact" FieldId="C$CustomerId" TabIndex="15" RequiredOption="" ReadOnlyOption="" SpellCheck="False" Multiline="False" TrimTextWhitespace="True" AcceptsReturn="False" Id="636908679918516649" />
+        <Field Row="8" Column="0" ObjectId="Contact" FieldId="Email" TabIndex="3" Id="636632413422131623" />
+        <Field Row="9" Column="0" ObjectId="Contact" FieldId="CtypeId" TabIndex="6" Id="636632413519167264" />
+        <Field Row="10" Column="0" ObjectId="Contact" FieldId="C$Gender" TabIndex="20" RequiredOption="" ReadOnlyOption="" />
+
+    </Table>
+</Workspace>

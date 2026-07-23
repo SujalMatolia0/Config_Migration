@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OSVCMasterJSON",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "exportedAt": { "type": "string" },
+        "serverVersion": { "type": "string" },
+        "totalComponents": { "type": "integer" }
+      },
+      "required": ["exportedAt", "serverVersion", "totalComponents"]
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "workspaces": { "type": "integer" },
+        "reports": { "type": "integer" },
+        "customScripts": { "type": "integer" },
+        "cpmHandlers": { "type": "integer" },
+        "businessRules": { "type": "integer" },
+        "navigationSets": { "type": "integer" },
+        "orphanedComponents": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "externalEndpoints": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["workspaces", "reports", "customScripts", "cpmHandlers", "businessRules", "navigationSets"]
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "workspaces": { "type": "array" },
+        "reports": { "type": "array" },
+        "customScripts": { "type": "array" },
+        "cpm": { "type": "array" },
+        "businessRules": { "type": "array" },
+        "navigationSets": { "type": "array" },
+        "workflows": { "type": "array" },
+        "templates": { "type": "array" }
+      },
+      "required": ["workspaces", "reports", "customScripts", "cpm", "businessRules", "navigationSets", "workflows", "templates"]
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["type", "name"]
+          },
+          "to": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "required": ["type"]
+          },
+          "via": { "type": "string" }
+        },
+        "required": ["from", "to", "via"]
+      }
+    },
+    "orphans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "name": { "type": "string" },
+          "reason": { "type": "string" }
+        },
+        "required": ["type", "name", "reason"]
+      }
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "referencedIn": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "params": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "type": { "type": "string" },
+          "risk": { "type": "string" }
+        },
+        "required": ["url", "referencedIn", "type"]
+      }
+    }
+  },
+  "required": ["meta", "summary", "components", "relationships", "orphans", "endpoints"]
+}

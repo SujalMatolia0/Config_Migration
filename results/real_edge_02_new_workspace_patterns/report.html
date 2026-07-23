@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSVC Instance Audit Report</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --accent-workspace: #eab308;
+      --accent-report: #3b82f6;
+      --accent-script: #22c55e;
+      --accent-cpm: #f97316;
+      --accent-endpoint: #ef4444;
+      --accent-nav: #a855f7;
+      --accent-rule: #ec4899;
+      --accent-orphan: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 2.5rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .meta-tag {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Dashboard Summary Grid */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .summary-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .summary-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .summary-card .value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-card .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    /* Section Container */
+    .section-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #3b82f6;
+      padding-left: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-workspace { background-color: rgba(234, 179, 8, 0.15); color: var(--accent-workspace); }
+    .badge-report { background-color: rgba(59, 130, 246, 0.15); color: var(--accent-report); }
+    .badge-script { background-color: rgba(34, 197, 94, 0.15); color: var(--accent-script); }
+    .badge-cpm { background-color: rgba(249, 115, 22, 0.15); color: var(--accent-cpm); }
+    .badge-endpoint { background-color: rgba(239, 68, 68, 0.15); color: var(--accent-endpoint); }
+    .badge-rule { background-color: rgba(236, 72, 153, 0.15); color: var(--accent-rule); }
+    .badge-nav { background-color: rgba(168, 85, 247, 0.15); color: var(--accent-nav); }
+    .badge-orphan { background-color: rgba(100, 116, 139, 0.15); color: var(--accent-orphan); }
+    .badge-configanomaly { background-color: rgba(234, 179, 8, 0.15); color: var(--accent-workspace); }
+    .badge-configrisk { background-color: rgba(239, 68, 68, 0.15); color: var(--accent-endpoint); }
+    .badge-businessrule { background-color: rgba(236, 72, 153, 0.15); color: var(--accent-rule); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      font-size: 0.875rem;
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Code Blocks */
+    code {
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.8rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      color: #e2e8f0;
+      word-break: break-all;
+    }
+
+    .risk-high {
+      color: #f87171;
+      font-weight: 500;
+    }
+
+    .risk-none {
+      color: var(--text-muted);
+    }
+
+    /* Component Details Lists */
+    .comp-item {
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 0;
+    }
+    .comp-item:last-child {
+      border-bottom: none;
+    }
+    .comp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .comp-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>OSVC Instance Audit Report</h1>
+      <div class="meta-tag">Generated: 2026-07-23 | Platform: Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)
+ CE Version: rnw-release-26-2-0-1-sp2 PL:</div>
+    </div>
+    <div>
+      <span class="badge badge-workspace">Master Analysis File</span>
+    </div>
+  </header>
+
+  <!-- Summary Dashboard -->
+  <section class="summary-grid">
+    <div class="summary-card" style="border-top: 4px solid var(--accent-workspace);">
+      <div class="value" style="color: var(--accent-workspace);">1</div>
+      <div class="label">Workspaces</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-report);">
+      <div class="value" style="color: var(--accent-report);">0</div>
+      <div class="label">Reports</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-cpm);">
+      <div class="value" style="color: var(--accent-cpm);">0</div>
+      <div class="label">CPMs</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-script);">
+      <div class="value" style="color: var(--accent-customScripts);">0</div>
+      <div class="label">Scripts</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-rule);">
+      <div class="value" style="color: var(--accent-rule);">0</div>
+      <div class="label">Rules</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-nav);">
+      <div class="value" style="color: var(--accent-nav);">0</div>
+      <div class="label">Nav Sets</div>
+    </div>
+    <div class="summary-card" style="border-top: 4px solid var(--accent-orphan);">
+      <div class="value" style="color: #cbd5e1;">3</div>
+      <div class="label">Orphans</div>
+    </div>
+  </section>
+
+  <!-- Risk Flags & Audit Warnings -->
+  
+  
+    
+  
+  
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+  <section class="section-card">
+    <h2>Risk Audit & Flags <span class="badge badge-endpoint">2 Issues</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Type of Issue / Risk Description</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        
+          
+        
+        
+        
+          
+        
+          
+            
+            <tr>
+              <td><code>Workspace 'real_edge_02_new_workspace_patterns' Rule: New Rule</code></td>
+              <td><span style="color: #fb923c;">Inactive Rule</span></td>
+              <td>Rule is marked Inactive (Active="False")</td>
+            </tr>
+          
+        
+          
+            
+            <tr>
+              <td><code>Workspace 'real_edge_02_new_workspace_patterns' Tab: 'New Tab 1'</code></td>
+              <td><span style="color: #ef4444; font-weight: 500;">Config Risk</span></td>
+              <td>Embedded Browser has SuppressErrors=True (Url: None) - fails silently.</td>
+            </tr>
+          
+        
+
+        
+          <tr>
+            <td colspan="3" class="risk-none">No immediate security or configuration risks flagged.</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Orphan Components Registry -->
+  <section class="section-card">
+    <h2>Orphaned & Dead Code Registry <span class="badge badge-orphan">3 Dead</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component Name</th>
+          <th>Component Type</th>
+          <th>Reason for Orphan Flag</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          
+            <tr>
+              <td><strong>real_edge_02_new_workspace_patterns</strong></td>
+              <td><span class="badge badge-workspace">Workspace</span></td>
+              <td>Not referenced in any Navigation Set</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Workspace 'real_edge_02_new_workspace_patterns' Rule: New Rule</strong></td>
+              <td><span class="badge badge-businessrule">BusinessRule</span></td>
+              <td>Rule is marked Inactive (Active="False")</td>
+            </tr>
+          
+            <tr>
+              <td><strong>Workspace 'real_edge_02_new_workspace_patterns' Tab: 'New Tab 1'</strong></td>
+              <td><span class="badge badge-configrisk">ConfigRisk</span></td>
+              <td>Embedded Browser has SuppressErrors=True (Url: None) - fails silently.</td>
+            </tr>
+          
+        
+      </tbody>
+    </table>
+  </section>
+
+  <!-- External Endpoints Registry -->
+  <section class="section-card">
+    <h2>External Endpoint Registry <span class="badge badge-endpoint">1 Endpoints</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>URL / Endpoint</th>
+          <th>Type</th>
+          <th>Owner Component(s)</th>
+          <th>Parameters Detected</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          
+            <tr>
+              <td><code>http://cloud.oracle.com/service</code></td>
+              <td><span class="badge badge-endpoint">RibbonLink</span></td>
+              <td>
+                
+                  <div>RibbonLink: real_edge_02_new_workspace_patterns → Ribbon Link: Oracle Service Cloud</div>
+                
+              </td>
+              <td>
+                
+                  -
+                
+              </td>
+            </tr>
+          
+        
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Component Inventory Details -->
+  <section class="section-card">
+    <h2>Component Details Inventory</h2>
+    
+    <!-- Workspaces -->
+    <div style="margin-bottom: 2rem;">
+      <h3 style="margin-bottom: 1rem; color: var(--accent-workspace);">Workspaces (1)</h3>
+      
+        <div class="comp-item">
+          
+          
+          <div class="comp-header">
+            <span class="comp-title">real_edge_02_new_workspace_patterns</span>
+            <span class="badge badge-workspace">Contact</span>
+          </div>
+          <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div>Fields used: 0 (Standard: 0, Custom: 0) | Tabs layout: 5 | Rules defined: 1</div>
+            
+            
+              <div style="margin-top: 0.25rem;">Tabs: 
+                
+                  <code>Summary</code>
+                
+                  <code>New Tab 1</code>
+                
+                  <code>New Tab 2</code>
+                
+                  <code>New Tab 3</code>
+                
+                  <code>New Tab 4</code>
+                
+              </div>
+            
+          </div>
+        </div>
+      
+    </div>
+
+    <!-- Reports -->
+    <div style="margin-bottom: 2rem;">
+      <h3 style="margin-bottom: 1rem; color: var(--accent-report);">Reports (0)</h3>
+      
+    </div>
+
+    <!-- CPM -->
+    <div style="margin-bottom: 2rem;">
+      <h3 style="margin-bottom: 1rem; color: var(--accent-cpm);">Custom Process Managers (0)</h3>
+      
+    </div>
+
+  </section>
+
+</body>
+</html>

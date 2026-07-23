@@ -1,0 +1,915 @@
+{
+  "meta": {
+    "exportedAt": "2026-07-23",
+    "serverVersion": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+    "totalComponents": 1,
+    "workspace": "real_edge_02_new_workspace_patterns"
+  },
+  "summary": {
+    "workspaces": 1,
+    "reports": 0,
+    "customScripts": 0,
+    "cpmHandlers": 0,
+    "businessRules": 0,
+    "navigationSets": 0,
+    "orphanedComponents": [
+      "Workspace: real_edge_02_new_workspace_patterns",
+      "BusinessRule: Workspace 'real_edge_02_new_workspace_patterns' Rule: New Rule",
+      "ConfigRisk: Workspace 'real_edge_02_new_workspace_patterns' Tab: 'New Tab 1'"
+    ],
+    "externalEndpoints": [
+      "http://cloud.oracle.com/service"
+    ]
+  },
+  "components": {
+    "workspaces": [
+      {
+        "name": "real_edge_02_new_workspace_patterns",
+        "type": "Contact",
+        "ui_type": "Contact",
+        "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+        "client_version": "26.2.0.326",
+        "is_multi_edit": false,
+        "row_count": 0,
+        "column_count": 0,
+        "tab_set_info": {
+          "row": null,
+          "column": null,
+          "row_span": null,
+          "column_span": null,
+          "summary_panel_height": "210",
+          "summary_panel_alignment": "Top",
+          "can_reorder_tabs": true,
+          "wrap_tabs": true,
+          "summary_tab_index": "0",
+          "threshold_height": "310"
+        },
+        "record_types": [
+          {
+            "id": "6",
+            "name": "Contact"
+          },
+          {
+            "id": "7",
+            "name": "Org"
+          },
+          {
+            "id": "1",
+            "name": "Incident"
+          },
+          {
+            "id": "5",
+            "name": "Opportunity"
+          },
+          {
+            "id": "8",
+            "name": "Task"
+          },
+          {
+            "id": "49",
+            "name": "Chat"
+          },
+          {
+            "id": "126",
+            "name": "Asset"
+          },
+          {
+            "id": "152",
+            "name": "Interaction"
+          }
+        ],
+        "ribbon_buttons": [
+          "Save",
+          "SaveAndClose",
+          "New",
+          "Refresh",
+          "Appointment",
+          "Print",
+          "Copy",
+          "Delete",
+          "Separator",
+          "ResetPassword",
+          "SpellCheck",
+          "EditorLinks",
+          "Separator",
+          "Info"
+        ],
+        "info_items": [
+          {
+            "object_id": "Contact",
+            "field_id": "CId"
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Created"
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Updated"
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "RuleState"
+          }
+        ],
+        "rules": [
+          {
+            "name": "New Rule",
+            "active": false,
+            "triggers": [
+              "EditorLoaded"
+            ],
+            "conditions": [
+              {
+                "source": "Contact.CtypeId",
+                "source_type": "Field",
+                "operator": "EQ",
+                "value": "3",
+                "logic_expr": "0"
+              }
+            ],
+            "actions": [
+              {
+                "type": "Standard",
+                "object": "MessageBox",
+                "object_type": "MessageBox",
+                "object_id": null,
+                "operation": "Show",
+                "value": "This contact is created through email and may not hold sufficient information in the system",
+                "value_operator": null,
+                "button_id": null,
+                "branch": "then"
+              }
+            ]
+          }
+        ],
+        "tabs": [
+          {
+            "text": "Summary",
+            "id": null,
+            "relationship_items": [],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [
+              {
+                "object_id": "Contact",
+                "field_id": "C$AccountNumber",
+                "label": null,
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": "",
+                "hidden_option": null,
+                "required_option": ""
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "PhOffice",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 0,
+                "default_phone_type": "0",
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "OrgId",
+                "label": null,
+                "id": null,
+                "row": 3,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": "8001",
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "Addr",
+                "label": null,
+                "id": null,
+                "row": 4,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "C$Gender",
+                "label": null,
+                "id": null,
+                "row": 5,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": "",
+                "hidden_option": null,
+                "required_option": ""
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "Email",
+                "label": null,
+                "id": null,
+                "row": 6,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              }
+            ],
+            "menus": [
+              {
+                "id": "639203177532626906",
+                "row": 2,
+                "column": 0,
+                "items": [
+                  "Menu Item #1",
+                  "Menu Item #2",
+                  "Menu Item #3",
+                  "Anurag",
+                  "Monish"
+                ]
+              }
+            ],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "New Tab 1",
+            "id": "639203176794447864",
+            "relationship_items": [],
+            "browsers": [
+              {
+                "url": null,
+                "suppress_errors": true,
+                "id": null,
+                "height": "1036",
+                "row": 0,
+                "column": 0
+              }
+            ],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "New Tab 2",
+            "id": "639203176730504371",
+            "relationship_items": [
+              {
+                "item_type": "Report",
+                "ac_id": "0",
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": false,
+                "show_read_transactions": true,
+                "default_channel": null,
+                "search_report_id": "0"
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "New Tab 3",
+            "id": "639203176746840897",
+            "relationship_items": [
+              {
+                "item_type": "Tasks",
+                "ac_id": "9016",
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": false,
+                "show_read_transactions": true,
+                "default_channel": null,
+                "search_report_id": "8012",
+                "can_send_on_save": null,
+                "can_use_smart_assistant": null,
+                "default_channel_customer": null,
+                "default_thread_on_new": null,
+                "status_change_on_response": null
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "New Tab 4",
+            "id": "639203176994103776",
+            "relationship_items": [
+              {
+                "item_type": "FileAttachments",
+                "ac_id": null,
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": true,
+                "show_read_transactions": true,
+                "default_channel": null,
+                "search_report_id": null,
+                "can_send_on_save": null,
+                "can_use_smart_assistant": null,
+                "default_channel_customer": null,
+                "default_thread_on_new": null,
+                "status_change_on_response": null
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          }
+        ],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "ribbon_links": [
+          {
+            "title": "Oracle Service Cloud",
+            "url": "http://cloud.oracle.com/service"
+          }
+        ],
+        "flag_visible": true
+      }
+    ],
+    "reports": [],
+    "customScripts": [],
+    "cpm": [],
+    "businessRules": [],
+    "navigationSets": [],
+    "workflows": [],
+    "templates": []
+  },
+  "relationships": [
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "Report",
+        "id": "0",
+        "name": "Report 0"
+      },
+      "via": "Tab 'New Tab 2' -> RelationshipItem Type: Report (AcId: 0)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "Report",
+        "id": "0",
+        "name": "Report 0"
+      },
+      "via": "Tab 'New Tab 2' -> RelationshipItem Search Report (SearchReportId: 0)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9016",
+        "name": "Report 9016"
+      },
+      "via": "Tab 'New Tab 3' -> RelationshipItem Type: Tasks (AcId: 9016)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8012",
+        "name": "Report 8012"
+      },
+      "via": "Tab 'New Tab 3' -> RelationshipItem Search Report (SearchReportId: 8012)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8001",
+        "name": "Report 8001"
+      },
+      "via": "Tab 'Summary' -> Field 'OrgId' -> ReportId property (Report: 8001)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_02_new_workspace_patterns"
+      },
+      "to": {
+        "type": "ExternalEndpoint",
+        "name": "http://cloud.oracle.com/service"
+      },
+      "via": "Ribbon Link 'Oracle Service Cloud' -> External Endpoint (http://cloud.oracle.com/service)"
+    }
+  ],
+  "orphans": [
+    {
+      "type": "Workspace",
+      "name": "real_edge_02_new_workspace_patterns",
+      "reason": "Not referenced in any Navigation Set"
+    },
+    {
+      "type": "BusinessRule",
+      "name": "Workspace 'real_edge_02_new_workspace_patterns' Rule: New Rule",
+      "reason": "Rule is marked Inactive (Active=\"False\")"
+    },
+    {
+      "type": "ConfigRisk",
+      "name": "Workspace 'real_edge_02_new_workspace_patterns' Tab: 'New Tab 1'",
+      "reason": "Embedded Browser has SuppressErrors=True (Url: None) - fails silently."
+    }
+  ],
+  "endpoints": [
+    {
+      "url": "http://cloud.oracle.com/service",
+      "referencedIn": [
+        "RibbonLink: real_edge_02_new_workspace_patterns → Ribbon Link: Oracle Service Cloud"
+      ],
+      "params": [],
+      "type": "RibbonLink",
+      "risk": ""
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "workspace:real_edge_02_new_workspace_patterns",
+        "type": "workspace",
+        "label": "real_edge_02_new_workspace_patterns",
+        "isOrphan": true,
+        "orphanReason": "Not referenced in any Navigation Set",
+        "data": {
+          "name": "real_edge_02_new_workspace_patterns",
+          "type": "Contact",
+          "ui_type": "Contact",
+          "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+          "client_version": "26.2.0.326",
+          "is_multi_edit": false,
+          "row_count": 0,
+          "column_count": 0,
+          "tab_set_info": {
+            "row": null,
+            "column": null,
+            "row_span": null,
+            "column_span": null,
+            "summary_panel_height": "210",
+            "summary_panel_alignment": "Top",
+            "can_reorder_tabs": true,
+            "wrap_tabs": true,
+            "summary_tab_index": "0",
+            "threshold_height": "310"
+          },
+          "record_types": [
+            {
+              "id": "6",
+              "name": "Contact"
+            },
+            {
+              "id": "7",
+              "name": "Org"
+            },
+            {
+              "id": "1",
+              "name": "Incident"
+            },
+            {
+              "id": "5",
+              "name": "Opportunity"
+            },
+            {
+              "id": "8",
+              "name": "Task"
+            },
+            {
+              "id": "49",
+              "name": "Chat"
+            },
+            {
+              "id": "126",
+              "name": "Asset"
+            },
+            {
+              "id": "152",
+              "name": "Interaction"
+            }
+          ],
+          "ribbon_buttons": [
+            "Save",
+            "SaveAndClose",
+            "New",
+            "Refresh",
+            "Appointment",
+            "Print",
+            "Copy",
+            "Delete",
+            "Separator",
+            "ResetPassword",
+            "SpellCheck",
+            "EditorLinks",
+            "Separator",
+            "Info"
+          ],
+          "info_items": [
+            {
+              "object_id": "Contact",
+              "field_id": "CId"
+            },
+            {
+              "object_id": "Contact",
+              "field_id": "Created"
+            },
+            {
+              "object_id": "Contact",
+              "field_id": "Updated"
+            },
+            {
+              "object_id": "Contact",
+              "field_id": "RuleState"
+            }
+          ],
+          "rules": [
+            {
+              "name": "New Rule",
+              "active": false,
+              "triggers": [
+                "EditorLoaded"
+              ],
+              "conditions": [
+                {
+                  "source": "Contact.CtypeId",
+                  "source_type": "Field",
+                  "operator": "EQ",
+                  "value": "3",
+                  "logic_expr": "0"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Standard",
+                  "object": "MessageBox",
+                  "object_type": "MessageBox",
+                  "object_id": null,
+                  "operation": "Show",
+                  "value": "This contact is created through email and may not hold sufficient information in the system",
+                  "value_operator": null,
+                  "button_id": null,
+                  "branch": "then"
+                }
+              ]
+            }
+          ],
+          "tabs": [
+            {
+              "text": "Summary",
+              "id": null,
+              "relationship_items": [],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [
+                {
+                  "object_id": "Contact",
+                  "field_id": "C$AccountNumber",
+                  "label": null,
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": "",
+                  "hidden_option": null,
+                  "required_option": ""
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "PhOffice",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 0,
+                  "default_phone_type": "0",
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "OrgId",
+                  "label": null,
+                  "id": null,
+                  "row": 3,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": "8001",
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "Addr",
+                  "label": null,
+                  "id": null,
+                  "row": 4,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "C$Gender",
+                  "label": null,
+                  "id": null,
+                  "row": 5,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": "",
+                  "hidden_option": null,
+                  "required_option": ""
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "Email",
+                  "label": null,
+                  "id": null,
+                  "row": 6,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                }
+              ],
+              "menus": [
+                {
+                  "id": "639203177532626906",
+                  "row": 2,
+                  "column": 0,
+                  "items": [
+                    "Menu Item #1",
+                    "Menu Item #2",
+                    "Menu Item #3",
+                    "Anurag",
+                    "Monish"
+                  ]
+                }
+              ],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "New Tab 1",
+              "id": "639203176794447864",
+              "relationship_items": [],
+              "browsers": [
+                {
+                  "url": null,
+                  "suppress_errors": true,
+                  "id": null,
+                  "height": "1036",
+                  "row": 0,
+                  "column": 0
+                }
+              ],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "New Tab 2",
+              "id": "639203176730504371",
+              "relationship_items": [
+                {
+                  "item_type": "Report",
+                  "ac_id": "0",
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": false,
+                  "show_read_transactions": true,
+                  "default_channel": null,
+                  "search_report_id": "0"
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "New Tab 3",
+              "id": "639203176746840897",
+              "relationship_items": [
+                {
+                  "item_type": "Tasks",
+                  "ac_id": "9016",
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": false,
+                  "show_read_transactions": true,
+                  "default_channel": null,
+                  "search_report_id": "8012",
+                  "can_send_on_save": null,
+                  "can_use_smart_assistant": null,
+                  "default_channel_customer": null,
+                  "default_thread_on_new": null,
+                  "status_change_on_response": null
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "New Tab 4",
+              "id": "639203176994103776",
+              "relationship_items": [
+                {
+                  "item_type": "FileAttachments",
+                  "ac_id": null,
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": true,
+                  "show_read_transactions": true,
+                  "default_channel": null,
+                  "search_report_id": null,
+                  "can_send_on_save": null,
+                  "can_use_smart_assistant": null,
+                  "default_channel_customer": null,
+                  "default_thread_on_new": null,
+                  "status_change_on_response": null
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            }
+          ],
+          "fields": [],
+          "menus": [],
+          "title_bars": [],
+          "spacers": [],
+          "ribbon_links": [
+            {
+              "title": "Oracle Service Cloud",
+              "url": "http://cloud.oracle.com/service"
+            }
+          ],
+          "flag_visible": true
+        }
+      },
+      {
+        "id": "externalendpoint:http://cloud.oracle.com/service",
+        "type": "externalendpoint",
+        "label": "http://cloud.oracle.com/service",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "url": "http://cloud.oracle.com/service",
+          "referencedIn": [
+            "RibbonLink: real_edge_02_new_workspace_patterns → Ribbon Link: Oracle Service Cloud"
+          ],
+          "params": [],
+          "type": "RibbonLink",
+          "risk": ""
+        }
+      },
+      {
+        "id": "report:report 0",
+        "type": "report",
+        "label": "Report 0",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 9016",
+        "type": "report",
+        "label": "Report 9016",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 8012",
+        "type": "report",
+        "label": "Report 8012",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 8001",
+        "type": "report",
+        "label": "Report 8001",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-0",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "report:report 0",
+        "label": "Tab 'New Tab 2' -> RelationshipItem Type: Report (AcId: 0)"
+      },
+      {
+        "id": "edge-1",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "report:report 0",
+        "label": "Tab 'New Tab 2' -> RelationshipItem Search Report (SearchReportId: 0)"
+      },
+      {
+        "id": "edge-2",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "report:report 9016",
+        "label": "Tab 'New Tab 3' -> RelationshipItem Type: Tasks (AcId: 9016)"
+      },
+      {
+        "id": "edge-3",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "report:report 8012",
+        "label": "Tab 'New Tab 3' -> RelationshipItem Search Report (SearchReportId: 8012)"
+      },
+      {
+        "id": "edge-4",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "report:report 8001",
+        "label": "Tab 'Summary' -> Field 'OrgId' -> ReportId property (Report: 8001)"
+      },
+      {
+        "id": "edge-5",
+        "source": "workspace:real_edge_02_new_workspace_patterns",
+        "target": "externalendpoint:http://cloud.oracle.com/service",
+        "label": "Ribbon Link 'Oracle Service Cloud' -> External Endpoint (http://cloud.oracle.com/service)"
+      }
+    ]
+  }
+}

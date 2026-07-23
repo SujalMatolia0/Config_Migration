@@ -1,0 +1,1796 @@
+{
+  "meta": {
+    "exportedAt": "2026-07-23",
+    "serverVersion": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+    "totalComponents": 1,
+    "workspace": "real_edge_01_nested_tabset"
+  },
+  "summary": {
+    "workspaces": 1,
+    "reports": 0,
+    "customScripts": 0,
+    "cpmHandlers": 0,
+    "businessRules": 0,
+    "navigationSets": 0,
+    "orphanedComponents": [
+      "Workspace: real_edge_01_nested_tabset"
+    ],
+    "externalEndpoints": []
+  },
+  "components": {
+    "workspaces": [
+      {
+        "name": "real_edge_01_nested_tabset",
+        "type": "Incident",
+        "ui_type": "Incident",
+        "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+        "client_version": "26.2.0.326",
+        "is_multi_edit": false,
+        "row_count": 0,
+        "column_count": 0,
+        "tab_set_info": {
+          "row": null,
+          "column": null,
+          "row_span": null,
+          "column_span": null,
+          "summary_panel_height": "200",
+          "summary_panel_alignment": "FirstTab",
+          "can_reorder_tabs": false,
+          "wrap_tabs": false,
+          "summary_tab_index": "2",
+          "threshold_height": "500"
+        },
+        "record_types": [
+          {
+            "id": "1",
+            "name": "Incident"
+          },
+          {
+            "id": "6",
+            "name": "Contact"
+          },
+          {
+            "id": "7",
+            "name": "Org"
+          },
+          {
+            "id": "8",
+            "name": "Task"
+          },
+          {
+            "id": "126",
+            "name": "Asset"
+          }
+        ],
+        "ribbon_buttons": [
+          "Save",
+          "SaveAndClose",
+          "SaveAndSend",
+          "New",
+          "Refresh",
+          "Forward",
+          "Separator",
+          "Print",
+          "Copy",
+          "Delete",
+          "Propose",
+          "BestAnswer",
+          "Info"
+        ],
+        "info_items": [
+          {
+            "object_id": "Incident",
+            "field_id": "IId"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Created"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Updated"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "RelDue"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Closed"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "CreatedBy"
+          }
+        ],
+        "rules": [
+          {
+            "name": "Hide Customer360 for Email Contacts",
+            "active": true,
+            "triggers": [
+              "EditorLoaded"
+            ],
+            "conditions": [
+              {
+                "source": "Contact.CtypeId",
+                "source_type": "Field",
+                "operator": "EQ",
+                "value": "3",
+                "logic_expr": "0"
+              }
+            ],
+            "actions": [
+              {
+                "type": "Standard",
+                "object": "636632404590473054",
+                "object_type": "Object",
+                "object_id": "636632404590473054",
+                "operation": "Hidden",
+                "value": "True",
+                "value_operator": null,
+                "button_id": null,
+                "branch": "then"
+              },
+              {
+                "type": "Standard",
+                "object": "MessageBox",
+                "object_type": "MessageBox",
+                "object_id": null,
+                "operation": "Show",
+                "value": "This contact is created through email and may not hold sufficient information in the system",
+                "value_operator": null,
+                "button_id": null,
+                "branch": "then"
+              }
+            ]
+          },
+          {
+            "name": "Filter Products for Segment",
+            "active": true,
+            "triggers": [
+              "EditorLoaded"
+            ],
+            "conditions": [
+              {
+                "source": "Current",
+                "source_type": "Profile",
+                "operator": "LIST",
+                "value": "7;8;2;6",
+                "logic_expr": "0"
+              }
+            ],
+            "actions": [
+              {
+                "type": "Standard",
+                "object": "Incident.ProdId",
+                "object_type": "Field",
+                "object_id": null,
+                "operation": "ConfigureMenuItems",
+                "value": "u0;383",
+                "value_operator": "EQ",
+                "button_id": null,
+                "branch": "then"
+              },
+              {
+                "type": "Standard",
+                "object": "Incident.CatId",
+                "object_type": "Field",
+                "object_id": null,
+                "operation": "ConfigureMenuItems",
+                "value": "384;385;386",
+                "value_operator": "EQ",
+                "button_id": null,
+                "branch": "then"
+              }
+            ]
+          }
+        ],
+        "tabs": [
+          {
+            "text": "SUMMARY_LBL",
+            "id": null,
+            "relationship_items": [],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [
+              {
+                "object_id": "Incident",
+                "field_id": "ProdId",
+                "label": null,
+                "id": "636632403892446858",
+                "row": 1,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": "OnNew:~any~;OnEdit:~any~"
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "CId",
+                "label": null,
+                "id": "637117509668239961",
+                "row": 1,
+                "column": 2,
+                "default_phone_type": null,
+                "report_id": "8014",
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "Status.Id",
+                "label": null,
+                "id": "636632403493114316",
+                "row": 1,
+                "column": 3,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "Subject",
+                "label": null,
+                "id": "637117528899453697",
+                "row": 2,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "ChanId",
+                "label": null,
+                "id": "636766181545566802",
+                "row": 2,
+                "column": 2,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "CatId",
+                "label": null,
+                "id": "637117509073552909",
+                "row": 2,
+                "column": 3,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": "OnNew:~any~;OnEdit:~any~"
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "Assigned",
+                "label": null,
+                "id": "636632403839549309",
+                "row": 3,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "PhOffice",
+                "label": "&Mobile Phone",
+                "id": "637117509126425321",
+                "row": 3,
+                "column": 2,
+                "default_phone_type": "1",
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "QueueId",
+                "label": null,
+                "id": "636632406750288729",
+                "row": 3,
+                "column": 3,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "C$Gender",
+                "label": null,
+                "id": "637100264821974040",
+                "row": 4,
+                "column": 2,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": "",
+                "hidden_option": null,
+                "required_option": "OnNew:~any~;OnEdit:~any~"
+              }
+            ],
+            "menus": [],
+            "title_bars": [
+              {
+                "text": "Details",
+                "row": 0,
+                "column": 1
+              },
+              {
+                "text": "Contact Details",
+                "row": 0,
+                "column": 2
+              },
+              {
+                "text": "Categorization",
+                "row": 0,
+                "column": 3
+              }
+            ],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "CONTACTS_LBL",
+            "id": null,
+            "relationship_items": [],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [
+              {
+                "object_id": "Contact",
+                "field_id": "Name.First",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "Name.Last",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "Email",
+                "label": null,
+                "id": "636648859145855538",
+                "row": 2,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "Addr",
+                "label": null,
+                "id": "636951503319647795",
+                "row": 2,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Contact",
+                "field_id": "PhOffice",
+                "label": null,
+                "id": null,
+                "row": 3,
+                "column": 0,
+                "default_phone_type": "0",
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              }
+            ],
+            "menus": [],
+            "title_bars": [
+              {
+                "text": "Primary Contact Information",
+                "row": 0,
+                "column": 0
+              }
+            ],
+            "spacers": [],
+            "nested_tabsets": [
+              {
+                "id": null,
+                "row": 4,
+                "column": 0,
+                "can_reorder_tabs": true,
+                "sub_tabs": [
+                  {
+                    "text": "CONTACTS_LBL",
+                    "id": null,
+                    "relationship_items": [
+                      {
+                        "item_type": "Contacts",
+                        "ac_id": "9011",
+                        "id": null,
+                        "row": 0,
+                        "column": 0,
+                        "execute_on_new": false,
+                        "show_read_transactions": true,
+                        "default_channel": null,
+                        "search_report_id": "8014",
+                        "can_send_on_save": null,
+                        "can_use_smart_assistant": null,
+                        "default_channel_customer": null,
+                        "default_thread_on_new": null,
+                        "status_change_on_response": null
+                      }
+                    ],
+                    "browsers": [],
+                    "add_in_items": [],
+                    "fields": [],
+                    "menus": [],
+                    "title_bars": [],
+                    "spacers": [],
+                    "nested_tabsets": []
+                  },
+                  {
+                    "text": "CONTACT_FIELDS_LBL",
+                    "id": null,
+                    "relationship_items": [],
+                    "browsers": [],
+                    "add_in_items": [],
+                    "fields": [
+                      {
+                        "object_id": "Contact",
+                        "field_id": "Login",
+                        "label": null,
+                        "id": null,
+                        "row": 0,
+                        "column": 0,
+                        "default_phone_type": null,
+                        "report_id": null,
+                        "readonly_option": null,
+                        "hidden_option": null,
+                        "required_option": ""
+                      },
+                      {
+                        "object_id": "Contact",
+                        "field_id": "MaOptIn",
+                        "label": null,
+                        "id": null,
+                        "row": 0,
+                        "column": 1,
+                        "default_phone_type": null,
+                        "report_id": null,
+                        "readonly_option": null,
+                        "hidden_option": null,
+                        "required_option": null
+                      },
+                      {
+                        "object_id": "Contact",
+                        "field_id": "State",
+                        "label": null,
+                        "id": null,
+                        "row": 0,
+                        "column": 2,
+                        "default_phone_type": null,
+                        "report_id": null,
+                        "readonly_option": null,
+                        "hidden_option": null,
+                        "required_option": null
+                      },
+                      {
+                        "object_id": "Contact",
+                        "field_id": "MaMailType",
+                        "label": null,
+                        "id": null,
+                        "row": 1,
+                        "column": 1,
+                        "default_phone_type": null,
+                        "report_id": null,
+                        "readonly_option": null,
+                        "hidden_option": null,
+                        "required_option": null
+                      },
+                      {
+                        "object_id": "Contact",
+                        "field_id": "Source",
+                        "label": null,
+                        "id": null,
+                        "row": 1,
+                        "column": 2,
+                        "default_phone_type": null,
+                        "report_id": null,
+                        "readonly_option": null,
+                        "hidden_option": null,
+                        "required_option": null
+                      }
+                    ],
+                    "menus": [],
+                    "title_bars": [],
+                    "spacers": [],
+                    "nested_tabsets": []
+                  },
+                  {
+                    "text": "INCIDENT_HISTORY_LBL",
+                    "id": null,
+                    "relationship_items": [
+                      {
+                        "item_type": "Report",
+                        "ac_id": "9029",
+                        "id": null,
+                        "row": 0,
+                        "column": 0,
+                        "execute_on_new": false,
+                        "show_read_transactions": true,
+                        "default_channel": null,
+                        "search_report_id": "0"
+                      }
+                    ],
+                    "browsers": [],
+                    "add_in_items": [],
+                    "fields": [],
+                    "menus": [],
+                    "title_bars": [],
+                    "spacers": [],
+                    "nested_tabsets": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "text": "Other Info",
+            "id": "636648859515971722",
+            "relationship_items": [],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [
+              {
+                "object_id": "Incident",
+                "field_id": "MailboxId",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "InterfaceId",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "SlaiId",
+                "label": null,
+                "id": null,
+                "row": 1,
+                "column": 2,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "Source",
+                "label": null,
+                "id": null,
+                "row": 2,
+                "column": 0,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              },
+              {
+                "object_id": "Incident",
+                "field_id": "LangId",
+                "label": null,
+                "id": null,
+                "row": 2,
+                "column": 1,
+                "default_phone_type": null,
+                "report_id": null,
+                "readonly_option": null,
+                "hidden_option": null,
+                "required_option": null
+              }
+            ],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [
+              {
+                "height": "26",
+                "row": 0,
+                "column": 0
+              }
+            ],
+            "nested_tabsets": []
+          },
+          {
+            "text": "Incident Details",
+            "id": "636773684231314258",
+            "relationship_items": [
+              {
+                "item_type": "RichIncidentThread",
+                "ac_id": null,
+                "id": "638131947442246948",
+                "row": 0,
+                "column": 0,
+                "execute_on_new": true,
+                "show_read_transactions": true,
+                "default_channel": "NoDefault",
+                "search_report_id": "125",
+                "can_send_on_save": "True",
+                "can_use_smart_assistant": "True",
+                "default_channel_customer": "Phone",
+                "default_thread_on_new": "CustomerEntry",
+                "status_change_on_response": "ToSolved"
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "TASKS_LBL",
+            "id": null,
+            "relationship_items": [
+              {
+                "item_type": "Tasks",
+                "ac_id": "9018",
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": false,
+                "show_read_transactions": true,
+                "default_channel": null,
+                "search_report_id": "8010",
+                "can_send_on_save": null,
+                "can_use_smart_assistant": null,
+                "default_channel_customer": null,
+                "default_thread_on_new": null,
+                "status_change_on_response": null
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "ATTACHMENTS_LBL",
+            "id": null,
+            "relationship_items": [
+              {
+                "item_type": "FileAttachments",
+                "ac_id": null,
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": true,
+                "show_read_transactions": true,
+                "default_channel": null,
+                "search_report_id": null,
+                "can_send_on_save": null,
+                "can_use_smart_assistant": null,
+                "default_channel_customer": null,
+                "default_thread_on_new": null,
+                "status_change_on_response": null
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          },
+          {
+            "text": "AUDIT_LOG_LBL",
+            "id": null,
+            "relationship_items": [
+              {
+                "item_type": "IncidentAuditLog",
+                "ac_id": "9041",
+                "id": null,
+                "row": 0,
+                "column": 0,
+                "execute_on_new": false,
+                "show_read_transactions": false,
+                "default_channel": null,
+                "search_report_id": null,
+                "can_send_on_save": null,
+                "can_use_smart_assistant": null,
+                "default_channel_customer": null,
+                "default_thread_on_new": null,
+                "status_change_on_response": null
+              }
+            ],
+            "browsers": [],
+            "add_in_items": [],
+            "fields": [],
+            "menus": [],
+            "title_bars": [],
+            "spacers": [],
+            "nested_tabsets": []
+          }
+        ],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "ribbon_links": [],
+        "flag_visible": false
+      }
+    ],
+    "reports": [],
+    "customScripts": [],
+    "cpm": [],
+    "businessRules": [],
+    "navigationSets": [],
+    "workflows": [],
+    "templates": []
+  },
+  "relationships": [
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9011",
+        "name": "Report 9011"
+      },
+      "via": "Tab 'CONTACTS_LBL' -> RelationshipItem Type: Contacts (AcId: 9011)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8014",
+        "name": "Report 8014"
+      },
+      "via": "Tab 'CONTACTS_LBL' -> RelationshipItem Search Report (SearchReportId: 8014)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9029",
+        "name": "Report 9029"
+      },
+      "via": "Tab 'INCIDENT_HISTORY_LBL' -> RelationshipItem Type: Report (AcId: 9029)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "0",
+        "name": "Report 0"
+      },
+      "via": "Tab 'INCIDENT_HISTORY_LBL' -> RelationshipItem Search Report (SearchReportId: 0)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "125",
+        "name": "Report 125"
+      },
+      "via": "Tab 'Incident Details' -> RelationshipItem Search Report (SearchReportId: 125)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9018",
+        "name": "Report 9018"
+      },
+      "via": "Tab 'TASKS_LBL' -> RelationshipItem Type: Tasks (AcId: 9018)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8010",
+        "name": "Report 8010"
+      },
+      "via": "Tab 'TASKS_LBL' -> RelationshipItem Search Report (SearchReportId: 8010)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9041",
+        "name": "Report 9041"
+      },
+      "via": "Tab 'AUDIT_LOG_LBL' -> RelationshipItem Type: IncidentAuditLog (AcId: 9041)"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "real_edge_01_nested_tabset"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8014",
+        "name": "Report 8014"
+      },
+      "via": "Tab 'SUMMARY_LBL' -> Field 'CId' -> ReportId property (Report: 8014)"
+    }
+  ],
+  "orphans": [
+    {
+      "type": "Workspace",
+      "name": "real_edge_01_nested_tabset",
+      "reason": "Not referenced in any Navigation Set"
+    }
+  ],
+  "endpoints": [],
+  "graph": {
+    "nodes": [
+      {
+        "id": "workspace:real_edge_01_nested_tabset",
+        "type": "workspace",
+        "label": "real_edge_01_nested_tabset",
+        "isOrphan": true,
+        "orphanReason": "Not referenced in any Navigation Set",
+        "data": {
+          "name": "real_edge_01_nested_tabset",
+          "type": "Incident",
+          "ui_type": "Incident",
+          "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+          "client_version": "26.2.0.326",
+          "is_multi_edit": false,
+          "row_count": 0,
+          "column_count": 0,
+          "tab_set_info": {
+            "row": null,
+            "column": null,
+            "row_span": null,
+            "column_span": null,
+            "summary_panel_height": "200",
+            "summary_panel_alignment": "FirstTab",
+            "can_reorder_tabs": false,
+            "wrap_tabs": false,
+            "summary_tab_index": "2",
+            "threshold_height": "500"
+          },
+          "record_types": [
+            {
+              "id": "1",
+              "name": "Incident"
+            },
+            {
+              "id": "6",
+              "name": "Contact"
+            },
+            {
+              "id": "7",
+              "name": "Org"
+            },
+            {
+              "id": "8",
+              "name": "Task"
+            },
+            {
+              "id": "126",
+              "name": "Asset"
+            }
+          ],
+          "ribbon_buttons": [
+            "Save",
+            "SaveAndClose",
+            "SaveAndSend",
+            "New",
+            "Refresh",
+            "Forward",
+            "Separator",
+            "Print",
+            "Copy",
+            "Delete",
+            "Propose",
+            "BestAnswer",
+            "Info"
+          ],
+          "info_items": [
+            {
+              "object_id": "Incident",
+              "field_id": "IId"
+            },
+            {
+              "object_id": "Incident",
+              "field_id": "Created"
+            },
+            {
+              "object_id": "Incident",
+              "field_id": "Updated"
+            },
+            {
+              "object_id": "Incident",
+              "field_id": "RelDue"
+            },
+            {
+              "object_id": "Incident",
+              "field_id": "Closed"
+            },
+            {
+              "object_id": "Incident",
+              "field_id": "CreatedBy"
+            }
+          ],
+          "rules": [
+            {
+              "name": "Hide Customer360 for Email Contacts",
+              "active": true,
+              "triggers": [
+                "EditorLoaded"
+              ],
+              "conditions": [
+                {
+                  "source": "Contact.CtypeId",
+                  "source_type": "Field",
+                  "operator": "EQ",
+                  "value": "3",
+                  "logic_expr": "0"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Standard",
+                  "object": "636632404590473054",
+                  "object_type": "Object",
+                  "object_id": "636632404590473054",
+                  "operation": "Hidden",
+                  "value": "True",
+                  "value_operator": null,
+                  "button_id": null,
+                  "branch": "then"
+                },
+                {
+                  "type": "Standard",
+                  "object": "MessageBox",
+                  "object_type": "MessageBox",
+                  "object_id": null,
+                  "operation": "Show",
+                  "value": "This contact is created through email and may not hold sufficient information in the system",
+                  "value_operator": null,
+                  "button_id": null,
+                  "branch": "then"
+                }
+              ]
+            },
+            {
+              "name": "Filter Products for Segment",
+              "active": true,
+              "triggers": [
+                "EditorLoaded"
+              ],
+              "conditions": [
+                {
+                  "source": "Current",
+                  "source_type": "Profile",
+                  "operator": "LIST",
+                  "value": "7;8;2;6",
+                  "logic_expr": "0"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "Standard",
+                  "object": "Incident.ProdId",
+                  "object_type": "Field",
+                  "object_id": null,
+                  "operation": "ConfigureMenuItems",
+                  "value": "u0;383",
+                  "value_operator": "EQ",
+                  "button_id": null,
+                  "branch": "then"
+                },
+                {
+                  "type": "Standard",
+                  "object": "Incident.CatId",
+                  "object_type": "Field",
+                  "object_id": null,
+                  "operation": "ConfigureMenuItems",
+                  "value": "384;385;386",
+                  "value_operator": "EQ",
+                  "button_id": null,
+                  "branch": "then"
+                }
+              ]
+            }
+          ],
+          "tabs": [
+            {
+              "text": "SUMMARY_LBL",
+              "id": null,
+              "relationship_items": [],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [
+                {
+                  "object_id": "Incident",
+                  "field_id": "ProdId",
+                  "label": null,
+                  "id": "636632403892446858",
+                  "row": 1,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": "OnNew:~any~;OnEdit:~any~"
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "CId",
+                  "label": null,
+                  "id": "637117509668239961",
+                  "row": 1,
+                  "column": 2,
+                  "default_phone_type": null,
+                  "report_id": "8014",
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "Status.Id",
+                  "label": null,
+                  "id": "636632403493114316",
+                  "row": 1,
+                  "column": 3,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "Subject",
+                  "label": null,
+                  "id": "637117528899453697",
+                  "row": 2,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "ChanId",
+                  "label": null,
+                  "id": "636766181545566802",
+                  "row": 2,
+                  "column": 2,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "CatId",
+                  "label": null,
+                  "id": "637117509073552909",
+                  "row": 2,
+                  "column": 3,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": "OnNew:~any~;OnEdit:~any~"
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "Assigned",
+                  "label": null,
+                  "id": "636632403839549309",
+                  "row": 3,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "PhOffice",
+                  "label": "&Mobile Phone",
+                  "id": "637117509126425321",
+                  "row": 3,
+                  "column": 2,
+                  "default_phone_type": "1",
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "QueueId",
+                  "label": null,
+                  "id": "636632406750288729",
+                  "row": 3,
+                  "column": 3,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "C$Gender",
+                  "label": null,
+                  "id": "637100264821974040",
+                  "row": 4,
+                  "column": 2,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": "",
+                  "hidden_option": null,
+                  "required_option": "OnNew:~any~;OnEdit:~any~"
+                }
+              ],
+              "menus": [],
+              "title_bars": [
+                {
+                  "text": "Details",
+                  "row": 0,
+                  "column": 1
+                },
+                {
+                  "text": "Contact Details",
+                  "row": 0,
+                  "column": 2
+                },
+                {
+                  "text": "Categorization",
+                  "row": 0,
+                  "column": 3
+                }
+              ],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "CONTACTS_LBL",
+              "id": null,
+              "relationship_items": [],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [
+                {
+                  "object_id": "Contact",
+                  "field_id": "Name.First",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "Name.Last",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "Email",
+                  "label": null,
+                  "id": "636648859145855538",
+                  "row": 2,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "Addr",
+                  "label": null,
+                  "id": "636951503319647795",
+                  "row": 2,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Contact",
+                  "field_id": "PhOffice",
+                  "label": null,
+                  "id": null,
+                  "row": 3,
+                  "column": 0,
+                  "default_phone_type": "0",
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                }
+              ],
+              "menus": [],
+              "title_bars": [
+                {
+                  "text": "Primary Contact Information",
+                  "row": 0,
+                  "column": 0
+                }
+              ],
+              "spacers": [],
+              "nested_tabsets": [
+                {
+                  "id": null,
+                  "row": 4,
+                  "column": 0,
+                  "can_reorder_tabs": true,
+                  "sub_tabs": [
+                    {
+                      "text": "CONTACTS_LBL",
+                      "id": null,
+                      "relationship_items": [
+                        {
+                          "item_type": "Contacts",
+                          "ac_id": "9011",
+                          "id": null,
+                          "row": 0,
+                          "column": 0,
+                          "execute_on_new": false,
+                          "show_read_transactions": true,
+                          "default_channel": null,
+                          "search_report_id": "8014",
+                          "can_send_on_save": null,
+                          "can_use_smart_assistant": null,
+                          "default_channel_customer": null,
+                          "default_thread_on_new": null,
+                          "status_change_on_response": null
+                        }
+                      ],
+                      "browsers": [],
+                      "add_in_items": [],
+                      "fields": [],
+                      "menus": [],
+                      "title_bars": [],
+                      "spacers": [],
+                      "nested_tabsets": []
+                    },
+                    {
+                      "text": "CONTACT_FIELDS_LBL",
+                      "id": null,
+                      "relationship_items": [],
+                      "browsers": [],
+                      "add_in_items": [],
+                      "fields": [
+                        {
+                          "object_id": "Contact",
+                          "field_id": "Login",
+                          "label": null,
+                          "id": null,
+                          "row": 0,
+                          "column": 0,
+                          "default_phone_type": null,
+                          "report_id": null,
+                          "readonly_option": null,
+                          "hidden_option": null,
+                          "required_option": ""
+                        },
+                        {
+                          "object_id": "Contact",
+                          "field_id": "MaOptIn",
+                          "label": null,
+                          "id": null,
+                          "row": 0,
+                          "column": 1,
+                          "default_phone_type": null,
+                          "report_id": null,
+                          "readonly_option": null,
+                          "hidden_option": null,
+                          "required_option": null
+                        },
+                        {
+                          "object_id": "Contact",
+                          "field_id": "State",
+                          "label": null,
+                          "id": null,
+                          "row": 0,
+                          "column": 2,
+                          "default_phone_type": null,
+                          "report_id": null,
+                          "readonly_option": null,
+                          "hidden_option": null,
+                          "required_option": null
+                        },
+                        {
+                          "object_id": "Contact",
+                          "field_id": "MaMailType",
+                          "label": null,
+                          "id": null,
+                          "row": 1,
+                          "column": 1,
+                          "default_phone_type": null,
+                          "report_id": null,
+                          "readonly_option": null,
+                          "hidden_option": null,
+                          "required_option": null
+                        },
+                        {
+                          "object_id": "Contact",
+                          "field_id": "Source",
+                          "label": null,
+                          "id": null,
+                          "row": 1,
+                          "column": 2,
+                          "default_phone_type": null,
+                          "report_id": null,
+                          "readonly_option": null,
+                          "hidden_option": null,
+                          "required_option": null
+                        }
+                      ],
+                      "menus": [],
+                      "title_bars": [],
+                      "spacers": [],
+                      "nested_tabsets": []
+                    },
+                    {
+                      "text": "INCIDENT_HISTORY_LBL",
+                      "id": null,
+                      "relationship_items": [
+                        {
+                          "item_type": "Report",
+                          "ac_id": "9029",
+                          "id": null,
+                          "row": 0,
+                          "column": 0,
+                          "execute_on_new": false,
+                          "show_read_transactions": true,
+                          "default_channel": null,
+                          "search_report_id": "0"
+                        }
+                      ],
+                      "browsers": [],
+                      "add_in_items": [],
+                      "fields": [],
+                      "menus": [],
+                      "title_bars": [],
+                      "spacers": [],
+                      "nested_tabsets": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "text": "Other Info",
+              "id": "636648859515971722",
+              "relationship_items": [],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [
+                {
+                  "object_id": "Incident",
+                  "field_id": "MailboxId",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "InterfaceId",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "SlaiId",
+                  "label": null,
+                  "id": null,
+                  "row": 1,
+                  "column": 2,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "Source",
+                  "label": null,
+                  "id": null,
+                  "row": 2,
+                  "column": 0,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                },
+                {
+                  "object_id": "Incident",
+                  "field_id": "LangId",
+                  "label": null,
+                  "id": null,
+                  "row": 2,
+                  "column": 1,
+                  "default_phone_type": null,
+                  "report_id": null,
+                  "readonly_option": null,
+                  "hidden_option": null,
+                  "required_option": null
+                }
+              ],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [
+                {
+                  "height": "26",
+                  "row": 0,
+                  "column": 0
+                }
+              ],
+              "nested_tabsets": []
+            },
+            {
+              "text": "Incident Details",
+              "id": "636773684231314258",
+              "relationship_items": [
+                {
+                  "item_type": "RichIncidentThread",
+                  "ac_id": null,
+                  "id": "638131947442246948",
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": true,
+                  "show_read_transactions": true,
+                  "default_channel": "NoDefault",
+                  "search_report_id": "125",
+                  "can_send_on_save": "True",
+                  "can_use_smart_assistant": "True",
+                  "default_channel_customer": "Phone",
+                  "default_thread_on_new": "CustomerEntry",
+                  "status_change_on_response": "ToSolved"
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "TASKS_LBL",
+              "id": null,
+              "relationship_items": [
+                {
+                  "item_type": "Tasks",
+                  "ac_id": "9018",
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": false,
+                  "show_read_transactions": true,
+                  "default_channel": null,
+                  "search_report_id": "8010",
+                  "can_send_on_save": null,
+                  "can_use_smart_assistant": null,
+                  "default_channel_customer": null,
+                  "default_thread_on_new": null,
+                  "status_change_on_response": null
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "ATTACHMENTS_LBL",
+              "id": null,
+              "relationship_items": [
+                {
+                  "item_type": "FileAttachments",
+                  "ac_id": null,
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": true,
+                  "show_read_transactions": true,
+                  "default_channel": null,
+                  "search_report_id": null,
+                  "can_send_on_save": null,
+                  "can_use_smart_assistant": null,
+                  "default_channel_customer": null,
+                  "default_thread_on_new": null,
+                  "status_change_on_response": null
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            },
+            {
+              "text": "AUDIT_LOG_LBL",
+              "id": null,
+              "relationship_items": [
+                {
+                  "item_type": "IncidentAuditLog",
+                  "ac_id": "9041",
+                  "id": null,
+                  "row": 0,
+                  "column": 0,
+                  "execute_on_new": false,
+                  "show_read_transactions": false,
+                  "default_channel": null,
+                  "search_report_id": null,
+                  "can_send_on_save": null,
+                  "can_use_smart_assistant": null,
+                  "default_channel_customer": null,
+                  "default_thread_on_new": null,
+                  "status_change_on_response": null
+                }
+              ],
+              "browsers": [],
+              "add_in_items": [],
+              "fields": [],
+              "menus": [],
+              "title_bars": [],
+              "spacers": [],
+              "nested_tabsets": []
+            }
+          ],
+          "fields": [],
+          "menus": [],
+          "title_bars": [],
+          "spacers": [],
+          "ribbon_links": [],
+          "flag_visible": false
+        }
+      },
+      {
+        "id": "report:report 9011",
+        "type": "report",
+        "label": "Report 9011",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 8014",
+        "type": "report",
+        "label": "Report 8014",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 9029",
+        "type": "report",
+        "label": "Report 9029",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 0",
+        "type": "report",
+        "label": "Report 0",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 125",
+        "type": "report",
+        "label": "Report 125",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 9018",
+        "type": "report",
+        "label": "Report 9018",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 8010",
+        "type": "report",
+        "label": "Report 8010",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      },
+      {
+        "id": "report:report 9041",
+        "type": "report",
+        "label": "Report 9041",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge-0",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 9011",
+        "label": "Tab 'CONTACTS_LBL' -> RelationshipItem Type: Contacts (AcId: 9011)"
+      },
+      {
+        "id": "edge-1",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 8014",
+        "label": "Tab 'CONTACTS_LBL' -> RelationshipItem Search Report (SearchReportId: 8014)"
+      },
+      {
+        "id": "edge-2",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 9029",
+        "label": "Tab 'INCIDENT_HISTORY_LBL' -> RelationshipItem Type: Report (AcId: 9029)"
+      },
+      {
+        "id": "edge-3",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 0",
+        "label": "Tab 'INCIDENT_HISTORY_LBL' -> RelationshipItem Search Report (SearchReportId: 0)"
+      },
+      {
+        "id": "edge-4",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 125",
+        "label": "Tab 'Incident Details' -> RelationshipItem Search Report (SearchReportId: 125)"
+      },
+      {
+        "id": "edge-5",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 9018",
+        "label": "Tab 'TASKS_LBL' -> RelationshipItem Type: Tasks (AcId: 9018)"
+      },
+      {
+        "id": "edge-6",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 8010",
+        "label": "Tab 'TASKS_LBL' -> RelationshipItem Search Report (SearchReportId: 8010)"
+      },
+      {
+        "id": "edge-7",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 9041",
+        "label": "Tab 'AUDIT_LOG_LBL' -> RelationshipItem Type: IncidentAuditLog (AcId: 9041)"
+      },
+      {
+        "id": "edge-8",
+        "source": "workspace:real_edge_01_nested_tabset",
+        "target": "report:report 8014",
+        "label": "Tab 'SUMMARY_LBL' -> Field 'CId' -> ReportId property (Report: 8014)"
+      }
+    ]
+  }
+}
