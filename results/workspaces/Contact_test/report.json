@@ -1,0 +1,386 @@
+{
+  "name": "Contact test",
+  "type": "Contact",
+  "ui_type": "Contact",
+  "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+  "client_version": "26.2.0.326",
+  "is_multi_edit": false,
+  "row_count": 11,
+  "column_count": 5,
+  "tab_set_info": {
+    "row": 0,
+    "column": 1,
+    "row_span": 11,
+    "column_span": 4,
+    "summary_panel_height": null,
+    "summary_panel_alignment": null,
+    "can_reorder_tabs": false,
+    "wrap_tabs": false,
+    "summary_tab_index": null,
+    "threshold_height": null
+  },
+  "record_types": [
+    {
+      "id": "6",
+      "name": "Contact"
+    },
+    {
+      "id": "7",
+      "name": "Org"
+    },
+    {
+      "id": "1",
+      "name": "Incident"
+    },
+    {
+      "id": "5",
+      "name": "Opportunity"
+    },
+    {
+      "id": "8",
+      "name": "Task"
+    },
+    {
+      "id": "49",
+      "name": "Chat"
+    },
+    {
+      "id": "126",
+      "name": "Asset"
+    },
+    {
+      "id": "152",
+      "name": "Interaction"
+    }
+  ],
+  "ribbon_buttons": [
+    "Save",
+    "SaveAndClose",
+    "New",
+    "Refresh",
+    "Appointment",
+    "Print",
+    "Copy",
+    "Delete",
+    "SpellCheck",
+    "Info"
+  ],
+  "info_items": [
+    {
+      "object_id": "Contact",
+      "field_id": "CId"
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Created"
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Updated"
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "RuleState"
+    }
+  ],
+  "rules": [
+    {
+      "name": "New Rule",
+      "active": false,
+      "triggers": [
+        "EditorLoaded"
+      ],
+      "conditions": [
+        {
+          "source": "Contact.CtypeId",
+          "source_type": "Field",
+          "operator": "EQ",
+          "value": "3",
+          "logic_expr": "0"
+        }
+      ],
+      "actions": [
+        {
+          "type": "Standard",
+          "object": "MessageBox",
+          "object_type": "MessageBox",
+          "object_id": null,
+          "operation": "Show",
+          "value": "This contact is created through email and may not hold sufficient information in the system",
+          "value_operator": null,
+          "button_id": null,
+          "branch": "then"
+        }
+      ]
+    }
+  ],
+  "tabs": [
+    {
+      "text": "Incidents",
+      "id": "636908681376940067",
+      "relationship_items": [
+        {
+          "item_type": "IncidentView",
+          "ac_id": "9029",
+          "id": "636908679290650738",
+          "row": 0,
+          "column": 0,
+          "execute_on_new": false,
+          "show_read_transactions": true,
+          "default_channel": null,
+          "search_report_id": "0",
+          "can_send_on_save": null,
+          "can_use_smart_assistant": null,
+          "default_channel_customer": null,
+          "default_thread_on_new": null,
+          "status_change_on_response": null
+        }
+      ],
+      "browsers": [],
+      "add_in_items": [],
+      "fields": [],
+      "menus": [],
+      "title_bars": [],
+      "spacers": [],
+      "nested_tabsets": []
+    },
+    {
+      "text": "Customer360",
+      "id": "636908681812694990",
+      "relationship_items": [],
+      "browsers": [
+        {
+          "url": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php?mobile=$contact.phmobile",
+          "suppress_errors": true,
+          "id": "636908689046358732",
+          "height": "420",
+          "row": 0,
+          "column": 0
+        }
+      ],
+      "add_in_items": [],
+      "fields": [],
+      "menus": [],
+      "title_bars": [],
+      "spacers": [],
+      "nested_tabsets": []
+    },
+    {
+      "text": "Attachments",
+      "id": "636908679362564851",
+      "relationship_items": [
+        {
+          "item_type": "FileAttachments",
+          "ac_id": null,
+          "id": "636908679379055794",
+          "row": 0,
+          "column": 0,
+          "execute_on_new": true,
+          "show_read_transactions": true,
+          "default_channel": null,
+          "search_report_id": null,
+          "can_send_on_save": null,
+          "can_use_smart_assistant": null,
+          "default_channel_customer": null,
+          "default_thread_on_new": null,
+          "status_change_on_response": null
+        }
+      ],
+      "browsers": [],
+      "add_in_items": [],
+      "fields": [],
+      "menus": [],
+      "title_bars": [],
+      "spacers": [],
+      "nested_tabsets": []
+    },
+    {
+      "text": "Notes",
+      "id": "636908679403907216",
+      "relationship_items": [
+        {
+          "item_type": "ContactNotes",
+          "ac_id": null,
+          "id": "636908679421398216",
+          "row": 0,
+          "column": 0,
+          "execute_on_new": true,
+          "show_read_transactions": true,
+          "default_channel": "NoDefault",
+          "search_report_id": null,
+          "can_send_on_save": null,
+          "can_use_smart_assistant": null,
+          "default_channel_customer": null,
+          "default_thread_on_new": null,
+          "status_change_on_response": null
+        }
+      ],
+      "browsers": [],
+      "add_in_items": [],
+      "fields": [],
+      "menus": [],
+      "title_bars": [],
+      "spacers": [],
+      "nested_tabsets": []
+    },
+    {
+      "text": "Audit",
+      "id": "636908679456970251",
+      "relationship_items": [
+        {
+          "item_type": "ContactAuditLog",
+          "ac_id": "9050",
+          "id": "636908679483641776",
+          "row": 0,
+          "column": 0,
+          "execute_on_new": false,
+          "show_read_transactions": false,
+          "default_channel": null,
+          "search_report_id": null,
+          "can_send_on_save": null,
+          "can_use_smart_assistant": null,
+          "default_channel_customer": null,
+          "default_thread_on_new": null,
+          "status_change_on_response": null
+        }
+      ],
+      "browsers": [],
+      "add_in_items": [],
+      "fields": [],
+      "menus": [],
+      "title_bars": [],
+      "spacers": [],
+      "nested_tabsets": []
+    }
+  ],
+  "fields": [
+    {
+      "object_id": "Contact",
+      "field_id": "Title",
+      "label": null,
+      "id": null,
+      "row": 2,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Name.First",
+      "label": null,
+      "id": "636984392060169799",
+      "row": 3,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Name.Last",
+      "label": null,
+      "id": null,
+      "row": 4,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Addr",
+      "label": null,
+      "id": null,
+      "row": 5,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "PhOffice",
+      "label": "&Mobile Phone",
+      "id": "636632413451106202",
+      "row": 6,
+      "column": 0,
+      "default_phone_type": "1",
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "C$CustomerId",
+      "label": null,
+      "id": "636908679918516649",
+      "row": 7,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": "",
+      "hidden_option": null,
+      "required_option": ""
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "Email",
+      "label": null,
+      "id": "636632413422131623",
+      "row": 8,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "CtypeId",
+      "label": null,
+      "id": "636632413519167264",
+      "row": 9,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": null,
+      "hidden_option": null,
+      "required_option": null
+    },
+    {
+      "object_id": "Contact",
+      "field_id": "C$Gender",
+      "label": null,
+      "id": null,
+      "row": 10,
+      "column": 0,
+      "default_phone_type": null,
+      "report_id": null,
+      "readonly_option": "",
+      "hidden_option": null,
+      "required_option": ""
+    }
+  ],
+  "menus": [],
+  "title_bars": [
+    {
+      "text": "Customer Details",
+      "row": 1,
+      "column": 0
+    }
+  ],
+  "spacers": [],
+  "ribbon_links": [],
+  "flag_visible": true
+}

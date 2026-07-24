@@ -37,14 +37,14 @@ def build_pdf_report(output_html_file, output_pdf_file):
     """
     try:
         from weasyprint import HTML
-        print(f"📄 Rendering PDF from {output_html_file}...")
+        print(f"[PDF] Rendering PDF from {output_html_file}...")
         HTML(output_html_file).write_pdf(output_pdf_file)
-        print(f"✅ PDF report created: {output_pdf_file}")
+        print(f"[SUCCESS] PDF report created: {output_pdf_file}")
         return True
     except ImportError:
-        print("⚠️ WeasyPrint is not installed or import failed. Skipping PDF generation.")
+        print("[WARNING] WeasyPrint is not installed or import failed. Skipping PDF generation.")
         print("hint: make sure pango/cairo system libraries are installed on macOS (e.g. brew install pango cairo)")
         return False
     except Exception as e:
-        print(f"❌ Failed to build PDF: {e}")
+        print(f"[ERROR] Failed to build PDF: {e}")
         return False

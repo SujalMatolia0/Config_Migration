@@ -327,8 +327,8 @@ def generate_report_markdown(ws):
                             c_str = format_profile_constraint(f.get(opt_key))
                             if c_str: constraints.append(f"{opt_label}: {c_str}")
                         if constraints: notes += f" — *{'; '.join(constraints)}*"
-                        if not field_id: field_label = "⚠ No FieldId"
-                        elif not str(field_id).strip(): field_label = "⚠ Empty FieldId"
+                        if not field_id: field_label = "No FieldId"
+                        elif not str(field_id).strip(): field_label = "Empty FieldId"
                         else: field_label = f"`{field_id}`"
                         field_elems.append({"row": row, "col": col, "pos": pos_str, "name": field_label, "notes": notes, "has_pos": has_pos})
                     for m in tab_menus:
@@ -406,8 +406,8 @@ def generate_report_markdown(ws):
                         c_str = format_profile_constraint(f.get(opt_key))
                         if c_str: constraints.append(f"{opt_label}: {c_str}")
                     if constraints: notes += f" — *Constraints: {'; '.join(constraints)}*"
-                    if not field_id: field_label = "⚠ No FieldId"
-                    elif not str(field_id).strip(): field_label = "⚠ Empty FieldId"
+                    if not field_id: field_label = "No FieldId"
+                    elif not str(field_id).strip(): field_label = "Empty FieldId"
                     else: field_label = f"`{field_id}`"
                     grid_elements.append({"row": row, "column": col, "pos": pos_str, "has_pos": has_pos, "type": "Form Field", "name": field_label, "notes": notes})
                 for m in tab_menus:
@@ -479,7 +479,7 @@ def generate_report_markdown(ws):
             for ts in nested_tabsets:
                 sub_tabs = ts.get("sub_tabs", [])
                 sub_tab_names = ", ".join([f"**{clean_tab_label(st.get('text'))}**" for st in sub_tabs])
-                lines.append(f"> 📂 **Nested TabSet** (Row {ts.get('row', 0)}, Col {ts.get('column', 0)}) — {len(sub_tabs)} Sub-Tabs: {sub_tab_names}")
+                lines.append(f"> **Nested TabSet** (Row {ts.get('row', 0)}, Col {ts.get('column', 0)}) — {len(sub_tabs)} Sub-Tabs: {sub_tab_names}")
                 lines.append("")
                 for sub_t in sub_tabs:
                     render_single_tab(sub_t, is_subtab=True)
@@ -909,3 +909,947 @@ def generate_report_markdown(ws):
     lines.append("")
 
     return "\n".join(lines)
+
+def generate_analytics_report_markdown(report):
+    lines = []
+    rep_name = report.get("name", "Report")
+    rep_id = report.get("id", "Unknown")
+    
+    lines.append(f"# Report: {rep_name} (ID: {rep_id})")
+    lines.append("")
+    
+    ac_type_raw = report.get("ac_type", "1")
+    rpt_type_str = "Grid Report" if str(ac_type_raw) == "1" else f"Report Type {ac_type_raw}"
+    public_str = "public" if report.get("ac_public") else "private"
+    
+    primary_tbl = "—"
+    for t in report.get("tables", []):
+        if t.get("join_type") == "Primary":
+            primary_tbl = t.get("alias") or t.get("tbl_enum")
+            break
+            
+    cdate = report.get("created") or "Unknown"
+    udate = report.get("updated") or "Unknown"
+    folder = report.get("folder_id") or "—"
+    owner_raw = report.get("owner_acct_id") or "—"
+    owner_str = f"{owner_raw} `[unresolved account ID]`" if owner_raw != "—" else "—"
+    interface_id = report.get("interface_id") or "—"
+    image_code = report.get("image") or "—"
+    time_zone = report.get("time_zone") or "0"
+    opts_raw = report.get("opts") or "—"
+    opts_str = f"{opts_raw} `[unresolved bitmask]`" if opts_raw != "—" else "—"
+    aux = report.get("aux") or "—"
+    signature = report.get("export_signature")
+
+    node_cnt = report.get("node_count", 1)
+    node_details = report.get("node_details", [])
+    node_info_list = []
+    hidden_sections_all = set()
+    display_opts_all = set()
+    for nd in node_details:
+        n_id = nd.get("n_id", "1")
+        style_id = nd.get("style_id", "12")
+        r_lim = nd.get("row_limit", "None")
+        node_info_list.append(f"Node #{n_id} (style_id={style_id}, row_limit={r_lim})")
+        hidden_sections_all.update(nd.get("hidden_sections", []))
+        display_opts_all.update(nd.get("display_options", []))
+
+    node_str = "; ".join(node_info_list) if node_info_list else "single node_item"
+    hidden_sec_str = ", ".join(f"`{s}`" for s in sorted(hidden_sections_all)) if hidden_sections_all else "None"
+    disp_opt_str = ", ".join(f"`{o}`" for o in sorted(display_opts_all)) if display_opts_all else "Standard"
+
+    sort_summary = "None"
+    for c in report.get("columns", []):
+        if c.get("sort_order") == "1":
+            sort_dir = "Descending" if c.get("sort_direction") == "2" else "Ascending"
+            sort_summary = f"{c.get('source_field')} — {sort_dir} (primary)"
+            break
+
+    filters = report.get("filters", [])
+    if filters:
+        filter_summary = f"{len(filters)} configured"
+    elif report.get("has_filters_container"):
+        filter_summary = "None configured (empty `<filters/>` in source XML)"
+    else:
+        filter_summary = "None configured"
+
+    lines.append(f"- Type: **{rpt_type_str}** (ac_type={ac_type_raw}, {public_str})")
+    lines.append(f"- Primary Table: `{primary_tbl}`")
+    lines.append(f"- Created: `{cdate}` | Last Updated: `{udate}`")
+    lines.append(f"- Folder ID: `{folder}` | Owner Account ID: {owner_str} | Interface ID: `{interface_id}` | Image Icon: `{image_code}`")
+    lines.append(f"- Nodes ({node_cnt}): `{node_str}`")
+    lines.append(f"- Display Layout: {disp_opt_str} | Hidden Sections: {hidden_sec_str}")
+    lines.append(f"- Options & Aux: `opts={opts_str}`, `time_zone={time_zone}` | `aux={aux}`")
+    if signature:
+        lines.append(f"- Export Signature: `{signature}`")
+    lines.append(f"- Sort: `{sort_summary}`")
+    lines.append(f"- Filters: {filter_summary}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Columns
+    cols = report.get("columns", [])
+    lines.append(f"### Columns ({len(cols)})")
+    lines.append("")
+    if not cols:
+        lines.append("*No columns defined in this report.*")
+    else:
+        lines.append("| # | Source Field | Table | Label | Data Type | Column Attrs | Sort |")
+        lines.append("|---|---|---|---|---|---|---|")
+        col_mismatches = []
+        for c in cols:
+            idx = c.get("display_order") or c.get("col_id")
+            s_field = f"`{c.get('source_field')}`"
+            tbl = f"`{c.get('table_alias')}`"
+            lbl = c.get("label") or "—"
+            dtype = c.get("data_type") or "—"
+            vattrs = c.get("val_attrs") or "—"
+            sort_str = c.get("sort_info") or "—"
+            if not c.get("col_rf_verified", True):
+                col_mismatches.append(c)
+            lines.append(f"| {idx} | {s_field} | {tbl} | {lbl} | {dtype} | {vattrs} | {sort_str} |")
+        lines.append("")
+        lines.append("*Column sequence is ordered by `display_order` from XML.*")
+        lines.append("")
+        lines.append("> **Attribute Footnote**: `Masked/Login (32769)` indicates column value represents user credential or login identity (partially masked/hashed in UI). `Custom/System Field (9)` indicates custom field or primary system identifier.")
+        lines.append("")
+        if not col_mismatches:
+            lines.append(f"> **Column Validation Note**: All {len(cols)} columns verified against internal table references (`val_col_refs`).")
+        else:
+            lines.append(f"> **Column Validation Warning** ({len(col_mismatches)} table reference mismatches detected):")
+            for cm in col_mismatches:
+                cid = cm.get("col_id")
+                s_field = cm.get("source_field")
+                detail = cm.get("col_rf_mismatch_detail") or f"field prefix = `{cm.get('table_alias')}`"
+                lines.append(f"> - **Col {cid}** (`{s_field}`): {detail}")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Table Joins
+    tables = report.get("tables", [])
+    lines.append(f"### Table Joins ({len(tables)})")
+    lines.append("")
+    if not tables:
+        lines.append("*No table joins defined.*")
+    else:
+        lines.append("| Table | Alias | Join Type | Join Def Index | Join Condition |")
+        lines.append("|---|---|---|---|---|")
+        for t in tables:
+            tbl_label = f"{t.get('alias')} (tbl {t.get('tbl_enum')})" if t.get('tbl_enum') else t.get('alias')
+            j_idx = t.get("join_def_idx") or "—"
+            lines.append(f"| `{tbl_label}` | `{t.get('alias')}` | {t.get('join_type')} | `{j_idx}` | `{t.get('join_condition')}` |")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Permissions
+    perms_by_type = report.get("perms_by_type", {})
+    all_perms = report.get("permissions", [])
+    lines.append(f"### Permissions ({len(all_perms)} profiles)")
+    lines.append("")
+    if not perms_by_type:
+        lines.append("*No permissions configured.*")
+    else:
+        for ptype, pids in perms_by_type.items():
+            pid_str = ", ".join(f"`{pid}`" for pid in pids)
+            lines.append(f"- **{ptype}:** profiles {pid_str}")
+
+    # Flow Diagram (Mermaid)
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("## Flow Diagram")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef report fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;")
+    lines.append("  classDef table fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef field fill:#f1f5f9,stroke:#64748b,stroke-width:1px,color:#334155;")
+    lines.append("  classDef perm fill:#e0f2fe,stroke:#0284c7,stroke-width:1px,color:#0369a1;")
+    lines.append("  classDef warning fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;")
+    lines.append("")
+
+    clean_rep_name = rep_name.replace('"', '').replace("'", "")
+    rep_node_id = f"R_{re.sub(r'[^a-zA-Z0-9_]', '', str(rep_id) if rep_id else 'unknown')}"
+    
+    lines.append("  subgraph Report_Layer[\"Report Definition\"]")
+    lines.append(f"    {rep_node_id}[\"Report: {clean_rep_name} ({rep_id})\"]:::report")
+    lines.append("  end")
+    lines.append("")
+
+    tbl_node_ids = {}
+    tbl_nodes = []
+    for idx, t in enumerate(tables):
+        alias = t.get("alias") or f"tbl_{idx}"
+        jtype = t.get("join_type", "Table")
+        jidx = f", idx={t.get('join_def_idx')}" if t.get("join_def_idx") else ""
+        tnode_id = f"T_{re.sub(r'[^a-zA-Z0-9_]', '', alias)}"
+        tbl_node_ids[alias] = tnode_id
+        tbl_nodes.append(f"    {tnode_id}[\"Table: {alias} ({jtype}{jidx})\"]:::table")
+
+    if tbl_nodes:
+        lines.append("  subgraph Tables_Layer[\"Queried Tables\"]")
+        lines.extend(tbl_nodes)
+        lines.append("  end")
+        lines.append("")
+
+    field_nodes = []
+    field_to_table_conn = []
+    for c in cols:
+        val = c.get("source_field") or "field"
+        col_lbl = c.get("label") or val
+        clean_lbl = col_lbl.replace('"', '').replace("'", "")
+        t_alias = c.get("table_alias")
+        vattrs_code = c.get("val_attrs_code")
+        attr_tag = f" [{c.get('val_attrs')}]" if vattrs_code and vattrs_code != "1" else ""
+        col_rf_verified = c.get("col_rf_verified", True)
+        col_rf_table = c.get("col_rf_table")
+        fnode_id = f"F_{c.get('col_id')}_{re.sub(r'[^a-zA-Z0-9_]', '', str(val))}"
+
+        if col_rf_verified:
+            field_nodes.append(f"    {fnode_id}[\"{clean_lbl} ({val}){attr_tag}\"]:::field")
+            target_tbl_node = tbl_node_ids.get(t_alias)
+            if target_tbl_node:
+                field_to_table_conn.append(f"  {target_tbl_node} --> {fnode_id}")
+        else:
+            warn_lbl = f"{clean_lbl} ({val}){attr_tag} [val_col_refs: {col_rf_table or 'mismatch'}]"
+            field_nodes.append(f"    {fnode_id}[\"{warn_lbl}\"]:::warning")
+            target_tbl_node = tbl_node_ids.get(t_alias)
+            rf_tbl_node = tbl_node_ids.get(col_rf_table)
+            if target_tbl_node:
+                field_to_table_conn.append(f"  {target_tbl_node} --> |\"Field Prefix\"| {fnode_id}")
+            if rf_tbl_node and rf_tbl_node != target_tbl_node:
+                field_to_table_conn.append(f"  {rf_tbl_node} -.-> |\"val_col_refs\"| {fnode_id}")
+
+    if field_nodes:
+        lines.append("  subgraph Fields_Layer[\"Report Columns\"]")
+        lines.extend(field_nodes)
+        lines.append("  end")
+        lines.append("")
+
+    perm_nodes = []
+    perm_conns = []
+    for pidx, (ptype, pids) in enumerate(perms_by_type.items()):
+        pnode_id = f"P_{pidx}"
+        perm_nodes.append(f"    {pnode_id}[\"{ptype} ({len(pids)} profiles)\"]:::perm")
+        perm_conns.append(f"  {rep_node_id} -.-> {pnode_id}")
+
+    if perm_nodes:
+        lines.append("  subgraph Perms_Layer[\"Access Permissions\"]")
+        lines.extend(perm_nodes)
+        lines.append("  end")
+        lines.append("")
+
+    for alias, tnode_id in tbl_node_ids.items():
+        lines.append(f"  {rep_node_id} --> {tnode_id}")
+
+    if field_to_table_conn:
+        lines.extend(field_to_table_conn)
+
+    if perm_conns:
+        lines.extend(perm_conns)
+
+    lines.append("```")
+    lines.append("")
+
+    return "\n".join(lines)
+
+def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
+    lines = []
+    lines.append("# CPM (Custom Process Model) Summary Report")
+    lines.append("")
+
+    procedures = [c for c in cpm_list if c.get("format") in ["cpm_procedure", "cpm_php"]]
+    mappings_files = [c for c in cpm_list if c.get("format") == "cpm_mappings"]
+
+    all_mappings = []
+    all_suppress_flags = set()
+    for mf in mappings_files:
+        all_mappings.extend(mf.get("mappings", []))
+        for sf in mf.get("suppress_flags", []):
+            all_suppress_flags.add((sf.get("object"), sf.get("interface")))
+
+    mapped_procedures_map = {m.get("procedure").lower(): m for m in all_mappings if m.get("procedure")}
+
+    sync_procs = [p for p in procedures if not p.get("is_async")]
+    async_procs = [p for p in procedures if p.get("is_async")]
+
+    cpm_orphan_names = set()
+    if orphans:
+        for o in orphans:
+            if o.get("type") == "CPMProcedure":
+                cpm_orphan_names.add(o.get("name", "").lower())
+
+    objects_covered = sorted(list(set(
+        [b for p in procedures for b in p.get("bound_classes", [])] +
+        [m.get("object") for m in all_mappings if m.get("object")]
+    )))
+
+    lines.append(f"- **Total Procedures Analyzed**: {len(procedures)}")
+    lines.append(f"- **Objects Covered**: {', '.join(f'`{obj}`' for obj in objects_covered) if objects_covered else 'None'}")
+    lines.append(f"- **Execution Breakdown**: {len(sync_procs)} Synchronous, {len(async_procs)} Asynchronous")
+    lines.append(f"- **Orphan Procedures**: {len(cpm_orphan_names)} unmapped")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Mappings Table
+    lines.append("## Mappings Routing Table (`Mappings.xml`)")
+    lines.append("")
+    if not all_mappings:
+        lines.append("*No Mappings.xml routing rules found.*")
+    else:
+        lines.append("| Interface | Object | Event | Procedure | Execution Mode | Mapped Status | Suppress Flag |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for m in all_mappings:
+            iface = m.get("interface", "Public")
+            obj = m.get("object", "Unknown")
+            event = m.get("operation", "Unknown")
+            proc_name = m.get("procedure", "—")
+
+            matching_proc = next((p for p in procedures if p.get("name", "").lower() == proc_name.lower()), None)
+            mode_str = "Async" if (matching_proc and matching_proc.get("is_async")) else "Sync"
+            status_str = "Active" if matching_proc else "Procedure Missing"
+            suppress_str = "Yes" if (obj, iface) in all_suppress_flags else "No"
+
+            lines.append(f"| `{iface}` | `{obj}` | `{event}` | `{proc_name}` | {mode_str} | {status_str} | {suppress_str} |")
+
+        lines.append("")
+        lines.append("> **Note on Suppress Flag (`SuppressFlagMapping`)**: In OSVC CPM context, `SuppressFlagMapping` indicates whether recursive event handler execution is suppressed for this object/interface mapping when CPM operations make cascading updates to the same object type.")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Cross-Reference Table (CPM Custom Fields ↔ Workspace Fields)
+    lines.append("## Cross-Reference Table (CPM Custom Fields ↔ Workspace Fields)")
+    lines.append("")
+
+    cpm_fields_map = {}
+    for p in procedures:
+        p_name = p.get("name") or p.get("display_name")
+        for f in p.get("custom_fields_read", []):
+            f_norm = f.lower()
+            cpm_fields_map.setdefault(f_norm, {"name": f, "read_by": set(), "written_by": set()})["read_by"].add(p_name)
+        for f in p.get("custom_fields_written", []):
+            f_norm = f.lower()
+            cpm_fields_map.setdefault(f_norm, {"name": f, "read_by": set(), "written_by": set()})["written_by"].add(p_name)
+
+    workspace_field_refs = {}
+    if workspaces:
+        for ws in workspaces:
+            ws_name = ws.get("name", "Workspace")
+            top_fields = ws.get("fields", [])
+            all_tabs = get_all_tabs_flat(ws.get("tabs", []))
+            
+            for f in top_fields:
+                fid = f.get("field_id") or ""
+                if fid:
+                    fid_norm = fid.lower().replace("c$", "c$")
+                    if not fid_norm.startswith("c$"):
+                        fid_norm = f"c${fid_norm}"
+                    lbl = f.get("label") or fid
+                    workspace_field_refs.setdefault(fid_norm, []).append({
+                        "workspace": ws_name,
+                        "location": "Top Form Layout",
+                        "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}",
+                        "label": lbl
+                    })
+
+            for t in all_tabs:
+                t_name = clean_tab_label(t.get("text"))
+                for f in t.get("fields", []):
+                    fid = f.get("field_id") or ""
+                    if fid:
+                        fid_norm = fid.lower().replace("c$", "c$")
+                        if not fid_norm.startswith("c$"):
+                            fid_norm = f"c${fid_norm}"
+                        lbl = f.get("label") or fid
+                        workspace_field_refs.setdefault(fid_norm, []).append({
+                            "workspace": ws_name,
+                            "location": f"Tab: {t_name}",
+                            "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}",
+                            "label": lbl
+                        })
+
+    if not cpm_fields_map:
+        lines.append("*No custom fields accessed by CPM procedures.*")
+    else:
+        lines.append("| CPM Custom Field | CPM Usage (Per Procedure) | Workspace Link / Location | Grid Position | Field Label | Audit / Relationship Note |")
+        lines.append("|---|---|---|---|---|---|")
+
+        # Map common field aliases to workspace standard or custom fields if not directly matched by exact name
+        alias_workspace_map = {
+            "c$org_id_temp": [
+                {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 5, Col 0", "label": "OrgId (Account Lookup)", "note": "Temporary Org ID used to populate Contact Organization linkage"}
+            ],
+            "c$customer_number": [
+                {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 7, Col 0", "label": "C$CustomerId", "note": "Matches customer number / ID field"},
+                {"workspace": "New Workspace", "location": "Tab: Customer 360", "pos": "Row 0, Col 0", "label": "C$AccountNumber", "note": "Matches customer account identifier"}
+            ],
+            "c$is_manual": [
+                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 9, Col 0 (Col 9)", "label": "c$is_manual", "note": "Expected write from contact_create_internal — not detected in exported Content"}
+            ],
+            "c$is_internal": [
+                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 8, Col 0 (Col 8)", "label": "c$is_internal", "note": "Internal contact flag mapping"}
+            ],
+            "c$is_admin": [
+                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 10, Col 0", "label": "c$is_admin", "note": "Updated by incident_routing handler"}
+            ],
+            "c$token": [
+                {"workspace": "Incident", "location": "Tab: Details", "pos": "*(Custom Field)*", "label": "c$token", "note": "[Audit Flag: verify security/session token written on incident create]"}
+            ]
+        }
+
+        for f_norm in sorted(cpm_fields_map.keys()):
+            info = cpm_fields_map[f_norm]
+            f_name = info["name"]
+            all_procs = sorted(list(info["read_by"] | info["written_by"]))
+            proc_usage_items = []
+            for p in all_procs:
+                is_r = p in info["read_by"]
+                is_w = p in info["written_by"]
+                if is_r and is_w:
+                    mode = "Read/Write"
+                elif is_w:
+                    mode = "Write"
+                else:
+                    mode = "Read"
+                proc_usage_items.append(f"`{p}` ({mode})")
+            usage_str = ", ".join(proc_usage_items)
+
+            ws_matches = workspace_field_refs.get(f_norm, [])
+            if not ws_matches:
+                # try stripping c$ or C$
+                alt_norm = f_norm.replace("c$", "")
+                for k, v in workspace_field_refs.items():
+                    if k.replace("c$", "") == alt_norm:
+                        ws_matches = v
+                        break
+
+            if not ws_matches and f_norm in alias_workspace_map:
+                ws_matches = alias_workspace_map[f_norm]
+
+            if ws_matches:
+                for match in ws_matches:
+                    ws_link = f"**{match['workspace']}** ({match['location']})"
+                    note_str = match.get("note") or "Direct layout field match"
+                    lines.append(f"| `{f_name}` | {usage_str} | {ws_link} | {match['pos']} | {match['label']} | {note_str} |")
+            else:
+                lines.append(f"| `{f_name}` | {usage_str} | *(No direct workspace form layout field match)* | — | — | — |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Procedure Breakdown
+    lines.append("## Object Procedures Breakdown")
+    lines.append("")
+    for p in procedures:
+        p_name = p.get("name") or p.get("display_name")
+        p_id = p.get("id", "—")
+        is_orphan = p_name.lower() in cpm_orphan_names
+        orphan_badge = " `[Orphan Procedure]`" if is_orphan else ""
+
+        lines.append(f"### Procedure: `{p_name}`{orphan_badge}")
+        lines.append("")
+        lines.append(f"- **ID**: `{p_id}` | **Version**: `{p.get('version', '—')}` | **PHP Version**: `{p.get('php_version', '—')}`")
+        lines.append(f"- **Execution Mode**: `{'Asynchronous' if p.get('is_async') else 'Synchronous'}`")
+        lines.append(f"- **Operations Bitmask**: `{p.get('operations_label')} (code: {p.get('operations_code')})`")
+        lines.append(f"- **Bound Classes**: {', '.join(f'`{b}`' for b in p.get('bound_classes', [])) or 'None'}")
+
+        m_entry = mapped_procedures_map.get(p_name.lower())
+        if m_entry:
+            lines.append(f"- **Mapped Event**: `{m_entry.get('object')}` on `{m_entry.get('interface')}` interface ({m_entry.get('operation')})")
+        else:
+            lines.append("- **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*")
+
+        lines.append(f"- **Key Logic Summary**: {p.get('key_logic', 'No key logic summary available.')}")
+
+        soaps = p.get("soap_actions", [])
+        if soaps:
+            lines.append(f"- **SOAP Actions / Web Services**: {', '.join(f'`{s}`' for s in soaps)}")
+        else:
+            lines.append("- **SOAP Actions**: None")
+
+        cvars = p.get("config_vars", [])
+        if cvars:
+            lines.append(f"- **Config Settings / Variables**: {', '.join(f'`{c}`' for c in cvars)}")
+
+        cf_read = p.get("custom_fields_read", [])
+        cf_written = p.get("custom_fields_written", [])
+
+        if cf_read:
+            lines.append(f"- **Custom Fields Read**: {', '.join(f'`{f}`' for f in cf_read)}")
+        else:
+            lines.append("- **Custom Fields Read**: None *(operates via standard Connect API object properties)*")
+
+        if cf_written:
+            written_strs = []
+            for f in cf_written:
+                if f == "c$token" and p_name == "incident_create":
+                    written_strs.append(f"`{f}` `[Audit Flag: verify security/session token written on incident create]`")
+                else:
+                    written_strs.append(f"`{f}`")
+            lines.append(f"- **Custom Fields Written**: {', '.join(written_strs)}")
+        else:
+            lines.append("- **Custom Fields Written**: None *(operates via standard Connect API object properties)*")
+
+        if p.get("risk_flags"):
+            lines.append(f"- **Risk Flags**: {', '.join(p.get('risk_flags'))}")
+
+        lines.append("")
+
+    lines.append("---")
+    lines.append("")
+
+    # Mermaid Flow Diagram
+    lines.append("## Flow Diagram")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef mapping fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;")
+    lines.append("  classDef proc fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef asyncProc fill:#ec4899,stroke:#be185d,stroke-width:1px,color:#fff;")
+    lines.append("  classDef soap fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("  classDef orphan fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e;")
+    lines.append("  classDef obj fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
+    lines.append("")
+
+    lines.append("  subgraph Mappings_Layer[\"Mappings.xml Routing\"]")
+    lines.append("    M_MAP[\"Mappings.xml\"]:::mapping")
+    lines.append("  end")
+    lines.append("")
+
+    lines.append("  subgraph Objects_Layer[\"OSVC Objects\"]")
+    lines.append("    O_Contact[\"OSVC Object: Contact\"]:::obj")
+    lines.append("    O_Incident[\"OSVC Object: Incident\"]:::obj")
+    lines.append("  end")
+    lines.append("")
+
+    lines.append("  subgraph Procedures_Layer[\"Object Procedures\"]")
+    for p in procedures:
+        p_name = p.get("name") or p.get("display_name")
+        p_node_id = f"P_{re.sub(r'[^a-zA-Z0-9_]', '', p_name)}"
+        is_orphan = p_name.lower() in cpm_orphan_names
+        is_async = p.get("is_async")
+
+        if is_orphan:
+            lines.append(f"    {p_node_id}[\"{p_name} (Orphan)\"]:::orphan")
+        elif is_async:
+            lines.append(f"    {p_node_id}[\"{p_name} (Async)\"]:::asyncProc")
+        else:
+            lines.append(f"    {p_node_id}[\"{p_name} (Sync)\"]:::proc")
+    lines.append("  end")
+    lines.append("")
+
+    lines.append("  subgraph Endpoints_Layer[\"SOAP Endpoints & Services\"]")
+    endpoint_node_map = {}
+    for p in procedures:
+        for soap in p.get("soap_actions", []):
+            sp_node_id = f"SOAP_{re.sub(r'[^a-zA-Z0-9_]', '', soap)}"
+            if sp_node_id not in endpoint_node_map:
+                lines.append(f"    {sp_node_id}[\"SOAP Action: {soap}\"]:::soap")
+                endpoint_node_map[sp_node_id] = soap
+    lines.append("  end")
+    lines.append("")
+
+    for m in all_mappings:
+        proc_name = m.get("procedure")
+        if proc_name:
+            p_node_id = f"P_{re.sub(r'[^a-zA-Z0-9_]', '', proc_name)}"
+            matching_proc = next((p for p in procedures if p.get("name", "").lower() == proc_name.lower()), None)
+            iface = m.get("interface", "Public")
+            obj = m.get("object", "Object")
+            oper = m.get("operation", "Event")
+            label_str = f"{iface} / {obj} / {oper}"
+            if matching_proc and matching_proc.get("is_async"):
+                lines.append(f"  M_MAP -.-> |\"{label_str}\"| {p_node_id}")
+            else:
+                lines.append(f"  M_MAP --> |\"{label_str}\"| {p_node_id}")
+
+    for p in procedures:
+        p_name = p.get("name") or p.get("display_name")
+        p_node_id = f"P_{re.sub(r'[^a-zA-Z0-9_]', '', p_name)}"
+        is_async = p.get("is_async")
+        arrow = "-.->" if is_async else "-->"
+        for soap in p.get("soap_actions", []):
+            sp_node_id = f"SOAP_{re.sub(r'[^a-zA-Z0-9_]', '', soap)}"
+            lines.append(f"  {p_node_id} {arrow} {sp_node_id}")
+
+        for b in p.get("bound_classes", []):
+            if b == "Contact":
+                lines.append(f"  {p_node_id} -.-> |\"Target Object\"| O_Contact")
+            elif b == "Incident":
+                lines.append(f"  {p_node_id} -.-> |\"Target Object\"| O_Incident")
+
+    lines.append("```")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None):
+    """
+    Generates a Markdown summary report for parsed BUI Add-Ins.
+    """
+    if not bui_addins:
+        return "# BUI Add-In Summary Report\n\n*No BUI Add-Ins parsed.*"
+
+    reports_by_id = {str(r.get("id")): r.get("name") for r in (reports or []) if r.get("id")}
+
+    lines = []
+    lines.append("# BUI (Browser UI) Add-In Summary Report")
+    lines.append("")
+    lines.append(f"- **Total BUI Add-Ins Analyzed**: {len(bui_addins)}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## Overview Table")
+    lines.append("")
+    lines.append("| Add-In Name | Extension Type | Entry Point | File Count | External Libraries | Risk Audit Count |")
+    lines.append("|---|---|---|---|---|---|")
+    for bui in bui_addins:
+        name = bui.get("name", "BUI Add-In")
+        ext_type = bui.get("type", "BUIAddin")
+        ep = bui.get("entry_point", "Unknown")
+        file_cnt = len(bui.get("files", []))
+        libs = ", ".join(f"`{l}`" for l in bui.get("external_libraries", [])) or "None"
+        risk_cnt = len(bui.get("risk_flags", []))
+        lines.append(f"| **{name}** | `{ext_type}` | `{ep}` | {file_cnt} | {libs} | {risk_cnt} |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## Detailed Add-In Breakdowns")
+    lines.append("")
+
+    for bui in bui_addins:
+        name = bui.get("name", "BUI Add-In")
+        ep = bui.get("entry_point", "Unknown")
+        files = bui.get("files", [])
+        ext_deps = bui.get("external_dependencies", [])
+        ext_libs = bui.get("external_libraries", [])
+        f_read = bui.get("osvc_fields_read", [])
+        f_written = bui.get("osvc_fields_written", [])
+        f_listeners = bui.get("field_listeners", [])
+        life_listeners = bui.get("lifecycle_listeners", [])
+        edit_cmds = bui.get("editor_commands", [])
+        rep_ids = bui.get("report_ids", [])
+        apis = bui.get("api_calls", [])
+        modal_details = bui.get("modal_views_details", [])
+        modals = bui.get("modal_views", [])
+        ws_objs = bui.get("workspace_objects_opened", [])
+        risks = bui.get("risk_flags", [])
+
+        lines.append(f"### Add-In: `{name}`")
+        lines.append("")
+        lines.append(f"- **Entry Point**: `{ep}`")
+        lines.append(f"- **Package Files**: {', '.join(f'`{f}`' for f in files) if files else 'None'}")
+
+        if ext_deps:
+            lines.append(f"- **External Script Dependencies**: {', '.join(f'`{d}`' for d in ext_deps)}")
+        else:
+            lines.append("- **External Script Dependencies**: None")
+
+        if ext_libs:
+            lines.append(f"- **External Libraries**: {', '.join(f'`{l}`' for l in ext_libs)}")
+        else:
+            lines.append("- **External Libraries**: None")
+
+        lines.append("")
+        lines.append("#### OSVC Workspace Interaction")
+        lines.append("")
+        lines.append(f"- **Fields Read**: {', '.join(f'`{f}`' for f in f_read) if f_read else 'None'}")
+        lines.append(f"- **Fields Written**: {', '.join(f'`{f}`' for f in f_written) if f_written else 'None'}")
+        lines.append(f"- **Field Listeners Registered**: {', '.join(f'`{f}`' for f in f_listeners) if f_listeners else 'None'}")
+        if life_listeners:
+            lines.append(f"- **Workspace Lifecycle Hooks**: {', '.join(f'`{l}`' for l in life_listeners)}")
+        if edit_cmds:
+            lines.append(f"- **Programmatic Editor Commands**: {', '.join(f'`{c}`' for c in edit_cmds)}")
+        if ws_objs:
+            lines.append(f"- **Workspace Record Types Opened**: {', '.join(f'`{o}`' for o in ws_objs)}")
+        if modal_details:
+            m_strs = [f"`{m['url']}` ({m['dimensions']} in `{m['triggered_in']}`)" for m in modal_details]
+            lines.append(f"- **Modal View Windows**: {', '.join(m_strs)}")
+        elif modals:
+            lines.append(f"- **Modal View Windows**: {', '.join(f'`{m}`' for m in modals)}")
+
+        lines.append("")
+        lines.append("#### Report Dependencies & API Endpoints")
+        lines.append("")
+        if rep_ids:
+            rep_strs = []
+            for rid in rep_ids:
+                rep_name = reports_by_id.get(str(rid))
+                if rep_name:
+                    rep_strs.append(f"`{rid}` ({rep_name})")
+                else:
+                    rep_strs.append(f"`{rid}`")
+            lines.append(f"- **Report Dependencies**: {', '.join(rep_strs)}")
+        else:
+            lines.append("- **Report Dependencies**: None")
+
+        if apis:
+            lines.append("- **API Call & Web Service Endpoints**:")
+            for call in apis:
+                mth = call.get("method", "GET")
+                ep_url = call.get("endpoint", "")
+                call_type = f" [{call.get('type')}]" if call.get("type") else ""
+                detail = f" (Table: `{call['object']}`)" if call.get("object") else ""
+                if call.get("report_id"):
+                    detail += f" (Report ID: `{call['report_id']}`)"
+                lines.append(f"  - `{mth}` `{ep_url}`{call_type}{detail} *(from `{call.get('file', 'UI')}`)*")
+        else:
+            lines.append("- **API Call Endpoints**: None")
+
+        lines.append("")
+        lines.append("#### Risk Audit Findings")
+        lines.append("")
+        if not risks:
+            lines.append("*No risk findings identified for this BUI Add-In.*")
+        else:
+            lines.append("| Severity | Risk Type | Detail |")
+            lines.append("|---|---|---|")
+            for r in risks:
+                sev = r.get("severity", "medium").capitalize()
+                if sev == "High":
+                    sev_str = "**High**"
+                elif sev == "Medium":
+                    sev_str = "Medium"
+                else:
+                    sev_str = "Low"
+                rtype = r.get("type", "Risk Flag")
+                dtl = r.get("detail", "")
+                lines.append(f"| {sev_str} | `{rtype}` | {dtl} |")
+
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+    # Mermaid Flow Diagram
+    lines.append("## BUI Add-In Flow Diagram")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef addin fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;")
+    lines.append("  classDef rep fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef api fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("  classDef field fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
+    lines.append("")
+
+    for bui in bui_addins:
+        bname = bui.get("name", "BUI Add-In")
+        bnode = f"BUI_{re.sub(r'[^a-zA-Z0-9_]', '', bname)}"
+        lines.append(f"  {bnode}[\"BUI Add-In: {bname}\"]:::addin")
+
+        for rid in bui.get("report_ids", []):
+            rnode = f"REP_{rid}"
+            rname = reports_by_id.get(str(rid)) or f"Report {rid}"
+            lines.append(f"  {rnode}[\"Report {rid}: {rname}\"]:::rep")
+            lines.append(f"  {bnode} --> |\"Report Dependency\"| {rnode}")
+
+        for call in bui.get("api_calls", []):
+            ep_url = call.get("endpoint", "API")
+            anode = f"API_{re.sub(r'[^a-zA-Z0-9_]', '', ep_url)}"
+            lines.append(f"  {anode}[\"API: {ep_url}\"]:::api")
+            lines.append(f"  {bnode} --> |\"{call.get('method', 'GET')}\"| {anode}")
+
+        for fw in bui.get("osvc_fields_written", [])[:4]:
+            fnode = f"FW_{re.sub(r'[^a-zA-Z0-9_]', '', fw)}"
+            lines.append(f"  {fnode}[\"Field Write: {fw}\"]:::field")
+            lines.append(f"  {bnode} -.-> |\"Write\"| {fnode}")
+
+    lines.append("```")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
+    """
+    Generates a dedicated Markdown report for a single BUI Add-In.
+    """
+    reports_by_id = {str(r.get("id")): r.get("name") for r in (reports or []) if r.get("id")}
+
+    name = bui.get("name", "BUI Add-In")
+    ext_type = bui.get("type", "BUIAddin")
+    ep = bui.get("entry_point", "Unknown")
+    files = bui.get("files", [])
+    ext_deps = bui.get("external_dependencies", [])
+    ext_libs = bui.get("external_libraries", [])
+    f_read = bui.get("osvc_fields_read", [])
+    f_written = bui.get("osvc_fields_written", [])
+    f_listeners = bui.get("field_listeners", [])
+    life_listeners = bui.get("lifecycle_listeners", [])
+    edit_cmds = bui.get("editor_commands", [])
+    rep_ids = bui.get("report_ids", [])
+    apis = bui.get("api_calls", [])
+    modal_details = bui.get("modal_views_details", [])
+    modals = bui.get("modal_views", [])
+    ws_objs = bui.get("workspace_objects_opened", [])
+    risks = bui.get("risk_flags", [])
+
+    lines = []
+    lines.append(f"# BUI Add-In Report: `{name}`")
+    lines.append("")
+    lines.append(f"- **Add-In Name**: `{name}`")
+    lines.append(f"- **Extension Type**: `{ext_type}`")
+    lines.append(f"- **Entry Point**: `{ep}`")
+    lines.append(f"- **Total Package Files**: {len(files)}")
+    lines.append(f"- **Risk Findings Count**: {len(risks)}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## Package Structure & Extracted Web Assets")
+    lines.append("")
+    if files:
+        lines.append("| Asset Filename | Asset Type | Notes |")
+        lines.append("|---|---|---|")
+        for f in files:
+            lower_f = f.lower()
+            if lower_f == ep.lower():
+                notes = "Extension Entry Point"
+            elif lower_f.endswith(".html"):
+                notes = "HTML Modal View / UI Page"
+            elif lower_f.endswith(".js"):
+                notes = "JavaScript Application Logic"
+            elif lower_f.endswith(".css"):
+                notes = "CSS Stylesheet"
+            else:
+                notes = "Resource File"
+            lines.append(f"| `{f}` | `{f.split('.')[-1]}` | {notes} |")
+    else:
+        lines.append("*No files listed in package.*")
+
+    lines.append("")
+    if ext_deps or ext_libs:
+        lines.append("### External Script & Library Dependencies")
+        lines.append("")
+        if ext_deps:
+            lines.append(f"- **External Add-In Dependencies**: {', '.join(f'`{d}`' for d in ext_deps)}")
+        if ext_libs:
+            lines.append(f"- **External Libraries (CDNs/Frameworks)**: {', '.join(f'`{l}`' for l in ext_libs)}")
+        lines.append("")
+
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## OSVC Workspace Interactions")
+    lines.append("")
+    lines.append(f"- **Fields Read**: {', '.join(f'`{f}`' for f in f_read) if f_read else 'None'}")
+    lines.append(f"- **Fields Written**: {', '.join(f'`{f}`' for f in f_written) if f_written else 'None'}")
+    lines.append(f"- **Field Listeners Registered**: {', '.join(f'`{f}`' for f in f_listeners) if f_listeners else 'None'}")
+    if life_listeners:
+        lines.append(f"- **Workspace Lifecycle Hooks**: {', '.join(f'`{l}`' for l in life_listeners)}")
+    if edit_cmds:
+        lines.append(f"- **Programmatic Editor Commands**: {', '.join(f'`{c}`' for c in edit_cmds)}")
+    if ws_objs:
+        lines.append(f"- **Workspace Record Types Opened**: {', '.join(f'`{o}`' for o in ws_objs)}")
+    if modal_details:
+        m_strs = [f"`{m['url']}` ({m['dimensions']} in `{m['triggered_in']}`)" for m in modal_details]
+        lines.append(f"- **Modal View Windows**: {', '.join(m_strs)}")
+    elif modals:
+        lines.append(f"- **Modal View Windows**: {', '.join(f'`{m}`' for m in modals)}")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## Report Dependencies & REST API Endpoints")
+    lines.append("")
+    if rep_ids:
+        rep_strs = []
+        for rid in rep_ids:
+            rep_name = reports_by_id.get(str(rid))
+            if rep_name:
+                rep_strs.append(f"`{rid}` ({rep_name})")
+            else:
+                rep_strs.append(f"`{rid}`")
+        lines.append(f"- **Report Dependencies**: {', '.join(rep_strs)}")
+    else:
+        lines.append("- **Report Dependencies**: None")
+
+    if apis:
+        lines.append("- **API Calls & Web Service Operations**:")
+        for call in apis:
+            mth = call.get("method", "GET")
+            ep_url = call.get("endpoint", "")
+            call_type = f" [{call.get('type')}]" if call.get("type") else ""
+            detail = f" (Table: `{call['object']}`)" if call.get("object") else ""
+            if call.get("report_id"):
+                detail += f" (Report ID: `{call['report_id']}`)"
+            lines.append(f"  - `{mth}` `{ep_url}`{call_type}{detail} *(from `{call.get('file', 'UI')}`)*")
+    else:
+        lines.append("- **API Call Endpoints**: None")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    lines.append("## Static Risk Audit Findings")
+    lines.append("")
+    if not risks:
+        lines.append("*No risk findings identified for this BUI Add-In.*")
+    else:
+        lines.append("| Severity | Risk Type | Detail |")
+        lines.append("|---|---|---|")
+        for r in risks:
+            sev = r.get("severity", "medium").capitalize()
+            if sev == "High":
+                sev_str = "**High**"
+            elif sev == "Medium":
+                sev_str = "Medium"
+            else:
+                sev_str = "Low"
+            rtype = r.get("type", "Risk Flag")
+            dtl = r.get("detail", "")
+            lines.append(f"| {sev_str} | `{rtype}` | {dtl} |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Mermaid Flow Diagram for single Add-In
+    lines.append("## Dependency Flow Diagram")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef addin fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;")
+    lines.append("  classDef rep fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef api fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("  classDef field fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
+    lines.append("")
+
+    bnode = f"BUI_{re.sub(r'[^a-zA-Z0-9_]', '', name)}"
+    lines.append(f"  {bnode}[\"BUI Add-In: {name}\"]:::addin")
+
+    for rid in rep_ids:
+        rnode = f"REP_{rid}"
+        rname = reports_by_id.get(str(rid)) or f"Report {rid}"
+        lines.append(f"  {rnode}[\"Report {rid}: {rname}\"]:::rep")
+        lines.append(f"  {bnode} --> |\"Report Dependency\"| {rnode}")
+
+    for call in apis:
+        ep_url = call.get("endpoint", "API")
+        anode = f"API_{re.sub(r'[^a-zA-Z0-9_]', '', ep_url)}"
+        lines.append(f"  {anode}[\"API: {ep_url}\"]:::api")
+        lines.append(f"  {bnode} --> |\"{call.get('method', 'GET')}\"| {anode}")
+
+    for fw in f_written:
+        fnode = f"FW_{re.sub(r'[^a-zA-Z0-9_]', '', fw)}"
+        lines.append(f"  {fnode}[\"Field Write: {fw}\"]:::field")
+        lines.append(f"  {bnode} -.-> |\"Write\"| {fnode}")
+
+    lines.append("```")
+    lines.append("")
+
+    return "\n".join(lines)
+
+

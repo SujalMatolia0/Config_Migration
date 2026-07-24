@@ -4,7 +4,7 @@ This accelerator scans exported Oracle Service Cloud (OSVC) configuration files 
 
 ---
 
-## 📂 Directory Structure
+## Directory Structure
 
 ```
 .
@@ -24,8 +24,55 @@ This accelerator scans exported Oracle Service Cloud (OSVC) configuration files 
 │   ├── report_builder.py     # HTML/PDF report generators
 │   └── templates/
 │       └── report.html.j2    # High-aesthetic Jinja2 dashboard template
-├── ui/                       # Next.js + React Flow Interactive Dashboard
-├── tests/                    # Parser test suite
+├── input/                    # Organized input OSVC exports
+│   ├── workspaces/           # Workspace XML files
+│   ├── cpm/                  # CPM PHP handlers & Mappings.xml
+│   ├── reports/              # Report XML files
+│   ├── rules/                # Business Rules XML files
+│   ├── scripts/              # Custom PHP/JS scripts
+│   └── navigation/           # Navigation Set XML files
+├── results/                  # Generated reports and analysis outputs
+│   ├── master.json           # Global master JSON data schema
+│   ├── report.html           # Global interactive HTML dashboard
+│   ├── index.md              # Global cross-workspace index
+│   ├── index.json            # Global workspace index JSON
+│   ├── json/                 # Format-sorted JSON files
+│   │   ├── master.json
+│   │   ├── index.json
+│   │   ├── workspaces/       # Per-workspace JSON reports
+│   │   ├── cpm/              # CPM JSON reports
+│   │   ├── reports/          # Analytics Core JSON reports
+│   │   └── scripts/          # BUI Add-In JSON reports
+│   ├── markdown/             # Format-sorted Markdown reports
+│   │   ├── index.md
+│   │   ├── workspaces/
+│   │   ├── cpm/
+│   │   ├── reports/
+│   │   └── scripts/
+│   ├── html/                 # Format-sorted HTML dashboards
+│   │   ├── report.html
+│   │   └── workspaces/
+│   ├── workspaces/           # Category-sorted workspace outputs
+│   │   └── <workspace_slug>/
+│   │       ├── report.md
+│   │       ├── report.json
+│   │       ├── report.html
+│   │       └── master.json
+│   ├── cpm/                  # CPM process handler summaries (MD + JSON)
+│   │   ├── report_CPM_Summary.md
+│   │   └── report_CPM_Summary.json
+│   ├── reports/              # OSVC analytics core report summaries (MD + JSON)
+│   │   ├── report_Contacts_100008.md
+│   │   └── report_Contacts_100008.json
+│   ├── scripts/              # BUI Add-In summaries (MD + JSON)
+│   │   ├── report_BUI_Addins.md
+│   │   ├── report_BUI_Addins.json
+│   │   ├── report_ContactOrgLookupBUIAddin.md
+│   │   ├── report_ContactOrgLookupBUIAddin.json
+│   │   ├── report_SendToSiebelBUIAddin.md
+│   │   └── report_SendToSiebelBUIAddin.json
+│   ├── rules/                # Business rules outputs
+│   └── navigation/           # Navigation set outputs
 ├── osvc_analyser.py          # Orchestrator CLI entry point
 ├── schema.json               # Master JSON validation schema
 └── README.md
@@ -33,7 +80,7 @@ This accelerator scans exported Oracle Service Cloud (OSVC) configuration files 
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### 1. Python Parser Environment
 Create a virtual environment and install the required dependencies:
@@ -52,7 +99,7 @@ npm install
 
 ---
 
-## 🚀 Running the Analyser CLI
+## Running the Analyser CLI
 
 Place all OSVC configuration exports (XML, PHP, JS) in an `input` directory.
 
@@ -78,7 +125,7 @@ Place all OSVC configuration exports (XML, PHP, JS) in an `input` directory.
 
 ---
 
-## 📊 Launching the Interactive Flow Diagram
+## Launching the Interactive Flow Diagram
 
 To start the React Flow visualization UI:
 

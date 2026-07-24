@@ -1,0 +1,42 @@
+﻿<ClassMappings>
+    <ClassMapping ClassName="Answer">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="CommunityComment">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="CommunityCommentRtg">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="CommunityQuestion">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="CommunityQuestionRtg">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="Contact">
+        <Mappings>
+            <Mapping Interface="scriptpro" Operation="Create" Procedure="contact_create" />
+            <Mapping Interface="scriptpro" Operation="Update" Procedure="contact_update" />
+            <SuppressFlagMapping Interface="scriptpro" />
+            <Mapping Interface="scriptpro_customerservice_2" Operation="Create" Procedure="contact_create_internal" />
+            <Mapping Interface="scriptpro_customerservice_2" Operation="Update" Procedure="contact_update_internal" />
+            <SuppressFlagMapping Interface="scriptpro_customerservice_2" />
+        </Mappings>
+    </ClassMapping>
+    <ClassMapping ClassName="Incident">
+        <Mappings>
+            <Mapping Interface="scriptpro" Operation="Create" Procedure="incident_create" />
+            <SuppressFlagMapping Interface="scriptpro" />
+        </Mappings>
+    </ClassMapping>
+    <ClassMapping ClassName="Opportunity">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="Organization">
+        <Mappings />
+    </ClassMapping>
+    <ClassMapping ClassName="Task">
+        <Mappings />
+    </ClassMapping>
+</ClassMappings><!--2.RtYHUUZvQT9wnPjOK3UJ84sCBWhuBMY+RqZh+yxBD9J1naTc64k=-->
