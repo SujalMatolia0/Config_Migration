@@ -154,15 +154,25 @@ def extract_endpoints(components):
         risk_str = "; ".join(risk_parts)
 
         for api_call in bui.get("api_calls", []):
-            ep_str = api_call.get("endpoint", "REST Endpoint")
+            raw_ep = api_call.get("endpoint", "REST Endpoint")
+            detail = ""
             if api_call.get("object"):
-                ep_str += f" ({api_call['object']})"
+                detail = f" ({api_call['object']})"
             elif api_call.get("report_id"):
-                ep_str += f" (Report ID {api_call['report_id']})"
+                detail = f" (Report ID {api_call['report_id']})"
+
+            if raw_ep.startswith("connect/v1.3/") or raw_ep.startswith("/"):
+                clean_url = raw_ep
+            else:
+                clean_url = f"connect/v1.3/{raw_ep}"
+
+            full_url_label = f"{clean_url}{detail}"
+            call_type = f"BUI Add-In ({api_call.get('type', 'REST API')})"
+
             add_endpoint(
-                url=f"connect/v1.3/{ep_str}",
+                url=full_url_label,
                 ref_name=f"{bui_name} ({api_call.get('file', 'UI')})",
-                ref_type="BUI Add-In REST",
+                ref_type=call_type,
                 risk=risk_str
             )
 

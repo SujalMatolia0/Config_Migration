@@ -197,7 +197,9 @@ def parse_bui_addin(target_path):
             editor_commands.add(cmd)
 
         # Extension IDs registered or closed
-        reg_ids = re.findall(r'registerWorkspaceExtension\s*\(\s*function\s*\(.*?\).*?["\']?([a-zA-Z0-9_\-]+)["\']?\s*\)', content, re.DOTALL)
+        reg_ids = re.findall(r'extension_loader\.load\s*\(\s*["\']([^"\']+)["\']', content)
+        if not reg_ids:
+            reg_ids = re.findall(r'registerWorkspaceExtension\s*\(\s*function\s*\(.*?\).*?["\']?([a-zA-Z0-9_\-]+)["\']?\s*\)', content, re.DOTALL)
         if not reg_ids:
             reg_ids = re.findall(r'extensionProvider\.registerWorkspaceExtension\s*\(\s*["\']([^"\']+)["\']', content)
         if not reg_ids:
@@ -256,26 +258,28 @@ def parse_bui_addin(target_path):
                 "file": path_key
             })
 
-        # Modal Views with Dimensions
-        modal_window_matches = re.findall(r'createModalWindow\s*\(\s*["\']([^"\']+)["\']', content)
-        for mw in modal_window_matches:
-            mw_url = mw.split("?")[0]
-            if mw_url.lower() != os.path.basename(path_key).lower() and mw_url != entry_point:
-                modal_views.add(mw_url)
-                # Look for dimensions around match
+        # Modal Views with Dimensions (supports createModalWindow('url') AND setContentUrl('url'))
+        modal_urls = re.findall(r'(?:createModalWindow|setContentUrl)\s*\(\s*["\']([^"\']+)["\']', content)
+        for mw in modal_urls:
+            clean_mw = mw.lstrip("/").split("?")[0]
+            if clean_mw.lower() != os.path.basename(path_key).lower() and clean_mw != entry_point:
+                modal_views.add(clean_mw)
                 pos = content.find(mw)
-                snippet = content[max(0, pos-100):min(len(content), pos+300)]
-                w_m = re.search(r'width\s*[:=]\s*["\']?(\d+)', snippet, re.IGNORECASE)
-                h_m = re.search(r'height\s*[:=]\s*["\']?(\d+)', snippet, re.IGNORECASE)
+                snippet = content[max(0, pos-150):min(len(content), pos+350)]
+                w_m = re.search(r'(?:setWidth|width)\s*\(?\s*[:=]?\s*["\']?(\d+)', snippet, re.IGNORECASE)
+                h_m = re.search(r'(?:setHeight|height)\s*\(?\s*[:=]?\s*["\']?(\d+)', snippet, re.IGNORECASE)
                 dims = f"{w_m.group(1)}x{h_m.group(1)}px" if (w_m and h_m) else "Standard Modal"
                 modal_views_details.append({
-                    "url": mw,
-                    "clean_url": mw_url,
+                    "url": mw.lstrip("/"),
+                    "clean_url": clean_mw,
                     "dimensions": dims,
                     "triggered_in": path_key
                 })
 
         # Workspace objects opened
+        ws_obj_matches = re.findall(r'(?:editWorkspaceRecord|openWorkspaceRecord|createRecord|openWorkspace)\s*\(\s*["\']([a-zA-Z0-9_\$]+)["\']', content)
+        for obj_type in ws_obj_matches:
+            workspace_objects_opened.add(obj_type)
         if "editWorkspaceRecord" in content or "openWorkspace" in content:
             for obj in ["Contact", "Org", "Organization", "Incident", "Task"]:
                 if obj in content:
@@ -358,11 +362,18 @@ def parse_bui_addin(target_path):
                 "detail": "jsPDF / jsPDF-AutoTable loaded in HTML headers but unreferenced in JavaScript"
             })
 
+    html_previews = {}
+    for fk, fc in files_map.items():
+        if fk.lower().endswith(".html") or fk.lower().endswith(".htm"):
+            html_previews[fk] = fc
+
     return {
         "name": addin_name,
+        "format": "bui_addin",
         "type": "BUIAddin",
         "entry_point": entry_point,
         "files": sorted(all_file_names),
+        "html_previews": html_previews,
         "external_dependencies": sorted(list(external_dependencies)),
         "external_libraries": sorted(list(external_libraries)),
         "osvc_fields_read": sorted(list(osvc_fields_read_map.values())),

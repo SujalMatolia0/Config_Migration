@@ -24,7 +24,7 @@ from output.json_writer import write_master_json
 from output.report_builder import build_html_report, build_pdf_report
 
 
-def detect_and_parse_file(file_path, components):
+def detect_and_parse_file(file_path, components, strict=False):
     _, ext = os.path.splitext(file_path.lower())
     if ext == ".xml":
         try:
@@ -34,7 +34,7 @@ def detect_and_parse_file(file_path, components):
             tag = root.tag.split('}')[-1]
             if tag == "Workspace":
                 print(f"  -> Parsing Workspace: {os.path.basename(file_path)}")
-                components["workspaces"].append(parse_workspace_file(file_path))
+                components["workspaces"].append(parse_workspace_file(file_path, strict=strict))
             elif tag in ["Report", "Reports", "analytics_core"]:
                 print(f"  -> Parsing Report: {os.path.basename(file_path)}")
                 components["reports"].append(parse_report_file(file_path))
@@ -48,22 +48,27 @@ def detect_and_parse_file(file_path, components):
                 print(f"  -> Parsing Nav Set: {os.path.basename(file_path)}")
                 components["navigationSets"].append(parse_nav_file(file_path))
             else:
-                if root.find(".//Workspace") is not None:
-                    print(f"  -> Parsing Workspace (nested): {os.path.basename(file_path)}")
-                    components["workspaces"].append(parse_workspace_file(file_path))
-                elif root.find(".//Report") is not None or root.find(".//Column") is not None or root.find(".//ac_id") is not None or bool(root.xpath(".//*[local-name()='ac_id']")):
-                    print(f"  -> Parsing Report (nested): {os.path.basename(file_path)}")
-                    components["reports"].append(parse_report_file(file_path))
-                elif root.find(".//Rule") is not None:
-                    print(f"  -> Parsing Business Rules (nested): {os.path.basename(file_path)}")
-                    components["businessRules"].append(parse_rule_file(file_path))
-                elif root.find(".//NavItem") is not None:
-                    print(f"  -> Parsing Nav Set (nested): {os.path.basename(file_path)}")
-                    components["navigationSets"].append(parse_nav_file(file_path))
-                else:
-                    print(f"  Warning: Skipping unrecognized XML: {os.path.basename(file_path)} (root tag: {tag})")
+                raw_preview = ""
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f_prev:
+                        raw_preview = f_prev.read(500)
+                except Exception:
+                    pass
+                print(f"  [WARNING] Unrecognized XML root tag: <{tag}> in {os.path.basename(file_path)} — capturing in unhandledFiles")
+                components.setdefault("unhandledFiles", []).append({
+                    "file_path": file_path,
+                    "file_name": os.path.basename(file_path),
+                    "reason": f"Unrecognized XML root tag <{tag}>",
+                    "raw_preview": raw_preview
+                })
         except Exception as e:
             print(f"  Error parsing XML {os.path.basename(file_path)}: {e}")
+            components.setdefault("unhandledFiles", []).append({
+                "file_path": file_path,
+                "file_name": os.path.basename(file_path),
+                "reason": f"XML Parse Error: {e}",
+                "raw_preview": ""
+            })
     elif ext == ".php":
         try:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -95,6 +100,20 @@ def detect_and_parse_file(file_path, components):
             components["buiAddins"].append(parse_bui_addin(file_path))
         except Exception as e:
             print(f"  Error parsing BUI Add-In {os.path.basename(file_path)}: {e}")
+    elif ext not in [".html", ".css"] and not os.path.basename(file_path).startswith("."):
+        raw_preview = ""
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f_prev:
+                raw_preview = f_prev.read(500)
+        except Exception:
+            pass
+        print(f"  [WARNING] Unhandled file extension '{ext}' in {os.path.basename(file_path)} — capturing in unhandledFiles")
+        components.setdefault("unhandledFiles", []).append({
+            "file_path": file_path,
+            "file_name": os.path.basename(file_path),
+            "reason": f"Unsupported file extension '{ext}'",
+            "raw_preview": raw_preview
+        })
 
 
 def make_ws_scoped_components(ws, all_components):
@@ -147,8 +166,8 @@ def generate_index_md(workspaces, output_dir):
     lines.append("")
     lines.append("## Workspaces Overview")
     lines.append("")
-    lines.append("| Workspace | Tabs | Fields | Rules | Referenced Reports | Output Folder |")
-    lines.append("|---|---|---|---|---|---|")
+    lines.append("| Workspace | Tabs | Fields | Rules | Unknown Elements | Referenced Reports | Output Folder |")
+    lines.append("|---|---|---|---|---|---|---|")
 
     all_referenced_reports = {}
 
@@ -158,12 +177,15 @@ def generate_index_md(workspaces, output_dir):
         tabs = ws.get("tabs", [])
         fields = ws.get("fields", [])
         rules = ws.get("rules", [])
+        unk_dict = ws.get("unknowns", {})
+        unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
+        unk_str = f"**{unk_cnt}** *(needs review)*" if unk_cnt > 0 else "0"
         ref_ids = collect_ws_referenced_report_ids(ws)
         for rid in ref_ids:
             all_referenced_reports.setdefault(rid, []).append(ws_name)
         ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "--"
         folder_link = f"[workspaces/{ws_slug}/report.md](workspaces/{ws_slug}/report.md)"
-        lines.append(f"| **{ws_name}** | {len(tabs)} | {len(fields)} | {len(rules)} | {ref_ids_str} | {folder_link} |")
+        lines.append(f"| **{ws_name}** | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
 
     lines.append("")
 
@@ -211,6 +233,10 @@ def main():
     parser.add_argument("--report-only", action="store_true", help="Only build/rebuild reports from existing master.json")
     parser.add_argument("--json-only", action="store_true", help="Only parse files and write master.json, skip reports")
     parser.add_argument("--format", choices=["html", "pdf"], default="html", help="Report export format (default: html)")
+    parser.add_argument("--use-ai-summary", action="store_true", default=True, help="Include AI summary field in CPM outputs (default: True)")
+    parser.add_argument("--no-ai-summary", dest="use_ai_summary", action="store_false", help="Disable AI summary field in CPM outputs")
+    parser.add_argument("--strict", action="store_true", help="Enable strict mode: warn on any unknown XML elements or attributes")
+    parser.add_argument("--dump-unknowns", action="store_true", help="Dump all captured unknown elements and attributes to results/unknowns.json")
     args = parser.parse_args()
 
     input_dir = os.path.abspath(args.input)
@@ -286,7 +312,7 @@ def main():
 
         for f in sorted(files):
             file_path = os.path.join(root_dir, f)
-            detect_and_parse_file(file_path, components)
+            detect_and_parse_file(file_path, components, strict=args.strict)
 
     print("Analyzing relationships, orphans, and endpoints...")
     relationships = map_relationships(components)
@@ -300,9 +326,36 @@ def main():
     }
 
     print(f"Writing global master.json -> {master_json_path}...")
-    master_data = write_master_json(components, relationships, orphans, endpoints, master_json_path, meta)
-    write_master_json(components, relationships, orphans, endpoints, os.path.join(json_dir, "master.json"), meta)
+    master_data = write_master_json(components, relationships, orphans, endpoints, master_json_path, meta, use_ai_summary=args.use_ai_summary)
+    write_master_json(components, relationships, orphans, endpoints, os.path.join(json_dir, "master.json"), meta, use_ai_summary=args.use_ai_summary)
     print("Global master.json written.")
+
+    # Dump unknowns.json if requested or if any unknown elements found
+    unknowns_json_path = os.path.join(output_dir, "unknowns.json")
+    all_unknowns_summary = {
+        "generated_at": datetime.now().isoformat(),
+        "strict_mode": args.strict,
+        "workspaces": []
+    }
+    total_unknown_count = 0
+    for ws in components.get("workspaces", []):
+        unk = ws.get("unknowns", {})
+        u_attrs = unk.get("unknown_attrs", [])
+        u_children = unk.get("unknown_children", [])
+        cnt = len(u_attrs) + len(u_children)
+        total_unknown_count += cnt
+        if cnt > 0:
+            all_unknowns_summary["workspaces"].append({
+                "name": ws.get("name"),
+                "total_unknowns": cnt,
+                "unknown_attrs": u_attrs,
+                "unknown_children": u_children
+            })
+
+    if args.dump_unknowns or total_unknown_count > 0:
+        with open(unknowns_json_path, "w", encoding="utf-8") as f:
+            json.dump(all_unknowns_summary, f, indent=2)
+        print(f"Unknown elements dump written -> {unknowns_json_path} ({total_unknown_count} items)")
 
     if not args.json_only:
         from output.markdown_generator import generate_report_markdown
@@ -411,7 +464,7 @@ def main():
         if cpm_items:
             from output.markdown_generator import generate_cpm_report_markdown
             from output.json_writer import write_cpm_summary_json
-            cpm_md_content = generate_cpm_report_markdown(cpm_items, orphans, components["workspaces"])
+            cpm_md_content = generate_cpm_report_markdown(cpm_items, orphans, components["workspaces"], use_ai_summary=args.use_ai_summary)
             cpm_md_path = os.path.join(cpm_dir, "report_CPM_Summary.md")
             with open(cpm_md_path, "w", encoding="utf-8") as f:
                 f.write(cpm_md_content)
@@ -422,10 +475,10 @@ def main():
             print(f"CPM Summary report written -> {cpm_md_path}")
 
             cpm_json_path = os.path.join(cpm_dir, "report_CPM_Summary.json")
-            write_cpm_summary_json(cpm_items, orphans, components["workspaces"], cpm_json_path)
+            write_cpm_summary_json(cpm_items, orphans, components["workspaces"], cpm_json_path, use_ai_summary=args.use_ai_summary)
             cpm_json_fmt_dir = os.path.join(json_dir, "cpm")
             os.makedirs(cpm_json_fmt_dir, exist_ok=True)
-            write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"))
+            write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"), use_ai_summary=args.use_ai_summary)
             print(f"CPM Summary JSON written -> {cpm_json_path}")
 
         bui_items = components.get("buiAddins", [])

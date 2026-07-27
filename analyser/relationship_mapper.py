@@ -1,3 +1,6 @@
+import re
+import os
+
 try:
     from .utils import get_all_tabs_flat, normalise_id, is_custom_script_url, safe_basename
 except ImportError:

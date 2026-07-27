@@ -1,6 +1,7 @@
 import os
 import re
 import urllib.parse
+import base64 as _b64
 
 def get_all_tabs_flat(tabs_list):
     flat = []
@@ -85,9 +86,7 @@ def format_server_version(server_version):
         return f"**{platform}** (Build {build}, {month_name} {year})"
     return f"**{server_version}**"
 
-def get_field_notes(field_id, label, default_phone_type):
-    if not field_id:
-        return label or "Form field"
+def get_field_notes(field_id, label, default_phone_type, default_value=None):
     clean_label = label.replace('&', '').strip() if label else ""
     standards = {
         "Title": "Salutation/title",
@@ -106,19 +105,34 @@ def get_field_notes(field_id, label, default_phone_type):
         "QueueId": "Queue",
         "Subject": "Incident Subject"
     }
+
+    if not field_id:
+        notes = clean_label or "Form field"
+        if default_value is not None and str(default_value).strip():
+            notes += f" — *Default Value: `{default_value}`*"
+        return notes
+
+    base_notes = ""
     if clean_label:
         std_name = standards.get(field_id)
         if std_name and clean_label.lower() != std_name.lower():
-            notes = f'Relabeled as **"{clean_label}"**'
+            base_notes = f'Relabeled as **"{clean_label}"**'
             if default_phone_type == "1":
-                notes += ", default type 1"
-            return notes
-    if field_id.startswith("C$"):
-        field_name = field_id[2:]
-        words = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', field_name)
-        desc = " ".join(words).lower()
-        return f"Custom field — {desc}"
-    return standards.get(field_id, clean_label or "Form field")
+                base_notes += ", default type 1"
+    
+    if not base_notes:
+        if field_id.startswith("C$"):
+            field_name = field_id[2:]
+            words = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\b)', field_name)
+            desc = " ".join(words).lower()
+            base_notes = f"Custom field — {desc}"
+        else:
+            base_notes = standards.get(field_id, clean_label or "Form field")
+
+    if default_value is not None and str(default_value).strip():
+        base_notes += f" — *Default Value: `{default_value}`*"
+
+    return base_notes
 
 def format_condition(cond):
     source = cond.get("source") or ""
@@ -205,14 +219,19 @@ def generate_report_markdown(ws):
     lines.append("## Layout Structure")
     lines.append("")
     col_count = ws.get('column_count', 0)
-    col_str = f"**{col_count}-column table layout**" if col_count else "**table layout**"
+    row_count = ws.get('row_count', 0)
+    is_tab_only = ws.get("is_tab_only_root", False) or (col_count == 0 and row_count == 0)
+    if is_tab_only:
+        col_str = "**TabSet container layout** (tab-oriented workspace layout)"
+    else:
+        col_str = f"**{col_count}-column table layout** ({row_count} rows × {col_count} columns)" if col_count else "**table layout**"
     
     top_fields = ws.get("fields", [])
     top_menus = ws.get("menus", [])
     all_tabs_flat = get_all_tabs_flat(ws.get("tabs", []))
     
     if top_fields or top_menus:
-        lines.append(f"The workspace has a {col_str} ({ws.get('row_count')} rows × {col_count} columns):")
+        lines.append(f"The workspace has a {col_str}:")
         lines.append("")
         lines.append("**Left column** — Form fields:")
         lines.append("")
@@ -270,11 +289,6 @@ def generate_report_markdown(ws):
     def render_single_tab(t, is_subtab=False):
         tab_name = clean_tab_label(t.get("text"))
         lines.append("")
-        if is_subtab:
-            lines.append(f"#### Sub-Tab: {tab_name}")
-        else:
-            lines.append(f"### Tab: {tab_name}")
-        lines.append("")
         
         tab_fields = t.get("fields", [])
         tab_menus = t.get("menus", [])
@@ -287,6 +301,17 @@ def generate_report_markdown(ws):
         total_controls = (len(tab_fields) + len(tab_menus) + 
                           len(tab_relationship_items) + len(tab_browsers) + 
                           len(tab_addins))
+
+        if not is_subtab:
+            lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+            lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>{tab_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">({total_controls} Controls)</span></summary>')
+            lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+            lines.append("")
+            lines.append(f"### Tab: `{tab_name}`")
+        else:
+            lines.append(f"#### Sub-Tab: `{tab_name}`")
+
+        lines.append("")
         
         distinct_kinds = sum([
             1 if tab_fields else 0,
@@ -320,7 +345,7 @@ def generate_report_markdown(ws):
                         col = f.get("column", 0) or 0
                         pos_str = f"Row {row}, Col {col}" if has_pos else "*(pos unknown)*"
                         rep_id = f.get("report_id")
-                        notes = get_field_notes(field_id, f.get("label"), f.get("default_phone_type"))
+                        notes = get_field_notes(field_id, f.get("label"), f.get("default_phone_type"), f.get("default_value"))
                         if rep_id: notes += f" (Lookup → Report **{rep_id}**)"
                         constraints = []
                         for opt_key, opt_label in [("readonly_option","ReadOnly"),("hidden_option","Hidden"),("required_option","Required")]:
@@ -399,7 +424,7 @@ def generate_report_markdown(ws):
                     col = f.get("column", 0) or 0
                     pos_str = f"Row {row}, Col {col}" if has_pos else "*(pos unknown)*"
                     rep_id = f.get("report_id")
-                    notes = get_field_notes(field_id, f.get("label"), f.get("default_phone_type"))
+                    notes = get_field_notes(field_id, f.get("label"), f.get("default_phone_type"), f.get("default_value"))
                     if rep_id: notes += f" (Lookup pointing to Report **{rep_id}**)"
                     constraints = []
                     for opt_key, opt_label in [("readonly_option","ReadOnly"),("hidden_option","Hidden"),("required_option","Required")]:
@@ -484,6 +509,11 @@ def generate_report_markdown(ws):
                 for sub_t in sub_tabs:
                     render_single_tab(sub_t, is_subtab=True)
 
+        if not is_subtab:
+            lines.append("  </div>")
+            lines.append("</details>")
+            lines.append("")
+
     for t in ws.get("tabs", []):
         render_single_tab(t, is_subtab=False)
         
@@ -517,9 +547,16 @@ def generate_report_markdown(ws):
             lines.append("")
 
             for rule in trigger_rules:
-                active_str = "Active" if rule.get("active", True) else "Inactive"
+                is_act = rule.get("active", True)
+                active_str = "Active" if is_act else "Inactive"
+                act_badge = '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #10b981; color: #10b981; margin-right: 8px;">Active</span>' if is_act else '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #94a3b8; color: #94a3b8; margin-right: 8px;">Inactive</span>'
                 rule_display_name = rule.get("name") or "(Unnamed Rule)"
-                lines.append(f"#### Rule: {rule_display_name} ({active_str})")
+
+                lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+                lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">{act_badge}Rule: <b>{rule_display_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Event: {display_trigger})</span></summary>')
+                lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+                lines.append("")
+                lines.append(f"#### Rule: `{rule_display_name}` ({active_str})")
                 if rule.get("notes"):
                     lines.append(f"*{rule.get('notes')}*")
                     lines.append("")
@@ -554,6 +591,9 @@ def generate_report_markdown(ws):
                         lines.append(f"  - {format_action(act, tab_id_to_name)}")
                 if not then_acts and not else_acts:
                     lines.append("- **Actions:** *(none)*")
+                lines.append("")
+                lines.append("  </div>")
+                lines.append("</details>")
                 lines.append("")
             
     lines.append("---")
@@ -698,7 +738,7 @@ def generate_report_markdown(ws):
         tab_text = clean_tab_label(t.get("text"))
         clean_tab = tab_text.replace('"', '').replace("'", "")
         tab_id = t.get("id") or f"tab_{idx}"
-        tab_node_id = f"Tab_{idx}"
+        tab_node_id = f"SubTab_{idx}" if is_subtab else f"Tab_{idx}"
         tab_node_ids[tab_id] = tab_node_id
 
         node_prefix = "Sub-Tab" if is_subtab else "Tab"
@@ -908,6 +948,35 @@ def generate_report_markdown(ws):
     lines.append("```")
     lines.append("")
 
+    lines.append("---")
+    lines.append("")
+    lines.append("## Parser Coverage Gaps")
+    lines.append("")
+    lines.append("The following elements were found in this workspace XML but are not fully parsed by the current accelerator. Raw data is preserved in `master.json` under `unknowns`.")
+    lines.append("")
+
+    unknowns = ws.get("unknowns", {})
+    unk_attrs = unknowns.get("unknown_attrs", [])
+    unk_children = unknowns.get("unknown_children", [])
+
+    if not unk_attrs and not unk_children:
+        lines.append("*No parser coverage gaps identified for this workspace.*")
+    else:
+        lines.append("| Location | Element / Attribute | Raw Value / XML |")
+        lines.append("|---|---|---|")
+        for item in unk_attrs:
+            loc = item.get("location", "Workspace")
+            attr = f"Attribute: `{item.get('attribute')}`"
+            val = f"`\"{item.get('value')}\"`"
+            lines.append(f"| {loc} | {attr} | {val} |")
+        for item in unk_children:
+            loc = item.get("location", "Workspace")
+            tag = f"Element: `<{item.get('tag')}>`"
+            raw = f"`{item.get('raw', '')}`"
+            lines.append(f"| {loc} | {tag} | {raw} |")
+
+    lines.append("")
+
     return "\n".join(lines)
 
 def generate_analytics_report_markdown(report):
@@ -1045,6 +1114,30 @@ def generate_analytics_report_markdown(report):
     lines.append("---")
     lines.append("")
 
+    # Filters & Variables Table
+    filters = report.get("filters", [])
+    lines.append(f"### Filters & Variable Parameters ({len(filters)})")
+    lines.append("")
+    if not filters:
+        if report.get("has_filters_container"):
+            lines.append("*No filters configured (empty `<filters/>` in source XML).*")
+        else:
+            lines.append("*No filters configured in report XML.*")
+    else:
+        lines.append("| Filter ID / Name | Target Field | Operator | Default Value / Expression | Notes |")
+        lines.append("|---|---|---|---|---|")
+        for idx, flt in enumerate(filters, 1):
+            fid = f"`{flt.get('id')}`" if flt.get('id') else (f"`{flt.get('name')}`" if flt.get('name') else f"`#{idx}`")
+            f_field = f"`{flt.get('field')}`" if flt.get('field') else "—"
+            op_val = f"`{flt.get('operator')}`" if flt.get('operator') else "—"
+            def_val = f"`{flt.get('val')}`" if flt.get('val') is not None and str(flt.get('val')).strip() else "—"
+            notes = "Configured report filter"
+            lines.append(f"| {fid} | {f_field} | {op_val} | {def_val} | {notes} |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
     # Permissions
     perms_by_type = report.get("perms_by_type", {})
     all_perms = report.get("permissions", [])
@@ -1157,7 +1250,12 @@ def generate_analytics_report_markdown(report):
 
     return "\n".join(lines)
 
-def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
+USE_AI_SUMMARY = True
+
+def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None, use_ai_summary=None):
+    if use_ai_summary is None:
+        use_ai_summary = USE_AI_SUMMARY
+
     lines = []
     lines.append("# CPM (Custom Process Model) Summary Report")
     lines.append("")
@@ -1275,89 +1373,50 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
                             "label": lbl
                         })
 
-    if not cpm_fields_map:
-        lines.append("*No custom fields accessed by CPM procedures.*")
-    else:
-        lines.append("| CPM Custom Field | CPM Usage (Per Procedure) | Workspace Link / Location | Grid Position | Field Label | Audit / Relationship Note |")
-        lines.append("|---|---|---|---|---|---|")
+    alias_workspace_map = {
+        "c$org_id_temp": [
+            {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 5, Col 0", "label": "OrgId (Account Lookup)", "note": "Temporary Org ID used to populate Contact Organization linkage"}
+        ],
+        "c$customer_number": [
+            {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 7, Col 0", "label": "C$CustomerId", "note": "Matches customer number / ID field"},
+            {"workspace": "New Workspace", "location": "Tab: Customer 360", "pos": "Row 0, Col 0", "label": "C$AccountNumber", "note": "Matches customer account identifier"}
+        ],
+        "c$is_manual": [
+            {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 9, Col 0 (Col 9)", "label": "c$is_manual", "note": "Expected write from contact_create_internal — not detected in exported Content"}
+        ],
+        "c$is_internal": [
+            {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 8, Col 0 (Col 8)", "label": "c$is_internal", "note": "Internal contact flag mapping"}
+        ],
+        "c$is_admin": [
+            {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 10, Col 0", "label": "c$is_admin", "note": "Updated by incident_routing handler"}
+        ],
+        "c$token": [
+            {"workspace": "Incident", "location": "Tab: Details", "pos": "*(Custom Field)*", "label": "c$token", "note": "[Audit Flag: verify security/session token written on incident create]"}
+        ]
+    }
 
-        # Map common field aliases to workspace standard or custom fields if not directly matched by exact name
-        alias_workspace_map = {
-            "c$org_id_temp": [
-                {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 5, Col 0", "label": "OrgId (Account Lookup)", "note": "Temporary Org ID used to populate Contact Organization linkage"}
-            ],
-            "c$customer_number": [
-                {"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 7, Col 0", "label": "C$CustomerId", "note": "Matches customer number / ID field"},
-                {"workspace": "New Workspace", "location": "Tab: Customer 360", "pos": "Row 0, Col 0", "label": "C$AccountNumber", "note": "Matches customer account identifier"}
-            ],
-            "c$is_manual": [
-                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 9, Col 0 (Col 9)", "label": "c$is_manual", "note": "Expected write from contact_create_internal — not detected in exported Content"}
-            ],
-            "c$is_internal": [
-                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 8, Col 0 (Col 8)", "label": "c$is_internal", "note": "Internal contact flag mapping"}
-            ],
-            "c$is_admin": [
-                {"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 10, Col 0", "label": "c$is_admin", "note": "Updated by incident_routing handler"}
-            ],
-            "c$token": [
-                {"workspace": "Incident", "location": "Tab: Details", "pos": "*(Custom Field)*", "label": "c$token", "note": "[Audit Flag: verify security/session token written on incident create]"}
-            ]
-        }
-
-        for f_norm in sorted(cpm_fields_map.keys()):
-            info = cpm_fields_map[f_norm]
-            f_name = info["name"]
-            all_procs = sorted(list(info["read_by"] | info["written_by"]))
-            proc_usage_items = []
-            for p in all_procs:
-                is_r = p in info["read_by"]
-                is_w = p in info["written_by"]
-                if is_r and is_w:
-                    mode = "Read/Write"
-                elif is_w:
-                    mode = "Write"
-                else:
-                    mode = "Read"
-                proc_usage_items.append(f"`{p}` ({mode})")
-            usage_str = ", ".join(proc_usage_items)
-
-            ws_matches = workspace_field_refs.get(f_norm, [])
-            if not ws_matches:
-                # try stripping c$ or C$
-                alt_norm = f_norm.replace("c$", "")
-                for k, v in workspace_field_refs.items():
-                    if k.replace("c$", "") == alt_norm:
-                        ws_matches = v
-                        break
-
-            if not ws_matches and f_norm in alias_workspace_map:
-                ws_matches = alias_workspace_map[f_norm]
-
-            if ws_matches:
-                for match in ws_matches:
-                    ws_link = f"**{match['workspace']}** ({match['location']})"
-                    note_str = match.get("note") or "Direct layout field match"
-                    lines.append(f"| `{f_name}` | {usage_str} | {ws_link} | {match['pos']} | {match['label']} | {note_str} |")
-            else:
-                lines.append(f"| `{f_name}` | {usage_str} | *(No direct workspace form layout field match)* | — | — | — |")
-
-    lines.append("")
-    lines.append("---")
-    lines.append("")
-
-    # Procedure Breakdown
+    # Procedure Breakdown with Accordions
     lines.append("## Object Procedures Breakdown")
     lines.append("")
     for p in procedures:
         p_name = p.get("name") or p.get("display_name")
         p_id = p.get("id", "—")
         is_orphan = p_name.lower() in cpm_orphan_names
-        orphan_badge = " `[Orphan Procedure]`" if is_orphan else ""
+        is_async = p.get("is_async")
+        exec_mode = "Asynchronous" if is_async else "Synchronous"
+        bound_str = ', '.join(p.get('bound_classes', [])) or 'None'
 
-        lines.append(f"### Procedure: `{p_name}`{orphan_badge}")
+        mode_badge = '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #ec4899; color: #ec4899; margin-right: 8px;">Asynchronous</span>' if is_async else '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #6366f1; color: #6366f1; margin-right: 8px;">Synchronous</span>'
+        orphan_badge = ' <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #f59e0b; color: #f59e0b; margin-left: 6px;">Orphan</span>' if is_orphan else ''
+
+        lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+        lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">{mode_badge}<b>Procedure: {p_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(ID: {p_id} | Bound: {bound_str})</span>{orphan_badge}</summary>')
+        lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+        lines.append("")
+        lines.append(f"### Procedure: `{p_name}`")
         lines.append("")
         lines.append(f"- **ID**: `{p_id}` | **Version**: `{p.get('version', '—')}` | **PHP Version**: `{p.get('php_version', '—')}`")
-        lines.append(f"- **Execution Mode**: `{'Asynchronous' if p.get('is_async') else 'Synchronous'}`")
+        lines.append(f"- **Execution Mode**: `{exec_mode}`")
         lines.append(f"- **Operations Bitmask**: `{p.get('operations_label')} (code: {p.get('operations_code')})`")
         lines.append(f"- **Bound Classes**: {', '.join(f'`{b}`' for b in p.get('bound_classes', [])) or 'None'}")
 
@@ -1367,7 +1426,8 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
         else:
             lines.append("- **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*")
 
-        lines.append(f"- **Key Logic Summary**: {p.get('key_logic', 'No key logic summary available.')}")
+        if use_ai_summary:
+            lines.append(f"- **Key Logic Summary**: {p.get('key_logic', 'No key logic summary available.')}")
 
         soaps = p.get("soap_actions", [])
         if soaps:
@@ -1379,28 +1439,94 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
         if cvars:
             lines.append(f"- **Config Settings / Variables**: {', '.join(f'`{c}`' for c in cvars)}")
 
-        cf_read = p.get("custom_fields_read", [])
-        cf_written = p.get("custom_fields_written", [])
+        cf_read_raw = p.get("custom_fields_read", [])
+        cf_written_raw = p.get("custom_fields_written", [])
 
-        if cf_read:
-            lines.append(f"- **Custom Fields Read**: {', '.join(f'`{f}`' for f in cf_read)}")
-        else:
-            lines.append("- **Custom Fields Read**: None *(operates via standard Connect API object properties)*")
+        # Build Procedure-Specific Custom Field Workspace Mappings Table
+        proc_cf_rows = []
+        all_proc_cfs = sorted(list(set(cf_read_raw + cf_written_raw)))
+        for cf in all_proc_cfs:
+            clean_cf = cf.replace("`", "").split(" ")[0].strip()
+            is_r = cf in cf_read_raw
+            is_w = cf in cf_written_raw
+            mode = "Read/Write" if (is_r and is_w) else ("Write" if is_w else "Read")
 
-        if cf_written:
-            written_strs = []
-            for f in cf_written:
-                if f == "c$token" and p_name == "incident_create":
-                    written_strs.append(f"`{f}` `[Audit Flag: verify security/session token written on incident create]`")
-                else:
-                    written_strs.append(f"`{f}`")
-            lines.append(f"- **Custom Fields Written**: {', '.join(written_strs)}")
+            f_norm = clean_cf.lower()
+            ws_matches = workspace_field_refs.get(f_norm, [])
+            if not ws_matches:
+                alt_norm = f_norm.replace("c$", "")
+                for k, v in workspace_field_refs.items():
+                    if k.replace("c$", "") == alt_norm:
+                        ws_matches = v
+                        break
+
+            if not ws_matches and f_norm in alias_workspace_map:
+                ws_matches = alias_workspace_map[f_norm]
+
+            if ws_matches:
+                for match in ws_matches:
+                    proc_cf_rows.append({
+                        "field": clean_cf,
+                        "mode": mode,
+                        "workspace": match['workspace'],
+                        "location": match['location'],
+                        "pos": match['pos'],
+                        "label": match['label'],
+                        "note": match.get("note") or "Direct layout field match"
+                    })
+            else:
+                proc_cf_rows.append({
+                    "field": clean_cf,
+                    "mode": mode,
+                    "workspace": "*(Background Logic)*",
+                    "location": "—",
+                    "pos": "—",
+                    "label": "—",
+                    "note": "Operated purely via Connect API / CPM script logic"
+                })
+
+        lines.append("")
+        lines.append(f"#### Custom Field Workspace Mappings for `{p_name}`")
+        lines.append("")
+        if proc_cf_rows:
+            lines.append("| CPM Custom Field | Access Mode | Target Workspace | Location / Tab | Grid Position | Field Label | Audit / Relationship Note |")
+            lines.append("|---|---|---|---|---|---|---|")
+            for r in proc_cf_rows:
+                lines.append(f"| `{r['field']}` | **{r['mode']}** | **{r['workspace']}** | {r['location']} | {r['pos']} | {r['label']} | {r['note']} |")
         else:
-            lines.append("- **Custom Fields Written**: None *(operates via standard Connect API object properties)*")
+            lines.append("*No custom fields accessed by this procedure (operates via standard Connect API object properties).*")
+
+        lines.append("")
+
+        if p.get("extracted_functions"):
+            lines.append(f"- **Extracted Functions**: {', '.join(f'`{f}()`' for f in p.get('extracted_functions'))}")
+
+        if p.get("constants_defined"):
+            lines.append(f"- **Constants Defined**: {', '.join(f'`{c}`' for c in p.get('constants_defined'))}")
+
+        if p.get("log_files"):
+            lines.append(f"- **Log Files Accessed**: {', '.join(f'`{lf}`' for lf in p.get('log_files'))}")
+
+        if p.get("message_templates"):
+            lines.append(f"- **Message Templates**: {', '.join(f'`{m}`' for m in p.get('message_templates'))}")
 
         if p.get("risk_flags"):
             lines.append(f"- **Risk Flags**: {', '.join(p.get('risk_flags'))}")
 
+        if p.get("flow_diagram"):
+            lines.append("")
+            lines.append("**Logic Flow Diagram**:")
+            lines.append('<div align="center">')
+            lines.append("")
+            lines.append("```mermaid")
+            lines.append(p["flow_diagram"])
+            lines.append("```")
+            lines.append("")
+            lines.append("</div>")
+
+        lines.append("")
+        lines.append("  </div>")
+        lines.append("</details>")
         lines.append("")
 
     lines.append("---")
@@ -1408,6 +1534,8 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
 
     # Mermaid Flow Diagram
     lines.append("## Flow Diagram")
+    lines.append("")
+    lines.append('<div align="center">')
     lines.append("")
     lines.append("```mermaid")
     lines.append("graph LR")
@@ -1419,18 +1547,18 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
     lines.append("  classDef obj fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
     lines.append("")
 
-    lines.append("  subgraph Mappings_Layer[\"Mappings.xml Routing\"]")
+    lines.append("  subgraph Mappings_Layer")
     lines.append("    M_MAP[\"Mappings.xml\"]:::mapping")
     lines.append("  end")
     lines.append("")
 
-    lines.append("  subgraph Objects_Layer[\"OSVC Objects\"]")
+    lines.append("  subgraph Objects_Layer")
     lines.append("    O_Contact[\"OSVC Object: Contact\"]:::obj")
     lines.append("    O_Incident[\"OSVC Object: Incident\"]:::obj")
     lines.append("  end")
     lines.append("")
 
-    lines.append("  subgraph Procedures_Layer[\"Object Procedures\"]")
+    lines.append("  subgraph Procedures_Layer")
     for p in procedures:
         p_name = p.get("name") or p.get("display_name")
         p_node_id = f"P_{re.sub(r'[^a-zA-Z0-9_]', '', p_name)}"
@@ -1446,7 +1574,7 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
     lines.append("  end")
     lines.append("")
 
-    lines.append("  subgraph Endpoints_Layer[\"SOAP Endpoints & Services\"]")
+    lines.append("  subgraph Endpoints_Layer")
     endpoint_node_map = {}
     for p in procedures:
         for soap in p.get("soap_actions", []):
@@ -1488,6 +1616,8 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None):
 
     lines.append("```")
     lines.append("")
+    lines.append("</div>")
+    lines.append("")
 
     return "\n".join(lines)
 
@@ -1497,12 +1627,12 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
     Generates a Markdown summary report for parsed BUI Add-Ins.
     """
     if not bui_addins:
-        return "# BUI Add-In Summary Report\n\n*No BUI Add-Ins parsed.*"
+        return "# BUI Add-In Summary\n\n*No BUI Add-Ins parsed.*"
 
     reports_by_id = {str(r.get("id")): r.get("name") for r in (reports or []) if r.get("id")}
 
     lines = []
-    lines.append("# BUI (Browser UI) Add-In Summary Report")
+    lines.append("# BUI (Browser UI) Add-In Summary")
     lines.append("")
     lines.append(f"- **Total BUI Add-Ins Analyzed**: {len(bui_addins)}")
     lines.append("")
@@ -1532,6 +1662,7 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
     for bui in bui_addins:
         name = bui.get("name", "BUI Add-In")
         ep = bui.get("entry_point", "Unknown")
+        ext_type = bui.get("type", "BUIAddin")
         files = bui.get("files", [])
         ext_deps = bui.get("external_dependencies", [])
         ext_libs = bui.get("external_libraries", [])
@@ -1547,10 +1678,25 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
         ws_objs = bui.get("workspace_objects_opened", [])
         risks = bui.get("risk_flags", [])
 
+        lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+        lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #06b6d4; color: #06b6d4; margin-right: 8px;">{ext_type}</span><b>Add-In: {name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Entry: {ep})</span></summary>')
+        lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+        lines.append("")
         lines.append(f"### Add-In: `{name}`")
         lines.append("")
         lines.append(f"- **Entry Point**: `{ep}`")
         lines.append(f"- **Package Files**: {', '.join(f'`{f}`' for f in files) if files else 'None'}")
+
+        html_previews = bui.get("html_previews", {})
+        if html_previews:
+            lines.append("")
+            lines.append("##### HTML Live Previews")
+            lines.append("")
+            for hpath, hcode in html_previews.items():
+                lines.append(f"**HTML Asset**: `{hpath}`")
+                encoded = _b64.b64encode(hcode.strip().encode("utf-8")).decode("ascii")
+                lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{hpath}"></div>')
+                lines.append("")
 
         if ext_deps:
             lines.append(f"- **External Script Dependencies**: {', '.join(f'`{d}`' for d in ext_deps)}")
@@ -1596,15 +1742,18 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
             lines.append("- **Report Dependencies**: None")
 
         if apis:
-            lines.append("- **API Call & Web Service Endpoints**:")
+            lines.append("##### API Call & Web Service Endpoints Table")
+            lines.append("")
+            lines.append("| HTTP Method | Endpoint URL / Path | Operation Type | Target Object / Table | Report ID | Source Asset |")
+            lines.append("|---|---|---|---|---|---|")
             for call in apis:
-                mth = call.get("method", "GET")
-                ep_url = call.get("endpoint", "")
-                call_type = f" [{call.get('type')}]" if call.get("type") else ""
-                detail = f" (Table: `{call['object']}`)" if call.get("object") else ""
-                if call.get("report_id"):
-                    detail += f" (Report ID: `{call['report_id']}`)"
-                lines.append(f"  - `{mth}` `{ep_url}`{call_type}{detail} *(from `{call.get('file', 'UI')}`)*")
+                mth = f"`{call.get('method', 'GET')}`"
+                ep_url = f"`{call.get('endpoint', '')}`"
+                call_type = f"`{call.get('type', 'API')}`"
+                obj = f"`{call.get('object')}`" if call.get("object") else "—"
+                rid = f"`{call.get('report_id')}`" if call.get("report_id") else "—"
+                src = f"`{call.get('file', 'UI')}`"
+                lines.append(f"| {mth} | {ep_url} | {call_type} | {obj} | {rid} | {src} |")
         else:
             lines.append("- **API Call Endpoints**: None")
 
@@ -1629,7 +1778,8 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
                 lines.append(f"| {sev_str} | `{rtype}` | {dtl} |")
 
         lines.append("")
-        lines.append("---")
+        lines.append("  </div>")
+        lines.append("</details>")
         lines.append("")
 
     # Mermaid Flow Diagram
@@ -1696,7 +1846,7 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
     risks = bui.get("risk_flags", [])
 
     lines = []
-    lines.append(f"# BUI Add-In Report: `{name}`")
+    lines.append(f"# BUI Add-In: `{name}`")
     lines.append("")
     lines.append(f"- **Add-In Name**: `{name}`")
     lines.append(f"- **Extension Type**: `{ext_type}`")
@@ -1727,6 +1877,19 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
             lines.append(f"| `{f}` | `{f.split('.')[-1]}` | {notes} |")
     else:
         lines.append("*No files listed in package.*")
+
+    lines.append("")
+    html_previews = bui.get("html_previews", {})
+    if html_previews:
+        lines.append("### HTML Live Previews")
+        lines.append("")
+        for hpath, hcode in html_previews.items():
+            lines.append(f"#### HTML Asset: `{hpath}`")
+            lines.append("")
+            # Encode HTML as base64 so the placeholder survives markdown parsing
+            encoded = _b64.b64encode(hcode.strip().encode("utf-8")).decode("ascii")
+            lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{hpath}"></div>')
+            lines.append("")
 
     lines.append("")
     if ext_deps or ext_libs:
@@ -1777,15 +1940,18 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
         lines.append("- **Report Dependencies**: None")
 
     if apis:
-        lines.append("- **API Calls & Web Service Operations**:")
+        lines.append("### API Call & Web Service Endpoints Table")
+        lines.append("")
+        lines.append("| HTTP Method | Endpoint URL / Path | Operation Type | Target Object / Table | Report ID | Source Asset |")
+        lines.append("|---|---|---|---|---|---|")
         for call in apis:
-            mth = call.get("method", "GET")
-            ep_url = call.get("endpoint", "")
-            call_type = f" [{call.get('type')}]" if call.get("type") else ""
-            detail = f" (Table: `{call['object']}`)" if call.get("object") else ""
-            if call.get("report_id"):
-                detail += f" (Report ID: `{call['report_id']}`)"
-            lines.append(f"  - `{mth}` `{ep_url}`{call_type}{detail} *(from `{call.get('file', 'UI')}`)*")
+            mth = f"`{call.get('method', 'GET')}`"
+            ep_url = f"`{call.get('endpoint', '')}`"
+            call_type = f"`{call.get('type', 'API')}`"
+            obj = f"`{call.get('object')}`" if call.get("object") else "—"
+            rid = f"`{call.get('report_id')}`" if call.get("report_id") else "—"
+            src = f"`{call.get('file', 'UI')}`"
+            lines.append(f"| {mth} | {ep_url} | {call_type} | {obj} | {rid} | {src} |")
     else:
         lines.append("- **API Call Endpoints**: None")
 

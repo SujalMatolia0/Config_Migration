@@ -21,6 +21,7 @@ def parse_rule_file(file_path):
         name_attr = rule.get("Name")
         active_str = rule.get("Active", "True")
         is_active = active_str.lower() == "true"
+        rule_notes = rule.get("Notes")
         
         triggers = []
         for trigger in rule.findall(".//Trigger"):
@@ -36,11 +37,14 @@ def parse_rule_file(file_path):
             op_val = op.text if op is not None else cond.get("Operator")
             val = cond.find("Value")
             val_val = val.text if val is not None else cond.get("Value")
+            prop = cond.find("Property")
+            prop_val = prop.text if prop is not None else cond.get("Property")
             
             conditions.append({
                 "source": source_val,
                 "operator": op_val,
-                "value": val_val
+                "value": val_val,
+                "property": prop_val
             })
             
         actions = []
@@ -69,6 +73,7 @@ def parse_rule_file(file_path):
         rules.append({
             "name": name_attr,
             "active": is_active,
+            "notes": rule_notes,
             "triggers": triggers,
             "conditions": conditions,
             "actions": actions
@@ -76,6 +81,7 @@ def parse_rule_file(file_path):
 
     return {
         "file_name": os.path.basename(file_path),
+        "format": "business_rule",
         "rules": rules
     }
 

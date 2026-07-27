@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSVC Configuration Accelerator Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #FDFBF7;
+      --bg-card: #FFFFFF;
+      --border-color: rgba(153, 0, 38, 0.15);
+      --border-accent: #990026;
+      --text-main: #2C070B;
+      --text-muted: #7A4047;
+      --accent-primary: #990026;
+      --accent-warning: #B91C1C;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(253, 251, 247, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-title { display: flex; align-items: center; gap: 12px; }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #990026, #660019);
+      color: #FFFDF5;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .brand-name { font-size: 18px; font-weight: 800; color: #990026; }
+    .header-actions { display: flex; gap: 12px; }
+
+    main {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      flex: 1;
+    }
+
+    .dashboard-split { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
+
+    .main-panel-85 { flex: 1 1 82%; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+
+    .side-panel-15 {
+      flex: 0 0 18%;
+      min-width: 240px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: sticky;
+      top: 80px;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-split { flex-direction: column; }
+      .main-panel-85, .side-panel-15 { width: 100%; flex: auto; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(153, 0, 38, 0.04);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover { border-color: var(--border-accent); box-shadow: 0 8px 24px rgba(153, 0, 38, 0.12); }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2C070B;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .dropzone {
+      border: 2px dashed rgba(153, 0, 38, 0.3);
+      background: #FAF5ED;
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent-primary); background: #F5EBE0; }
+    .dropzone-icon { width: 44px; height: 44px; margin: 0 auto 8px; color: var(--accent-primary); }
+    .dropzone-title { font-size: 15px; font-weight: 600; color: #2C070B; margin-bottom: 4px; }
+    .dropzone-desc { font-size: 12px; color: var(--text-muted); }
+    .file-input { display: none; }
+
+    .category-selector { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+    .category-btn {
+      background: #F3ECE0;
+      border: 1px solid rgba(153, 0, 38, 0.15);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .category-btn.active, .category-btn:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #FFFDF5;
+    }
+
+    .accordion-group { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+
+    .accordion-item {
+      background: #FAF5ED;
+      border: 1px solid rgba(153, 0, 38, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .accordion-item.active { border-color: var(--accent-primary); box-shadow: 0 4px 12px rgba(153, 0, 38, 0.08); }
+
+    .accordion-header {
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      background: #FAF5ED;
+      transition: background 0.15s ease;
+    }
+
+    .accordion-header:hover { background: #F3ECE0; }
+
+    .accordion-title { font-size: 14px; font-weight: 700; color: #2C070B; display: flex; align-items: center; gap: 10px; }
+
+    .accordion-icon {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--accent-primary);
+      width: 18px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .accordion-body {
+      display: none;
+      background: #FFFFFF;
+      border-top: 1px solid rgba(153, 0, 38, 0.1);
+      width: 100%;
+    }
+
+    .accordion-item.active .accordion-body { display: block; }
+
+    /* ── File Table ── */
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 420px;
+    }
+
+    .file-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .file-table th {
+      background: #F5EEE2;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 2px solid rgba(153, 0, 38, 0.15);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      vertical-align: middle;
+    }
+
+    .file-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(153, 0, 38, 0.08);
+      color: var(--text-main);
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    .file-table tr.file-row:hover td {
+      background: rgba(153, 0, 38, 0.02);
+    }
+
+    .file-table tr.subgroup-label-row td {
+      background: #F0E8D8;
+      box-shadow: inset 3px 0 0 var(--accent-primary);
+      border-top: 1px solid rgba(153, 0, 38, 0.14);
+      border-bottom: 1px solid rgba(153, 0, 38, 0.14);
+      padding: 0;
+    }
+
+    .file-table tr.subgroup-label-row:hover td {
+      background: #F0E8D8 !important;
+    }
+
+    .subgroup-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+    }
+
+    .subgroup-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #2C070B;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    .subgroup-count {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* ── End File Table ── */
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .badge-xml { background: rgba(153,0,38,0.08); color: #990026; border-color: rgba(153,0,38,0.25); }
+    .badge-php { background: rgba(122,0,30,0.1); color: #7A001E; border-color: rgba(122,0,30,0.3); }
+    .badge-zip { background: rgba(185,28,28,0.12); color: #B91C1C; border-color: rgba(185,28,28,0.3); }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #FAF5ED;
+      border: 1px solid rgba(153, 0, 38, 0.12);
+      border-radius: 8px;
+    }
+
+    .switch-title { font-size: 14px; font-weight: 600; color: #2C070B; }
+    .switch-desc { font-size: 12px; color: var(--text-muted); }
+
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #DCD0C0;
+      transition: .2s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: var(--accent-primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #990026, #660019);
+      color: #FFFDF5;
+      box-shadow: 0 4px 14px rgba(153, 0, 38, 0.35);
+    }
+
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(153, 0, 38, 0.5); transform: translateY(-1px); }
+    .btn-secondary { background: #F3ECE0; border-color: rgba(153, 0, 38, 0.2); color: #2C070B; }
+    .btn-secondary:hover { background: #EAE0D0; border-color: var(--accent-primary); }
+    .btn-danger { background: rgba(153,0,38,0.1); border-color: rgba(153,0,38,0.3); color: #990026; }
+    .btn-danger:hover { background: rgba(153,0,38,0.2); }
+
+    .console-box {
+      background: #1C0307;
+      border: 1px solid rgba(153, 0, 38, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #F5D5DA;
+      height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+
+
+    .tag-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="brand-title">
+      <span class="brand-badge">PLATFORM</span>
+      <span class="brand-name">OSVC Configuration Accelerator</span>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="dashboard-split">
+
+      <div class="main-panel-85">
+        <div class="card">
+          <div class="tag-header">INPUT CONFIGURATION &amp; AUTO-CLASSIFIER</div>
+          <div class="card-title">
+            <span>OSVC Export File Manager</span>
+            <button class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="clearInput()">CLEAR ALL</button>
+          </div>
+          <div class="card-subtitle">Upload any combination of Workspace XMLs, Report XMLs, CPM PHP files, or BUI ZIP archives. Files are classified &amp; grouped into accordions automatically.</div>
+
+          <div class="category-selector">
+            <button class="category-btn active" data-cat="auto" onclick="selectCat(this)">SMART AUTO-DETECT</button>
+            <button class="category-btn" data-cat="workspaces" onclick="selectCat(this)">WORKSPACES</button>
+            <button class="category-btn" data-cat="reports" onclick="selectCat(this)">REPORTS</button>
+            <button class="category-btn" data-cat="cpm" onclick="selectCat(this)">CPM PHP</button>
+            <button class="category-btn" data-cat="scripts" onclick="selectCat(this)">BUI / SCRIPTS</button>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <svg class="dropzone-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+            <div class="dropzone-title">Click or drag OSVC files here to upload</div>
+            <div class="dropzone-desc">Schema Classifier automatically detects &amp; routes XMLs, PHP, JS, and ZIP archives</div>
+            <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)">
+          </div>
+
+          <div class="accordion-group">
+
+            <div class="accordion-item active" id="accWorkspace">
+              <div class="accordion-header" onclick="toggleAccordion('accWorkspace')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccWorkspace">[-]</span>
+                  <span>Workspaces Inventory</span>
+                </div>
+                <span class="badge badge-xml" id="badgeCountWorkspace">Workspaces: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyWorkspace">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading Workspaces...</div>
+              </div>
+            </div>
+
+            <div class="accordion-item" id="accReport">
+              <div class="accordion-header" onclick="toggleAccordion('accReport')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccReport">[+]</span>
+                  <span>Analytics Reports Inventory</span>
+                </div>
+                <span class="badge badge-xml" id="badgeCountReport">Reports: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyReport">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading Reports...</div>
+              </div>
+            </div>
+
+            <div class="accordion-item" id="accCpm">
+              <div class="accordion-header" onclick="toggleAccordion('accCpm')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccCpm">[+]</span>
+                  <span>CPM Procedures &amp; Mappings</span>
+                </div>
+                <span class="badge badge-php" id="badgeCountCpm">CPM: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyCpm">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading CPM Procedures...</div>
+              </div>
+            </div>
+
+            <div class="accordion-item" id="accBui">
+              <div class="accordion-header" onclick="toggleAccordion('accBui')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccBui">[+]</span>
+                  <span>BUI Add-Ins &amp; Custom Scripts</span>
+                </div>
+                <span class="badge badge-zip" id="badgeCountBui">BUI Add-Ins: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyBui">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading BUI Add-Ins...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel-15">
+        <div class="card" style="padding:18px;">
+          <div class="tag-header">CONFIG</div>
+          <div class="card-title" style="font-size:15px;">Accelerator Control</div>
+          <div class="card-subtitle" style="font-size:12px;margin-bottom:14px;">Parser switches &amp; execution control.</div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px;">
+
+            <div class="switch-row" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                <span class="switch-title" style="font-size:13px;">AI Summaries</span>
+                <label class="toggle"><input type="checkbox" id="optAiSummary" checked><span class="slider"></span></label>
+              </div>
+              <span class="switch-desc" style="font-size:11px;">Groq LLM explanation for CPMs.</span>
+            </div>
+
+            <div class="switch-row" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                <span class="switch-title" style="font-size:13px;">Strict Auditing</span>
+                <label class="toggle"><input type="checkbox" id="optStrict" checked><span class="slider"></span></label>
+              </div>
+              <span class="switch-desc" style="font-size:11px;">Warn on unknown tags.</span>
+            </div>
+
+            <div class="switch-row" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                <span class="switch-title" style="font-size:13px;">Dump Unknowns</span>
+                <label class="toggle"><input type="checkbox" id="optDumpUnknowns" checked><span class="slider"></span></label>
+              </div>
+              <span class="switch-desc" style="font-size:11px;">Export unknowns.json report.</span>
+            </div>
+
+            <div class="switch-row" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
+              <span class="switch-title" style="font-size:13px;">Report Format</span>
+              <select id="optFormat" style="width:100%;background:#FAF5ED;border:1px solid rgba(153,0,38,0.2);color:#2C070B;padding:6px 8px;border-radius:6px;font-size:12px;">
+                <option value="html" selected>HTML Dashboard</option>
+                <option value="pdf">PDF Suite</option>
+              </select>
+            </div>
+
+          </div>
+
+          <button class="btn btn-primary" style="padding:12px 8px;font-size:13px;width:100%;" onclick="runAnalysis()">RUN ACCELERATOR</button>
+          
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(153,0,38,0.15);display:flex;flex-direction:column;gap:10px;">
+            <div class="tag-header">RESULTS &amp; ARCHITECT GRAPH</div>
+            <button class="btn btn-primary" style="padding:10px 8px;font-size:12px;width:100%;background:linear-gradient(135deg, #7C3AED, #4C1D95);" onclick="generateArchitectGraph()">GENERATE ARCHITECT GRAPH</button>
+            <button class="btn btn-secondary" style="padding:10px 8px;font-size:12px;width:100%;" onclick="downloadResultsZip()">DOWNLOAD RESULTS ZIP</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+    <div class="card">
+      <div class="tag-header">SYSTEM LOG CONSOLE</div>
+      <div class="card-title">Execution Console Output</div>
+      <div class="console-box" id="consoleBox">READY: Awaiting analysis execution command...</div>
+    </div>
+
+  </main>
+
+
+
+  <script>
+    let selectedCategory = 'auto';
+
+    function selectCat(btn) {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCategory = btn.getAttribute('data-cat');
+    }
+
+    function toggleAccordion(id) {
+      const item = document.getElementById(id);
+      if (!item) return;
+      const isActive = item.classList.contains('active');
+      const icon = item.querySelector('.accordion-icon');
+      if (isActive) {
+        item.classList.remove('active');
+        if (icon) icon.textContent = '[+]';
+      } else {
+        item.classList.add('active');
+        if (icon) icon.textContent = '[-]';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderGroupedTableRows(filesList) {
+      if (!filesList || filesList.length === 0) {
+        return '<div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">No files uploaded in this component category.</div>';
+      }
+
+      // Group files by sub_group
+      const groups = {};
+      filesList.forEach(f => {
+        const sg = f.sub_group || 'Component Inventory Files';
+        if (!groups[sg]) groups[sg] = [];
+        groups[sg].push(f);
+      });
+
+      // Build divider row + data rows for each subgroup
+      const allRowsHtml = Object.keys(groups).map(groupName => {
+        const groupFiles = groups[groupName];
+
+        const dividerRow =
+          '<tr class="subgroup-label-row">' +
+          '<td colspan="4">' +
+          '<div class="subgroup-inner">' +
+          '<span class="subgroup-title">' + escapeHtml(groupName) + '</span>' +
+          '<span class="subgroup-count">' + groupFiles.length + ' File(s)</span>' +
+          '</div></td></tr>';
+
+        const dataRows = groupFiles.map(f => {
+          let badgeClass = 'badge-xml';
+          if (f.cat_code === 'cpm') badgeClass = 'badge-php';
+          if (f.cat_code === 'bui' || f.cat_code === 'scripts') badgeClass = 'badge-zip';
+          const sizeKb = (f.size_bytes / 1024).toFixed(1) + ' KB';
+          const safeReason = escapeHtml(f.detection_reason);
+          const reasonText = safeReason
+            ? '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">' + safeReason + '</div>'
+            : '';
+          return '<tr class="file-row">' +
+            '<td><div style="font-weight:700;color:var(--text-main);">' + escapeHtml(f.name) + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(f.path) + '</div></td>' +
+            '<td><span class="badge ' + badgeClass + '">' + escapeHtml(f.cat_name || f.category) + '</span>' + reasonText + '</td>' +
+            '<td style="white-space:nowrap;font-size:12px;font-weight:600;">' + sizeKb + '</td>' +
+            '<td style="white-space:nowrap;"><button class="btn btn-danger" style="padding:4px 10px;font-size:11px;font-weight:700;" onclick="deleteFile(\'' + escapeHtml(f.path) + '\')">REMOVE</button></td>' +
+            '</tr>';
+        }).join('');
+
+        return dividerRow + dataRows;
+      }).join('');
+
+      return '<div class="table-container">' +
+        '<table class="file-table">' +
+        '<thead><tr>' +
+        '<th style="width:38%;">File Name &amp; Path</th>' +
+        '<th style="width:34%;">Schema Classification</th>' +
+        '<th style="width:14%;">Size</th>' +
+        '<th style="width:14%;">Action</th>' +
+        '</tr></thead>' +
+        '<tbody>' + allRowsHtml + '</tbody>' +
+        '</table></div>';
+    }
+
+    async function loadFiles() {
+      try {
+        const res = await fetch('/api/files');
+        const data = await res.json();
+
+        if (data.counts) {
+          document.getElementById('badgeCountWorkspace').innerText = 'Workspaces: ' + (data.counts.workspace || 0);
+          document.getElementById('badgeCountReport').innerText = 'Reports: ' + (data.counts.report || 0);
+          document.getElementById('badgeCountCpm').innerText = 'CPM: ' + (data.counts.cpm || 0);
+          document.getElementById('badgeCountBui').innerText = 'BUI Add-Ins: ' + ((data.counts.bui || 0) + (data.counts.scripts || 0));
+        }
+
+        const files = data.files || [];
+        const workspaces = files.filter(f => f.cat_code === 'workspace');
+        const reports = files.filter(f => f.cat_code === 'report');
+        const cpms = files.filter(f => f.cat_code === 'cpm');
+        const buis = files.filter(f => f.cat_code === 'bui' || f.cat_code === 'scripts');
+
+        document.getElementById('bodyWorkspace').innerHTML = renderGroupedTableRows(workspaces);
+        document.getElementById('bodyReport').innerHTML = renderGroupedTableRows(reports);
+        document.getElementById('bodyCpm').innerHTML = renderGroupedTableRows(cpms);
+        document.getElementById('bodyBui').innerHTML = renderGroupedTableRows(buis);
+      } catch (err) {
+        console.error('Failed to load files', err);
+      }
+    }
+
+    async function handleFileSelect(evt) {
+      const files = evt.target.files;
+      if (!files || files.length === 0) return;
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) formData.append('files', files[i]);
+      formData.append('category', selectedCategory);
+      logConsole('UPLOAD: Uploading ' + files.length + ' file(s)...');
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+          data.saved.forEach(item => {
+            logConsole('CLASSIFIED: ' + item.filename + ' -> ' + item.category + ' (' + item.reason + ') => Routed to ' + item.folder);
+          });
+          loadFiles();
+        } else {
+          logConsole('ERROR: Upload failed: ' + data.error);
+        }
+      } catch (err) {
+        logConsole('ERROR: Upload exception: ' + err.message);
+      }
+    }
+
+    async function deleteFile(filePath) {
+      try {
+        const res = await fetch('/api/delete-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: filePath })
+        });
+        const data = await res.json();
+        if (data.success) { logConsole('[REMOVED] ' + filePath); loadFiles(); }
+      } catch (err) {
+        logConsole('[ERROR] Failed to delete file: ' + err.message);
+      }
+    }
+
+    async function clearInput() {
+      if (!confirm('Remove all input files from repository?')) return;
+      try {
+        const res = await fetch('/api/clear-input', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) { logConsole('[CLEARED] Input folder cleared.'); loadFiles(); }
+      } catch (err) {
+        logConsole('[ERROR] Clear failed: ' + err.message);
+      }
+    }
+
+    async function runAnalysis() {
+      const useAi = document.getElementById('optAiSummary').checked;
+      const strict = document.getElementById('optStrict').checked;
+      const dumpUnknowns = document.getElementById('optDumpUnknowns').checked;
+      const format = document.getElementById('optFormat').value;
+      logConsole('[START] Launching OSVC Configuration Analyser CLI...');
+      logConsole('[CONFIG] AI Summary: ' + useAi + ' | Strict Mode: ' + strict + ' | Dump Unknowns: ' + dumpUnknowns + ' | Format: ' + format);
+      try {
+        const res = await fetch('/api/run-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ use_ai_summary: useAi, strict, dump_unknowns: dumpUnknowns, format })
+        });
+        const data = await res.json();
+        if (data.output) logConsole(data.output);
+        if (data.success) {
+          logConsole('\n[SUCCESS] Analysis completed cleanly!');
+          logConsole('[GRAPH] Automatically generating Architect Graph...');
+          generateArchitectGraph();
+        }
+        else logConsole('\n[FAILURE] Analysis failed: ' + (data.error || 'Check log output above'));
+      } catch (err) {
+        logConsole('[ERROR] Exception running analysis: ' + err.message);
+      }
+    }
+
+    async function generateArchitectGraph() {
+      logConsole('[GRAPH] Generating interactive Architect Graph visualization...');
+      try {
+        const res = await fetch('/api/generate-architect-report', { method: 'POST' });
+        const data = await res.json();
+        if (data.success && data.path) {
+          logConsole('[SUCCESS] Architect Graph created -> Navigating to viewer...');
+          window.location.href = data.path;
+        } else {
+          logConsole('[FAILURE] Graph generation failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        logConsole('[ERROR] Graph generation exception: ' + err.message);
+      }
+    }
+
+    function downloadResultsZip() {
+      logConsole('[DOWNLOAD] Initiating results ZIP archive download...');
+      window.location.href = '/api/download-results';
+    }
+
+    function logConsole(text) {
+      const box = document.getElementById('consoleBox');
+      box.innerText += '\n' + text;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    const dz = document.getElementById('dropzone');
+    ['dragenter', 'dragover'].forEach(n => {
+      dz.addEventListener(n, e => { e.preventDefault(); dz.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(n => {
+      dz.addEventListener(n, e => { e.preventDefault(); dz.classList.remove('dragover'); });
+    });
+    dz.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) handleFileSelect({ target: { files } });
+    });
+
+    loadFiles();
+  </script>
+</body>
+
+</html>

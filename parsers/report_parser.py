@@ -195,9 +195,23 @@ def parse_analytics_core_report(root, file_path):
             }
             tables.append(table_entry)
             if tbl_id:
-                tables_by_tbl_id[tbl_id] = alias
+                tables_by_tbl_id[str(tbl_id)] = alias
             if tbl_enum:
-                tables_by_tbl[tbl_enum] = alias
+                tables_by_tbl[str(tbl_enum)] = alias
+            if tbl_id and str(tbl_id) not in tables_by_tbl:
+                tables_by_tbl[str(tbl_id)] = alias
+
+    # Extract sub-report drilldown target IDs
+    sub_reports = []
+    sub_report_ids_set = set()
+    for child in root.iter():
+        if isinstance(child.tag, str):
+            tag_name = get_local_tag(child)
+            if tag_name in ["sub_report_id", "sub_rpt_id", "drilldown_ac_id", "sub_id"]:
+                sr_text = child.text.strip() if child.text else None
+                if sr_text and sr_text != "0" and sr_text not in sub_report_ids_set:
+                    sub_report_ids_set.add(sr_text)
+                    sub_reports.append({"id": sr_text, "name": None})
 
     # Nodes count and section visibilities
     nodes_container = ns_find(root, "nodes")
@@ -373,6 +387,27 @@ def parse_analytics_core_report(root, file_path):
                 "val": val
             })
 
+    RECOGNIZED_REPORT_TAGS = {
+        "ac_id", "ac_public", "ac_type", "created", "updated", "folder_id",
+        "owner_acct_id", "interface_id", "image", "time_zone", "version",
+        "opts", "aux", "label", "tables", "nodes", "cols", "filters", "perms"
+    }
+
+    raw_unhandled_tags = []
+    for child in root:
+        local_t = get_local_tag(child)
+        if local_t and local_t not in RECOGNIZED_REPORT_TAGS:
+            try:
+                raw_snippet = etree.tostring(child, encoding="unicode").strip()
+                if len(raw_snippet) > 300:
+                    raw_snippet = raw_snippet[:300] + "... [truncated]"
+                raw_unhandled_tags.append({
+                    "tag": local_t,
+                    "raw_xml": raw_snippet
+                })
+            except Exception:
+                pass
+
     return {
         "id": report_id,
         "name": report_name,
@@ -397,7 +432,8 @@ def parse_analytics_core_report(root, file_path):
         "permissions": permissions,
         "perms_by_type": perms_by_type,
         "filters": filters,
-        "sub_reports": []
+        "sub_reports": sub_reports,
+        "raw_unhandled_tags": raw_unhandled_tags
     }
 
 def parse_standard_report(root, file_path):

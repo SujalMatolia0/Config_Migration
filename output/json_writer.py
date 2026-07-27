@@ -2,10 +2,15 @@ import json
 import os
 from analyser.graph_builder import build_graph
 
-def write_master_json(components, relationships, orphans, endpoints, output_file, meta=None):
+USE_AI_SUMMARY = True
+
+def write_master_json(components, relationships, orphans, endpoints, output_file, meta=None, use_ai_summary=None):
     """
     Assembles and writes the master JSON representing the OSVC configuration state.
     """
+    if use_ai_summary is None:
+        use_ai_summary = USE_AI_SUMMARY
+
     if meta is None:
         meta = {
             "exportedAt": "2026-07-22",
@@ -40,11 +45,21 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         "cpmHandlers": len(components.get("cpm", [])),
         "businessRules": len(components.get("businessRules", [])),
         "navigationSets": len(components.get("navigationSets", [])),
+        "unhandledFiles": len(components.get("unhandledFiles", [])),
         "orphanedComponents": [f"{o.get('type')}: {o.get('name')}" for o in orphans],
         "externalEndpoints": [e.get("url") for e in endpoints]
     }
 
     graph_data = build_graph(components, relationships, orphans, endpoints)
+
+    cpm_list = components.get("cpm", [])
+    if not use_ai_summary:
+        cpm_processed = []
+        for item in cpm_list:
+            item_copy = dict(item)
+            item_copy.pop("key_logic", None)
+            cpm_processed.append(item_copy)
+        cpm_list = cpm_processed
 
     master_data = {
         "meta": meta,
@@ -53,11 +68,13 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
             "workspaces": components.get("workspaces", []),
             "reports": components.get("reports", []),
             "customScripts": components.get("customScripts", []),
-            "cpm": components.get("cpm", []),
+            "cpm": cpm_list,
             "businessRules": components.get("businessRules", []),
             "navigationSets": components.get("navigationSets", []),
             "workflows": components.get("workflows", []),
-            "templates": components.get("templates", [])
+            "templates": components.get("templates", []),
+            "buiAddins": components.get("buiAddins", []),
+            "unhandledFiles": components.get("unhandledFiles", [])
         },
         "relationships": relationships,
         "orphans": orphans,
@@ -112,15 +129,24 @@ def write_index_json(workspaces, output_file, shared_reports=None):
     return index_data
 
 
-def write_cpm_summary_json(cpm_items, orphans, workspaces, output_file):
+def write_cpm_summary_json(cpm_items, orphans, workspaces, output_file, use_ai_summary=None):
     """
     Writes structured JSON representation of the CPM Summary Report.
     """
+    if use_ai_summary is None:
+        use_ai_summary = USE_AI_SUMMARY
+
     objects_covered = set()
     sync_cnt = 0
     async_cnt = 0
 
+    procs_to_write = []
     for p in cpm_items:
+        p_copy = dict(p)
+        if not use_ai_summary:
+            p_copy.pop("key_logic", None)
+        procs_to_write.append(p_copy)
+
         for b in p.get("bound_classes", []):
             objects_covered.add(b)
         if p.get("is_async"):
@@ -137,7 +163,7 @@ def write_cpm_summary_json(cpm_items, orphans, workspaces, output_file):
             "asynchronousProcedures": async_cnt,
             "orphanProcedures": len(orphans)
         },
-        "procedures": cpm_items
+        "procedures": procs_to_write
     }
 
     output_dir = os.path.dirname(output_file)
@@ -155,7 +181,7 @@ def write_bui_addin_summary_json(bui_addins, reports, workspaces, output_file):
     Writes structured JSON representation of all BUI Add-Ins Summary Report.
     """
     bui_summary_data = {
-        "title": "BUI Browser UI Add-In Summary Report",
+        "title": "BUI Browser UI Add-In Summary",
         "totalAddinsAnalyzed": len(bui_addins),
         "addins": bui_addins
     }
