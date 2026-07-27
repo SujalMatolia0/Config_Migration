@@ -31,6 +31,85 @@ def get_detail_filename(node_id):
     return f"{safe_name}.json"
 
 
+def determine_node_module(node_type, data):
+    if not data:
+        return "Other"
+    
+    node_type_lower = node_type.lower()
+    
+    # 1. Check workspace type or name
+    if node_type_lower == "workspace":
+        t = (data.get("type") or "").lower()
+        if "contact" in t: return "Contact"
+        if "incident" in t: return "Incident"
+        if "org" in t or "organization" in t: return "Organization"
+        if "answer" in t: return "Answer"
+        
+        name = (data.get("name") or "").lower()
+        if "contact" in name: return "Contact"
+        if "incident" in name: return "Incident"
+        if "org" in name or "organization" in name: return "Organization"
+        if "answer" in name: return "Answer"
+        return "Other"
+        
+    # 2. Check CPM bindings or osvc_objects
+    if node_type_lower == "cpm":
+        bound = [str(b).lower() for b in data.get("bound_classes", [])]
+        for b in bound:
+            if "contact" in b: return "Contact"
+            if "incident" in b: return "Incident"
+            if "org" in b or "organization" in b: return "Organization"
+            if "answer" in b: return "Answer"
+            
+        objects = [str(o).lower() for o in data.get("osvc_objects", [])]
+        for o in objects:
+            if "contact" in o: return "Contact"
+            if "incident" in o: return "Incident"
+            if "org" in o or "organization" in o: return "Organization"
+            if "answer" in o: return "Answer"
+            
+        name = (data.get("name") or data.get("display_name") or data.get("file_name") or "").lower()
+        if "contact" in name: return "Contact"
+        if "incident" in name: return "Incident"
+        if "org" in name or "organization" in name: return "Organization"
+        if "answer" in name: return "Answer"
+        return "Other"
+        
+    # 3. Check BUI Add-in fields read/written
+    if node_type_lower == "buiaddin":
+        fields = [str(f).lower() for f in data.get("osvc_fields_read", []) + data.get("osvc_fields_written", [])]
+        for f in fields:
+            if f.startswith("contact."): return "Contact"
+            if f.startswith("incident."): return "Incident"
+            if f.startswith("org.") or f.startswith("organization."): return "Organization"
+            if f.startswith("answer."): return "Answer"
+            
+        name = (data.get("name") or "").lower()
+        if "contact" in name: return "Contact"
+        if "incident" in name: return "Incident"
+        if "org" in name or "organization" in name: return "Organization"
+        if "answer" in name: return "Answer"
+        return "Other"
+        
+    # 4. Check Report name or fields
+    if node_type_lower == "report":
+        name = (data.get("name") or "").lower()
+        if "contact" in name: return "Contact"
+        if "incident" in name: return "Incident"
+        if "org" in name or "organization" in name: return "Organization"
+        if "answer" in name: return "Answer"
+        
+        cols = [str(col.get("field", "")).lower() for col in data.get("columns", [])]
+        for col in cols:
+            if "contact" in col: return "Contact"
+            if "incident" in col: return "Incident"
+            if "org" in col or "organization" in col: return "Organization"
+            if "answer" in col: return "Answer"
+        return "Other"
+        
+    return "Other"
+
+
 def make_lightweight_node_data(node_type, data):
     if not data:
         return {}
@@ -47,6 +126,7 @@ def make_lightweight_node_data(node_type, data):
         "is_async": data.get("is_async"),
         "operations_label": data.get("operations_label"),
         "entry_point": data.get("entry_point"),
+        "module": determine_node_module(node_type, data)
     }
 
     # Add relative path to report markdown

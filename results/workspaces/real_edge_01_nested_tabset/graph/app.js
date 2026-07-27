@@ -11,7 +11,27 @@ mermaid.initialize({
   flowchart: { useMaxWidth: true, htmlLabels: true }
 });
 
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Customize Marked code block rendering to support inline Mermaid flowcharts
+const markedRenderer = {
+  code(code, infostring, escaped) {
+    const lang = (infostring || '').match(/\S*/)[0];
+    const rawCode = typeof code === 'object' ? code.text : code;
+    if (lang === "mermaid") {
+      return `<div class="mermaid-inline">${rawCode}</div>`;
+    }
+    return `<pre><code class="language-${lang}">${esc(rawCode)}</code></pre>`;
+  }
+};
+marked.use({ renderer: markedRenderer });
+
 const TYPE_COLORS = {
+  module_root: "#3b82f6",
+  category_hub: "#8b5cf6",
+  
   workspace: "#1e6091",
   report: "#38761d",
   navigationset: "#b45309",
@@ -31,6 +51,9 @@ const TYPE_COLORS = {
 const DEFAULT_COLOR = "#6b7280";
 
 const TYPE_LABELS = {
+  module_root: "System Modules",
+  category_hub: "Categories",
+  
   workspace: "Workspaces",
   report: "Reports",
   navigationset: "Navigation Sets",
@@ -58,17 +81,135 @@ if (!GRAPH.nodes || !GRAPH.nodes.length) {
 
 document.getElementById("metaLine").textContent =
   (META.serverVersion || "OSVC instance").split("\n")[0];
-document.getElementById("hint").textContent =
-  `${GRAPH.nodes.length} components · ${GRAPH.edges.length} links`;
 
-let nodes = GRAPH.nodes.map(n => ({ ...n }));
-let edges = GRAPH.edges.map(e => ({ ...e }));
+// Dynamic Multi-Tier Hierarchy State
+const expandedModules = new Set();
+const expandedHubs = new Set();
+
+const MODULE_ROOTS = [
+  { id: "module:contact", type: "module_root", label: "Contact Module", module: "Contact" },
+  { id: "module:incident", type: "module_root", label: "Incident Module", module: "Incident" },
+  { id: "module:organization", type: "module_root", label: "Organization Module", module: "Organization" },
+  { id: "module:answer", type: "module_root", label: "Answer Module", module: "Answer" },
+  { id: "module:other", type: "module_root", label: "Other Module", module: "Other" }
+];
+
+let nodes = [];
+let edges = [];
 let activeEdges = [];
 let nodeById = {};
-
-// Dynamic DOM Elements references
-let edgeEls = [];
 let nodeEls = [];
+let edgeEls = [];
+
+// Cache coordinates so nodes don't jump when rebuilding graph
+const coordinatesCache = {};
+
+function rebuildGraphState() {
+  // 1. Cache current node coordinates
+  nodes.forEach(n => {
+    coordinatesCache[n.id] = { x: n.x, y: n.y, vx: n.vx, vy: n.vy };
+  });
+
+  const nextNodes = [];
+  const nextEdges = [];
+
+  // 2. Add Module Roots
+  MODULE_ROOTS.forEach(root => {
+    nextNodes.push({ ...root });
+  });
+
+  // 3. Expand Modules -> Category Hubs
+  MODULE_ROOTS.forEach(root => {
+    if (expandedModules.has(root.id)) {
+      // Find all types of components belonging to this module
+      const moduleComponents = GRAPH.nodes.filter(n => n.data && n.data.module === root.module);
+      const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
+      
+      uniqueTypes.forEach(type => {
+        const hubId = `hub:${root.module.toLowerCase()}/${type}`;
+        const hubLabel = TYPE_LABELS[type] || type;
+        
+        nextNodes.push({
+          id: hubId,
+          type: "category_hub",
+          label: hubLabel,
+          module: root.module,
+          hubType: type
+        });
+        
+        nextEdges.push({
+          id: `edge-${root.id}-to-${hubId}`,
+          source: root.id,
+          target: hubId,
+          label: "contains"
+        });
+      });
+    }
+  });
+
+  // 4. Expand Category Hubs -> Component Instances
+  nextNodes.forEach(n => {
+    if (n.type === "category_hub" && expandedHubs.has(n.id)) {
+      const moduleInstances = GRAPH.nodes.filter(inst => 
+        inst.data && 
+        inst.data.module === n.module && 
+        inst.type === n.hubType
+      );
+      
+      moduleInstances.forEach(inst => {
+        nextNodes.push({ ...inst });
+        
+        nextEdges.push({
+          id: `edge-${n.id}-to-${inst.id}`,
+          source: n.id,
+          target: inst.id,
+          label: "instance"
+        });
+      });
+    }
+  });
+
+  // 5. Add cross-component links (edges) if both source and target are visible
+  const visibleNodeIds = new Set(nextNodes.map(n => n.id));
+  GRAPH.edges.forEach(e => {
+    if (visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target)) {
+      nextEdges.push({ ...e });
+    }
+  });
+
+  // 6. Restore positions or position relative to parent
+  nextNodes.forEach(n => {
+    if (coordinatesCache[n.id]) {
+      n.x = coordinatesCache[n.id].x;
+      n.y = coordinatesCache[n.id].y;
+      n.vx = coordinatesCache[n.id].vx;
+      n.vy = coordinatesCache[n.id].vy;
+    } else {
+      // Find parent coordinates
+      let parentNode = null;
+      if (n.id.startsWith("hub:")) {
+        parentNode = nextNodes.find(m => m.id === `module:${n.module.toLowerCase()}`);
+      } else if (n.data && n.data.module) {
+        parentNode = nextNodes.find(m => m.id === `hub:${n.data.module.toLowerCase()}/${n.type}`);
+      }
+      
+      const px = parentNode ? parentNode.x : W / 2;
+      const py = parentNode ? parentNode.y : H / 2;
+      n.x = px + (Math.random() - 0.5) * 60;
+      n.y = py + (Math.random() - 0.5) * 60;
+      n.vx = 0;
+      n.vy = 0;
+    }
+  });
+
+  nodes = nextNodes;
+  edges = nextEdges;
+
+  rebuildAdjacency();
+  
+  document.getElementById("hint").textContent =
+    `${nodes.filter(n => n.type !== "module_root" && n.type !== "category_hub").length} components visible · ${edges.length} links`;
+}
 
 // Adjacency and degree mapping
 function rebuildAdjacency() {
@@ -92,11 +233,13 @@ function rebuildAdjacency() {
 
 // ---------- layout: simple force simulation ----------
 const W = 1600, H = 1000;
-nodes.forEach((n, i) => {
-  const a = (i / nodes.length) * 2 * Math.PI;
-  const r = 280 + 120 * (i % 3);
-  n.x = W / 2 + r * Math.cos(a); n.y = H / 2 + r * Math.sin(a);
-  n.vx = 0; n.vy = 0; n.fixed = false;
+
+// Initialize Root Node positions in a neat ring
+MODULE_ROOTS.forEach((root, i) => {
+  const a = (i / MODULE_ROOTS.length) * 2 * Math.PI;
+  root.x = W / 2 + 180 * Math.cos(a);
+  root.y = H / 2 + 180 * Math.sin(a);
+  root.vx = 0; root.vy = 0;
 });
 
 function tick(alpha) {
@@ -107,8 +250,11 @@ function tick(alpha) {
       let dx = a.x - b.x, dy = a.y - b.y;
       let d2 = dx * dx + dy * dy || 1;
       
-      if (d2 < 250000) {
-        const f = 2600 * alpha / d2;
+      const isHubOrRoot = a.type === "module_root" || b.type === "module_root" || a.type === "category_hub" || b.type === "category_hub";
+      const limit = isHubOrRoot ? 350000 : 250000;
+      if (d2 < limit) {
+        const force = isHubOrRoot ? 3500 : 2600;
+        const f = force * alpha / d2;
         const d = Math.sqrt(d2);
         dx /= d; dy /= d;
         a.vx += dx * f * 60; a.vy += dy * f * 60;
@@ -122,7 +268,16 @@ function tick(alpha) {
     const s = nodeById[e.source], t = nodeById[e.target];
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const f = (d - 160) * 0.03 * alpha * 6;
+    
+    // Set custom lengths for starburst hierarchy
+    let restLength = 160;
+    if (e.id.includes("-to-hub:")) {
+      restLength = 110;
+    } else if (e.source.startsWith("hub:") || e.target.startsWith("hub:")) {
+      restLength = 70;
+    }
+    
+    const f = (d - restLength) * 0.03 * alpha * 6;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
@@ -130,15 +285,16 @@ function tick(alpha) {
   
   // centering + integrate
   nodes.forEach(n => {
-    n.vx += (W / 2 - n.x) * 0.0015 * alpha * 6;
-    n.vy += (H / 2 - n.y) * 0.0015 * alpha * 6;
+    const strength = n.type === "module_root" ? 0.0025 : 0.0015;
+    n.vx += (W / 2 - n.x) * strength * alpha * 6;
+    n.vy += (H / 2 - n.y) * strength * alpha * 6;
     if (!n.fixed) { n.x += n.vx; n.y += n.vy; }
     n.vx *= 0.6; n.vy *= 0.6;
   });
 }
 
-// Initial static ticks
-rebuildAdjacency();
+// Initial state construction
+rebuildGraphState();
 for (let i = 0; i < 400; i++) tick(Math.max(0.05, 1 - i / 400));
 
 // ---------- Interactive Animation Loop (Obsidian float effect) ----------
@@ -150,14 +306,12 @@ function restartSimulation() {
 }
 
 function simLoop() {
-  // Maintain a persistent low-energy ambient motion floor (Obsidian style)
   alpha = Math.max(0.02, alpha * 0.93);
-  
-  // Inject a small random noise perturbation to velocities to create organic drift
   nodes.forEach(n => {
     if (!n.fixed) {
-      n.vx += (Math.random() - 0.5) * 0.02 * alpha;
-      n.vy += (Math.random() - 0.5) * 0.02 * alpha;
+      const noise = n.type === "module_root" ? 0.01 : 0.02;
+      n.vx += (Math.random() - 0.5) * noise * alpha;
+      n.vy += (Math.random() - 0.5) * noise * alpha;
     }
   });
 
@@ -177,13 +331,15 @@ const nodesG = document.getElementById("nodes");
 const NS = "http://www.w3.org/2000/svg";
 
 function updateDOM() {
-  // Clear the existing SVG elements
   edgesG.innerHTML = "";
   nodesG.innerHTML = "";
 
   edgeEls = activeEdges.map(e => {
     const line = document.createElementNS(NS, "line");
     line.setAttribute("class", "edge");
+    if (e.label === "contains" || e.label === "instance") {
+      line.classList.add("child-edge");
+    }
     const title = document.createElementNS(NS, "title");
     title.textContent = e.label || "";
     line.appendChild(title);
@@ -197,10 +353,14 @@ function updateDOM() {
     let cls = "node";
     if (n.isOrphan) cls += " orphan";
     if (selected === n) cls += " selected";
+    if (n.type === "module_root") cls += " module-root expanded";
+    if (n.type === "category_hub") cls += " category-hub";
     g.setAttribute("class", cls);
 
     const c = document.createElementNS(NS, "circle");
     let r = Math.min(26, 9 + n.degree * 1.6);
+    if (n.type === "module_root") r = 28;
+    else if (n.type === "category_hub") r = 16;
     c.setAttribute("r", r);
     c.setAttribute("fill", TYPE_COLORS[n.type] || DEFAULT_COLOR);
 
@@ -208,6 +368,9 @@ function updateDOM() {
     t.setAttribute("dy", -r - 4);
     t.setAttribute("text-anchor", "middle");
     t.textContent = n.label.length > 34 ? n.label.slice(0, 33) + "…" : n.label;
+    if (n.type === "category_hub") {
+      t.classList.add("child-text");
+    }
 
     const title = document.createElementNS(NS, "title");
     title.textContent = TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") + ": " + n.label : n.label;
@@ -217,7 +380,11 @@ function updateDOM() {
 
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      select(n);
+      if (n.type === "module_root" || n.type === "category_hub") {
+        toggleExpand(n);
+      } else {
+        select(n);
+      }
     });
 
     g.addEventListener("mouseenter", ev => {
@@ -322,6 +489,36 @@ function enableDrag(g, n) {
   });
 }
 
+// ---------- Expand / Collapse hierarchical state ----------
+function toggleExpand(n) {
+  select(n);
+  if (n.type === "module_root") {
+    if (expandedModules.has(n.id)) {
+      expandedModules.delete(n.id);
+      // Clean child hubs
+      for (const hubId of expandedHubs) {
+        if (hubId.startsWith(`hub:${n.module.toLowerCase()}/`)) {
+          expandedHubs.delete(hubId);
+        }
+      }
+    } else {
+      expandedModules.add(n.id);
+    }
+    rebuildGraphState();
+    updateDOM();
+    restartSimulation();
+  } else if (n.type === "category_hub") {
+    if (expandedHubs.has(n.id)) {
+      expandedHubs.delete(n.id);
+    } else {
+      expandedHubs.add(n.id);
+    }
+    rebuildGraphState();
+    updateDOM();
+    restartSimulation();
+  }
+}
+
 // ---------- filters / search / orphans ----------
 const activeTypes = new Set();
 let filtersInitialized = false;
@@ -332,6 +529,9 @@ function rebuildFilters() {
   
   if (!filtersInitialized) {
     Object.keys(typeCounts).forEach(t => activeTypes.add(t));
+    // Pre-activate core visual folder wrapper categories
+    activeTypes.add("module_root");
+    activeTypes.add("category_hub");
     filtersInitialized = true;
   }
   
@@ -444,10 +644,6 @@ let selected = null;
 let currentFetchController = null;
 let mermaidCount = 0;
 
-function esc(s) {
-  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 function relRow(otherId, via, dir) {
   const other = nodeById[otherId];
   const name = other ? other.label : otherId;
@@ -482,11 +678,11 @@ async function renderMermaidDiagram(container, mermaidCode) {
 async function loadDocsAndDiagrams(node) {
   tabDoc.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
   tabDiagram.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
-  
+
   const mdPath = node.data && node.data.mdPath;
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
-  
+
   if (!mdPath) {
     tabDoc.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">No markdown documentation generated for this component type.</div>`;
     tabDiagram.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">No architecture diagram generated for this component type.</div>`;
@@ -494,28 +690,37 @@ async function loadDocsAndDiagrams(node) {
     diagBtn.style.opacity = "0.4";
     return;
   }
-  
+
   docBtn.style.opacity = "1";
   diagBtn.style.opacity = "1";
-  
+
   if (currentFetchController) {
     currentFetchController.abort();
   }
   currentFetchController = new AbortController();
-  
+
   try {
     const response = await fetch(mdPath, { signal: currentFetchController.signal });
     if (!response.ok) throw new Error(`HTTP status ${response.status}`);
     const mdText = await response.text();
-    
+
     // Render markdown to HTML
     tabDoc.innerHTML = marked.parse(mdText);
-    
+
+    // Compile and render inline mermaid blocks in document scroll view
+    try {
+      await mermaid.run({
+        querySelector: '#tab-doc .mermaid-inline'
+      });
+    } catch (e) {
+      console.warn("Inline Mermaid render warning:", e);
+    }
+
     // Extract and render Mermaid diagram
     const mermaidCode = extractMermaidCode(mdText);
     if (mermaidCode) {
       await renderMermaidDiagram(tabDiagram, mermaidCode);
-      
+
       // Create and inject Fullscreen Button
       const fsBtn = document.createElement("button");
       fsBtn.className = "tab-btn";
@@ -545,13 +750,13 @@ function select(n) {
       nodeEls[i].classList.toggle("selected", m === n);
     }
   });
-  
+
   if (n) {
     highlightNodeNeighbors(n);
   } else {
     clearHighlights();
   }
-  
+
   inspector.classList.toggle("open", !!n);
   if (!n) return;
 
@@ -559,9 +764,25 @@ function select(n) {
   let html = `<h2>${esc(n.label)}</h2>
     <span class="type-chip" style="background:${TYPE_COLORS[n.type] || DEFAULT_COLOR}">
     ${esc(TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") : n.type)}</span>`;
-    
+
   if (n.isOrphan) html += `<div class="orphan-flag">⚠ Orphaned: ${esc(n.orphanReason || "unreferenced")}</div>`;
-  
+
+  if (n.type === "module_root") {
+    html += `<div style="background:var(--panel2); padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 11px; color:var(--accent);">
+      📁 Double-click this module node to expand its categories (Workspaces, Reports, CPMs, etc.).
+    </div>`;
+    tabDetails.innerHTML = html;
+    return;
+  }
+
+  if (n.type === "category_hub") {
+    html += `<div style="background:var(--panel2); padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 11px; color:var(--accent);">
+      📁 Double-click this category folder to view specific components.
+    </div>`;
+    tabDetails.innerHTML = html;
+    return;
+  }
+
   html += `<div class="kv"><b>${n.inc.length}</b> inbound · <b>${n.out.length}</b> outbound link(s)</div>`;
 
   if (n.inc.length) {
@@ -570,10 +791,10 @@ function select(n) {
   if (n.out.length) {
     html += "<h3>Uses</h3>" + n.out.map(e => relRow(e.target, e.label, "out")).join("");
   }
-  
+
   const d = n.data || {};
   const facts = [];
-  
+
   if (d.type) facts.push(["Record type", d.type]);
   if (d.id) facts.push(["ID", d.id]);
   if (d.object_type) facts.push(["Object", d.object_type]);
@@ -607,12 +828,12 @@ function select(n) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
     facts.push(["⚠ Risks", riskText]);
   }
-  
+
   if (facts.length) {
     html += "<h3>Details</h3>" + facts.map(([k, v]) =>
       `<div class="kv">${esc(k)}: <b>${esc(v)}</b></div>`).join("");
   }
-  
+
   tabDetails.innerHTML = html;
   tabDetails.querySelectorAll(".rel").forEach(el => {
     el.addEventListener("click", () => {
@@ -620,7 +841,7 @@ function select(n) {
       if (target) select(target);
     });
   });
-  
+
   // Async fetch markdown documentation and compile Mermaid
   loadDocsAndDiagrams(n);
 }
@@ -645,16 +866,16 @@ function updateModalTransform() {
 function openFullscreenDiagram() {
   const sourceSvg = tabDiagram.querySelector(".mermaid svg");
   if (!sourceSvg) return;
-  
+
   modalViewport.innerHTML = "";
   const clone = sourceSvg.cloneNode(true);
   clone.style.transition = "transform 0.05s ease-out";
   modalViewport.appendChild(clone);
-  
+
   // Center and scale to 1.1x initial size
   modalView = { x: 0, y: 0, k: 1.1 };
   updateModalTransform();
-  
+
   diagramModal.classList.add("open");
 }
 

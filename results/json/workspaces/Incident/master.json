@@ -1238,6 +1238,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Incident",
           "mdPath": "../workspaces/Incident/report.md",
           "tabs": [
             null,
@@ -1273,6 +1274,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../reports/report_Contacts_100008.md",
           "columns": [
             null,
@@ -1309,6 +1311,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/cpmmappings_mappings.xml.json"
         }
       },
@@ -1328,6 +1331,7 @@
           "is_async": true,
           "operations_label": "Update",
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [
             "RegisterContact"
@@ -1367,6 +1371,7 @@
           "is_async": false,
           "operations_label": "Create",
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [],
           "custom_fields_read": [],
@@ -1398,6 +1403,7 @@
           "is_async": false,
           "operations_label": "Create",
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [],
           "custom_fields_read": [],
@@ -1429,6 +1435,7 @@
           "is_async": false,
           "operations_label": "Update",
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [],
           "custom_fields_read": [],
@@ -1465,6 +1472,7 @@
           "is_async": false,
           "operations_label": "Update",
           "entry_point": null,
+          "module": "Contact",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [],
           "custom_fields_read": [
@@ -1501,6 +1509,7 @@
           "is_async": false,
           "operations_label": "Create",
           "entry_point": null,
+          "module": "Incident",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [],
           "custom_fields_read": [
@@ -1557,6 +1566,7 @@
           "is_async": true,
           "operations_label": "Create, Update",
           "entry_point": null,
+          "module": "Incident",
           "mdPath": "../cpm/report_CPM_Summary.md",
           "soap_actions": [
             "GetAccounts"
@@ -1620,6 +1630,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_https___gcb.custhelp.com_cgi-bin_gcb.cfg_php_custom_gcb_flex.php.json"
         }
       },
@@ -1639,6 +1650,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_http___www.siebel.com_ws_fault.json"
         }
       },
@@ -1658,6 +1670,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_urn_soap_registercontact_via_custom_cfg_siebel_url.json"
         }
       },
@@ -1677,6 +1690,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_http___siebel.com_customui.json"
         }
       },
@@ -1696,6 +1710,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_http___www.siebel.com_xml_account.json"
         }
       },
@@ -1715,6 +1730,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_urn_soap_getaccounts_via_custom_cfg_siebel_url.json"
         }
       },
@@ -1734,6 +1750,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_connect_v1.3_connect_v1.3_analyticsreportresults_report_id_100407.json"
         }
       },
@@ -1753,6 +1770,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_connect_v1.3_connect_v1.3_queryresults_organizations.json"
         }
       },
@@ -1772,6 +1790,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": null,
+          "module": "Other",
           "detailsPath": "details/externalendpoint_connect_v1.3__cc_ajaxcustom_addsrtosiebel.json"
         }
       },
@@ -1791,6 +1810,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": "init.html",
+          "module": "Contact",
           "mdPath": "../scripts/report_ContactOrgLookupBUIAddin.md",
           "osvc_fields_read": [
             "Contact.OrgId",
@@ -1849,6 +1869,7 @@
           "is_async": null,
           "operations_label": null,
           "entry_point": "init.html",
+          "module": "Incident",
           "mdPath": "../scripts/report_SendToSiebelBUIAddin.md",
           "osvc_fields_read": [
             "Incident.Created",
