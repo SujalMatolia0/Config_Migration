@@ -70,8 +70,22 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
+    # Write a lightweight copy to disk to save space (replaces nested details with small stubs)
+    light_master_data = {
+        "meta": master_data["meta"],
+        "summary": master_data["summary"],
+        "components": {
+            k: [{"name": c.get("name") or c.get("file_name"), "id": c.get("id")} for c in v]
+            for k, v in master_data["components"].items()
+        },
+        "relationships": master_data["relationships"],
+        "orphans": master_data["orphans"],
+        "endpoints": master_data["endpoints"],
+        "graph": master_data["graph"]
+    }
+
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(master_data, f, indent=2, ensure_ascii=False)
+        json.dump(light_master_data, f, indent=2, ensure_ascii=False)
 
     return master_data
 

@@ -3,7 +3,14 @@
 // `window.GRAPH_META` = { serverVersion, ... } to already be defined
 // (normally by a sibling data.js written by build.py) before this file runs.
 
-// Keep in sync with analyser/graph_builder.py TYPE_COLORS.
+// Initialize Mermaid with dark theme
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  securityLevel: 'loose',
+  flowchart: { useMaxWidth: true, htmlLabels: true }
+});
+
 const TYPE_COLORS = {
   workspace: "#1e6091",
   report: "#38761d",
@@ -19,7 +26,7 @@ const TYPE_COLORS = {
   configsetting: "#854d0e",
   reportcolumn: "#166534",
   cpmmappings: "#134e4a",
-  workspacefield: "#1d4ed8",
+  workspacefield: "#1d4ed8"
 };
 const DEFAULT_COLOR = "#6b7280";
 
@@ -38,7 +45,7 @@ const TYPE_LABELS = {
   configsetting: "Config Settings",
   reportcolumn: "Report Columns",
   cpmmappings: "CPM Mappings",
-  workspacefield: "Workspace Fields",
+  workspacefield: "Workspace Fields"
 };
 
 const GRAPH = window.GRAPH_DATA || { nodes: [], edges: [] };
@@ -54,33 +61,52 @@ document.getElementById("metaLine").textContent =
 document.getElementById("hint").textContent =
   `${GRAPH.nodes.length} components · ${GRAPH.edges.length} links`;
 
-const nodes = GRAPH.nodes.map(n => ({ ...n }));
-const nodeById = {};
-nodes.forEach(n => (nodeById[n.id] = n));
-const edges = GRAPH.edges.filter(e => nodeById[e.source] && nodeById[e.target]);
+let nodes = GRAPH.nodes.map(n => ({ ...n }));
+let edges = GRAPH.edges.map(e => ({ ...e }));
+let activeEdges = [];
+let nodeById = {};
 
-// adjacency for inspector + highlighting
-nodes.forEach(n => { n.out = []; n.inc = []; n.degree = 0; });
-edges.forEach(e => {
-  nodeById[e.source].out.push(e); nodeById[e.target].inc.push(e);
-  nodeById[e.source].degree++; nodeById[e.target].degree++;
-});
+// Dynamic DOM Elements references
+let edgeEls = [];
+let nodeEls = [];
+
+// Adjacency and degree mapping
+function rebuildAdjacency() {
+  nodeById = {};
+  nodes.forEach(n => {
+    nodeById[n.id] = n;
+    n.out = [];
+    n.inc = [];
+    n.degree = 0;
+  });
+  
+  activeEdges = edges.filter(e => nodeById[e.source] && nodeById[e.target]);
+  
+  activeEdges.forEach(e => {
+    nodeById[e.source].out.push(e);
+    nodeById[e.target].inc.push(e);
+    nodeById[e.source].degree++;
+    nodeById[e.target].degree++;
+  });
+}
 
 // ---------- layout: simple force simulation ----------
 const W = 1600, H = 1000;
 nodes.forEach((n, i) => {
   const a = (i / nodes.length) * 2 * Math.PI;
-  const r = 250 + 150 * (i % 3);
+  const r = 280 + 120 * (i % 3);
   n.x = W / 2 + r * Math.cos(a); n.y = H / 2 + r * Math.sin(a);
   n.vx = 0; n.vy = 0; n.fixed = false;
 });
+
 function tick(alpha) {
-  // repulsion (O(n^2) — fine for config graphs)
+  // repulsion (O(n^2))
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d2 = dx * dx + dy * dy || 1;
+      
       if (d2 < 250000) {
         const f = 2600 * alpha / d2;
         const d = Math.sqrt(d2);
@@ -90,16 +116,18 @@ function tick(alpha) {
       }
     }
   }
+  
   // springs
-  edges.forEach(e => {
+  activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const f = (d - 160) * 0.02 * alpha * 6;
+    const f = (d - 160) * 0.03 * alpha * 6;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
   });
+  
   // centering + integrate
   nodes.forEach(n => {
     n.vx += (W / 2 - n.x) * 0.0015 * alpha * 6;
@@ -108,7 +136,38 @@ function tick(alpha) {
     n.vx *= 0.6; n.vy *= 0.6;
   });
 }
+
+// Initial static ticks
+rebuildAdjacency();
 for (let i = 0; i < 400; i++) tick(Math.max(0.05, 1 - i / 400));
+
+// ---------- Interactive Animation Loop (Obsidian float effect) ----------
+let alpha = 0;
+let simTimer = null;
+
+function restartSimulation() {
+  alpha = 1;
+}
+
+function simLoop() {
+  // Maintain a persistent low-energy ambient motion floor (Obsidian style)
+  alpha = Math.max(0.02, alpha * 0.93);
+  
+  // Inject a small random noise perturbation to velocities to create organic drift
+  nodes.forEach(n => {
+    if (!n.fixed) {
+      n.vx += (Math.random() - 0.5) * 0.02 * alpha;
+      n.vy += (Math.random() - 0.5) * 0.02 * alpha;
+    }
+  });
+
+  tick(alpha);
+  redraw();
+  simTimer = requestAnimationFrame(simLoop);
+}
+
+// Start continuous animation loop
+simLoop();
 
 // ---------- render ----------
 const svg = document.getElementById("svg");
@@ -117,61 +176,105 @@ const edgesG = document.getElementById("edges");
 const nodesG = document.getElementById("nodes");
 const NS = "http://www.w3.org/2000/svg";
 
-const edgeEls = edges.map(e => {
-  const line = document.createElementNS(NS, "line");
-  line.setAttribute("class", "edge");
-  const title = document.createElementNS(NS, "title");
-  title.textContent = e.label || "";
-  line.appendChild(title);
-  edgesG.appendChild(line);
-  return line;
-});
+function updateDOM() {
+  // Clear the existing SVG elements
+  edgesG.innerHTML = "";
+  nodesG.innerHTML = "";
 
-const nodeEls = nodes.map(n => {
-  const g = document.createElementNS(NS, "g");
-  g.setAttribute("class", "node" + (n.isOrphan ? " orphan" : ""));
-  const c = document.createElementNS(NS, "circle");
-  c.setAttribute("r", Math.min(26, 9 + n.degree * 1.6));
-  c.setAttribute("fill", TYPE_COLORS[n.type] || DEFAULT_COLOR);
-  const t = document.createElementNS(NS, "text");
-  t.setAttribute("dy", -Math.min(26, 9 + n.degree * 1.6) - 4);
-  t.setAttribute("text-anchor", "middle");
-  t.textContent = n.label.length > 34 ? n.label.slice(0, 33) + "…" : n.label;
-  const title = document.createElementNS(NS, "title");
-  title.textContent = TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") + ": " + n.label : n.label;
-  g.appendChild(c); g.appendChild(t); g.appendChild(title);
-  nodesG.appendChild(g);
-  g.addEventListener("click", ev => { ev.stopPropagation(); select(n); });
-  enableDrag(g, n);
-  return g;
-});
+  edgeEls = activeEdges.map(e => {
+    const line = document.createElementNS(NS, "line");
+    line.setAttribute("class", "edge");
+    const title = document.createElementNS(NS, "title");
+    title.textContent = e.label || "";
+    line.appendChild(title);
+    edgesG.appendChild(line);
+    return line;
+  });
+
+  nodeEls = nodes.map(n => {
+    const g = document.createElementNS(NS, "g");
+    
+    let cls = "node";
+    if (n.isOrphan) cls += " orphan";
+    if (selected === n) cls += " selected";
+    g.setAttribute("class", cls);
+
+    const c = document.createElementNS(NS, "circle");
+    let r = Math.min(26, 9 + n.degree * 1.6);
+    c.setAttribute("r", r);
+    c.setAttribute("fill", TYPE_COLORS[n.type] || DEFAULT_COLOR);
+
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("dy", -r - 4);
+    t.setAttribute("text-anchor", "middle");
+    t.textContent = n.label.length > 34 ? n.label.slice(0, 33) + "…" : n.label;
+
+    const title = document.createElementNS(NS, "title");
+    title.textContent = TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") + ": " + n.label : n.label;
+
+    g.appendChild(c); g.appendChild(t); g.appendChild(title);
+    nodesG.appendChild(g);
+
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      select(n);
+    });
+
+    g.addEventListener("mouseenter", ev => {
+      if (!selected) {
+        highlightNodeNeighbors(n);
+      }
+    });
+
+    g.addEventListener("mouseleave", ev => {
+      if (!selected) {
+        clearHighlights();
+      }
+    });
+
+    enableDrag(g, n);
+    return g;
+  });
+
+  rebuildFilters();
+  applyFilters();
+  redraw();
+}
 
 function redraw() {
-  edges.forEach((e, i) => {
+  activeEdges.forEach((e, i) => {
     const s = nodeById[e.source], t = nodeById[e.target];
-    edgeEls[i].setAttribute("x1", s.x); edgeEls[i].setAttribute("y1", s.y);
-    edgeEls[i].setAttribute("x2", t.x); edgeEls[i].setAttribute("y2", t.y);
+    if (edgeEls[i] && s && t) {
+      edgeEls[i].setAttribute("x1", s.x); edgeEls[i].setAttribute("y1", s.y);
+      edgeEls[i].setAttribute("x2", t.x); edgeEls[i].setAttribute("y2", t.y);
+    }
   });
-  nodes.forEach((n, i) => nodeEls[i].setAttribute("transform", `translate(${n.x},${n.y})`));
+  nodes.forEach((n, i) => {
+    if (nodeEls[i]) {
+      nodeEls[i].setAttribute("transform", `translate(${n.x},${n.y})`);
+    }
+  });
 }
-redraw();
 
 // ---------- zoom / pan ----------
 let view = { x: 0, y: 0, k: 0.7 };
 function applyView() {
   viewport.setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`);
 }
-(function fit() {
+function fit() {
   if (!nodes.length) return;
   const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
   const bw = svg.clientWidth || 1000, bh = svg.clientHeight || 700;
-  view.k = Math.min(bw / (maxX - minX + 200), bh / (maxY - minY + 200), 1.2);
+  view.k = Math.min(bw / (maxX - minX + 250), bh / (maxY - minY + 250), 1.1);
   view.x = bw / 2 - view.k * (minX + maxX) / 2;
   view.y = bh / 2 - view.k * (minY + maxY) / 2;
   applyView();
-})();
+}
+
+fit();
+
 svg.addEventListener("wheel", ev => {
   ev.preventDefault();
   const f = ev.deltaY < 0 ? 1.12 : 0.89;
@@ -180,6 +283,7 @@ svg.addEventListener("wheel", ev => {
   view.k *= f;
   applyView();
 }, { passive: false });
+
 let panning = null;
 svg.addEventListener("mousedown", ev => {
   if (ev.target === svg || ev.target.id === "viewport") {
@@ -206,9 +310,10 @@ function enableDrag(g, n) {
     function move(e2) {
       n.x = start.nx + (e2.clientX - start.x) / view.k;
       n.y = start.ny + (e2.clientY - start.y) / view.k;
-      redraw();
+      restartSimulation();
     }
     function up() {
+      n.fixed = false;
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseup", up);
     }
@@ -218,22 +323,36 @@ function enableDrag(g, n) {
 }
 
 // ---------- filters / search / orphans ----------
-const typeCounts = {};
-nodes.forEach(n => typeCounts[n.type] = (typeCounts[n.type] || 0) + 1);
-const activeTypes = new Set(Object.keys(typeCounts));
-const filtersDiv = document.getElementById("filters");
-Object.keys(typeCounts).sort().forEach(t => {
-  const label = document.createElement("label");
-  label.className = "filter";
-  label.innerHTML = `<input type="checkbox" checked data-type="${t}">
-    <span class="swatch" style="background:${TYPE_COLORS[t] || DEFAULT_COLOR}"></span>
-    <span>${TYPE_LABELS[t] || t}</span><span class="count">${typeCounts[t]}</span>`;
-  label.querySelector("input").addEventListener("change", ev => {
-    ev.target.checked ? activeTypes.add(t) : activeTypes.delete(t);
-    applyFilters();
+const activeTypes = new Set();
+let filtersInitialized = false;
+
+function rebuildFilters() {
+  const typeCounts = {};
+  nodes.forEach(n => typeCounts[n.type] = (typeCounts[n.type] || 0) + 1);
+  
+  if (!filtersInitialized) {
+    Object.keys(typeCounts).forEach(t => activeTypes.add(t));
+    filtersInitialized = true;
+  }
+  
+  const filtersDiv = document.getElementById("filters");
+  filtersDiv.innerHTML = "";
+  
+  Object.keys(typeCounts).sort().forEach(t => {
+    const label = document.createElement("label");
+    label.className = "filter";
+    const checked = activeTypes.has(t) ? "checked" : "";
+    label.innerHTML = `<input type="checkbox" ${checked} data-type="${t}">
+      <span class="swatch" style="background:${TYPE_COLORS[t] || DEFAULT_COLOR}"></span>
+      <span>${TYPE_LABELS[t] || t}</span><span class="count">${typeCounts[t]}</span>`;
+    label.querySelector("input").addEventListener("change", ev => {
+      ev.target.checked ? activeTypes.add(t) : activeTypes.delete(t);
+      applyFilters();
+    });
+    filtersDiv.appendChild(label);
   });
-  filtersDiv.appendChild(label);
-});
+}
+
 const searchBox = document.getElementById("search");
 const orphansOnly = document.getElementById("orphansOnly");
 const showLabels = document.getElementById("showLabels");
@@ -250,26 +369,85 @@ function nodeVisible(n) {
   if (q && !n.label.toLowerCase().includes(q)) return false;
   return true;
 }
+
 function applyFilters() {
   const vis = {};
   nodes.forEach((n, i) => {
     vis[n.id] = nodeVisible(n);
-    nodeEls[i].style.display = vis[n.id] ? "" : "none";
+    if (nodeEls[i]) {
+      nodeEls[i].style.display = vis[n.id] ? "" : "none";
+    }
   });
-  edges.forEach((e, i) => {
-    edgeEls[i].style.display = (vis[e.source] && vis[e.target]) ? "" : "none";
+  activeEdges.forEach((e, i) => {
+    if (edgeEls[i]) {
+      edgeEls[i].style.display = (vis[e.source] && vis[e.target]) ? "" : "none";
+    }
   });
 }
 
-// ---------- inspector ----------
+// ---------- Node Highlighting Logic ----------
+function highlightNodeNeighbors(n) {
+  const near = new Set([n.id]);
+  n.out.forEach(e => near.add(e.target));
+  n.inc.forEach(e => near.add(e.source));
+  
+  nodes.forEach((m, i) => {
+    if (nodeEls[i]) {
+      nodeEls[i].classList.toggle("dim", !near.has(m.id));
+      nodeEls[i].classList.toggle("hover-hl", m === n);
+    }
+  });
+  
+  activeEdges.forEach((e, i) => {
+    const touches = e.source === n.id || e.target === n.id;
+    if (edgeEls[i]) {
+      edgeEls[i].classList.toggle("hl", touches);
+      edgeEls[i].classList.toggle("dim", !touches);
+    }
+  });
+}
+
+function clearHighlights() {
+  nodes.forEach((m, i) => {
+    if (nodeEls[i]) {
+      nodeEls[i].classList.remove("dim", "hover-hl");
+    }
+  });
+  activeEdges.forEach((e, i) => {
+    if (edgeEls[i]) {
+      edgeEls[i].classList.remove("hl", "dim");
+    }
+  });
+}
+
+// ---------- tabs interaction ----------
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tabName = btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".tab-content").forEach(tc => {
+      tc.classList.toggle("active", tc.id === `tab-${tabName}`);
+    });
+  });
+});
+
+// ---------- inspector and markdown/mermaid loader ----------
 const inspector = document.getElementById("inspector");
-const inspBody = document.getElementById("inspBody");
-document.getElementById("closeBtn").addEventListener("click", () => select(null));
+const closeBtn = document.getElementById("closeBtn");
+closeBtn.addEventListener("click", () => select(null));
+
+const tabDetails = document.getElementById("tab-details");
+const tabDoc = document.getElementById("tab-doc");
+const tabDiagram = document.getElementById("tab-diagram");
+
 let selected = null;
+let currentFetchController = null;
+let mermaidCount = 0;
 
 function esc(s) {
   return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
 function relRow(otherId, via, dir) {
   const other = nodeById[otherId];
   const name = other ? other.label : otherId;
@@ -279,30 +457,111 @@ function relRow(otherId, via, dir) {
     <span style="color:${color}">●</span> ${arrow} <b>${esc(name)}</b>
     <div class="via">${esc(via)}</div></div>`;
 }
+
+function extractMermaidCode(markdown) {
+  if (!markdown) return null;
+  const match = markdown.match(/```mermaid([\s\S]*?)```/);
+  return match ? match[1].trim() : null;
+}
+
+async function renderMermaidDiagram(container, mermaidCode) {
+  try {
+    container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">Generating diagram...</div>`;
+    const uniqueId = `mermaid-svg-${++mermaidCount}`;
+    const { svg } = await mermaid.render(uniqueId, mermaidCode);
+    container.innerHTML = `<div class="mermaid">${svg}</div>`;
+  } catch (err) {
+    console.error("Mermaid Render Error:", err);
+    container.innerHTML = `<div style="color:#f87171; padding: 12px; font-size: 12px;">
+      <b>Unable to render diagram.</b><br>
+      <pre style="font-size:10px; margin-top:5px; color:#cbd5e1; background:rgba(0,0,0,0.25); padding:6px; border-radius:4px; overflow-x:auto;">${esc(err.message || err)}</pre>
+    </div>`;
+  }
+}
+
+async function loadDocsAndDiagrams(node) {
+  tabDoc.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
+  tabDiagram.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
+  
+  const mdPath = node.data && node.data.mdPath;
+  const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
+  const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
+  
+  if (!mdPath) {
+    tabDoc.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">No markdown documentation generated for this component type.</div>`;
+    tabDiagram.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">No architecture diagram generated for this component type.</div>`;
+    docBtn.style.opacity = "0.4";
+    diagBtn.style.opacity = "0.4";
+    return;
+  }
+  
+  docBtn.style.opacity = "1";
+  diagBtn.style.opacity = "1";
+  
+  if (currentFetchController) {
+    currentFetchController.abort();
+  }
+  currentFetchController = new AbortController();
+  
+  try {
+    const response = await fetch(mdPath, { signal: currentFetchController.signal });
+    if (!response.ok) throw new Error(`HTTP status ${response.status}`);
+    const mdText = await response.text();
+    
+    // Render markdown to HTML
+    tabDoc.innerHTML = marked.parse(mdText);
+    
+    // Extract and render Mermaid diagram
+    const mermaidCode = extractMermaidCode(mdText);
+    if (mermaidCode) {
+      await renderMermaidDiagram(tabDiagram, mermaidCode);
+      
+      // Create and inject Fullscreen Button
+      const fsBtn = document.createElement("button");
+      fsBtn.className = "tab-btn";
+      fsBtn.style.marginTop = "12px";
+      fsBtn.style.background = "var(--panel2)";
+      fsBtn.style.border = "1px solid var(--accent)";
+      fsBtn.style.color = "var(--text)";
+      fsBtn.style.width = "100%";
+      fsBtn.textContent = "🔍 View Fullscreen (Zoom & Pan)";
+      fsBtn.addEventListener("click", openFullscreenDiagram);
+      tabDiagram.appendChild(fsBtn);
+    } else {
+      tabDiagram.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:10px;">No Mermaid architecture block found inside the documentation report.</div>`;
+    }
+  } catch (err) {
+    if (err.name === "AbortError") return;
+    console.error("Documentation loading error:", err);
+    tabDoc.innerHTML = `<div style="color:#f87171; padding:10px; font-size:12px;">Failed to load documentation: ${esc(err.message)}</div>`;
+    tabDiagram.innerHTML = `<div style="color:#f87171; padding:10px; font-size:12px;">Failed to load diagram: ${esc(err.message)}</div>`;
+  }
+}
+
 function select(n) {
   selected = n;
-  nodes.forEach((m, i) => nodeEls[i].classList.toggle("selected", m === n));
+  nodes.forEach((m, i) => {
+    if (nodeEls[i]) {
+      nodeEls[i].classList.toggle("selected", m === n);
+    }
+  });
+  
   if (n) {
-    const near = new Set([n.id]);
-    n.out.forEach(e => near.add(e.target));
-    n.inc.forEach(e => near.add(e.source));
-    nodes.forEach((m, i) => nodeEls[i].classList.toggle("dim", !near.has(m.id)));
-    edges.forEach((e, i) => {
-      const touches = e.source === n.id || e.target === n.id;
-      edgeEls[i].classList.toggle("hl", touches);
-      edgeEls[i].classList.toggle("dim", !touches);
-    });
+    highlightNodeNeighbors(n);
   } else {
-    nodes.forEach((m, i) => nodeEls[i].classList.remove("dim"));
-    edges.forEach((e, i) => { edgeEls[i].classList.remove("hl", "dim"); });
+    clearHighlights();
   }
+  
   inspector.classList.toggle("open", !!n);
   if (!n) return;
 
+  // Build Details Tab
   let html = `<h2>${esc(n.label)}</h2>
     <span class="type-chip" style="background:${TYPE_COLORS[n.type] || DEFAULT_COLOR}">
     ${esc(TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") : n.type)}</span>`;
+    
   if (n.isOrphan) html += `<div class="orphan-flag">⚠ Orphaned: ${esc(n.orphanReason || "unreferenced")}</div>`;
+  
   html += `<div class="kv"><b>${n.inc.length}</b> inbound · <b>${n.out.length}</b> outbound link(s)</div>`;
 
   if (n.inc.length) {
@@ -311,8 +570,10 @@ function select(n) {
   if (n.out.length) {
     html += "<h3>Uses</h3>" + n.out.map(e => relRow(e.target, e.label, "out")).join("");
   }
+  
   const d = n.data || {};
   const facts = [];
+  
   if (d.type) facts.push(["Record type", d.type]);
   if (d.id) facts.push(["ID", d.id]);
   if (d.object_type) facts.push(["Object", d.object_type]);
@@ -346,15 +607,111 @@ function select(n) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
     facts.push(["⚠ Risks", riskText]);
   }
+  
   if (facts.length) {
     html += "<h3>Details</h3>" + facts.map(([k, v]) =>
       `<div class="kv">${esc(k)}: <b>${esc(v)}</b></div>`).join("");
   }
-  inspBody.innerHTML = html;
-  inspBody.querySelectorAll(".rel").forEach(el => {
+  
+  tabDetails.innerHTML = html;
+  tabDetails.querySelectorAll(".rel").forEach(el => {
     el.addEventListener("click", () => {
       const target = nodeById[el.dataset.node];
       if (target) select(target);
     });
   });
+  
+  // Async fetch markdown documentation and compile Mermaid
+  loadDocsAndDiagrams(n);
 }
+
+// ---------- Fullscreen Modal zoom & pan ----------
+const diagramModal = document.getElementById("diagramModal");
+const modalViewport = document.getElementById("modalViewport");
+const modalClose = document.getElementById("modalClose");
+const modalZoomIn = document.getElementById("modalZoomIn");
+const modalZoomOut = document.getElementById("modalZoomOut");
+const modalReset = document.getElementById("modalReset");
+
+let modalView = { x: 0, y: 0, k: 1 };
+
+function updateModalTransform() {
+  const svgEl = modalViewport.querySelector("svg");
+  if (svgEl) {
+    svgEl.style.transform = `translate(${modalView.x}px, ${modalView.y}px) scale(${modalView.k})`;
+  }
+}
+
+function openFullscreenDiagram() {
+  const sourceSvg = tabDiagram.querySelector(".mermaid svg");
+  if (!sourceSvg) return;
+  
+  modalViewport.innerHTML = "";
+  const clone = sourceSvg.cloneNode(true);
+  clone.style.transition = "transform 0.05s ease-out";
+  modalViewport.appendChild(clone);
+  
+  // Center and scale to 1.1x initial size
+  modalView = { x: 0, y: 0, k: 1.1 };
+  updateModalTransform();
+  
+  diagramModal.classList.add("open");
+}
+
+function closeFullscreenDiagram() {
+  diagramModal.classList.remove("open");
+  modalViewport.innerHTML = "";
+}
+
+modalClose.addEventListener("click", closeFullscreenDiagram);
+
+// Drag pan interaction on modal
+let modalPanning = null;
+modalViewport.addEventListener("mousedown", ev => {
+  if (ev.target.id === "modalViewport" || modalViewport.contains(ev.target)) {
+    modalPanning = { x: ev.clientX, y: ev.clientY, vx: modalView.x, vy: modalView.y };
+    modalViewport.classList.add("dragging");
+  }
+});
+
+window.addEventListener("mousemove", ev => {
+  if (modalPanning) {
+    modalView.x = modalPanning.vx + (ev.clientX - modalPanning.x);
+    modalView.y = modalPanning.vy + (ev.clientY - modalPanning.y);
+    updateModalTransform();
+  }
+});
+
+window.addEventListener("mouseup", () => {
+  if (modalPanning) {
+    modalPanning = null;
+    modalViewport.classList.remove("dragging");
+  }
+});
+
+// Scrollwheel zoom interaction on modal
+modalViewport.addEventListener("wheel", ev => {
+  ev.preventDefault();
+  const factor = ev.deltaY < 0 ? 1.15 : 0.85;
+  modalView.k = Math.max(0.15, Math.min(6, modalView.k * factor));
+  updateModalTransform();
+}, { passive: false });
+
+// Zoom control buttons
+modalZoomIn.addEventListener("click", () => {
+  modalView.k = Math.min(6, modalView.k * 1.25);
+  updateModalTransform();
+});
+
+modalZoomOut.addEventListener("click", () => {
+  modalView.k = Math.max(0.15, modalView.k * 0.8);
+  updateModalTransform();
+});
+
+modalReset.addEventListener("click", () => {
+  modalView = { x: 0, y: 0, k: 1.1 };
+  updateModalTransform();
+});
+
+// Initial render
+updateDOM();

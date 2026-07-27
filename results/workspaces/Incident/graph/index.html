@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <title>OSVC Dependency Graph</title>
 <link rel="stylesheet" href="style.css">
+<!-- Marked.js for rendering markdown reports inside the UI -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- Mermaid.js for rendering sequence/flow charts inside the UI -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 </head>
 <body>
 <div id="sidebar">
@@ -14,8 +18,7 @@
   <label class="toggle"><input type="checkbox" id="orphansOnly"> Orphans only</label>
   <label class="toggle"><input type="checkbox" id="showLabels" checked> Show labels</label>
   <div id="legendNote">Dashed red ring = orphaned component.<br>
-  Click a node to inspect its links. Drag nodes to rearrange. Scroll to zoom,
-  drag background to pan.</div>
+  Click a node to inspect details, read documentation, and view Mermaid flowcharts. Scroll to zoom, drag background to pan.</div>
 </div>
 <div id="canvasWrap">
   <svg id="svg"><g id="viewport"><g id="edges"></g><g id="nodes"></g></g></svg>
@@ -28,7 +31,26 @@
 </div>
 <div id="inspector">
   <button id="closeBtn" title="Close">✕</button>
-  <div id="inspBody"></div>
+  <div class="tabs-header">
+    <button class="tab-btn active" data-tab="details">Details</button>
+    <button class="tab-btn" data-tab="doc">Documentation</button>
+    <button class="tab-btn" data-tab="diagram">Architecture</button>
+  </div>
+  <div id="inspBody">
+    <div id="tab-details" class="tab-content active"></div>
+    <div id="tab-doc" class="tab-content"></div>
+    <div id="tab-diagram" class="tab-content"></div>
+  </div>
+</div>
+
+<div id="diagramModal">
+  <div class="modal-controls">
+    <button id="modalZoomIn" title="Zoom In">➕ Zoom In</button>
+    <button id="modalZoomOut" title="Zoom Out">➖ Zoom Out</button>
+    <button id="modalReset" title="Reset View">⟲ Reset</button>
+    <button id="modalClose" title="Close Fullscreen">✕ Close</button>
+  </div>
+  <div id="modalViewport"></div>
 </div>
 
 <!-- data.js must define window.GRAPH_DATA = {nodes, edges} and window.GRAPH_META = {...}

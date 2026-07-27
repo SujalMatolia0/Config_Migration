@@ -1,0 +1,837 @@
+{
+  "id": "workspace:real_edge_03_split_panel_contact",
+  "type": "workspace",
+  "label": "real_edge_03_split_panel_contact",
+  "data": {
+    "name": "real_edge_03_split_panel_contact",
+    "type": "Contact",
+    "ui_type": "Contact",
+    "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+    "client_version": "26.2.0.326",
+    "is_multi_edit": false,
+    "row_count": 11,
+    "column_count": 5,
+    "tab_set_info": {
+      "row": 0,
+      "column": 1,
+      "row_span": 11,
+      "column_span": 4,
+      "summary_panel_height": null,
+      "summary_panel_alignment": null,
+      "can_reorder_tabs": false,
+      "wrap_tabs": false,
+      "summary_tab_index": null,
+      "threshold_height": null
+    },
+    "record_types": [
+      {
+        "id": "6",
+        "name": "Contact"
+      },
+      {
+        "id": "7",
+        "name": "Org"
+      },
+      {
+        "id": "1",
+        "name": "Incident"
+      },
+      {
+        "id": "5",
+        "name": "Opportunity"
+      },
+      {
+        "id": "8",
+        "name": "Task"
+      },
+      {
+        "id": "49",
+        "name": "Chat"
+      },
+      {
+        "id": "126",
+        "name": "Asset"
+      },
+      {
+        "id": "152",
+        "name": "Interaction"
+      }
+    ],
+    "ribbon_buttons": [
+      "Save",
+      "SaveAndClose",
+      "New",
+      "Refresh",
+      "Appointment",
+      "Print",
+      "Copy",
+      "Delete",
+      "SpellCheck",
+      "Info"
+    ],
+    "info_items": [
+      {
+        "object_id": "Contact",
+        "field_id": "CId"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Created"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Updated"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "RuleState"
+      }
+    ],
+    "rules": [
+      {
+        "name": "New Rule",
+        "active": false,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Contact.CtypeId",
+            "source_type": "Field",
+            "operator": "EQ",
+            "value": "3",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "MessageBox",
+            "object_type": "MessageBox",
+            "object_id": null,
+            "operation": "Show",
+            "value": "This contact is created through email and may not hold sufficient information in the system",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      }
+    ],
+    "tabs": [
+      {
+        "text": "Incidents",
+        "id": "636908681376940067",
+        "relationship_items": [
+          {
+            "item_type": "IncidentView",
+            "ac_id": "9029",
+            "id": "636908679290650738",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": "0",
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Customer360",
+        "id": "636908681812694990",
+        "relationship_items": [],
+        "browsers": [
+          {
+            "url": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php?mobile=$contact.phmobile",
+            "suppress_errors": true,
+            "id": "636908689046358732",
+            "height": "420",
+            "row": 0,
+            "column": 0
+          }
+        ],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Attachments",
+        "id": "636908679362564851",
+        "relationship_items": [
+          {
+            "item_type": "FileAttachments",
+            "ac_id": null,
+            "id": "636908679379055794",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": true,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Notes",
+        "id": "636908679403907216",
+        "relationship_items": [
+          {
+            "item_type": "ContactNotes",
+            "ac_id": null,
+            "id": "636908679421398216",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": true,
+            "show_read_transactions": true,
+            "default_channel": "NoDefault",
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Audit",
+        "id": "636908679456970251",
+        "relationship_items": [
+          {
+            "item_type": "ContactAuditLog",
+            "ac_id": "9050",
+            "id": "636908679483641776",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": false,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      }
+    ],
+    "fields": [
+      {
+        "object_id": "Contact",
+        "field_id": "Title",
+        "label": null,
+        "id": null,
+        "row": 2,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Name.First",
+        "label": null,
+        "id": "636984392060169799",
+        "row": 3,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Name.Last",
+        "label": null,
+        "id": null,
+        "row": 4,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Addr",
+        "label": null,
+        "id": null,
+        "row": 5,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "PhOffice",
+        "label": "&Mobile Phone",
+        "id": "636632413451106202",
+        "row": 6,
+        "column": 0,
+        "default_phone_type": "1",
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "C$CustomerId",
+        "label": null,
+        "id": "636908679918516649",
+        "row": 7,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": "",
+        "hidden_option": null,
+        "required_option": ""
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Email",
+        "label": null,
+        "id": "636632413422131623",
+        "row": 8,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "CtypeId",
+        "label": null,
+        "id": "636632413519167264",
+        "row": 9,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "C$Gender",
+        "label": null,
+        "id": null,
+        "row": 10,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": "",
+        "hidden_option": null,
+        "required_option": ""
+      }
+    ],
+    "menus": [],
+    "title_bars": [
+      {
+        "text": "Customer Details",
+        "row": 1,
+        "column": 0
+      }
+    ],
+    "spacers": [],
+    "ribbon_links": [],
+    "flag_visible": true
+  },
+  "childNodes": [
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/tab:636908681376940067",
+      "type": "workspace_tab",
+      "label": "Incidents",
+      "data": {
+        "type": "Tab",
+        "id": "636908681376940067"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/tab:636908681812694990",
+      "type": "workspace_tab",
+      "label": "Customer360",
+      "data": {
+        "type": "Tab",
+        "id": "636908681812694990"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/browser:636908689046358732",
+      "type": "workspace_browser",
+      "label": "https://gcb.custhelp.com/cgi-b...",
+      "data": {
+        "type": "Browser",
+        "url": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php?mobile=$contact.phmobile"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/tab:636908679362564851",
+      "type": "workspace_tab",
+      "label": "Attachments",
+      "data": {
+        "type": "Tab",
+        "id": "636908679362564851"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/tab:636908679403907216",
+      "type": "workspace_tab",
+      "label": "Notes",
+      "data": {
+        "type": "Tab",
+        "id": "636908679403907216"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/tab:636908679456970251",
+      "type": "workspace_tab",
+      "label": "Audit",
+      "data": {
+        "type": "Tab",
+        "id": "636908679456970251"
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:title",
+      "type": "workspace_field",
+      "label": "Title",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Title",
+        "label": null,
+        "id": null,
+        "row": 2,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "osvcobject:contact",
+      "type": "osvcobject",
+      "label": "Contact",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:name.first",
+      "type": "workspace_field",
+      "label": "Name.First",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Name.First",
+        "label": null,
+        "id": "636984392060169799",
+        "row": 3,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:name.last",
+      "type": "workspace_field",
+      "label": "Name.Last",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Name.Last",
+        "label": null,
+        "id": null,
+        "row": 4,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:addr",
+      "type": "workspace_field",
+      "label": "Addr",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Addr",
+        "label": null,
+        "id": null,
+        "row": 5,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:phoffice",
+      "type": "workspace_field",
+      "label": "PhOffice",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "PhOffice",
+        "label": "&Mobile Phone",
+        "id": "636632413451106202",
+        "row": 6,
+        "column": 0,
+        "default_phone_type": "1",
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:c$customerid",
+      "type": "workspace_field",
+      "label": "C$CustomerId",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "C$CustomerId",
+        "label": null,
+        "id": "636908679918516649",
+        "row": 7,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": "",
+        "hidden_option": null,
+        "required_option": ""
+      }
+    },
+    {
+      "id": "customfield:c$customerid",
+      "type": "customfield",
+      "label": "c$customerid",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:email",
+      "type": "workspace_field",
+      "label": "Email",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Email",
+        "label": null,
+        "id": "636632413422131623",
+        "row": 8,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:ctypeid",
+      "type": "workspace_field",
+      "label": "CtypeId",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "CtypeId",
+        "label": null,
+        "id": "636632413519167264",
+        "row": 9,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/field:c$gender",
+      "type": "workspace_field",
+      "label": "C$Gender",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "C$Gender",
+        "label": null,
+        "id": null,
+        "row": 10,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": "",
+        "hidden_option": null,
+        "required_option": ""
+      }
+    },
+    {
+      "id": "customfield:c$gender",
+      "type": "customfield",
+      "label": "c$gender",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_03_split_panel_contact/rule:new_rule",
+      "type": "workspace_rule",
+      "label": "New Rule",
+      "data": {
+        "name": "New Rule",
+        "active": false,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Contact.CtypeId",
+            "source_type": "Field",
+            "operator": "EQ",
+            "value": "3",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "MessageBox",
+            "object_type": "MessageBox",
+            "object_id": null,
+            "operation": "Show",
+            "value": "This contact is created through email and may not hold sufficient information in the system",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      }
+    }
+  ],
+  "childEdges": [
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/tab:636908681376940067",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/tab:636908681376940067",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/tab:636908681812694990",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/tab:636908681812694990",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/tab:636908681812694990-to-workspace:real_edge_03_split_panel_contact/browser:636908689046358732",
+      "source": "workspace:real_edge_03_split_panel_contact/tab:636908681812694990",
+      "target": "workspace:real_edge_03_split_panel_contact/browser:636908689046358732",
+      "label": "has_browser"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/browser:636908689046358732-to-customscript-gcb_flex.php",
+      "source": "workspace:real_edge_03_split_panel_contact/browser:636908689046358732",
+      "target": "customscript:gcb_flex.php",
+      "label": "redirects_to"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/tab:636908679362564851",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/tab:636908679362564851",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/tab:636908679403907216",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/tab:636908679403907216",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/tab:636908679456970251",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/tab:636908679456970251",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:title",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:title",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:title-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:title",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:name.first",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:name.first",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:name.first-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:name.first",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:name.last",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:name.last",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:name.last-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:name.last",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:addr",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:addr",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:addr-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:addr",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:phoffice",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:phoffice",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:phoffice-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:phoffice",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:c$customerid",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:c$customerid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:c$customerid-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:c$customerid",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:c$customerid-to-customfield:c$customerid",
+      "source": "workspace:real_edge_03_split_panel_contact/field:c$customerid",
+      "target": "customfield:c$customerid",
+      "label": "references"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:email",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:email",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:email-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:email",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:ctypeid",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:ctypeid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:ctypeid-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:ctypeid",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/field:c$gender",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/field:c$gender",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:c$gender-to-osvcobject:contact",
+      "source": "workspace:real_edge_03_split_panel_contact/field:c$gender",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact/field:c$gender-to-customfield:c$gender",
+      "source": "workspace:real_edge_03_split_panel_contact/field:c$gender",
+      "target": "customfield:c$gender",
+      "label": "references"
+    },
+    {
+      "id": "edge-workspace:real_edge_03_split_panel_contact-to-workspace:real_edge_03_split_panel_contact/rule:new_rule",
+      "source": "workspace:real_edge_03_split_panel_contact",
+      "target": "workspace:real_edge_03_split_panel_contact/rule:new_rule",
+      "label": "has_rule"
+    }
+  ]
+}

@@ -1,0 +1,1805 @@
+{
+  "id": "workspace:real_edge_01_nested_tabset",
+  "type": "workspace",
+  "label": "real_edge_01_nested_tabset",
+  "data": {
+    "name": "real_edge_01_nested_tabset",
+    "type": "Incident",
+    "ui_type": "Incident",
+    "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+    "client_version": "26.2.0.326",
+    "is_multi_edit": false,
+    "row_count": 0,
+    "column_count": 0,
+    "tab_set_info": {
+      "row": null,
+      "column": null,
+      "row_span": null,
+      "column_span": null,
+      "summary_panel_height": "200",
+      "summary_panel_alignment": "FirstTab",
+      "can_reorder_tabs": false,
+      "wrap_tabs": false,
+      "summary_tab_index": "2",
+      "threshold_height": "500"
+    },
+    "record_types": [
+      {
+        "id": "1",
+        "name": "Incident"
+      },
+      {
+        "id": "6",
+        "name": "Contact"
+      },
+      {
+        "id": "7",
+        "name": "Org"
+      },
+      {
+        "id": "8",
+        "name": "Task"
+      },
+      {
+        "id": "126",
+        "name": "Asset"
+      }
+    ],
+    "ribbon_buttons": [
+      "Save",
+      "SaveAndClose",
+      "SaveAndSend",
+      "New",
+      "Refresh",
+      "Forward",
+      "Separator",
+      "Print",
+      "Copy",
+      "Delete",
+      "Propose",
+      "BestAnswer",
+      "Info"
+    ],
+    "info_items": [
+      {
+        "object_id": "Incident",
+        "field_id": "IId"
+      },
+      {
+        "object_id": "Incident",
+        "field_id": "Created"
+      },
+      {
+        "object_id": "Incident",
+        "field_id": "Updated"
+      },
+      {
+        "object_id": "Incident",
+        "field_id": "RelDue"
+      },
+      {
+        "object_id": "Incident",
+        "field_id": "Closed"
+      },
+      {
+        "object_id": "Incident",
+        "field_id": "CreatedBy"
+      }
+    ],
+    "rules": [
+      {
+        "name": "Hide Customer360 for Email Contacts",
+        "active": true,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Contact.CtypeId",
+            "source_type": "Field",
+            "operator": "EQ",
+            "value": "3",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "636632404590473054",
+            "object_type": "Object",
+            "object_id": "636632404590473054",
+            "operation": "Hidden",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "MessageBox",
+            "object_type": "MessageBox",
+            "object_id": null,
+            "operation": "Show",
+            "value": "This contact is created through email and may not hold sufficient information in the system",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      },
+      {
+        "name": "Filter Products for Segment",
+        "active": true,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Current",
+            "source_type": "Profile",
+            "operator": "LIST",
+            "value": "7;8;2;6",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "Incident.ProdId",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ConfigureMenuItems",
+            "value": "u0;383",
+            "value_operator": "EQ",
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Incident.CatId",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ConfigureMenuItems",
+            "value": "384;385;386",
+            "value_operator": "EQ",
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      }
+    ],
+    "tabs": [
+      {
+        "text": "SUMMARY_LBL",
+        "id": null,
+        "relationship_items": [],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [
+          {
+            "object_id": "Incident",
+            "field_id": "ProdId",
+            "label": null,
+            "id": "636632403892446858",
+            "row": 1,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": "OnNew:~any~;OnEdit:~any~"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "CId",
+            "label": null,
+            "id": "637117509668239961",
+            "row": 1,
+            "column": 2,
+            "default_phone_type": null,
+            "report_id": "8014",
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Status.Id",
+            "label": null,
+            "id": "636632403493114316",
+            "row": 1,
+            "column": 3,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Subject",
+            "label": null,
+            "id": "637117528899453697",
+            "row": 2,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "ChanId",
+            "label": null,
+            "id": "636766181545566802",
+            "row": 2,
+            "column": 2,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "CatId",
+            "label": null,
+            "id": "637117509073552909",
+            "row": 2,
+            "column": 3,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": "OnNew:~any~;OnEdit:~any~"
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Assigned",
+            "label": null,
+            "id": "636632403839549309",
+            "row": 3,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "PhOffice",
+            "label": "&Mobile Phone",
+            "id": "637117509126425321",
+            "row": 3,
+            "column": 2,
+            "default_phone_type": "1",
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "QueueId",
+            "label": null,
+            "id": "636632406750288729",
+            "row": 3,
+            "column": 3,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "C$Gender",
+            "label": null,
+            "id": "637100264821974040",
+            "row": 4,
+            "column": 2,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": "",
+            "hidden_option": null,
+            "required_option": "OnNew:~any~;OnEdit:~any~"
+          }
+        ],
+        "menus": [],
+        "title_bars": [
+          {
+            "text": "Details",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "Contact Details",
+            "row": 0,
+            "column": 2
+          },
+          {
+            "text": "Categorization",
+            "row": 0,
+            "column": 3
+          }
+        ],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "CONTACTS_LBL",
+        "id": null,
+        "relationship_items": [],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [
+          {
+            "object_id": "Contact",
+            "field_id": "Name.First",
+            "label": null,
+            "id": null,
+            "row": 1,
+            "column": 0,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Name.Last",
+            "label": null,
+            "id": null,
+            "row": 1,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Email",
+            "label": null,
+            "id": "636648859145855538",
+            "row": 2,
+            "column": 0,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Addr",
+            "label": null,
+            "id": "636951503319647795",
+            "row": 2,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "PhOffice",
+            "label": null,
+            "id": null,
+            "row": 3,
+            "column": 0,
+            "default_phone_type": "0",
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          }
+        ],
+        "menus": [],
+        "title_bars": [
+          {
+            "text": "Primary Contact Information",
+            "row": 0,
+            "column": 0
+          }
+        ],
+        "spacers": [],
+        "nested_tabsets": [
+          {
+            "id": null,
+            "row": 4,
+            "column": 0,
+            "can_reorder_tabs": true,
+            "sub_tabs": [
+              {
+                "text": "CONTACTS_LBL",
+                "id": null,
+                "relationship_items": [
+                  {
+                    "item_type": "Contacts",
+                    "ac_id": "9011",
+                    "id": null,
+                    "row": 0,
+                    "column": 0,
+                    "execute_on_new": false,
+                    "show_read_transactions": true,
+                    "default_channel": null,
+                    "search_report_id": "8014",
+                    "can_send_on_save": null,
+                    "can_use_smart_assistant": null,
+                    "default_channel_customer": null,
+                    "default_thread_on_new": null,
+                    "status_change_on_response": null
+                  }
+                ],
+                "browsers": [],
+                "add_in_items": [],
+                "fields": [],
+                "menus": [],
+                "title_bars": [],
+                "spacers": [],
+                "nested_tabsets": []
+              },
+              {
+                "text": "CONTACT_FIELDS_LBL",
+                "id": null,
+                "relationship_items": [],
+                "browsers": [],
+                "add_in_items": [],
+                "fields": [
+                  {
+                    "object_id": "Contact",
+                    "field_id": "Login",
+                    "label": null,
+                    "id": null,
+                    "row": 0,
+                    "column": 0,
+                    "default_phone_type": null,
+                    "report_id": null,
+                    "readonly_option": null,
+                    "hidden_option": null,
+                    "required_option": ""
+                  },
+                  {
+                    "object_id": "Contact",
+                    "field_id": "MaOptIn",
+                    "label": null,
+                    "id": null,
+                    "row": 0,
+                    "column": 1,
+                    "default_phone_type": null,
+                    "report_id": null,
+                    "readonly_option": null,
+                    "hidden_option": null,
+                    "required_option": null
+                  },
+                  {
+                    "object_id": "Contact",
+                    "field_id": "State",
+                    "label": null,
+                    "id": null,
+                    "row": 0,
+                    "column": 2,
+                    "default_phone_type": null,
+                    "report_id": null,
+                    "readonly_option": null,
+                    "hidden_option": null,
+                    "required_option": null
+                  },
+                  {
+                    "object_id": "Contact",
+                    "field_id": "MaMailType",
+                    "label": null,
+                    "id": null,
+                    "row": 1,
+                    "column": 1,
+                    "default_phone_type": null,
+                    "report_id": null,
+                    "readonly_option": null,
+                    "hidden_option": null,
+                    "required_option": null
+                  },
+                  {
+                    "object_id": "Contact",
+                    "field_id": "Source",
+                    "label": null,
+                    "id": null,
+                    "row": 1,
+                    "column": 2,
+                    "default_phone_type": null,
+                    "report_id": null,
+                    "readonly_option": null,
+                    "hidden_option": null,
+                    "required_option": null
+                  }
+                ],
+                "menus": [],
+                "title_bars": [],
+                "spacers": [],
+                "nested_tabsets": []
+              },
+              {
+                "text": "INCIDENT_HISTORY_LBL",
+                "id": null,
+                "relationship_items": [
+                  {
+                    "item_type": "Report",
+                    "ac_id": "9029",
+                    "id": null,
+                    "row": 0,
+                    "column": 0,
+                    "execute_on_new": false,
+                    "show_read_transactions": true,
+                    "default_channel": null,
+                    "search_report_id": "0"
+                  }
+                ],
+                "browsers": [],
+                "add_in_items": [],
+                "fields": [],
+                "menus": [],
+                "title_bars": [],
+                "spacers": [],
+                "nested_tabsets": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "text": "Other Info",
+        "id": "636648859515971722",
+        "relationship_items": [],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [
+          {
+            "object_id": "Incident",
+            "field_id": "MailboxId",
+            "label": null,
+            "id": null,
+            "row": 1,
+            "column": 0,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "InterfaceId",
+            "label": null,
+            "id": null,
+            "row": 1,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "SlaiId",
+            "label": null,
+            "id": null,
+            "row": 1,
+            "column": 2,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "Source",
+            "label": null,
+            "id": null,
+            "row": 2,
+            "column": 0,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          },
+          {
+            "object_id": "Incident",
+            "field_id": "LangId",
+            "label": null,
+            "id": null,
+            "row": 2,
+            "column": 1,
+            "default_phone_type": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null
+          }
+        ],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [
+          {
+            "height": "26",
+            "row": 0,
+            "column": 0
+          }
+        ],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Incident Details",
+        "id": "636773684231314258",
+        "relationship_items": [
+          {
+            "item_type": "RichIncidentThread",
+            "ac_id": null,
+            "id": "638131947442246948",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": true,
+            "show_read_transactions": true,
+            "default_channel": "NoDefault",
+            "search_report_id": "125",
+            "can_send_on_save": "True",
+            "can_use_smart_assistant": "True",
+            "default_channel_customer": "Phone",
+            "default_thread_on_new": "CustomerEntry",
+            "status_change_on_response": "ToSolved"
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "TASKS_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "Tasks",
+            "ac_id": "9018",
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": "8010",
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "ATTACHMENTS_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "FileAttachments",
+            "ac_id": null,
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "execute_on_new": true,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "AUDIT_LOG_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "IncidentAuditLog",
+            "ac_id": "9041",
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": false,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      }
+    ],
+    "fields": [],
+    "menus": [],
+    "title_bars": [],
+    "spacers": [],
+    "ribbon_links": [],
+    "flag_visible": false
+  },
+  "childNodes": [
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "type": "workspace_tab",
+      "label": "SUMMARY_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_summary_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:prodid",
+      "type": "workspace_field",
+      "label": "ProdId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "ProdId",
+        "label": null,
+        "id": "636632403892446858",
+        "row": 1,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": "OnNew:~any~;OnEdit:~any~"
+      }
+    },
+    {
+      "id": "osvcobject:incident",
+      "type": "osvcobject",
+      "label": "Incident",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:cid",
+      "type": "workspace_field",
+      "label": "CId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "CId",
+        "label": null,
+        "id": "637117509668239961",
+        "row": 1,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": "8014",
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:status.id",
+      "type": "workspace_field",
+      "label": "Status.Id",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "Status.Id",
+        "label": null,
+        "id": "636632403493114316",
+        "row": 1,
+        "column": 3,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:subject",
+      "type": "workspace_field",
+      "label": "Subject",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "Subject",
+        "label": null,
+        "id": "637117528899453697",
+        "row": 2,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:chanid",
+      "type": "workspace_field",
+      "label": "ChanId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "ChanId",
+        "label": null,
+        "id": "636766181545566802",
+        "row": 2,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:catid",
+      "type": "workspace_field",
+      "label": "CatId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "CatId",
+        "label": null,
+        "id": "637117509073552909",
+        "row": 2,
+        "column": 3,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": "OnNew:~any~;OnEdit:~any~"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:assigned",
+      "type": "workspace_field",
+      "label": "Assigned",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "Assigned",
+        "label": null,
+        "id": "636632403839549309",
+        "row": 3,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "type": "workspace_field",
+      "label": "PhOffice",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "PhOffice",
+        "label": "&Mobile Phone",
+        "id": "637117509126425321",
+        "row": 3,
+        "column": 2,
+        "default_phone_type": "1",
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "osvcobject:contact",
+      "type": "osvcobject",
+      "label": "Contact",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:queueid",
+      "type": "workspace_field",
+      "label": "QueueId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "QueueId",
+        "label": null,
+        "id": "636632406750288729",
+        "row": 3,
+        "column": 3,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:c$gender",
+      "type": "workspace_field",
+      "label": "C$Gender",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "C$Gender",
+        "label": null,
+        "id": "637100264821974040",
+        "row": 4,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": "",
+        "hidden_option": null,
+        "required_option": "OnNew:~any~;OnEdit:~any~"
+      }
+    },
+    {
+      "id": "customfield:c$gender",
+      "type": "customfield",
+      "label": "c$gender",
+      "data": {
+        "_fallback": true
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "type": "workspace_tab",
+      "label": "CONTACTS_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_contacts_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:name.first",
+      "type": "workspace_field",
+      "label": "Name.First",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Name.First",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:name.last",
+      "type": "workspace_field",
+      "label": "Name.Last",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Name.Last",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:email",
+      "type": "workspace_field",
+      "label": "Email",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Email",
+        "label": null,
+        "id": "636648859145855538",
+        "row": 2,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:addr",
+      "type": "workspace_field",
+      "label": "Addr",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Addr",
+        "label": null,
+        "id": "636951503319647795",
+        "row": 2,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "type": "workspace_field",
+      "label": "PhOffice",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "PhOffice",
+        "label": null,
+        "id": null,
+        "row": 3,
+        "column": 0,
+        "default_phone_type": "0",
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "type": "workspace_tab",
+      "label": "CONTACTS_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_contacts_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "type": "workspace_tab",
+      "label": "CONTACT_FIELDS_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_contact_fields_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:login",
+      "type": "workspace_field",
+      "label": "Login",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Login",
+        "label": null,
+        "id": null,
+        "row": 0,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": ""
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:maoptin",
+      "type": "workspace_field",
+      "label": "MaOptIn",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "MaOptIn",
+        "label": null,
+        "id": null,
+        "row": 0,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:state",
+      "type": "workspace_field",
+      "label": "State",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "State",
+        "label": null,
+        "id": null,
+        "row": 0,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:mamailtype",
+      "type": "workspace_field",
+      "label": "MaMailType",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "MaMailType",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:source",
+      "type": "workspace_field",
+      "label": "Source",
+      "data": {
+        "object_id": "Contact",
+        "field_id": "Source",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_incident_history_lbl",
+      "type": "workspace_tab",
+      "label": "INCIDENT_HISTORY_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_incident_history_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "type": "workspace_tab",
+      "label": "Other Info",
+      "data": {
+        "type": "Tab",
+        "id": "636648859515971722"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:mailboxid",
+      "type": "workspace_field",
+      "label": "MailboxId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "MailboxId",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:interfaceid",
+      "type": "workspace_field",
+      "label": "InterfaceId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "InterfaceId",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:slaiid",
+      "type": "workspace_field",
+      "label": "SlaiId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "SlaiId",
+        "label": null,
+        "id": null,
+        "row": 1,
+        "column": 2,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:source",
+      "type": "workspace_field",
+      "label": "Source",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "Source",
+        "label": null,
+        "id": null,
+        "row": 2,
+        "column": 0,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/field:langid",
+      "type": "workspace_field",
+      "label": "LangId",
+      "data": {
+        "object_id": "Incident",
+        "field_id": "LangId",
+        "label": null,
+        "id": null,
+        "row": 2,
+        "column": 1,
+        "default_phone_type": null,
+        "report_id": null,
+        "readonly_option": null,
+        "hidden_option": null,
+        "required_option": null
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:636773684231314258",
+      "type": "workspace_tab",
+      "label": "Incident Details",
+      "data": {
+        "type": "Tab",
+        "id": "636773684231314258"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_tasks_lbl",
+      "type": "workspace_tab",
+      "label": "TASKS_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_tasks_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_attachments_lbl",
+      "type": "workspace_tab",
+      "label": "ATTACHMENTS_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_attachments_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/tab:tab_audit_log_lbl",
+      "type": "workspace_tab",
+      "label": "AUDIT_LOG_LBL",
+      "data": {
+        "type": "Tab",
+        "id": "tab_audit_log_lbl"
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/rule:hide_customer360_for_email_contacts",
+      "type": "workspace_rule",
+      "label": "Hide Customer360 for Email Contacts",
+      "data": {
+        "name": "Hide Customer360 for Email Contacts",
+        "active": true,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Contact.CtypeId",
+            "source_type": "Field",
+            "operator": "EQ",
+            "value": "3",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "636632404590473054",
+            "object_type": "Object",
+            "object_id": "636632404590473054",
+            "operation": "Hidden",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "MessageBox",
+            "object_type": "MessageBox",
+            "object_id": null,
+            "operation": "Show",
+            "value": "This contact is created through email and may not hold sufficient information in the system",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      }
+    },
+    {
+      "id": "workspace:real_edge_01_nested_tabset/rule:filter_products_for_segment",
+      "type": "workspace_rule",
+      "label": "Filter Products for Segment",
+      "data": {
+        "name": "Filter Products for Segment",
+        "active": true,
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Current",
+            "source_type": "Profile",
+            "operator": "LIST",
+            "value": "7;8;2;6",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "Incident.ProdId",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ConfigureMenuItems",
+            "value": "u0;383",
+            "value_operator": "EQ",
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Incident.CatId",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ConfigureMenuItems",
+            "value": "384;385;386",
+            "value_operator": "EQ",
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      }
+    }
+  ],
+  "childEdges": [
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:prodid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:prodid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:prodid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:prodid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:cid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:cid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:cid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:cid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:cid-to-report-8014",
+      "source": "workspace:real_edge_01_nested_tabset/field:cid",
+      "target": "report:report 8014",
+      "label": "runs_report"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:status.id",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:status.id",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:status.id-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:status.id",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:subject",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:subject",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:subject-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:subject",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:chanid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:chanid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:chanid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:chanid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:catid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:catid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:catid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:catid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:assigned",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:assigned",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:assigned-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:assigned",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:phoffice",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:phoffice-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:queueid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:queueid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:queueid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:queueid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl-to-workspace:real_edge_01_nested_tabset/field:c$gender",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_summary_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:c$gender",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:c$gender-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:c$gender",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:c$gender-to-customfield:c$gender",
+      "source": "workspace:real_edge_01_nested_tabset/field:c$gender",
+      "target": "customfield:c$gender",
+      "label": "references"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl-to-workspace:real_edge_01_nested_tabset/field:name.first",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:name.first",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:name.first-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:name.first",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl-to-workspace:real_edge_01_nested_tabset/field:name.last",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:name.last",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:name.last-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:name.last",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl-to-workspace:real_edge_01_nested_tabset/field:email",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:email",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:email-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:email",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl-to-workspace:real_edge_01_nested_tabset/field:addr",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:addr",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:addr-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:addr",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl-to-workspace:real_edge_01_nested_tabset/field:phoffice",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:phoffice-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:phoffice",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_contacts_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl-to-workspace:real_edge_01_nested_tabset/field:login",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:login",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:login-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:login",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl-to-workspace:real_edge_01_nested_tabset/field:maoptin",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:maoptin",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:maoptin-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:maoptin",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl-to-workspace:real_edge_01_nested_tabset/field:state",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:state",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:state-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:state",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl-to-workspace:real_edge_01_nested_tabset/field:mamailtype",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:mamailtype",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:mamailtype-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:mamailtype",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl-to-workspace:real_edge_01_nested_tabset/field:source",
+      "source": "workspace:real_edge_01_nested_tabset/tab:tab_contact_fields_lbl",
+      "target": "workspace:real_edge_01_nested_tabset/field:source",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:source-to-osvcobject:contact",
+      "source": "workspace:real_edge_01_nested_tabset/field:source",
+      "target": "osvcobject:contact",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_incident_history_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_incident_history_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:636648859515971722-to-workspace:real_edge_01_nested_tabset/field:mailboxid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "target": "workspace:real_edge_01_nested_tabset/field:mailboxid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:mailboxid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:mailboxid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:636648859515971722-to-workspace:real_edge_01_nested_tabset/field:interfaceid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "target": "workspace:real_edge_01_nested_tabset/field:interfaceid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:interfaceid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:interfaceid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:636648859515971722-to-workspace:real_edge_01_nested_tabset/field:slaiid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "target": "workspace:real_edge_01_nested_tabset/field:slaiid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:slaiid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:slaiid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:636648859515971722-to-workspace:real_edge_01_nested_tabset/field:source",
+      "source": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "target": "workspace:real_edge_01_nested_tabset/field:source",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:source-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:source",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/tab:636648859515971722-to-workspace:real_edge_01_nested_tabset/field:langid",
+      "source": "workspace:real_edge_01_nested_tabset/tab:636648859515971722",
+      "target": "workspace:real_edge_01_nested_tabset/field:langid",
+      "label": "has_field"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset/field:langid-to-osvcobject:incident",
+      "source": "workspace:real_edge_01_nested_tabset/field:langid",
+      "target": "osvcobject:incident",
+      "label": "table"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:636773684231314258",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:636773684231314258",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_tasks_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_tasks_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_attachments_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_attachments_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/tab:tab_audit_log_lbl",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/tab:tab_audit_log_lbl",
+      "label": "contains"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/rule:hide_customer360_for_email_contacts",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/rule:hide_customer360_for_email_contacts",
+      "label": "has_rule"
+    },
+    {
+      "id": "edge-workspace:real_edge_01_nested_tabset-to-workspace:real_edge_01_nested_tabset/rule:filter_products_for_segment",
+      "source": "workspace:real_edge_01_nested_tabset",
+      "target": "workspace:real_edge_01_nested_tabset/rule:filter_products_for_segment",
+      "label": "has_rule"
+    }
+  ]
+}

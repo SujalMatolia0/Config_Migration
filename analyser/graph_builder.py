@@ -25,6 +25,69 @@ def build_graph(components, relationships, orphans, endpoints):
     - Edge label truncated to 80 chars for UI readability
     - Async CPM procedures get distinct 'asynccpm' type for UI styling
     """
+def get_detail_filename(node_id):
+    safe_name = node_id.replace(":", "_").replace(" ", "_").replace("/", "_").replace("\\", "_")
+    safe_name = "".join(c for c in safe_name if c.isalnum() or c in ("_", "-", "."))
+    return f"{safe_name}.json"
+
+
+def make_lightweight_node_data(node_type, data):
+    if not data:
+        return {}
+    if data.get("_fallback"):
+        return data
+
+    light = {
+        "name": data.get("name"),
+        "type": data.get("type"),
+        "id": data.get("id"),
+        "object_type": data.get("object_type"),
+        "script_type": data.get("script_type"),
+        "php_version": data.get("php_version"),
+        "is_async": data.get("is_async"),
+        "operations_label": data.get("operations_label"),
+        "entry_point": data.get("entry_point"),
+    }
+
+    # Add relative path to report markdown
+    lower_type = node_type.lower()
+    if lower_type == "workspace" and data.get("name"):
+        ws_slug = data["name"].replace(" ", "_")
+        light["mdPath"] = f"../workspaces/{ws_slug}/report.md"
+    elif lower_type == "report":
+        rep_name = (data.get("name") or "Report").replace(" ", "_")
+        rep_id = data.get("id") or "doc"
+        light["mdPath"] = f"../reports/report_{rep_name}_{rep_id}.md"
+    elif lower_type == "cpm":
+        light["mdPath"] = "../cpm/report_CPM_Summary.md"
+    elif lower_type == "buiaddin" and data.get("name"):
+        bname = data["name"].replace(" ", "_")
+        light["mdPath"] = f"../scripts/report_{bname}.md"
+
+    # Counts of nested objects for summary UI
+    for key in ["tabs", "fields", "rules", "columns", "filters", "soap_actions", "custom_fields_read", "custom_fields_written", "config_vars", "osvc_fields_read", "osvc_fields_written", "api_calls", "modal_views", "lifecycle_listeners", "external_libraries", "hooks", "osvc_objects"]:
+        val = data.get(key)
+        if val is not None:
+            if isinstance(val, list):
+                if key in ["hooks", "osvc_objects", "soap_actions", "custom_fields_read", "custom_fields_written", "config_vars", "osvc_fields_read", "osvc_fields_written", "modal_views", "lifecycle_listeners", "external_libraries"]:
+                    light[key] = [str(x) for x in val]
+                else:
+                    light[key] = [None] * len(val)
+
+    if data.get("risk_flags"):
+        light["risk_flags"] = [
+            r if isinstance(r, str) else (r.get("type") or r.get("detail") or str(r))
+            for r in data["risk_flags"]
+        ]
+
+    return light
+
+
+def build_graph(components, relationships, orphans, endpoints):
+    """
+    Translates parsed components, relationships, endpoints, and orphans
+    into a node-and-edge layout for React Flow rendering.
+    """
     nodes    = []
     edges    = []
     node_ids = set()   # stores "type:name" lowercase keys
@@ -59,6 +122,12 @@ def build_graph(components, relationships, orphans, endpoints):
         if node_type == "CPM" and extra_data and extra_data.get("is_async"):
             render_type = "asynccpm"
 
+        light_data = None
+        if extra_data:
+            light_data = make_lightweight_node_data(node_type, extra_data)
+            if not extra_data.get("_fallback"):
+                light_data["detailsPath"] = f"details/{get_detail_filename(node_id)}"
+
         node_ids.add(node_id)
         nodes.append({
             "id":          node_id,
@@ -66,7 +135,7 @@ def build_graph(components, relationships, orphans, endpoints):
             "label":       label,
             "isOrphan":    is_orphan,
             "orphanReason": orphan_reason,
-            "data":        extra_data or {"_fallback": True}
+            "data":        light_data or {"_fallback": True}
         })
         return node_id
 
@@ -104,21 +173,8 @@ def build_graph(components, relationships, orphans, endpoints):
     for bui in components.get("buiAddins", []):
         add_node("BUIAddin", bui.get("name", "BUI Add-In"), bui)
 
-    # ── Relationship-derived Nodes ─────────────────────────────────────────
-    for rel in relationships:
-        to_type = rel["to"]["type"]
-        to_name = rel["to"].get("name") or normalise_id(rel["to"].get("id")) or "Unknown"
-
-        if to_type == "OSVCObject":
-            add_node("OSVCObject", to_name)
-        elif to_type == "CustomField":
-            add_node("CustomField", to_name)
-        elif to_type == "ConfigSetting":
-            add_node("ConfigSetting", to_name)
-        elif to_type == "ReportColumn":
-            add_node("ReportColumn", to_name)
-
     # ── Edges ──────────────────────────────────────────────────────────────
+    SECONDARY_TYPES = {"osvobject", "osvcobject", "customfield", "configsetting", "reportcolumn"}
     seen_edges = set()
 
     for idx, rel in enumerate(relationships):
@@ -129,6 +185,10 @@ def build_graph(components, relationships, orphans, endpoints):
         to_type   = rel["to"]["type"]
         to_target = rel["to"].get("name") or normalise_id(rel["to"].get("id")) or "Unknown"
         to_id     = f"{to_type.lower()}:{to_target.lower()}"
+
+        # Exclude secondary relationship nodes from the global core graph view
+        if from_type.lower() in SECONDARY_TYPES or to_type.lower() in SECONDARY_TYPES:
+            continue
 
         # Add fallback nodes for anything not yet in the graph
         if from_id not in node_ids:
