@@ -1,6 +1,6 @@
 import json
 import os
-from analyser.graph_builder import build_graph
+from src.analyser.graph_builder import build_graph
 
 USE_AI_SUMMARY = True
 

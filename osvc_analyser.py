@@ -8,20 +8,20 @@ from lxml import etree
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from parsers.workspace_parser import parse_workspace_file
-from parsers.report_parser import parse_report_file
-from parsers.rule_parser import parse_rule_file
-from parsers.nav_parser import parse_nav_file
-from parsers.cpm_parser import parse_cpm_file
-from parsers.script_parser import parse_script_file
-from parsers.bui_addin_parser import parse_bui_addin
+from src.parsers.workspace_parser import parse_workspace_file
+from src.parsers.report_parser import parse_report_file
+from src.parsers.rule_parser import parse_rule_file
+from src.parsers.nav_parser import parse_nav_file
+from src.parsers.cpm_parser import parse_cpm_file
+from src.parsers.script_parser import parse_script_file
+from src.parsers.bui_addin_parser import parse_bui_addin
 
-from analyser.relationship_mapper import map_relationships
-from analyser.orphan_detector import detect_orphans
-from analyser.endpoint_extractor import extract_endpoints
+from src.analyser.relationship_mapper import map_relationships
+from src.analyser.orphan_detector import detect_orphans
+from src.analyser.endpoint_extractor import extract_endpoints
 
-from output.json_writer import write_master_json
-from output.report_builder import build_html_report, build_pdf_report
+from src.output.json_writer import write_master_json
+from src.output.report_builder import build_html_report, build_pdf_report
 
 
 def detect_and_parse_file(file_path, components, strict=False):
@@ -358,7 +358,7 @@ def main():
         print(f"Unknown elements dump written -> {unknowns_json_path} ({total_unknown_count} items)")
 
     if not args.json_only:
-        from output.markdown_generator import generate_report_markdown
+        from src.output.markdown_generator import generate_report_markdown
 
         workspaces = components.get("workspaces", [])
         multi = len(workspaces) > 1
@@ -402,7 +402,7 @@ def main():
                 print("  report.md written")
 
                 # Write workspace report.json
-                from output.json_writer import write_workspace_report_json
+                from src.output.json_writer import write_workspace_report_json
                 write_workspace_report_json(ws, os.path.join(ws_out_dir, "report.json"))
                 write_workspace_report_json(ws, os.path.join(ws_json_fmt_dir, "report.json"))
                 print("  report.json written")
@@ -427,7 +427,7 @@ def main():
                     with open(index_path, "r", encoding="utf-8") as idx_f:
                         f.write(idx_f.read())
                 print(f"  index.md written -> {index_path}")
-                from output.json_writer import write_index_json
+                from src.output.json_writer import write_index_json
                 index_json_path = os.path.join(output_dir, "index.json")
                 write_index_json(workspaces, index_json_path)
                 write_index_json(workspaces, os.path.join(json_dir, "index.json"))
@@ -435,8 +435,8 @@ def main():
 
         reports = components.get("reports", [])
         if reports:
-            from output.markdown_generator import generate_analytics_report_markdown
-            from output.json_writer import write_analytics_report_json
+            from src.output.markdown_generator import generate_analytics_report_markdown
+            from src.output.json_writer import write_analytics_report_json
             for rep in reports:
                 if rep.get("format") == "analytics_core":
                     rep_name = rep.get("name", "Report").replace(" ", "_")
@@ -462,8 +462,8 @@ def main():
 
         cpm_items = components.get("cpm", [])
         if cpm_items:
-            from output.markdown_generator import generate_cpm_report_markdown
-            from output.json_writer import write_cpm_summary_json
+            from src.output.markdown_generator import generate_cpm_report_markdown
+            from src.output.json_writer import write_cpm_summary_json
             cpm_md_content = generate_cpm_report_markdown(cpm_items, orphans, components["workspaces"], use_ai_summary=args.use_ai_summary)
             cpm_md_path = os.path.join(cpm_dir, "report_CPM_Summary.md")
             with open(cpm_md_path, "w", encoding="utf-8") as f:
@@ -483,8 +483,8 @@ def main():
 
         bui_items = components.get("buiAddins", [])
         if bui_items:
-            from output.markdown_generator import generate_bui_addin_report_markdown, generate_single_bui_addin_markdown
-            from output.json_writer import write_bui_addin_summary_json, write_single_bui_addin_json
+            from src.output.markdown_generator import generate_bui_addin_report_markdown, generate_single_bui_addin_markdown
+            from src.output.json_writer import write_bui_addin_summary_json, write_single_bui_addin_json
             
             bui_md_content = generate_bui_addin_report_markdown(bui_items, components.get("reports", []), components["workspaces"])
             bui_md_path = os.path.join(scripts_dir, "report_BUI_Addins.md")

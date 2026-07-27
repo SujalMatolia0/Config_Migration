@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 import zipfile
-from parsers.bui_addin_parser import parse_bui_addin
+from src.parsers.bui_addin_parser import parse_bui_addin
 
 class TestBUIAddinParser(unittest.TestCase):
     def setUp(self):

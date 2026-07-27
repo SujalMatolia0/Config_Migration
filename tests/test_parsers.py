@@ -5,11 +5,11 @@ import sys
 # Add project root to python path to allow imports from folders
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from parsers.workspace_parser import parse_workspace_file
-from parsers.report_parser import parse_report_file
-from parsers.cpm_parser import parse_cpm_file
-from parsers.script_parser import parse_script_file
-from output.markdown_generator import generate_report_markdown, generate_analytics_report_markdown
+from src.parsers.workspace_parser import parse_workspace_file
+from src.parsers.report_parser import parse_report_file
+from src.parsers.cpm_parser import parse_cpm_file
+from src.parsers.script_parser import parse_script_file
+from src.output.markdown_generator import generate_report_markdown, generate_analytics_report_markdown
 
 class TestOSVCParsers(unittest.TestCase):
     def setUp(self):

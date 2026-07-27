@@ -1,6 +1,6 @@
 import os
 from lxml import etree
-from parsers.utils import capture_unknown
+from src.parsers.utils import capture_unknown
 
 KNOWN_WORKSPACE_ATTRS = {
     "Type", "UIType", "ServerVersion", "ClientVersion", "IsMultiEdit", "Id", "Name",
