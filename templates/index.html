@@ -517,14 +517,6 @@
               <span class="switch-desc" style="font-size:11px;">Export unknowns.json report.</span>
             </div>
 
-            <div class="switch-row" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
-              <span class="switch-title" style="font-size:13px;">Report Format</span>
-              <select id="optFormat" style="width:100%;background:#FAF5ED;border:1px solid rgba(153,0,38,0.2);color:#2C070B;padding:6px 8px;border-radius:6px;font-size:12px;">
-                <option value="html" selected>HTML Dashboard</option>
-                <option value="pdf">PDF Suite</option>
-              </select>
-            </div>
-
           </div>
 
           <button class="btn btn-primary" style="padding:12px 8px;font-size:13px;width:100%;" onclick="runAnalysis()">RUN ACCELERATOR</button>
@@ -720,9 +712,9 @@
       const useAi = document.getElementById('optAiSummary').checked;
       const strict = document.getElementById('optStrict').checked;
       const dumpUnknowns = document.getElementById('optDumpUnknowns').checked;
-      const format = document.getElementById('optFormat').value;
+      const format = 'html';
       logConsole('[START] Launching OSVC Configuration Analyser CLI...');
-      logConsole('[CONFIG] AI Summary: ' + useAi + ' | Strict Mode: ' + strict + ' | Dump Unknowns: ' + dumpUnknowns + ' | Format: ' + format);
+      logConsole('[CONFIG] AI Summary: ' + useAi + ' | Strict Mode: ' + strict + ' | Dump Unknowns: ' + dumpUnknowns);
       try {
         const res = await fetch('/api/run-analysis', {
           method: 'POST',

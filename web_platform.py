@@ -352,7 +352,7 @@ def download_results():
         for root, dirs, files in os.walk(RESULTS_DIR):
             dirs[:] = [d for d in dirs if not d.startswith(".")]
             for fname in files:
-                if fname.startswith("."):
+                if fname.startswith(".") or not fname.lower().endswith(".md"):
                     continue
                 full = os.path.join(root, fname)
                 arcname = os.path.relpath(full, RESULTS_DIR)
