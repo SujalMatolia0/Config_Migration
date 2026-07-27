@@ -101,6 +101,9 @@ def build_graph(components, relationships, orphans, endpoints):
     for ep in endpoints:
         add_node("ExternalEndpoint", ep["url"], ep)
 
+    for bui in components.get("buiAddins", []):
+        add_node("BUIAddin", bui.get("name", "BUI Add-In"), bui)
+
     # ── Relationship-derived Nodes ─────────────────────────────────────────
     for rel in relationships:
         to_type = rel["to"]["type"]

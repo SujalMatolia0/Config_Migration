@@ -1,6 +1,6 @@
 {
   "meta": {
-    "exportedAt": "2026-07-24",
+    "exportedAt": "2026-07-27",
     "serverVersion": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
     "totalComponents": 10,
     "workspace": "real_edge_03_split_panel_contact"
@@ -4066,6 +4066,214 @@
         }
       },
       {
+        "id": "buiaddin:contactorglookupbuiaddin",
+        "type": "buiaddin",
+        "label": "ContactOrgLookupBUIAddin",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "ContactOrgLookupBUIAddin",
+          "type": "BUIAddin",
+          "entry_point": "init.html",
+          "files": [
+            "ContactOrgDetailsView.html",
+            "displayContactOrgResults.js",
+            "init.html",
+            "logic.js"
+          ],
+          "external_dependencies": [
+            "../../AuthLibraryExtn/AuthLibraryExtn.js"
+          ],
+          "external_libraries": [
+            "jquery-3.5.1.min.js",
+            "jquery-3.6.0.min.js",
+            "jspdf.min.js",
+            "jspdf.plugin.autotable.min.js"
+          ],
+          "osvc_fields_read": [
+            "Contact.OrgId",
+            "Contact.first_name",
+            "Contact.last_name",
+            "Incident.CId",
+            "Incident.CO$Org",
+            "Incident.IId",
+            "Incident.c$org_id_temp",
+            "Incident.c$org_label_temp",
+            "Incident.c_id",
+            "Incident.source"
+          ],
+          "osvc_fields_written": [
+            "Incident.CId",
+            "Incident.CO$Org",
+            "Incident.c$org_id_temp",
+            "Incident.c$org_label_temp"
+          ],
+          "field_listeners": [
+            "Incident.CO$Org",
+            "Incident.c_id"
+          ],
+          "lifecycle_listeners": [],
+          "editor_commands": [],
+          "report_ids": [
+            100407
+          ],
+          "api_calls": [
+            {
+              "method": "POST",
+              "endpoint": "connect/v1.3/analyticsReportResults",
+              "report_id": 100407,
+              "type": "REST API",
+              "file": "displayContactOrgResults.js"
+            },
+            {
+              "method": "GET",
+              "endpoint": "connect/v1.3/queryResults",
+              "object": "Organizations",
+              "type": "REST API",
+              "file": "logic.js"
+            }
+          ],
+          "modal_views": [],
+          "modal_views_details": [],
+          "workspace_objects_opened": [],
+          "extension_ids_registered": {
+            "logic.js": [
+              "triggerOrgChange"
+            ]
+          },
+          "risk_flags": [
+            {
+              "severity": "medium",
+              "type": "Synchronous AJAX",
+              "detail": "Synchronous AJAX (async: false) detected in logic.js — blocks browser UI thread"
+            },
+            {
+              "severity": "medium",
+              "type": "Custom Field Schema Dependency",
+              "detail": "Direct CustomFields.c ROQL LookupName query in logic.js — vulnerable to schema alterations"
+            },
+            {
+              "severity": "high",
+              "type": "Duplicate Library Load",
+              "detail": "Duplicate jQuery versions loaded in init.html: https://code.jquery.com/jquery-3.5.1.min.js, https://code.jquery.com/jquery-3.6.0.min.js"
+            },
+            {
+              "severity": "high",
+              "type": "Relative Path Dependency",
+              "detail": "Relative path script reference '../../AuthLibraryExtn/AuthLibraryExtn.js' in init.html — will fail if add-in path changes"
+            },
+            {
+              "severity": "medium",
+              "type": "Hardcoded Report ID",
+              "detail": "Hardcoded Report ID 100407 in BUI Add-In code — risks silent failure if report ID changes"
+            },
+            {
+              "severity": "low",
+              "type": "Unused Library Import",
+              "detail": "jsPDF / jsPDF-AutoTable loaded in HTML headers but unreferenced in JavaScript"
+            }
+          ]
+        }
+      },
+      {
+        "id": "buiaddin:sendtosiebelbuiaddin",
+        "type": "buiaddin",
+        "label": "SendToSiebelBUIAddin",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "SendToSiebelBUIAddin",
+          "type": "BUIAddin",
+          "entry_point": "init.html",
+          "files": [
+            "askForSiebelNumber.html",
+            "askForSiebelNumber.js",
+            "init.html",
+            "logic.js",
+            "successMessage.html"
+          ],
+          "external_dependencies": [
+            "../../AuthLibraryExtn/AuthLibraryExtn.js"
+          ],
+          "external_libraries": [
+            "jquery-3.6.0.min.js",
+            "jquery-ui.js",
+            "jquery.min.js",
+            "jspdf.min.js",
+            "jspdf.plugin.autotable.min.js"
+          ],
+          "osvc_fields_read": [
+            "Incident.Created",
+            "Incident.IId",
+            "Incident.c$siebel_sr_number"
+          ],
+          "osvc_fields_written": [
+            "Incident.c$siebel_sr_number"
+          ],
+          "field_listeners": [
+            "Incident.c$siebel_sr_number"
+          ],
+          "lifecycle_listeners": [
+            "RecordSaved"
+          ],
+          "editor_commands": [
+            "Save"
+          ],
+          "report_ids": [],
+          "api_calls": [
+            {
+              "method": "POST",
+              "endpoint": "/cc/ajaxCustom/addSrToSiebel",
+              "type": "CP Controller Endpoint",
+              "file": "logic.js"
+            }
+          ],
+          "modal_views": [],
+          "modal_views_details": [],
+          "workspace_objects_opened": [],
+          "extension_ids_registered": {
+            "logic.js": [
+              "IFieldDetails"
+            ],
+            "askForSiebelNumber.js": [
+              "value"
+            ]
+          },
+          "risk_flags": [
+            {
+              "severity": "medium",
+              "type": "Synchronous AJAX",
+              "detail": "Synchronous AJAX (async: false) detected in logic.js — blocks browser UI thread"
+            },
+            {
+              "severity": "medium",
+              "type": "Synchronous AJAX",
+              "detail": "Synchronous AJAX (async: false) detected in askForSiebelNumber.js — blocks browser UI thread"
+            },
+            {
+              "severity": "high",
+              "type": "Duplicate Library Load",
+              "detail": "Duplicate jQuery versions loaded in init.html: https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js, https://code.jquery.com/jquery-3.6.0.min.js"
+            },
+            {
+              "severity": "high",
+              "type": "Relative Path Dependency",
+              "detail": "Relative path script reference '../../AuthLibraryExtn/AuthLibraryExtn.js' in init.html — will fail if add-in path changes"
+            },
+            {
+              "severity": "high",
+              "type": "Relative Path Dependency",
+              "detail": "Relative path script reference '../../AuthLibraryExtn/AuthLibraryExtn.js' in askForSiebelNumber.html — will fail if add-in path changes"
+            },
+            {
+              "severity": "low",
+              "type": "Unused Library Import",
+              "detail": "jsPDF / jsPDF-AutoTable loaded in HTML headers but unreferenced in JavaScript"
+            }
+          ]
+        }
+      },
+      {
         "id": "osvcobject:contact",
         "type": "osvcobject",
         "label": "Contact",
@@ -4522,17 +4730,6 @@
         }
       },
       {
-        "id": "buiaddin:contactorglookupbuiaddin",
-        "type": "buiaddin",
-        "label": "ContactOrgLookupBUIAddin",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "_fallback": true,
-          "_type_hint": "BUIAddin"
-        }
-      },
-      {
         "id": "report:report 100407",
         "type": "report",
         "label": "Report 100407",
@@ -4662,17 +4859,6 @@
         "data": {
           "_fallback": true,
           "_type_hint": "CustomScript"
-        }
-      },
-      {
-        "id": "buiaddin:sendtosiebelbuiaddin",
-        "type": "buiaddin",
-        "label": "SendToSiebelBUIAddin",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "_fallback": true,
-          "_type_hint": "BUIAddin"
         }
       },
       {
