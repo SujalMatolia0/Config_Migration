@@ -35,78 +35,61 @@ def determine_node_module(node_type, data):
     if not data:
         return "Other"
     
-    node_type_lower = node_type.lower()
-    
-    # 1. Check workspace type or name
-    if node_type_lower == "workspace":
-        t = (data.get("type") or "").lower()
-        if "contact" in t: return "Contact"
-        if "incident" in t: return "Incident"
-        if "org" in t or "organization" in t: return "Organization"
-        if "answer" in t: return "Answer"
-        
-        name = (data.get("name") or "").lower()
-        if "contact" in name: return "Contact"
-        if "incident" in name: return "Incident"
-        if "org" in name or "organization" in name: return "Organization"
-        if "answer" in name: return "Answer"
-        return "Other"
-        
-    # 2. Check CPM bindings or osvc_objects
-    if node_type_lower == "cpm":
-        bound = [str(b).lower() for b in data.get("bound_classes", [])]
-        for b in bound:
-            if "contact" in b: return "Contact"
-            if "incident" in b: return "Incident"
-            if "org" in b or "organization" in b: return "Organization"
-            if "answer" in b: return "Answer"
-            
-        objects = [str(o).lower() for o in data.get("osvc_objects", [])]
-        for o in objects:
-            if "contact" in o: return "Contact"
-            if "incident" in o: return "Incident"
-            if "org" in o or "organization" in o: return "Organization"
-            if "answer" in o: return "Answer"
-            
-        name = (data.get("name") or data.get("display_name") or data.get("file_name") or "").lower()
-        if "contact" in name: return "Contact"
-        if "incident" in name: return "Incident"
-        if "org" in name or "organization" in name: return "Organization"
-        if "answer" in name: return "Answer"
-        return "Other"
-        
-    # 3. Check BUI Add-in fields read/written
-    if node_type_lower == "buiaddin":
-        fields = [str(f).lower() for f in data.get("osvc_fields_read", []) + data.get("osvc_fields_written", [])]
-        for f in fields:
-            if f.startswith("contact."): return "Contact"
-            if f.startswith("incident."): return "Incident"
-            if f.startswith("org.") or f.startswith("organization."): return "Organization"
-            if f.startswith("answer."): return "Answer"
-            
-        name = (data.get("name") or "").lower()
-        if "contact" in name: return "Contact"
-        if "incident" in name: return "Incident"
-        if "org" in name or "organization" in name: return "Organization"
-        if "answer" in name: return "Answer"
-        return "Other"
-        
-    # 4. Check Report name or fields
-    if node_type_lower == "report":
-        name = (data.get("name") or "").lower()
-        if "contact" in name: return "Contact"
-        if "incident" in name: return "Incident"
-        if "org" in name or "organization" in name: return "Organization"
-        if "answer" in name: return "Answer"
-        
-        cols = [str(col.get("field", "")).lower() for col in data.get("columns", [])]
-        for col in cols:
-            if "contact" in col: return "Contact"
-            if "incident" in col: return "Incident"
-            if "org" in col or "organization" in col: return "Organization"
-            if "answer" in col: return "Answer"
-        return "Other"
-        
+    node_type_lower = (node_type or "").lower()
+
+    # Direct data object hint check
+    if data.get("object") and isinstance(data["object"], str) and data["object"] not in ("Other", "None"):
+        return data["object"]
+    if data.get("object_type") and isinstance(data["object_type"], str):
+        ot = data["object_type"].lower()
+        if "contact" in ot: return "Contact"
+        if "incident" in ot: return "Incident"
+        if "org" in ot or "organization" in ot: return "Organization"
+        if "answer" in ot: return "Answer"
+
+    # Searchable text dump from data dictionary
+    search_text = []
+    for key in ["name", "file_name", "id", "label", "url", "entry_point", "script_type", "type"]:
+        val = data.get(key)
+        if val and isinstance(val, str):
+            search_text.append(val.lower())
+
+    for key in ["osvc_objects", "osvc_fields_read", "osvc_fields_written", "custom_fields_read", "custom_fields_written", "bound_classes", "columns", "fields", "imports"]:
+        val = data.get(key)
+        if val and isinstance(val, list):
+            for item in val:
+                if isinstance(item, str):
+                    search_text.append(item.lower())
+                elif isinstance(item, dict):
+                    search_text.append(str(item).lower())
+
+    full_blob = " ".join(search_text)
+
+    # 1. Contact Module
+    if any(k in full_blob for k in ["contact", "rncphp\\contact", "contact.org_id", "contact_create", "contact_update", "contactasync", "duplicate_contacts", "registercontact"]):
+        return "Contact"
+
+    # 2. Incident Module
+    if any(k in full_blob for k in ["incident", "rncphp\\incident", "child_incident", "duplicate_incidents", "closing_notes", "bluebox_greencart", "cityworks", "addsr", "sr_number", "incident_create", "incident_routing"]):
+        return "Incident"
+
+    # 3. Organization Module
+    if any(k in full_blob for k in ["organization", "org_id", "rncphp\\organization", "getaccounts", "account", "siebel"]):
+        return "Organization"
+
+    # 4. Answer Module
+    if "answer" in full_blob:
+        return "Answer"
+
+    # 5. Fallback keyword heuristic on name / file_name / label / id
+    fname = (data.get("file_name") or data.get("name") or data.get("id") or data.get("label") or "").lower()
+    if any(k in fname for k in ["contact", "call", "sms"]):
+        return "Contact"
+    if any(k in fname for k in ["incident", "note", "clock", "validation", "sr"]):
+        return "Incident"
+    if any(k in fname for k in ["org", "account", "siebel"]):
+        return "Organization"
+
     return "Other"
 
 
@@ -204,6 +187,10 @@ def build_graph(components, relationships, orphans, endpoints):
 
         light_data = None
         if extra_data:
+            if "name" not in extra_data:
+                extra_data["name"] = label
+            if "label" not in extra_data:
+                extra_data["label"] = label
             light_data = make_lightweight_node_data(node_type, extra_data)
             if not extra_data.get("_fallback"):
                 light_data["detailsPath"] = f"details/{get_detail_filename(node_id)}"
@@ -272,9 +259,9 @@ def build_graph(components, relationships, orphans, endpoints):
 
         # Add fallback nodes for anything not yet in the graph
         if from_id not in node_ids:
-            add_node(from_type, from_name, {"_fallback": True, "_type_hint": from_type})
+            add_node(from_type, from_name, {"_fallback": True, "_type_hint": from_type, "name": from_name})
         if to_id not in node_ids:
-            add_node(to_type, to_target, {"_fallback": True, "_type_hint": to_type})
+            add_node(to_type, to_target, {"_fallback": True, "_type_hint": to_type, "name": to_target})
 
         # Deduplicate edges by (source, target, label) to avoid visual clutter
         edge_key = (from_id, to_id, rel["via"][:40])

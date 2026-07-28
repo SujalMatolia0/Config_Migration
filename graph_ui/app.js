@@ -103,17 +103,29 @@ const expandedModules = new Set();
 const expandedHubs = new Set();
 const coordinatesCache = {};
 
+function getNodeModule(n) {
+  if (n.data && n.data.module && n.data.module !== "Other" && n.data.module !== "None") {
+    return n.data.module;
+  }
+  if (n.type === "object") {
+    return n.label;
+  }
+  if (n.data && n.data.object) {
+    const o = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
+    if (o && o !== "None" && o !== "Other") return o;
+  }
+  const label = (n.label || "").toLowerCase();
+  if (label.includes("contact") || label.includes("call") || label.includes("sms")) return "Contact";
+  if (label.includes("incident") || label.includes("note") || label.includes("clock") || label.includes("validation") || label.includes("sr")) return "Incident";
+  if (label.includes("org") || label.includes("account") || label.includes("siebel")) return "Organization";
+  if (label.includes("answer")) return "Answer";
+  return "Other";
+}
+
 function getModuleRoots() {
   const modulesSet = new Set();
   (GRAPH.nodes || []).forEach(n => {
-    let mod = "Other";
-    if (n.type === "object") {
-      mod = n.label;
-    } else if (n.data && n.data.module && n.data.module !== "Other") {
-      mod = n.data.module;
-    } else if (n.data && n.data.object) {
-      mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
-    }
+    const mod = getNodeModule(n);
     if (mod) modulesSet.add(mod);
   });
   if (!modulesSet.size) modulesSet.add("Other");
@@ -155,11 +167,7 @@ function rebuildGraphState() {
   roots.forEach(root => {
     if (expandedModules.has(root.id)) {
       const moduleComponents = GRAPH.nodes.filter(n => {
-        let mod = "Other";
-        if (n.type === "object") mod = n.label;
-        else if (n.data && n.data.module) mod = n.data.module;
-        else if (n.data && n.data.object) mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
-        return mod.toLowerCase() === root.module.toLowerCase();
+        return getNodeModule(n).toLowerCase() === root.module.toLowerCase();
       });
 
       const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
@@ -190,11 +198,7 @@ function rebuildGraphState() {
   nextNodes.forEach(n => {
     if (n.type === "category_hub" && expandedHubs.has(n.id)) {
       const moduleInstances = GRAPH.nodes.filter(inst => {
-        let mod = "Other";
-        if (inst.type === "object") mod = inst.label;
-        else if (inst.data && inst.data.module) mod = inst.data.module;
-        else if (inst.data && inst.data.object) mod = Array.isArray(inst.data.object) ? inst.data.object[0] : inst.data.object;
-        return mod.toLowerCase() === n.module.toLowerCase() && inst.type === n.hubType;
+        return getNodeModule(inst).toLowerCase() === n.module.toLowerCase() && inst.type === n.hubType;
       });
 
       moduleInstances.forEach(inst => {

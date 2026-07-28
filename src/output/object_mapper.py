@@ -116,6 +116,18 @@ def detect_cpm_object(cpm: dict) -> list:
 
     return list(objects) if objects else ["Unknown"]
 
+def detect_custom_script_object(script: dict) -> list:
+    objects = set()
+    s_name = (script.get("file_name") or script.get("name") or "").lower()
+    if any(k in s_name for k in ["contact", "call", "sms"]): objects.add("Contact")
+    if any(k in s_name for k in ["incident", "note", "clock", "validation", "sr"]): objects.add("Incident")
+    if any(k in s_name for k in ["org", "account", "siebel"]): objects.add("Organization")
+
+    raw = (script.get("raw_code") or "").lower()
+    if "contact" in raw or "rncphp\\contact" in raw: objects.add("Contact")
+    if "incident" in raw or "rncphp\\incident" in raw: objects.add("Incident")
+    if "organization" in raw or "rncphp\\organization" in raw: objects.add("Organization")
+
 def detect_custom_object(co: dict) -> list:
     name = co.get("name") or co.get("label")
     return [name] if name else ["Unknown"]
@@ -126,10 +138,12 @@ def detect_component_object(component: dict, component_type: str) -> list:
         "report": detect_report_object,
         "bui_addin": detect_bui_object,
         "cpm": detect_cpm_object,
+        "custom_script": detect_custom_script_object,
         "custom_object": detect_custom_object
     }
     fn = dispatch.get(component_type.lower())
-    return fn(component) if fn else ["Unknown"]
+    res = fn(component) if fn else ["Other"]
+    return res if res else ["Other"]
 
 def build_object_tree(all_components: dict) -> tuple:
     """
@@ -150,6 +164,7 @@ def build_object_tree(all_components: dict) -> tuple:
                     "reports": [],
                     "cpm": [],
                     "bui_addins": [],
+                    "custom_scripts": [],
                     "navigation_sets": [],
                     "business_rules": [],
                     "custom_objects": []
@@ -161,6 +176,7 @@ def build_object_tree(all_components: dict) -> tuple:
         ("reports", "report"),
         ("cpm", "cpm"),
         ("buiAddins", "bui_addin"),
+        ("customScripts", "custom_script"),
         ("navigationSets", "nav_set"),
         ("businessRules", "rule"),
         ("customObjects", "custom_object")
