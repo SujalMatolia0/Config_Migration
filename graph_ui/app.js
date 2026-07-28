@@ -188,7 +188,7 @@ function rebuildGraphState() {
           id: `edge-${root.id}-to-${hubId}`,
           source: root.id,
           target: hubId,
-          label: "contains"
+          label: ""
         });
       });
     }
@@ -210,7 +210,7 @@ function rebuildGraphState() {
           id: `edge-${n.id}-to-${inst.id}`,
           source: n.id,
           target: inst.id,
-          label: "instance"
+          label: ""
         });
       });
     }
@@ -378,7 +378,7 @@ function updateDOM() {
     line.appendChild(title);
     g.appendChild(line);
 
-    if (e.label) {
+    if (e.label && e.label !== "contains" && e.label !== "instance") {
       const labelText = e.label.length > 28 ? e.label.slice(0, 26) + "..." : e.label;
       const bw = Math.min(labelText.length * 6.5 + 14, 180);
       const bh = 17;
