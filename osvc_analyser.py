@@ -322,13 +322,14 @@ def main():
     reports_dir = os.path.join(output_dir, "reports")
     rules_dir = os.path.join(output_dir, "rules")
     scripts_dir = os.path.join(output_dir, "scripts")
+    bui_dir = os.path.join(output_dir, "bui_addins")
     navigation_dir = os.path.join(output_dir, "navigation")
 
     # Dedicated format-sorted folders
     json_dir = os.path.join(output_dir, "json")
     markdown_dir = os.path.join(output_dir, "markdown")
 
-    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, navigation_dir, json_dir, markdown_dir]:
+    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, bui_dir, navigation_dir, json_dir, markdown_dir]:
         os.makedirs(d, exist_ok=True)
 
     print(f"OSVC Analyser started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -540,26 +541,26 @@ def main():
             write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"), use_ai_summary=args.use_ai_summary)
             print(f"CPM Summary JSON written -> {cpm_json_path}")
 
-        bui_items = components.get("buiAddins", [])
+        bui_items = sorted(components.get("buiAddins", []), key=lambda x: x.get("name", "").lower())
         if bui_items:
             from src.output.markdown_generator import generate_bui_addin_report_markdown, generate_single_bui_addin_markdown
             from src.output.json_writer import write_bui_addin_summary_json, write_single_bui_addin_json
             
             bui_md_content = generate_bui_addin_report_markdown(bui_items, components.get("reports", []), components["workspaces"])
-            bui_md_path = os.path.join(scripts_dir, "report_BUI_Addins.md")
+            bui_md_path = os.path.join(bui_dir, "report_BUI_Addins.md")
             with open(bui_md_path, "w", encoding="utf-8") as f:
                 f.write(bui_md_content)
-            scripts_md_fmt_dir = os.path.join(markdown_dir, "scripts")
-            os.makedirs(scripts_md_fmt_dir, exist_ok=True)
-            with open(os.path.join(scripts_md_fmt_dir, "report_BUI_Addins.md"), "w", encoding="utf-8") as f:
+            bui_md_fmt_dir = os.path.join(markdown_dir, "bui_addins")
+            os.makedirs(bui_md_fmt_dir, exist_ok=True)
+            with open(os.path.join(bui_md_fmt_dir, "report_BUI_Addins.md"), "w", encoding="utf-8") as f:
                 f.write(bui_md_content)
             print(f"BUI Add-In Summary report written -> {bui_md_path}")
 
-            bui_json_path = os.path.join(scripts_dir, "report_BUI_Addins.json")
+            bui_json_path = os.path.join(bui_dir, "report_BUI_Addins.json")
             write_bui_addin_summary_json(bui_items, components.get("reports", []), components["workspaces"], bui_json_path)
-            scripts_json_fmt_dir = os.path.join(json_dir, "scripts")
-            os.makedirs(scripts_json_fmt_dir, exist_ok=True)
-            write_bui_addin_summary_json(bui_items, components.get("reports", []), components["workspaces"], os.path.join(scripts_json_fmt_dir, "report_BUI_Addins.json"))
+            bui_json_fmt_dir = os.path.join(json_dir, "bui_addins")
+            os.makedirs(bui_json_fmt_dir, exist_ok=True)
+            write_bui_addin_summary_json(bui_items, components.get("reports", []), components["workspaces"], os.path.join(bui_json_fmt_dir, "report_BUI_Addins.json"))
             print(f"BUI Add-In Summary JSON written -> {bui_json_path}")
 
             # Individual per-Add-In reports (MD + JSON)
@@ -569,16 +570,16 @@ def main():
                 single_filename = f"report_{bname}.md"
                 single_json_filename = f"report_{bname}.json"
                 
-                single_path = os.path.join(scripts_dir, single_filename)
+                single_path = os.path.join(bui_dir, single_filename)
                 with open(single_path, "w", encoding="utf-8") as f:
                     f.write(single_md)
-                with open(os.path.join(scripts_md_fmt_dir, single_filename), "w", encoding="utf-8") as f:
+                with open(os.path.join(bui_md_fmt_dir, single_filename), "w", encoding="utf-8") as f:
                     f.write(single_md)
                 print(f"Single BUI Add-In report written -> {single_path}")
 
-                single_json_path = os.path.join(scripts_dir, single_json_filename)
+                single_json_path = os.path.join(bui_dir, single_json_filename)
                 write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], single_json_path)
-                write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], os.path.join(scripts_json_fmt_dir, single_json_filename))
+                write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], os.path.join(bui_json_fmt_dir, single_json_filename))
                 print(f"Single BUI Add-In JSON written -> {single_json_path}")
 
         script_items = components.get("customScripts", [])

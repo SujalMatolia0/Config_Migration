@@ -17,9 +17,14 @@
   <h1>OSVC Dependency Graph</h1>
   <div class="sub" id="metaLine"></div>
   
-  <label class="toggle" style="margin-bottom:12px;padding:6px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border-subtle);">
+  <label class="toggle" style="margin-bottom:8px;padding:6px 8px;background:var(--panel2);border-radius:6px;border:1px solid var(--border-subtle);">
     <input type="checkbox" id="focusModeToggle"> <b>Focus Mode</b> (Click parent node to expand branch)
   </label>
+
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button id="expandAllBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Expand All</button>
+    <button id="collapseAllBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Collapse All</button>
+  </div>
 
   <input id="search" type="search" placeholder="Search components...">
   <div id="filters"></div>

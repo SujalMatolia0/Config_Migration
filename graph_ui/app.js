@@ -45,6 +45,8 @@ _markedRenderer.code = function(code, lang) {
 marked.setOptions({ renderer: _markedRenderer });
 
 const TYPE_COLORS = {
+  module_root: "#990026",      // Crimson Module Root
+  category_hub: "#D97706",     // Amber Category Hub
   workspace: "#2563EB",        // Royal Blue
   report: "#059669",           // Emerald Green
   navigationset: "#D97706",    // Warm Amber
@@ -60,11 +62,13 @@ const TYPE_COLORS = {
   reportcolumn: "#047857",    // Deep Emerald
   cpmmappings: "#0F766E",     // Dark Teal
   workspacefield: "#3B82F6",   // Bright Blue
-  object: "#9333EA"           // Purple for Parent Object Nodes
+  object: "#9333EA"           // Purple
 };
 const DEFAULT_COLOR = "#6b7280";
 
 const TYPE_LABELS = {
+  module_root: "Module Root (Parent)",
+  category_hub: "Category Hub (Child)",
   workspace: "Workspaces",
   report: "Reports",
   navigationset: "Navigation Sets",
@@ -93,11 +97,38 @@ if (!GRAPH.nodes || !GRAPH.nodes.length) {
 
 document.getElementById("metaLine").textContent =
   (META.serverVersion || "OSVC instance").split("\n")[0];
-document.getElementById("hint").textContent =
-  `${GRAPH.nodes.length} components · ${GRAPH.edges.length} links`;
 
-let nodes = GRAPH.nodes.map(n => ({ ...n }));
-let edges = GRAPH.edges.map(e => ({ ...e }));
+// Dynamic Multi-Tier Hierarchy State
+const expandedModules = new Set();
+const expandedHubs = new Set();
+const coordinatesCache = {};
+
+function getModuleRoots() {
+  const modulesSet = new Set();
+  (GRAPH.nodes || []).forEach(n => {
+    let mod = "Other";
+    if (n.type === "object") {
+      mod = n.label;
+    } else if (n.data && n.data.module && n.data.module !== "Other") {
+      mod = n.data.module;
+    } else if (n.data && n.data.object) {
+      mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
+    }
+    if (mod) modulesSet.add(mod);
+  });
+  if (!modulesSet.size) modulesSet.add("Other");
+
+  return Array.from(modulesSet).sort().map(mod => ({
+    id: `module:${mod.toLowerCase()}`,
+    type: "module_root",
+    label: `${mod} Module`,
+    module: mod,
+    r: 32
+  }));
+}
+
+let nodes = [];
+let edges = [];
 let activeEdges = [];
 let nodeById = {};
 
@@ -105,7 +136,121 @@ let nodeById = {};
 let edgeEls = [];
 let nodeEls = [];
 
-// Adjacency and degree mapping
+function rebuildGraphState() {
+  // 1. Cache current node coordinates
+  nodes.forEach(n => {
+    coordinatesCache[n.id] = { x: n.x, y: n.y, vx: n.vx, vy: n.vy };
+  });
+
+  const nextNodes = [];
+  const nextEdges = [];
+  const roots = getModuleRoots();
+
+  // 2. Add Tier 1 Parent Module Roots
+  roots.forEach(root => {
+    nextNodes.push({ ...root });
+  });
+
+  // 3. Add Tier 2 Child Category Hubs if Module Root is expanded
+  roots.forEach(root => {
+    if (expandedModules.has(root.id)) {
+      const moduleComponents = GRAPH.nodes.filter(n => {
+        let mod = "Other";
+        if (n.type === "object") mod = n.label;
+        else if (n.data && n.data.module) mod = n.data.module;
+        else if (n.data && n.data.object) mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
+        return mod.toLowerCase() === root.module.toLowerCase();
+      });
+
+      const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
+      uniqueTypes.forEach(type => {
+        const hubId = `hub:${root.module.toLowerCase()}/${type}`;
+        const hubLabel = TYPE_LABELS[type] || type;
+
+        nextNodes.push({
+          id: hubId,
+          type: "category_hub",
+          label: hubLabel,
+          module: root.module,
+          hubType: type,
+          r: 24
+        });
+
+        nextEdges.push({
+          id: `edge-${root.id}-to-${hubId}`,
+          source: root.id,
+          target: hubId,
+          label: "contains"
+        });
+      });
+    }
+  });
+
+  // 4. Add Tier 3 Sub-Child Component Instances if Category Hub is expanded
+  nextNodes.forEach(n => {
+    if (n.type === "category_hub" && expandedHubs.has(n.id)) {
+      const moduleInstances = GRAPH.nodes.filter(inst => {
+        let mod = "Other";
+        if (inst.type === "object") mod = inst.label;
+        else if (inst.data && inst.data.module) mod = inst.data.module;
+        else if (inst.data && inst.data.object) mod = Array.isArray(inst.data.object) ? inst.data.object[0] : inst.data.object;
+        return mod.toLowerCase() === n.module.toLowerCase() && inst.type === n.hubType;
+      });
+
+      moduleInstances.forEach(inst => {
+        const baseR = inst.type === "object" ? 22 : 14;
+        const r = Math.min(30, baseR + (inst.degree || 0) * 1.5);
+        nextNodes.push({ ...inst, r: r });
+
+        nextEdges.push({
+          id: `edge-${n.id}-to-${inst.id}`,
+          source: n.id,
+          target: inst.id,
+          label: "instance"
+        });
+      });
+    }
+  });
+
+  // 5. Connect cross-component dependency edges if both endpoints are visible
+  const visibleNodeIds = new Set(nextNodes.map(n => n.id));
+  GRAPH.edges.forEach(e => {
+    if (visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target)) {
+      nextEdges.push({ ...e });
+    }
+  });
+
+  // 6. Position nodes smoothly or restore cached coordinates
+  nextNodes.forEach(n => {
+    if (coordinatesCache[n.id]) {
+      n.x = coordinatesCache[n.id].x;
+      n.y = coordinatesCache[n.id].y;
+      n.vx = coordinatesCache[n.id].vx;
+      n.vy = coordinatesCache[n.id].vy;
+    } else {
+      let parentNode = null;
+      if (n.id.startsWith("hub:")) {
+        parentNode = nextNodes.find(m => m.id === `module:${n.module.toLowerCase()}`);
+      } else if (n.type !== "module_root") {
+        parentNode = nextNodes.find(m => m.id === `hub:${(n.module || 'other').toLowerCase()}/${n.type}`);
+      }
+
+      const px = parentNode ? parentNode.x : W / 2;
+      const py = parentNode ? parentNode.y : H / 2;
+      n.x = px + (Math.random() - 0.5) * 120;
+      n.y = py + (Math.random() - 0.5) * 120;
+      n.vx = 0; n.vy = 0;
+    }
+  });
+
+  nodes = nextNodes;
+  edges = nextEdges;
+  rebuildAdjacency();
+
+  document.getElementById("hint").textContent =
+    `${nodes.filter(n => n.type !== "module_root" && n.type !== "category_hub").length} components visible · ${edges.length} links`;
+}
+
 function rebuildAdjacency() {
   nodeById = {};
   nodes.forEach(n => {
@@ -114,9 +259,9 @@ function rebuildAdjacency() {
     n.inc = [];
     n.degree = 0;
   });
-  
+
   activeEdges = edges.filter(e => nodeById[e.source] && nodeById[e.target]);
-  
+
   activeEdges.forEach(e => {
     nodeById[e.source].out.push(e);
     nodeById[e.target].inc.push(e);
@@ -266,6 +411,39 @@ function updateDOM() {
     g.addEventListener("click", ev => {
       ev.stopPropagation();
       select(n);
+      if (n.type === "module_root" || n.type === "category_hub") {
+        if (n.type === "module_root") {
+          expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
+        } else if (n.type === "category_hub") {
+          expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
+        }
+        rebuildGraphState();
+        updateDOM();
+        restartSimulation();
+      }
+    });
+
+    g.addEventListener("dblclick", ev => {
+      ev.stopPropagation();
+      if (n.type === "module_root") {
+        if (expandedModules.has(n.id)) {
+          expandedModules.delete(n.id);
+        } else {
+          expandedModules.add(n.id);
+        }
+        rebuildGraphState();
+        updateDOM();
+        restartSimulation();
+      } else if (n.type === "category_hub") {
+        if (expandedHubs.has(n.id)) {
+          expandedHubs.delete(n.id);
+        } else {
+          expandedHubs.add(n.id);
+        }
+        rebuildGraphState();
+        updateDOM();
+        restartSimulation();
+      }
     });
 
     g.addEventListener("mouseenter", ev => {
@@ -432,6 +610,40 @@ const searchBox = document.getElementById("search");
 const orphansOnly = document.getElementById("orphansOnly");
 const showLabels = document.getElementById("showLabels");
 const focusModeToggle = document.getElementById("focusModeToggle");
+const expandAllBtn = document.getElementById("expandAllBtn");
+const collapseAllBtn = document.getElementById("collapseAllBtn");
+
+if (expandAllBtn) {
+  expandAllBtn.addEventListener("click", () => {
+    getModuleRoots().forEach(root => {
+      expandedModules.add(root.id);
+      const moduleComponents = GRAPH.nodes.filter(n => {
+        let mod = "Other";
+        if (n.type === "object") mod = n.label;
+        else if (n.data && n.data.module) mod = n.data.module;
+        else if (n.data && n.data.object) mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
+        return mod.toLowerCase() === root.module.toLowerCase();
+      });
+      const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
+      uniqueTypes.forEach(type => {
+        expandedHubs.add(`hub:${root.module.toLowerCase()}/${type}`);
+      });
+    });
+    rebuildGraphState();
+    updateDOM();
+    restartSimulation();
+  });
+}
+
+if (collapseAllBtn) {
+  collapseAllBtn.addEventListener("click", () => {
+    expandedModules.clear();
+    expandedHubs.clear();
+    rebuildGraphState();
+    updateDOM();
+    restartSimulation();
+  });
+}
 
 let expandedNodeIds = new Set();
 
@@ -1014,8 +1226,7 @@ function simLoop() {
 // Defer all initialization until after the browser has finished layout
 // so that svg.getBoundingClientRect() returns correct dimensions.
 requestAnimationFrame(() => {
-  // Static pre-simulation to stabilize positions
-  rebuildAdjacency();
+  rebuildGraphState();
   for (let i = 0; i < 400; i++) tick(Math.max(0.05, 1 - i / 400));
 
   // Build DOM and fit the view

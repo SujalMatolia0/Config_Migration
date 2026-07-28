@@ -90,10 +90,13 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         "reports": {},
         "cpm": {},
         "bui_addins": {},
+        "custom_scripts": {},
         "custom_objects": {}
     }
 
-    for ws in components.get("workspaces", []):
+    # Workspaces
+    sorted_ws = sorted(components.get("workspaces", []), key=lambda x: x.get("name", "").lower())
+    for ws in sorted_ws:
         name = ws.get("name", "Workspace")
         slug = name.replace(" ", "_")
         rel_path = f"json/workspaces/{slug}.json"
@@ -110,7 +113,9 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
 
-    for rep in components.get("reports", []):
+    # Reports
+    sorted_reports = sorted(components.get("reports", []), key=lambda x: x.get("name", "").lower())
+    for rep in sorted_reports:
         name = rep.get("name", "Report")
         ac_id = str(rep.get("id", "doc"))
         slug = f"{name.replace(' ', '_')}_{ac_id}"
@@ -126,7 +131,9 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
 
-    for cpm in components.get("cpm", []):
+    # CPM
+    sorted_cpm = sorted(components.get("cpm", []), key=lambda x: (x.get("name") or x.get("file_name") or "").lower())
+    for cpm in sorted_cpm:
         name = cpm.get("name") or cpm.get("file_name") or "CPMHandler"
         slug = name.replace(" ", "_")
         rel_path = f"json/cpm/{slug}.json"
@@ -141,22 +148,43 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
 
-    for bui in components.get("buiAddins", []):
+    # BUI Add-Ins
+    sorted_bui = sorted(components.get("buiAddins", []), key=lambda x: x.get("name", "").lower())
+    for bui in sorted_bui:
         name = bui.get("name", "BUIAddin")
         slug = name.replace(" ", "_")
-        rel_path = f"json/scripts/{slug}.json"
+        rel_path = f"json/bui_addins/{slug}.json"
         flat_index["bui_addins"][slug] = rel_path
 
         comp_data = {
             "meta": {"type": "bui_addin", "name": name, "osvc_object": detect_component_object(bui, "bui_addin"), "generatedAt": meta["generatedAt"]},
             "data": bui
         }
+        out_p = os.path.join(json_dir, "bui_addins", f"{slug}.json")
+        os.makedirs(os.path.dirname(out_p), exist_ok=True)
+        with open(out_p, "w", encoding="utf-8") as f:
+            json.dump(comp_data, f, indent=2, ensure_ascii=False)
+
+    # Custom Scripts
+    sorted_scripts = sorted(components.get("customScripts", []), key=lambda x: x.get("file_name", "").lower())
+    for cs in sorted_scripts:
+        name = cs.get("file_name", "Script")
+        slug = name.replace(" ", "_")
+        rel_path = f"json/scripts/{slug}.json"
+        flat_index["custom_scripts"][slug] = rel_path
+
+        comp_data = {
+            "meta": {"type": "custom_script", "name": name, "osvc_object": detect_component_object(cs, "custom_script"), "generatedAt": meta["generatedAt"]},
+            "data": cs
+        }
         out_p = os.path.join(json_dir, "scripts", f"{slug}.json")
         os.makedirs(os.path.dirname(out_p), exist_ok=True)
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
 
-    for co in components.get("customObjects", []):
+    # Custom Objects
+    sorted_co = sorted(components.get("customObjects", []), key=lambda x: x.get("name", "").lower())
+    for co in sorted_co:
         name = co.get("name", "CustomObject")
         slug = name.replace(" ", "_")
         rel_path = f"json/objects/{slug}.json"
@@ -170,6 +198,10 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         os.makedirs(os.path.dirname(out_p), exist_ok=True)
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
+
+    # Ensure all dictionary keys in flat_index are sorted alphabetically
+    for key in flat_index:
+        flat_index[key] = dict(sorted(flat_index[key].items()))
 
     graph_payload = build_graph_structure(components, relationships, orphans, endpoints)
 
