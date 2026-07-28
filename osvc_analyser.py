@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import argparse
+import re
 from datetime import datetime
 from lxml import etree
 
@@ -83,13 +84,15 @@ def detect_and_parse_file(file_path, components, strict=False):
             is_cpm = (
                 "implements \\RightNow\\Connect" in content or
                 "implements CustomHook" in content or
-                "function pre_process" in content or
-                "function post_process" in content or
-                "function validate" in content
+                bool(re.search(r'\bfunction\s+(?:pre_process|post_process|validate)\s*\(', content))
             )
             if is_cpm:
                 print(f"  -> Parsing CPM Handler: {os.path.basename(file_path)}")
-                components["cpm"].append(parse_cpm_file(file_path))
+                try:
+                    components["cpm"].append(parse_cpm_file(file_path))
+                except Exception:
+                    print(f"  -> Reclassifying as PHP Script: {os.path.basename(file_path)}")
+                    components["customScripts"].append(parse_script_file(file_path))
             else:
                 print(f"  -> Parsing PHP Script: {os.path.basename(file_path)}")
                 components["customScripts"].append(parse_script_file(file_path))
@@ -577,6 +580,46 @@ def main():
                 write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], single_json_path)
                 write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], os.path.join(scripts_json_fmt_dir, single_json_filename))
                 print(f"Single BUI Add-In JSON written -> {single_json_path}")
+
+        script_items = components.get("customScripts", [])
+        if script_items:
+            from src.output.markdown_generator import generate_custom_scripts_summary_markdown, generate_single_custom_script_markdown
+            from src.output.json_writer import write_custom_scripts_summary_json, write_single_custom_script_json
+
+            cs_md_content = generate_custom_scripts_summary_markdown(script_items)
+            cs_md_path = os.path.join(scripts_dir, "report_Custom_Scripts.md")
+            with open(cs_md_path, "w", encoding="utf-8") as f:
+                f.write(cs_md_content)
+            scripts_md_fmt_dir = os.path.join(markdown_dir, "scripts")
+            os.makedirs(scripts_md_fmt_dir, exist_ok=True)
+            with open(os.path.join(scripts_md_fmt_dir, "report_Custom_Scripts.md"), "w", encoding="utf-8") as f:
+                f.write(cs_md_content)
+            print(f"Custom Scripts Summary report written -> {cs_md_path}")
+
+            cs_json_path = os.path.join(scripts_dir, "report_Custom_Scripts.json")
+            write_custom_scripts_summary_json(script_items, cs_json_path)
+            scripts_json_fmt_dir = os.path.join(json_dir, "scripts")
+            os.makedirs(scripts_json_fmt_dir, exist_ok=True)
+            write_custom_scripts_summary_json(script_items, os.path.join(scripts_json_fmt_dir, "report_Custom_Scripts.json"))
+            print(f"Custom Scripts Summary JSON written -> {cs_json_path}")
+
+            for sc in script_items:
+                sname = sc.get("file_name", "script").replace(" ", "_")
+                single_md = generate_single_custom_script_markdown(sc)
+                single_filename = f"report_{sname}.md"
+                single_json_filename = f"report_{sname}.json"
+
+                single_path = os.path.join(scripts_dir, single_filename)
+                with open(single_path, "w", encoding="utf-8") as f:
+                    f.write(single_md)
+                with open(os.path.join(scripts_md_fmt_dir, single_filename), "w", encoding="utf-8") as f:
+                    f.write(single_md)
+                print(f"Single Custom Script report written -> {single_path}")
+
+                single_json_path = os.path.join(scripts_dir, single_json_filename)
+                write_single_custom_script_json(sc, single_json_path)
+                write_single_custom_script_json(sc, os.path.join(scripts_json_fmt_dir, single_json_filename))
+                print(f"Single Custom Script JSON written -> {single_json_path}")
 
 
 

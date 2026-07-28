@@ -273,3 +273,17 @@ def write_workspace_report_json(ws_item, output_file):
         os.makedirs(output_dir, exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(ws_item, f, indent=2, ensure_ascii=False)
+
+def write_custom_scripts_summary_json(script_items, output_file):
+    output_dir = os.path.dirname(output_file)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump({"custom_script_count": len(script_items), "items": script_items}, f, indent=2, ensure_ascii=False)
+
+def write_single_custom_script_json(script_item, output_file):
+    output_dir = os.path.dirname(output_file)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(script_item, f, indent=2, ensure_ascii=False)

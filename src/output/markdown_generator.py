@@ -2019,3 +2019,133 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
     return "\n".join(lines)
 
 
+def generate_custom_scripts_summary_markdown(scripts):
+    lines = []
+    lines.append("# Custom Scripts Analysis Summary")
+    lines.append("")
+    lines.append(f"**Total Custom Scripts:** {len(scripts)}")
+    lines.append("")
+    lines.append("## Overview Table")
+    lines.append("")
+    lines.append("| Script File | Type | Imports | OSVC Objects | External Calls | Risk Flags |")
+    lines.append("| --- | --- | --- | --- | --- | --- |")
+
+    for s in scripts:
+        fname = s.get("file_name", "Unknown")
+        stype = s.get("script_type", "Script")
+        imports_cnt = len(s.get("imports", []))
+        objs = ", ".join(s.get("osvc_objects", [])) or "None"
+        ext_calls = ", ".join(s.get("external_calls", [])) or "None"
+        risks = len(s.get("risk_flags", []))
+        risk_badge = f"[RISK: {risks}]" if risks > 0 else "[OK]"
+        lines.append(f"| `{fname}` | {stype} | {imports_cnt} | {objs} | {ext_calls} | {risk_badge} |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("## Script Details Breakdown")
+    lines.append("")
+
+    for s in scripts:
+        fname = s.get("file_name", "Unknown")
+        stype = s.get("script_type", "Script")
+        lines.append(f"### Script: `{fname}` ({stype})")
+        lines.append("")
+        if s.get("imports"):
+            lines.append("- **Imports:** " + ", ".join(f"`{i}`" for i in s["imports"]))
+        if s.get("osvc_objects"):
+            lines.append("- **OSVC Objects:** " + ", ".join(f"`{o}`" for o in s["osvc_objects"]))
+        if s.get("urls"):
+            lines.append("- **URLs / Endpoints:** " + ", ".join(f"`{u}`" for u in s["urls"]))
+        if s.get("risk_flags"):
+            for r in s["risk_flags"]:
+                rtype = r.get("type", "Risk") if isinstance(r, dict) else str(r)
+                rdet = r.get("detail", "") if isinstance(r, dict) else ""
+                lines.append(f"- **[WARNING] {rtype}:** {rdet}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_single_custom_script_markdown(script):
+    fname = script.get("file_name", "Unknown")
+    stype = script.get("script_type", "Custom Script")
+
+    lines = []
+    lines.append(f"# Custom Script Analysis: `{fname}`")
+    lines.append("")
+    lines.append(f"**Script Type:** {stype}")
+    lines.append("")
+    lines.append("## Script Attributes")
+    lines.append("")
+    lines.append("| Attribute | Value |")
+    lines.append("| --- | --- |")
+    lines.append(f"| **File Name** | `{fname}` |")
+    lines.append(f"| **Script Type** | {stype} |")
+    lines.append(f"| **Imports Count** | {len(script.get('imports', []))} |")
+    lines.append(f"| **OSVC Objects Referenced** | {len(script.get('osvc_objects', []))} |")
+    lines.append(f"| **External API Calls** | {len(script.get('external_calls', []))} |")
+    lines.append(f"| **Hardcoded URLs** | {len(script.get('urls', []))} |")
+    lines.append("")
+
+    if script.get("imports"):
+        lines.append("## Code Imports")
+        lines.append("")
+        for imp in script["imports"]:
+            lines.append(f"- `{imp}`")
+        lines.append("")
+
+    if script.get("osvc_objects"):
+        lines.append("## OSVC Data Objects")
+        lines.append("")
+        for obj in script["osvc_objects"]:
+            lines.append(f"- `{obj}`")
+        lines.append("")
+
+    if script.get("urls") or script.get("external_calls"):
+        lines.append("## External Endpoints & API Calls")
+        lines.append("")
+        for call in script.get("external_calls", []):
+            lines.append(f"- **API Invocation:** {call}")
+        for url in script.get("urls", []):
+            lines.append(f"- **URL:** `{url}`")
+        lines.append("")
+
+    if script.get("risk_flags"):
+        lines.append("## Security & Risk Analysis")
+        lines.append("")
+        for r in script["risk_flags"]:
+            if isinstance(r, dict):
+                lines.append(f"- **[WARNING] {r.get('type', 'Risk')}:** {r.get('detail', '')}")
+            else:
+                lines.append(f"- **[WARNING]:** {r}")
+        lines.append("")
+
+    lines.append("## Dependency Flow Diagram")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef script fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff;")
+    lines.append("  classDef obj fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef api fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("")
+
+    snode = f"SCRIPT_{re.sub(r'[^a-zA-Z0-9_]', '', fname)}"
+    lines.append(f"  {snode}[\"Script: {fname}\"]:::script")
+
+    for obj in script.get("osvc_objects", []):
+        onode = f"OBJ_{re.sub(r'[^a-zA-Z0-9_]', '', obj)}"
+        lines.append(f"  {onode}[\"Object: {obj}\"]:::obj")
+        lines.append(f"  {snode} --> |\"References\"| {onode}")
+
+    for url in script.get("urls", []):
+        anode = f"URL_{re.sub(r'[^a-zA-Z0-9_]', '', url)}"
+        lines.append(f"  {anode}[\"Endpoint: {url}\"]:::api")
+        lines.append(f"  {snode} --> |\"HTTP Call\"| {anode}")
+
+    lines.append("```")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
