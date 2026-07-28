@@ -59,7 +59,8 @@ const TYPE_COLORS = {
   configsetting: "#CA8A04",   // Gold
   reportcolumn: "#047857",    // Deep Emerald
   cpmmappings: "#0F766E",     // Dark Teal
-  workspacefield: "#3B82F6"   // Bright Blue
+  workspacefield: "#3B82F6",   // Bright Blue
+  object: "#9333EA"           // Purple for Parent Object Nodes
 };
 const DEFAULT_COLOR = "#6b7280";
 
@@ -78,7 +79,8 @@ const TYPE_LABELS = {
   configsetting: "Config Settings",
   reportcolumn: "Report Columns",
   cpmmappings: "CPM Mappings",
-  workspacefield: "Workspace Fields"
+  workspacefield: "Workspace Fields",
+  object: "Parent Objects"
 };
 
 const GRAPH = window.GRAPH_DATA || { nodes: [], edges: [] };
@@ -123,75 +125,82 @@ function rebuildAdjacency() {
   });
 }
 
-//// ---------- layout: force simulation ----------
-const W = 2000, H = 1400;
+// ---------- layout: force simulation ----------
+const W = 3000, H = 2000;
+
 nodes.forEach((n, i) => {
+  const baseR = n.type === "object" ? 22 : 14;
+  n.r = Math.min(32, baseR + (n.degree || 0) * 1.5);
   const a = (i / nodes.length) * 2 * Math.PI;
-  const r = 380 + 160 * (i % 4);
-  n.x = W / 2 + r * Math.cos(a); n.y = H / 2 + r * Math.sin(a);
+  const r = 500 + 200 * (i % 4);
+  n.x = W / 2 + r * Math.cos(a);
+  n.y = H / 2 + r * Math.sin(a);
   n.vx = 0; n.vy = 0; n.fixed = false;
 });
 
 function tick(alpha) {
-  // Repulsion between nodes to prevent overlapping
+  // 1. Anti-overlap collision constraint (Hard circle + label margin collision)
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
-      let d2 = dx * dx + dy * dy || 1;
-      
-      if (d2 < 400000) {
-        const f = 4500 * alpha / d2;
-        const d = Math.sqrt(d2);
-        dx /= d; dy /= d;
-        a.vx += dx * f * 75; a.vy += dy * f * 75;
-        b.vx -= dx * f * 75; b.vy -= dy * f * 75;
+      let d = Math.sqrt(dx * dx + dy * dy) || 0.1;
+      const minDist = a.r + b.r + 65; // Guaranteed clearance for circle and label card
+      if (d < minDist) {
+        const overlap = (minDist - d) / d;
+        const f = overlap * 0.35 * alpha;
+        dx *= f; dy *= f;
+        a.vx += dx; a.vy += dy;
+        b.vx -= dx; b.vy -= dy;
       }
     }
   }
-  
-  // Spring forces pulling connected nodes together
+
+  // 2. Global pair-wise repulsion (Coulomb force)
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j];
+      let dx = a.x - b.x, dy = a.y - b.y;
+      let d2 = Math.max(dx * dx + dy * dy, 1);
+      if (d2 < 600000) {
+        let d = Math.sqrt(d2);
+        let f = Math.min(18000 * alpha / d2, 12);
+        dx /= d; dy /= d;
+        a.vx += dx * f; a.vy += dy * f;
+        b.vx -= dx * f; b.vy -= dy * f;
+      }
+    }
+  }
+
+  // 3. Spring forces pulling connected nodes towards targetDist
   activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (!s || !t) return;
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const targetDist = 220;
-    const f = (d - targetDist) * 0.025 * alpha * 5;
+    const targetDist = Math.max(220, s.r + t.r + 140);
+    const f = (d - targetDist) * 0.05 * alpha;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
   });
-  
-  // Centering force to keep graph clustered in viewport
+
+  // 4. Gentle centering gravity & velocity clamping
+  const MAX_V = 20;
   nodes.forEach(n => {
-    n.vx += (W / 2 - n.x) * 0.001 * alpha * 5;
-    n.vy += (H / 2 - n.y) * 0.001 * alpha * 5;
+    n.vx += (W / 2 - n.x) * 0.0006 * alpha;
+    n.vy += (H / 2 - n.y) * 0.0006 * alpha;
+    n.vx *= 0.70; n.vy *= 0.70;
+    n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
+    n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
     if (!n.fixed) { n.x += n.vx; n.y += n.vy; }
-    n.vx *= 0.65; n.vy *= 0.65;
+    if (!isFinite(n.x) || !isFinite(n.y)) {
+      n.x = W / 2 + (Math.random() - 0.5) * 400;
+      n.y = H / 2 + (Math.random() - 0.5) * 400;
+      n.vx = 0; n.vy = 0;
+    }
   });
 }
-
-// Initial static ticks to stabilize layout
-rebuildAdjacency();
-for (let i = 0; i < 400; i++) tick(Math.max(0.05, 1 - i / 400));
-
-// ---------- Interactive Animation Loop ----------
-let alpha = 0;
-
-function restartSimulation() {
-  alpha = 1;
-}
-
-function simLoop() {
-  alpha = Math.max(0.01, alpha * 0.94);
-  tick(alpha);
-  redraw();
-  requestAnimationFrame(simLoop);
-}
-
-// Start continuous animation loop
-simLoop();
 
 // ---------- render ----------
 const svg = document.getElementById("svg");
@@ -207,6 +216,7 @@ function updateDOM() {
   edgeEls = activeEdges.map(e => {
     const line = document.createElementNS(NS, "line");
     line.setAttribute("class", "edge");
+    line.setAttribute("marker-end", "url(#arrow)");
     const title = document.createElementNS(NS, "title");
     title.textContent = e.label || "";
     line.appendChild(title);
@@ -223,19 +233,34 @@ function updateDOM() {
     g.setAttribute("class", cls);
 
     const c = document.createElementNS(NS, "circle");
-    let r = Math.min(32, 12 + n.degree * 2);
-    c.setAttribute("r", r);
+    c.setAttribute("r", n.r);
     c.setAttribute("fill", TYPE_COLORS[n.type] || DEFAULT_COLOR);
+    c.setAttribute("filter", "url(#nodeShadow)");
+
+    const labelText = n.label.length > 28 ? n.label.slice(0, 26) + "..." : n.label;
+    const badgeW = Math.min(labelText.length * 7 + 16, 210);
+    const badgeH = 19;
+
+    const rect = document.createElementNS(NS, "rect");
+    rect.setAttribute("class", "label-bg");
+    rect.setAttribute("x", -badgeW / 2);
+    rect.setAttribute("y", -n.r - 24);
+    rect.setAttribute("width", badgeW);
+    rect.setAttribute("height", badgeH);
+    rect.setAttribute("rx", "4");
 
     const t = document.createElementNS(NS, "text");
-    t.setAttribute("dy", -r - 5);
+    t.setAttribute("dy", -n.r - 10);
     t.setAttribute("text-anchor", "middle");
-    t.textContent = n.label.length > 30 ? n.label.slice(0, 29) + "…" : n.label;
+    t.textContent = labelText;
 
     const title = document.createElementNS(NS, "title");
     title.textContent = TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") + ": " + n.label : n.label;
 
-    g.appendChild(c); g.appendChild(t); g.appendChild(title);
+    g.appendChild(c);
+    g.appendChild(rect);
+    g.appendChild(t);
+    g.appendChild(title);
     nodesG.appendChild(g);
 
     g.addEventListener("click", ev => {
@@ -268,12 +293,13 @@ function redraw() {
   activeEdges.forEach((e, i) => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (edgeEls[i] && s && t) {
+      if (!isFinite(s.x) || !isFinite(s.y) || !isFinite(t.x) || !isFinite(t.y)) return;
       edgeEls[i].setAttribute("x1", s.x); edgeEls[i].setAttribute("y1", s.y);
       edgeEls[i].setAttribute("x2", t.x); edgeEls[i].setAttribute("y2", t.y);
     }
   });
   nodes.forEach((n, i) => {
-    if (nodeEls[i]) {
+    if (nodeEls[i] && isFinite(n.x) && isFinite(n.y)) {
       nodeEls[i].setAttribute("transform", `translate(${n.x},${n.y})`);
     }
   });
@@ -289,14 +315,15 @@ function fit() {
   const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
-  const bw = svg.clientWidth || 1000, bh = svg.clientHeight || 700;
+  // Use getBoundingClientRect for reliable dimensions after layout
+  const rect = svg.getBoundingClientRect();
+  const bw = rect.width || svg.clientWidth || 1000;
+  const bh = rect.height || svg.clientHeight || 700;
   view.k = Math.min(bw / (maxX - minX + 250), bh / (maxY - minY + 250), 1.1);
   view.x = bw / 2 - view.k * (minX + maxX) / 2;
   view.y = bh / 2 - view.k * (minY + maxY) / 2;
   applyView();
 }
-
-fit();
 
 svg.addEventListener("wheel", ev => {
   ev.preventDefault();
@@ -346,31 +373,56 @@ function enableDrag(g, n) {
 }
 
 // ---------- filters / search / orphans ----------
-const activeTypes = new Set();
+const activeObjects = new Set();
 let filtersInitialized = false;
 
+function getNodeObjects(n) {
+  let objs = [];
+  if (n.type === "object") {
+    objs = [n.label];
+  } else if (n.data && n.data.object) {
+    objs = Array.isArray(n.data.object) ? n.data.object : [n.data.object];
+  } else if (n.data && n.data.module && n.data.module !== "Other") {
+    objs = [n.data.module];
+  }
+  if (!objs.length) objs = ["Other"];
+  return objs;
+}
+
 function rebuildFilters() {
-  const typeCounts = {};
-  nodes.forEach(n => typeCounts[n.type] = (typeCounts[n.type] || 0) + 1);
+  const objectCounts = {};
+  
+  nodes.forEach(n => {
+    const objs = getNodeObjects(n);
+    objs.forEach(o => {
+      objectCounts[o] = (objectCounts[o] || 0) + 1;
+    });
+  });
   
   if (!filtersInitialized) {
-    Object.keys(typeCounts).forEach(t => activeTypes.add(t));
+    Object.keys(objectCounts).forEach(o => activeObjects.add(o));
     filtersInitialized = true;
   }
   
   const filtersDiv = document.getElementById("filters");
   filtersDiv.innerHTML = "";
   
-  Object.keys(typeCounts).sort().forEach(t => {
+  const titleHeader = document.createElement("div");
+  titleHeader.style.cssText = "font-size:11px;font-weight:700;color:var(--text-muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.05em;";
+  titleHeader.textContent = "FILTER BY OSVC OBJECTS";
+  filtersDiv.appendChild(titleHeader);
+  
+  Object.keys(objectCounts).sort().forEach(objName => {
     const label = document.createElement("label");
     label.className = "filter";
-    const checked = activeTypes.has(t) ? "checked" : "";
-    label.innerHTML = `<input type="checkbox" ${checked} data-type="${t}">
-      <span class="swatch" style="background:${TYPE_COLORS[t] || DEFAULT_COLOR}"></span>
-      <span>${TYPE_LABELS[t] || t}</span><span class="count">${typeCounts[t]}</span>`;
+    const checked = activeObjects.has(objName) ? "checked" : "";
+    label.innerHTML = `<input type="checkbox" ${checked} data-obj="${objName}">
+      <span class="swatch" style="background:#9333EA"></span>
+      <span>${objName}</span><span class="count">${objectCounts[objName]}</span>`;
     label.querySelector("input").addEventListener("change", ev => {
-      ev.target.checked ? activeTypes.add(t) : activeTypes.delete(t);
+      ev.target.checked ? activeObjects.add(objName) : activeObjects.delete(objName);
       applyFilters();
+      restartSimulation();
     });
     filtersDiv.appendChild(label);
   });
@@ -379,17 +431,47 @@ function rebuildFilters() {
 const searchBox = document.getElementById("search");
 const orphansOnly = document.getElementById("orphansOnly");
 const showLabels = document.getElementById("showLabels");
+const focusModeToggle = document.getElementById("focusModeToggle");
+
+let expandedNodeIds = new Set();
+
+focusModeToggle.addEventListener("change", () => {
+  expandedNodeIds.clear();
+  applyFilters();
+});
+
 searchBox.addEventListener("input", applyFilters);
 orphansOnly.addEventListener("change", applyFilters);
 showLabels.addEventListener("change", () => {
-  nodesG.querySelectorAll("text").forEach(t => t.style.display = showLabels.checked ? "" : "none");
+  nodesG.querySelectorAll("text, rect.label-bg").forEach(el => el.style.display = showLabels.checked ? "" : "none");
 });
 
+function isNodeInSelectedObjects(n) {
+  if (activeObjects.size === 0) return false;
+  const activeLower = new Set(Array.from(activeObjects).map(o => String(o).toLowerCase()));
+  const nodeObjs = getNodeObjects(n);
+  return nodeObjs.some(o => activeLower.has(String(o).toLowerCase()));
+}
+
 function nodeVisible(n) {
-  if (!activeTypes.has(n.type)) return false;
-  if (orphansOnly.checked && !n.isOrphan) return false;
-  const q = searchBox.value.trim().toLowerCase();
+  if (activeObjects.size > 0 && !isNodeInSelectedObjects(n)) return false;
+  if (orphansOnly && orphansOnly.checked && !n.isOrphan) return false;
+
+  const q = searchBox ? searchBox.value.trim().toLowerCase() : "";
   if (q && !n.label.toLowerCase().includes(q)) return false;
+
+  // Focus Mode: when enabled, only show expanded parent nodes and their
+  // direct neighbours. All other nodes are hidden until expanded.
+  if (focusModeToggle.checked) {
+    if (expandedNodeIds.size === 0) return true; // nothing expanded yet, show all
+    // Always show expanded nodes themselves
+    if (expandedNodeIds.has(n.id)) return true;
+    // Show nodes that are a direct neighbour of any expanded node
+    const isNeighbour = n.inc.some(e => expandedNodeIds.has(e.source)) ||
+                        n.out.some(e => expandedNodeIds.has(e.target));
+    if (!isNeighbour) return false;
+  }
+
   return true;
 }
 
@@ -475,9 +557,9 @@ function relRow(otherId, via, dir) {
   const other = nodeById[otherId];
   const name = other ? other.label : otherId;
   const color = other ? (TYPE_COLORS[other.type] || DEFAULT_COLOR) : DEFAULT_COLOR;
-  const arrow = dir === "out" ? "→" : "←";
+  const arrow = dir === "out" ? "->" : "<-";
   return `<div class="rel" data-node="${esc(otherId)}">
-    <span style="color:${color}">●</span> ${arrow} <b>${esc(name)}</b>
+    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:4px;"></span> ${arrow} <b>${esc(name)}</b>
     <div class="via">${esc(via)}</div></div>`;
 }
 
@@ -658,17 +740,19 @@ async function loadDocsAndDiagrams(node) {
   const mdPath = node.data && node.data.mdPath;
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
+  const detailsBtn = document.querySelector('.tab-btn[data-tab="details"]');
   
   if (!mdPath) {
-    tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No markdown report generated for this component type. Try workspace, report, CPM, or BUI Add-In nodes.</div>`;
+    tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No markdown report generated for this component type.</div>`;
     tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No architecture diagram available for this component type.</div>`;
-    docBtn.style.opacity = "0.4";
-    diagBtn.style.opacity = "0.4";
+    docBtn.style.display = "none";
+    diagBtn.style.display = "none";
+    detailsBtn.click();
     return;
   }
   
-  docBtn.style.opacity = "1";
-  diagBtn.style.opacity = "1";
+  docBtn.style.display = "inline-block";
+  diagBtn.style.display = "inline-block";
   
   if (currentFetchController) {
     currentFetchController.abort();
@@ -720,6 +804,18 @@ async function loadDocsAndDiagrams(node) {
 
 function select(n) {
   selected = n;
+  
+  // If focus mode enabled, clicking a parent node toggles expanding its child branches
+  if (n && focusModeToggle.checked) {
+    if (expandedNodeIds.has(n.id)) {
+      expandedNodeIds.delete(n.id);
+    } else {
+      expandedNodeIds.add(n.id);
+    }
+    applyFilters();
+    restartSimulation();
+  }
+
   nodes.forEach((m, i) => {
     if (nodeEls[i]) {
       nodeEls[i].classList.toggle("selected", m === n);
@@ -740,9 +836,9 @@ function select(n) {
     <span class="type-chip" style="background:${TYPE_COLORS[n.type] || DEFAULT_COLOR}">
     ${esc(TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") : n.type)}</span>`;
     
-  if (n.isOrphan) html += `<div class="orphan-flag">⚠ Orphaned: ${esc(n.orphanReason || "unreferenced")}</div>`;
-  
-  html += `<div class="kv"><b>${n.inc.length}</b> inbound · <b>${n.out.length}</b> outbound link(s)</div>`;
+  if (n.isOrphan) html += `<div class="orphan-flag">[ORPHAN] Orphaned: ${esc(n.orphanReason || "unreferenced")}</div>`;
+
+  html += `<div class="kv"><b>${n.inc.length}</b> inbound | <b>${n.out.length}</b> outbound link(s)</div>`;
 
   if (n.inc.length) {
     html += "<h3>Used by</h3>" + n.inc.map(e => relRow(e.source, e.label, "in")).join("");
@@ -785,7 +881,7 @@ function select(n) {
 
   if (d.risk_flags && d.risk_flags.length) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
-    facts.push(["⚠ Risks", riskText]);
+    facts.push(["[RISK] Risks", riskText]);
   }
   
   if (facts.length) {
@@ -893,5 +989,39 @@ modalReset.addEventListener("click", () => {
   updateModalTransform();
 });
 
-// Initial render
-updateDOM();
+// ---------- Interactive Animation Loop ----------
+let alpha = 0;
+let simRafId = null;
+
+function restartSimulation() {
+  alpha = 1;
+  if (!simRafId) simLoop();
+}
+
+function simLoop() {
+  simRafId = null;
+  alpha *= 0.94;
+  if (alpha < 0.002) {
+    // Graph has settled — stop ticking to save CPU
+    alpha = 0;
+    return;
+  }
+  tick(alpha);
+  redraw();
+  simRafId = requestAnimationFrame(simLoop);
+}
+
+// Defer all initialization until after the browser has finished layout
+// so that svg.getBoundingClientRect() returns correct dimensions.
+requestAnimationFrame(() => {
+  // Static pre-simulation to stabilize positions
+  rebuildAdjacency();
+  for (let i = 0; i < 400; i++) tick(Math.max(0.05, 1 - i / 400));
+
+  // Build DOM and fit the view
+  updateDOM();
+  fit();
+
+  // Kick off the live simulation
+  restartSimulation();
+});

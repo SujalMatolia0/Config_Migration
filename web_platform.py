@@ -65,6 +65,10 @@ def detect_osvc_file_type(file_path):
                 elif "<tabset" in content.lower() or "<table" in content.lower() or "<recordtypes" in content.lower() or "<ribbon" in content.lower():
                     sub = "Standard Object Workspaces" if ("contact" in lower or "incident" in lower) else "Custom & Edge Workspaces"
                     return "workspace", "Workspace XML", sub, "Detected TabSet/Table workspace layout schema"
+                elif "<customobject" in content.lower() or "<object" in content.lower():
+                    return "objects", "Custom Object XML", "Custom Objects & Data Schema", "Detected CustomObject schema XML"
+                elif "<relationship" in content.lower():
+                    return "objects", "Relationship XML", "Object Relationships Schema", "Detected Relationship schema XML"
                 elif "<rule" in content.lower() or "<rules" in content.lower():
                     return "rule", "Business Rule XML", "Business Rules & Engine Logic", "Detected Rule engine logic schema"
                 elif "<navitem" in content.lower() or "<nav_set" in content.lower() or "<item_id" in content.lower():
@@ -87,6 +91,7 @@ def list_files():
         "report": 0,
         "cpm": 0,
         "bui": 0,
+        "objects": 0,
         "rule": 0,
         "nav": 0,
         "other": 0
@@ -203,6 +208,7 @@ def upload_files():
             elif category_target == "cpm": subfolder = "cpm"
             elif category_target == "scripts": subfolder = "scripts"
             elif category_target == "rules": subfolder = "rules"
+            elif category_target == "objects": subfolder = "objects"
 
         target_dir = os.path.join(INPUT_DIR, subfolder) if subfolder else INPUT_DIR
         os.makedirs(target_dir, exist_ok=True)

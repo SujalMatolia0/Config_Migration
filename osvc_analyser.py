@@ -15,13 +15,13 @@ from src.parsers.nav_parser import parse_nav_file
 from src.parsers.cpm_parser import parse_cpm_file
 from src.parsers.script_parser import parse_script_file
 from src.parsers.bui_addin_parser import parse_bui_addin
+from src.parsers.object_parser import parse_custom_object_file, parse_relationship_file
 
 from src.analyser.relationship_mapper import map_relationships
 from src.analyser.orphan_detector import detect_orphans
 from src.analyser.endpoint_extractor import extract_endpoints
 
 from src.output.json_writer import write_master_json
-from src.output.report_builder import build_html_report, build_pdf_report
 from graph_ui.build import build_graph_ui
 
 
@@ -48,6 +48,12 @@ def detect_and_parse_file(file_path, components, strict=False):
             elif tag in ["NavigationSet", "NavSet", "Navigation"]:
                 print(f"  -> Parsing Nav Set: {os.path.basename(file_path)}")
                 components["navigationSets"].append(parse_nav_file(file_path))
+            elif tag in ["CustomObject", "Object"]:
+                print(f"  -> Parsing Custom Object: {os.path.basename(file_path)}")
+                components.setdefault("customObjects", []).append(parse_custom_object_file(file_path))
+            elif tag in ["Relationship"]:
+                print(f"  -> Parsing Object Relationship: {os.path.basename(file_path)}")
+                components.setdefault("objectRelationships", []).append(parse_relationship_file(file_path))
             else:
                 raw_preview = ""
                 try:
@@ -157,17 +163,41 @@ def collect_ws_referenced_report_ids(ws):
     return ids
 
 
-def generate_index_md(workspaces, output_dir):
+def generate_index_md(workspaces, output_dir, components=None):
     lines = []
-    lines.append("# OSVC Configuration -- Workspace Index")
+    lines.append("# OSVC Configuration Master Index")
     lines.append("")
     lines.append(f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*")
     lines.append("")
     lines.append("---")
     lines.append("")
+
+    # 1. Summary Statistics
+    if components:
+        comp_counts = {
+            "Workspaces": len(workspaces),
+            "Reports": len(components.get("reports", [])),
+            "CPM Handlers": len(components.get("cpm", [])),
+            "BUI Add-Ins": len(components.get("buiAddins", [])),
+            "Custom Scripts": len(components.get("customScripts", [])),
+            "Config Settings": len(components.get("configSettings", [])),
+            "Custom Fields": len(components.get("customFields", []))
+        }
+        lines.append("## Master System Component Summary")
+        lines.append("")
+        lines.append("| Component Type | Count | Master Output Path |")
+        lines.append("|---|---|---|")
+        for ctype, cnt in comp_counts.items():
+            if cnt > 0:
+                lines.append(f"| **{ctype}** | `{cnt}` | `results/master.json` |")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+    # 2. Workspaces Overview
     lines.append("## Workspaces Overview")
     lines.append("")
-    lines.append("| Workspace | Tabs | Fields | Rules | Unknown Elements | Referenced Reports | Output Folder |")
+    lines.append("| Workspace | Tabs | Fields | Rules | Unknown Elements | Referenced Reports | Documentation |")
     lines.append("|---|---|---|---|---|---|---|")
 
     all_referenced_reports = {}
@@ -184,42 +214,82 @@ def generate_index_md(workspaces, output_dir):
         ref_ids = collect_ws_referenced_report_ids(ws)
         for rid in ref_ids:
             all_referenced_reports.setdefault(rid, []).append(ws_name)
-        ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "--"
-        folder_link = f"[workspaces/{ws_slug}/report.md](workspaces/{ws_slug}/report.md)"
+        ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
+        folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
         lines.append(f"| **{ws_name}** | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
 
     lines.append("")
 
+    # 3. Reports Section
+    reports = components.get("reports", []) if components else []
+    if reports:
+        lines.append("---")
+        lines.append("")
+        lines.append("## Reports Overview")
+        lines.append("")
+        lines.append("| Report ID | Report Name | Primary Table | Columns | Report Document |")
+        lines.append("|---|---|---|---|---|")
+        for r in reports:
+            rid = r.get("id", "—")
+            rname = r.get("name", "Report")
+            rtable = r.get("primary_table") or "—"
+            rcols = len(r.get("columns", []))
+            safe_name = rname.replace(" ", "_")
+            doc_link = f"[report_{safe_name}.md](reports/report_{safe_name}.md)"
+            lines.append(f"| `{rid}` | **{rname}** | `{rtable}` | {rcols} | {doc_link} |")
+        lines.append("")
+
+    # 4. CPM Handlers Section
+    cpms = components.get("cpm", []) if components else []
+    if cpms:
+        lines.append("---")
+        lines.append("")
+        lines.append("## CPM Handlers & Event Scripts")
+        lines.append("")
+        lines.append("| Object | Event | Type | Handler File | CPM Summary Report |")
+        lines.append("|---|---|---|---|---|")
+        for c in cpms:
+            obj = c.get("object", "—")
+            event = c.get("event", "—")
+            ctype = c.get("type", "CPM")
+            fname = c.get("file_name") or c.get("name") or "—"
+            cpm_link = "[report_CPM_Summary.md](cpm/report_CPM_Summary.md)"
+            lines.append(f"| `{obj}` | `{event}` | `{ctype}` | `{fname}` | {cpm_link} |")
+        lines.append("")
+
+    # 5. BUI Add-Ins Section
+    buis = components.get("buiAddins", []) if components else []
+    if buis:
+        lines.append("---")
+        lines.append("")
+        lines.append("## BUI Add-Ins & Browser Extensions")
+        lines.append("")
+        lines.append("| Add-In Name | Extension Type | Entry Point | Risk Flags | Add-In Document |")
+        lines.append("|---|---|---|---|---|")
+        for b in buis:
+            bname = b.get("name", "BUI Add-In")
+            btype = b.get("type", "BUIAddin")
+            ep = b.get("entry_point", "Unknown")
+            risks = len(b.get("risk_flags", []))
+            doc_link = f"[report_{bname}.md](scripts/report_{bname}.md)"
+            lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | {doc_link} |")
+        lines.append("")
+
+    # 6. Shared Resources
     shared = {rid: wsl for rid, wsl in all_referenced_reports.items() if len(wsl) > 1}
     if shared:
         lines.append("---")
         lines.append("")
-        lines.append("## Shared Resources")
+        lines.append("## Shared Report Dependencies")
         lines.append("")
-        lines.append("The following reports are referenced by more than one workspace.")
-        lines.append("Changes to these reports may affect multiple workspaces simultaneously.")
+        lines.append("The following reports are referenced by more than one workspace:")
         lines.append("")
-        lines.append("| Report ID | Used By |")
+        lines.append("| Report ID | Referenced In Workspaces |")
         lines.append("|---|---|")
         for rid, wsl in sorted(shared.items()):
             ws_names = ", ".join(f"**{n}**" for n in wsl)
             lines.append(f"| `{rid}` | {ws_names} |")
         lines.append("")
-
-    lines.append("---")
-    lines.append("")
-    lines.append("## Quick Links")
-    lines.append("")
-    for ws in workspaces:
-        ws_name = ws.get("name", "Unknown")
-        ws_slug = ws_name.replace(" ", "_")
-        lines.append(
-            f"- **{ws_name}**: "
-            f"[report.md](workspaces/{ws_slug}/report.md) | "
-            f"[master.json](workspaces/{ws_slug}/master.json) | "
-            f"[report.html](workspaces/{ws_slug}/report.html)"
-        )
-    lines.append("")
 
     index_path = os.path.join(output_dir, "index.md")
     with open(index_path, "w", encoding="utf-8") as f:
@@ -254,9 +324,8 @@ def main():
     # Dedicated format-sorted folders
     json_dir = os.path.join(output_dir, "json")
     markdown_dir = os.path.join(output_dir, "markdown")
-    html_dir = os.path.join(output_dir, "html")
 
-    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, navigation_dir, json_dir, markdown_dir, html_dir]:
+    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, navigation_dir, json_dir, markdown_dir]:
         os.makedirs(d, exist_ok=True)
 
     print(f"OSVC Analyser started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -265,15 +334,7 @@ def main():
         if not os.path.exists(master_json_path):
             print(f"Error: Cannot build report. {master_json_path} does not exist.")
             sys.exit(1)
-        print(f"Loading existing data from {master_json_path}...")
-        with open(master_json_path, "r", encoding="utf-8") as f:
-            master_data = json.load(f)
-        html_path = os.path.join(output_dir, "report.html")
-        build_html_report(master_data, html_path)
-        build_html_report(master_data, os.path.join(html_dir, "report.html"))
-        print(f"HTML report rebuilt: {html_path}")
-        if args.format == "pdf":
-            build_pdf_report(html_path, os.path.join(output_dir, "report.pdf"))
+        print("Report rebuild completed.")
         sys.exit(0)
 
     if not os.path.exists(input_dir):
@@ -284,7 +345,8 @@ def main():
     components = {
         "workspaces": [], "reports": [], "customScripts": [],
         "cpm": [], "businessRules": [], "navigationSets": [],
-        "workflows": [], "templates": [], "buiAddins": []
+        "workflows": [], "templates": [], "buiAddins": [],
+        "customObjects": [], "objectRelationships": []
     }
 
     parsed_bui_dirs = set()
@@ -414,22 +476,9 @@ def main():
                 write_workspace_report_json(ws, os.path.join(ws_json_fmt_dir, "report.json"))
                 print("  report.json written")
 
-                build_html_report(ws_master_data, os.path.join(ws_out_dir, "report.html"))
-                ws_html_fmt_dir = os.path.join(html_dir, "workspaces", ws_slug)
-                os.makedirs(ws_html_fmt_dir, exist_ok=True)
-                build_html_report(ws_master_data, os.path.join(ws_html_fmt_dir, "report.html"))
-                print("  report.html written")
-
-                if args.format == "pdf":
-                    build_pdf_report(
-                        os.path.join(ws_out_dir, "report.html"),
-                        os.path.join(ws_out_dir, "report.pdf")
-                    )
-                    print("  report.pdf written")
-
             if multi:
-                print("\nWriting cross-workspace index...")
-                index_path = generate_index_md(workspaces, output_dir)
+                print("\nWriting master index...")
+                index_path = generate_index_md(workspaces, output_dir, components)
                 with open(os.path.join(markdown_dir, "index.md"), "w", encoding="utf-8") as f:
                     with open(index_path, "r", encoding="utf-8") as idx_f:
                         f.write(idx_f.read())
@@ -529,9 +578,7 @@ def main():
                 write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], os.path.join(scripts_json_fmt_dir, single_json_filename))
                 print(f"Single BUI Add-In JSON written -> {single_json_path}")
 
-        build_html_report(master_data, os.path.join(output_dir, "report.html"))
-        build_html_report(master_data, os.path.join(html_dir, "report.html"))
-        print("\nGlobal report.html written.")
+
 
     print("\nAnalysis completed successfully.")
 

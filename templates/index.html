@@ -409,6 +409,7 @@
 
           <div class="category-selector">
             <button class="category-btn active" data-cat="auto" onclick="selectCat(this)">SMART AUTO-DETECT</button>
+            <button class="category-btn" data-cat="objects" onclick="selectCat(this)">OBJECTS</button>
             <button class="category-btn" data-cat="workspaces" onclick="selectCat(this)">WORKSPACES</button>
             <button class="category-btn" data-cat="reports" onclick="selectCat(this)">REPORTS</button>
             <button class="category-btn" data-cat="cpm" onclick="selectCat(this)">CPM PHP</button>
@@ -478,6 +479,19 @@
               </div>
               <div class="accordion-body" id="bodyBui">
                 <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading BUI Add-Ins...</div>
+              </div>
+            </div>
+
+            <div class="accordion-item" id="accObjects">
+              <div class="accordion-header" onclick="toggleAccordion('accObjects')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccObjects">[+]</span>
+                  <span>Custom Objects &amp; Relationships</span>
+                </div>
+                <span class="badge badge-xml" id="badgeCountObjects">Objects: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyObjects">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading Custom Objects...</div>
               </div>
             </div>
 
@@ -643,6 +657,7 @@
           document.getElementById('badgeCountReport').innerText = 'Reports: ' + (data.counts.report || 0);
           document.getElementById('badgeCountCpm').innerText = 'CPM: ' + (data.counts.cpm || 0);
           document.getElementById('badgeCountBui').innerText = 'BUI Add-Ins: ' + ((data.counts.bui || 0) + (data.counts.scripts || 0));
+          document.getElementById('badgeCountObjects').innerText = 'Objects: ' + (data.counts.objects || 0);
         }
 
         const files = data.files || [];
@@ -650,11 +665,13 @@
         const reports = files.filter(f => f.cat_code === 'report');
         const cpms = files.filter(f => f.cat_code === 'cpm');
         const buis = files.filter(f => f.cat_code === 'bui' || f.cat_code === 'scripts');
+        const objects = files.filter(f => f.cat_code === 'objects');
 
         document.getElementById('bodyWorkspace').innerHTML = renderGroupedTableRows(workspaces);
         document.getElementById('bodyReport').innerHTML = renderGroupedTableRows(reports);
         document.getElementById('bodyCpm').innerHTML = renderGroupedTableRows(cpms);
         document.getElementById('bodyBui').innerHTML = renderGroupedTableRows(buis);
+        document.getElementById('bodyObjects').innerHTML = renderGroupedTableRows(objects);
       } catch (err) {
         console.error('Failed to load files', err);
       }
