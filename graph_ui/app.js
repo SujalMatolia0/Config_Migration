@@ -363,14 +363,47 @@ function updateDOM() {
   nodesG.innerHTML = "";
 
   edgeEls = activeEdges.map(e => {
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "edge-group");
+
     const line = document.createElementNS(NS, "line");
     line.setAttribute("class", "edge");
+    if (e.label === "contains" || e.label === "instance") {
+      line.classList.add("child-edge");
+    }
     line.setAttribute("marker-end", "url(#arrow)");
+
     const title = document.createElementNS(NS, "title");
     title.textContent = e.label || "";
     line.appendChild(title);
-    edgesG.appendChild(line);
-    return line;
+    g.appendChild(line);
+
+    if (e.label) {
+      const labelText = e.label.length > 28 ? e.label.slice(0, 26) + "..." : e.label;
+      const bw = Math.min(labelText.length * 6.5 + 14, 180);
+      const bh = 17;
+
+      const rect = document.createElementNS(NS, "rect");
+      rect.setAttribute("class", "edge-label-bg");
+      rect.setAttribute("width", bw);
+      rect.setAttribute("height", bh);
+      rect.setAttribute("rx", "3");
+
+      const t = document.createElementNS(NS, "text");
+      t.setAttribute("class", "edge-label-text");
+      t.textContent = labelText;
+
+      g.appendChild(rect);
+      g.appendChild(t);
+      g.rectEl = rect;
+      g.textEl = t;
+      g.badgeW = bw;
+      g.badgeH = bh;
+    }
+
+    g.lineEl = line;
+    edgesG.appendChild(g);
+    return g;
   });
 
   nodeEls = nodes.map(n => {
@@ -474,10 +507,20 @@ function updateDOM() {
 function redraw() {
   activeEdges.forEach((e, i) => {
     const s = nodeById[e.source], t = nodeById[e.target];
-    if (edgeEls[i] && s && t) {
+    const elGroup = edgeEls[i];
+    if (elGroup && s && t) {
       if (!isFinite(s.x) || !isFinite(s.y) || !isFinite(t.x) || !isFinite(t.y)) return;
-      edgeEls[i].setAttribute("x1", s.x); edgeEls[i].setAttribute("y1", s.y);
-      edgeEls[i].setAttribute("x2", t.x); edgeEls[i].setAttribute("y2", t.y);
+      elGroup.lineEl.setAttribute("x1", s.x); elGroup.lineEl.setAttribute("y1", s.y);
+      elGroup.lineEl.setAttribute("x2", t.x); elGroup.lineEl.setAttribute("y2", t.y);
+
+      if (elGroup.rectEl && elGroup.textEl) {
+        const mx = (s.x + t.x) / 2;
+        const my = (s.y + t.y) / 2;
+        elGroup.rectEl.setAttribute("x", mx - elGroup.badgeW / 2);
+        elGroup.rectEl.setAttribute("y", my - elGroup.badgeH / 2);
+        elGroup.textEl.setAttribute("x", mx);
+        elGroup.textEl.setAttribute("y", my);
+      }
     }
   });
   nodes.forEach((n, i) => {
@@ -613,7 +656,17 @@ function rebuildFilters() {
 const searchBox = document.getElementById("search");
 const orphansOnly = document.getElementById("orphansOnly");
 const showLabels = document.getElementById("showLabels");
+const showEdgeLabels = document.getElementById("showEdgeLabels");
 const focusModeToggle = document.getElementById("focusModeToggle");
+
+if (showEdgeLabels) {
+  showEdgeLabels.addEventListener("change", () => {
+    const disp = showEdgeLabels.checked ? "inline" : "none";
+    document.querySelectorAll(".edge-label-bg, .edge-label-text").forEach(el => {
+      el.style.display = disp;
+    });
+  });
+}
 const expandAllBtn = document.getElementById("expandAllBtn");
 const collapseAllBtn = document.getElementById("collapseAllBtn");
 
@@ -723,7 +776,9 @@ function highlightNodeNeighbors(n) {
     const touches = e.source === n.id || e.target === n.id;
     if (edgeEls[i]) {
       edgeEls[i].classList.toggle("hl", touches);
+      edgeEls[i].lineEl.classList.toggle("hl", touches);
       edgeEls[i].classList.toggle("dim", !touches);
+      edgeEls[i].lineEl.classList.toggle("dim", !touches);
     }
   });
 }
@@ -737,6 +792,7 @@ function clearHighlights() {
   activeEdges.forEach((e, i) => {
     if (edgeEls[i]) {
       edgeEls[i].classList.remove("hl", "dim");
+      edgeEls[i].lineEl.classList.remove("hl", "dim");
     }
   });
 }

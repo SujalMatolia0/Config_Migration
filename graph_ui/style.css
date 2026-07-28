@@ -82,7 +82,38 @@ svg.panning { cursor: grabbing; }
 .edge { stroke: #B0A0A4; stroke-width: 1.5; fill: none; opacity: .55; transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s; }
 .edge.child-edge { stroke: #C8B8BC; stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.4; }
 .edge.hl { stroke: var(--accent-primary); stroke-width: 2.8; opacity: 1; filter: drop-shadow(0 0 4px rgba(153, 0, 38, 0.35)); }
-.edge.dim, .node.dim { opacity: .12; }
+.edge.dim, .node.dim, .edge-group.dim { opacity: .12; }
+
+.edge-label-bg {
+  fill: #FFFFFF;
+  fill-opacity: 0.94;
+  stroke: var(--border-subtle);
+  stroke-width: 1px;
+  rx: 3px;
+  ry: 3px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.06));
+  transition: stroke 0.2s, fill 0.2s;
+}
+.edge-label-text {
+  fill: #475569;
+  font-size: 9px;
+  font-weight: 600;
+  pointer-events: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.edge-group.hl .edge-label-bg {
+  fill: #FFFFFF;
+  stroke: var(--accent-primary);
+  stroke-width: 1.5px;
+}
+.edge-group.hl .edge-label-text {
+  fill: var(--accent-primary);
+  font-weight: 700;
+}
+
 .node { cursor: pointer; transition: opacity 0.2s; }
 .node.module_root circle { stroke: var(--accent-primary); stroke-width: 3.5; filter: drop-shadow(0 2px 8px rgba(153,0,38,0.25)); }
 .node.category_hub circle { stroke: #D97706; stroke-width: 2.8; stroke-dasharray: 4 2; filter: drop-shadow(0 2px 6px rgba(217,119,6,0.2)); }
