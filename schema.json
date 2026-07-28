@@ -104,7 +104,42 @@
         },
         "required": ["url", "referencedIn", "type"]
       }
+    },
+    "graph": {
+      "type": "object",
+      "description": "Node/edge layout consumed directly by graph_ui (see graph_ui/README.md).",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string" },
+              "label": { "type": "string" },
+              "isOrphan": { "type": "boolean" },
+              "orphanReason": { "type": ["string", "null"] },
+              "data": { "type": "object" }
+            },
+            "required": ["id", "type", "label", "isOrphan"]
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "label": { "type": "string" }
+            },
+            "required": ["id", "source", "target"]
+          }
+        }
+      },
+      "required": ["nodes", "edges"]
     }
   },
-  "required": ["meta", "summary", "components", "relationships", "orphans", "endpoints"]
+  "required": ["meta", "summary", "components", "relationships", "orphans", "endpoints", "graph"]
 }

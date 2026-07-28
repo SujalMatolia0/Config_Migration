@@ -22,6 +22,7 @@ from src.analyser.endpoint_extractor import extract_endpoints
 
 from src.output.json_writer import write_master_json
 from src.output.report_builder import build_html_report, build_pdf_report
+from graph_ui.build import build_graph_ui
 
 
 def detect_and_parse_file(file_path, components, strict=False):
@@ -357,6 +358,9 @@ def main():
             json.dump(all_unknowns_summary, f, indent=2)
         print(f"Unknown elements dump written -> {unknowns_json_path} ({total_unknown_count} items)")
 
+    graph_path = build_graph_ui(master_data, os.path.join(output_dir, "graph"))
+    print(f"Global dependency graph viewer written -> {graph_path}")
+
     if not args.json_only:
         from src.output.markdown_generator import generate_report_markdown
 
@@ -391,6 +395,9 @@ def main():
                 ws_json_fmt_dir = os.path.join(json_dir, "workspaces", ws_slug)
                 write_master_json(ws_components, ws_relationships, ws_orphans, ws_endpoints, os.path.join(ws_json_fmt_dir, "master.json"), ws_meta)
                 print("  master.json written")
+
+                ws_graph_path = build_graph_ui(ws_master_data, os.path.join(ws_out_dir, "graph"))
+                print(f"  dependency graph viewer written -> {ws_graph_path}")
 
                 md_content = generate_report_markdown(ws)
                 with open(os.path.join(ws_out_dir, "report.md"), "w", encoding="utf-8") as f:
