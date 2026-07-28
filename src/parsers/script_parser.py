@@ -212,6 +212,50 @@ def parse_script_file(file_path):
                 "detail": f"Potential credentials found in variable assignments (count: {len(valid_creds)})"
             })
 
+    # ── HTML & JavaScript Extraction for Live Previews ─────────────────────
+    has_html = False
+    has_js = False
+    html_snippets = []
+    js_snippets = []
+
+    if ext == ".js":
+        has_js = True
+        js_snippets.append(content[:4000])
+
+    elif ext == ".php":
+        # Extract <script> blocks
+        script_blocks = re.findall(r'<script[^>]*>([\s\S]*?)</script>', content, re.IGNORECASE)
+        for sb in script_blocks:
+            if sb.strip():
+                has_js = True
+                js_snippets.append(sb.strip())
+
+        if not has_js and any(k in content for k in ["document.getElementById", "window.", "function()", "$.ajax", "jQuery("]):
+            has_js = True
+
+        # Extract raw HTML or echo HTML strings
+        echo_html_matches = re.findall(r'(?:echo|print)\s*["\']\s*(<(?:div|table|tr|td|th|form|p|span|input|button|h\d)[\s\S]*?>[\s\S]*?)["\'];', content, re.IGNORECASE)
+        for eh in echo_html_matches:
+            has_html = True
+            clean_eh = re.sub(r'\.\s*\$[a-zA-Z0-9_]+(?:\-\>[a-zA-Z0-9_]+)*\s*\.', ' [Dynamic] ', eh)
+            clean_eh = re.sub(r'\"\.([^\"]+)\.\"', ' [Dynamic] ', clean_eh)
+            html_snippets.append(clean_eh.strip())
+
+        heredocs = re.findall(r'<<<\s*HTML([\s\S]*?)HTML;', content)
+        for hd in heredocs:
+            has_html = True
+            html_snippets.append(hd.strip())
+
+        # Check for raw HTML markup outside PHP tags
+        clean_php = re.sub(r'<\?php[\s\S]*?\?>', '', content, flags=re.IGNORECASE)
+        clean_php = re.sub(r'<\?[\s\S]*?\?>', '', clean_php)
+        if clean_php.strip() and ("<div" in clean_php or "<table" in clean_php or "<html" in clean_php or "<span" in clean_php or "<form" in clean_php):
+            has_html = True
+            html_snippets.append(clean_php.strip())
+
+    full_html = "\n\n".join(html_snippets) if html_snippets else ""
+    full_js = "\n\n".join(js_snippets) if js_snippets else ""
+
     return {
         "file_name": script_name,
         "script_type": script_type,
@@ -224,7 +268,11 @@ def parse_script_file(file_path):
         "internal_apis": internal_apis,
         "external_soap_apis": external_soap_apis,
         "external_rest_apis": external_rest_apis,
-        "flow_steps": flow_steps
+        "flow_steps": flow_steps,
+        "has_html": has_html,
+        "has_js": has_js,
+        "html_content": full_html[:6000],
+        "js_content": full_js[:6000]
     }
 
 if __name__ == "__main__":

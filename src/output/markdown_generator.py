@@ -2092,8 +2092,13 @@ def generate_single_custom_script_markdown(script):
     lines.append("")
     lines.append("| Attribute | Value |")
     lines.append("| --- | --- |")
+    has_js_str = "Yes" if script.get("has_js") or script.get("js_content") else "No"
+    has_html_str = "Yes" if script.get("has_html") or script.get("html_content") else "No"
+
     lines.append(f"| **File Name** | `{fname}` |")
     lines.append(f"| **Script Type** | {stype} |")
+    lines.append(f"| **Contains JavaScript Code** | {has_js_str} |")
+    lines.append(f"| **Contains HTML UI Markup** | {has_html_str} |")
     lines.append(f"| **Code Imports** | {len(script.get('imports', []))} |")
     lines.append(f"| **OSVC Data Objects** | {len(script.get('osvc_objects', []))} |")
     lines.append(f"| **Internal APIs (ROQL / Connect)** | {len(internal_apis)} |")
@@ -2208,6 +2213,38 @@ def generate_single_custom_script_markdown(script):
     lines.append("  Script-->>Client: Return Script Execution Response")
     lines.append("```")
     lines.append("")
+
+    # JavaScript Code Section
+    if script.get("has_js") or script.get("js_content"):
+        lines.append("## JavaScript Code Analysis")
+        lines.append("")
+        lines.append("The script includes client-side JavaScript / embedded script logic:")
+        lines.append("")
+        lines.append("```javascript")
+        lines.append(script.get("js_content", "// JavaScript logic detected").strip())
+        lines.append("```")
+        lines.append("")
+
+    # HTML UI Markup & Live Interactive Preview Section
+    if script.get("has_html") or script.get("html_content"):
+        lines.append("## HTML UI Markup & Live Interactive Preview")
+        lines.append("")
+        lines.append("The script contains embedded HTML UI markup. Below is the extracted source code and a live interactive preview:")
+        lines.append("")
+        lines.append("### Source Markup")
+        lines.append("")
+        lines.append("```html")
+        lines.append(script.get("html_content", "<!-- HTML UI Markup -->").strip())
+        lines.append("```")
+        lines.append("")
+        lines.append("### Interactive HTML Preview")
+        lines.append("")
+        lines.append('<div class="html-preview-pending">')
+        lines.append('  <template>')
+        lines.append(script.get("html_content", "<div>HTML Preview</div>").strip())
+        lines.append('  </template>')
+        lines.append('</div>')
+        lines.append("")
 
     return "\n".join(lines)
 
