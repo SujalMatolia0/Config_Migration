@@ -2027,18 +2027,18 @@ def generate_custom_scripts_summary_markdown(scripts):
     lines.append("")
     lines.append("## Overview Table")
     lines.append("")
-    lines.append("| Script File | Type | Imports | OSVC Objects | External Calls | Risk Flags |")
+    lines.append("| Script File | Type | Internal APIs | SOAP APIs | REST APIs | Risk Flags |")
     lines.append("| --- | --- | --- | --- | --- | --- |")
 
     for s in scripts:
         fname = s.get("file_name", "Unknown")
         stype = s.get("script_type", "Script")
-        imports_cnt = len(s.get("imports", []))
-        objs = ", ".join(s.get("osvc_objects", [])) or "None"
-        ext_calls = ", ".join(s.get("external_calls", [])) or "None"
+        int_cnt = len(s.get("internal_apis", []))
+        soap_cnt = len(s.get("external_soap_apis", []))
+        rest_cnt = len(s.get("external_rest_apis", []))
         risks = len(s.get("risk_flags", []))
         risk_badge = f"[RISK: {risks}]" if risks > 0 else "[OK]"
-        lines.append(f"| `{fname}` | {stype} | {imports_cnt} | {objs} | {ext_calls} | {risk_badge} |")
+        lines.append(f"| `{fname}` | {stype} | {int_cnt} | {soap_cnt} | {rest_cnt} | {risk_badge} |")
 
     lines.append("")
     lines.append("---")
@@ -2049,8 +2049,16 @@ def generate_custom_scripts_summary_markdown(scripts):
     for s in scripts:
         fname = s.get("file_name", "Unknown")
         stype = s.get("script_type", "Script")
+        int_cnt = len(s.get("internal_apis", []))
+        soap_cnt = len(s.get("external_soap_apis", []))
+        rest_cnt = len(s.get("external_rest_apis", []))
+
         lines.append(f"### Script: `{fname}` ({stype})")
         lines.append("")
+        lines.append(f"- **Internal APIs (ROQL/Connect):** {int_cnt}")
+        lines.append(f"- **External SOAP APIs:** {soap_cnt}")
+        lines.append(f"- **External REST APIs:** {rest_cnt}")
+
         if s.get("imports"):
             lines.append("- **Imports:** " + ", ".join(f"`{i}`" for i in s["imports"]))
         if s.get("osvc_objects"):
@@ -2071,21 +2079,27 @@ def generate_single_custom_script_markdown(script):
     fname = script.get("file_name", "Unknown")
     stype = script.get("script_type", "Custom Script")
 
+    internal_apis = script.get("internal_apis", [])
+    soap_apis = script.get("external_soap_apis", [])
+    rest_apis = script.get("external_rest_apis", [])
+
     lines = []
     lines.append(f"# Custom Script Analysis: `{fname}`")
     lines.append("")
     lines.append(f"**Script Type:** {stype}")
     lines.append("")
-    lines.append("## Script Attributes")
+    lines.append("## Script Overview & Attributes")
     lines.append("")
     lines.append("| Attribute | Value |")
     lines.append("| --- | --- |")
     lines.append(f"| **File Name** | `{fname}` |")
     lines.append(f"| **Script Type** | {stype} |")
-    lines.append(f"| **Imports Count** | {len(script.get('imports', []))} |")
-    lines.append(f"| **OSVC Objects Referenced** | {len(script.get('osvc_objects', []))} |")
-    lines.append(f"| **External API Calls** | {len(script.get('external_calls', []))} |")
-    lines.append(f"| **Hardcoded URLs** | {len(script.get('urls', []))} |")
+    lines.append(f"| **Code Imports** | {len(script.get('imports', []))} |")
+    lines.append(f"| **OSVC Data Objects** | {len(script.get('osvc_objects', []))} |")
+    lines.append(f"| **Internal APIs (ROQL / Connect)** | {len(internal_apis)} |")
+    lines.append(f"| **External SOAP APIs** | {len(soap_apis)} |")
+    lines.append(f"| **External REST APIs** | {len(rest_apis)} |")
+    lines.append(f"| **Risk Flags** | {len(script.get('risk_flags', []))} |")
     lines.append("")
 
     if script.get("imports"):
@@ -2096,20 +2110,60 @@ def generate_single_custom_script_markdown(script):
         lines.append("")
 
     if script.get("osvc_objects"):
-        lines.append("## OSVC Data Objects")
+        lines.append("## OSVC Data Objects Referenced")
         lines.append("")
         for obj in script["osvc_objects"]:
             lines.append(f"- `{obj}`")
         lines.append("")
 
-    if script.get("urls") or script.get("external_calls"):
-        lines.append("## External Endpoints & API Calls")
-        lines.append("")
-        for call in script.get("external_calls", []):
-            lines.append(f"- **API Invocation:** {call}")
-        for url in script.get("urls", []):
-            lines.append(f"- **URL:** `{url}`")
-        lines.append("")
+    lines.append("## Categorized API Breakdown")
+    lines.append("")
+
+    # 1. Internal APIs
+    lines.append("### 1. Internal APIs (ROQL & Native OSVC Objects)")
+    lines.append("")
+    if internal_apis:
+        lines.append("| API Type | Operation | Details |")
+        lines.append("| --- | --- | --- |")
+        for api in internal_apis:
+            atype = api.get("type", "Internal API")
+            op = api.get("operation", "N/A")
+            dtl = api.get("detail", "")
+            lines.append(f"| `{atype}` | {op} | `{dtl}` |")
+    else:
+        lines.append("*No Internal ROQL or Connect PHP API calls detected.*")
+    lines.append("")
+
+    # 2. External SOAP APIs
+    lines.append("### 2. External APIs (SOAP)")
+    lines.append("")
+    if soap_apis:
+        lines.append("| Protocol | Endpoint / WSDL | Action / Operation |")
+        lines.append("| --- | --- | --- |")
+        for api in soap_apis:
+            proto = api.get("protocol", "SOAP")
+            ep = api.get("endpoint", "N/A")
+            act = api.get("action", "SOAP Request")
+            lines.append(f"| {proto} | `{ep}` | {act} |")
+    else:
+        lines.append("*No External SOAP Web Service integrations detected.*")
+    lines.append("")
+
+    # 3. External REST APIs
+    lines.append("### 3. External APIs (REST)")
+    lines.append("")
+    if rest_apis:
+        lines.append("| Protocol | HTTP Method | Endpoint URL | Details |")
+        lines.append("| --- | --- | --- | --- |")
+        for api in rest_apis:
+            proto = api.get("protocol", "REST")
+            mth = api.get("method", "GET/POST")
+            ep = api.get("endpoint", "N/A")
+            dtl = api.get("details", "")
+            lines.append(f"| {proto} | `{mth}` | `{ep}` | {dtl} |")
+    else:
+        lines.append("*No External REST HTTP API integrations detected.*")
+    lines.append("")
 
     if script.get("risk_flags"):
         lines.append("## Security & Risk Analysis")
@@ -2121,28 +2175,37 @@ def generate_single_custom_script_markdown(script):
                 lines.append(f"- **[WARNING]:** {r}")
         lines.append("")
 
-    lines.append("## Dependency Flow Diagram")
+    # Execution Sequence Flow Diagram
+    lines.append("## Execution Flow Diagram")
     lines.append("")
     lines.append("```mermaid")
-    lines.append("graph LR")
-    lines.append("  classDef script fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff;")
-    lines.append("  classDef obj fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
-    lines.append("  classDef api fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
-    lines.append("")
+    lines.append("sequenceDiagram")
+    lines.append("  autonumber")
+    lines.append("  participant Client as Client / Trigger")
+    lines.append(f"  participant Script as Script ({fname})")
+    if internal_apis:
+        lines.append("  participant OSVC as OSVC Connect API / DB")
+    if soap_apis:
+        lines.append("  participant SOAP as External SOAP Service")
+    if rest_apis:
+        lines.append("  participant REST as External REST Service")
 
-    snode = f"SCRIPT_{re.sub(r'[^a-zA-Z0-9_]', '', fname)}"
-    lines.append(f"  {snode}[\"Script: {fname}\"]:::script")
+    lines.append("  Client->>Script: Execute / Invoke Request")
 
-    for obj in script.get("osvc_objects", []):
-        onode = f"OBJ_{re.sub(r'[^a-zA-Z0-9_]', '', obj)}"
-        lines.append(f"  {onode}[\"Object: {obj}\"]:::obj")
-        lines.append(f"  {snode} --> |\"References\"| {onode}")
+    for step in script.get("flow_steps", []):
+        stg = step.get("stage", "")
+        act = step.get("action", "")
+        if "Authentication" in stg or "Internal" in stg:
+            lines.append(f"  Script->>OSVC: {act}")
+            lines.append(f"  OSVC-->>Script: Return Data / Context")
+        elif "SOAP" in stg:
+            lines.append(f"  Script->>SOAP: {act}")
+            lines.append(f"  SOAP-->>Script: Return SOAP Response Envelope")
+        elif "REST" in stg:
+            lines.append(f"  Script->>REST: {act}")
+            lines.append(f"  REST-->>Script: Return REST Response Payload")
 
-    for url in script.get("urls", []):
-        anode = f"URL_{re.sub(r'[^a-zA-Z0-9_]', '', url)}"
-        lines.append(f"  {anode}[\"Endpoint: {url}\"]:::api")
-        lines.append(f"  {snode} --> |\"HTTP Call\"| {anode}")
-
+    lines.append("  Script-->>Client: Return Script Execution Response")
     lines.append("```")
     lines.append("")
 
