@@ -603,12 +603,13 @@ let filtersInitialized = false;
 
 function getNodeObjects(n) {
   let objs = [];
-  if (n.type === "object") {
-    objs = [n.label];
-  } else if (n.data && n.data.object) {
-    objs = Array.isArray(n.data.object) ? n.data.object : [n.data.object];
-  } else if (n.data && n.data.module && n.data.module !== "Other") {
-    objs = [n.data.module];
+  if (n.type === "module_root") {
+    objs = [n.module];
+  } else if (n.type === "category_hub") {
+    objs = [n.module];
+  } else {
+    const mod = getNodeModule(n);
+    if (mod) objs = [mod];
   }
   if (!objs.length) objs = ["Other"];
   return objs;
