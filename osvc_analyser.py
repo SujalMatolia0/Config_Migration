@@ -166,7 +166,35 @@ def collect_ws_referenced_report_ids(ws):
     return ids
 
 
-def generate_index_md(workspaces, output_dir, components=None):
+def format_component_ref(obj):
+    if isinstance(obj, str):
+        return obj
+    if isinstance(obj, dict):
+        ctype = obj.get("type") or "Component"
+        name = obj.get("name") or obj.get("file_name") or obj.get("id") or "Unnamed"
+        if ctype == "Report":
+            rid = obj.get("id")
+            rname = obj.get("name")
+            return f"Report {rid} ({rname})" if rid and rname and rname != f"Report {rid}" else f"Report {rid or name}"
+        return f"{ctype}: {name}"
+    return str(obj)
+
+def format_rel_type(rel):
+    rtype = rel.get("type") or rel.get("label") or "Linkage"
+    if isinstance(rel.get("target"), dict):
+        tgt_type = rel["target"].get("type")
+        if tgt_type == "Report":
+            return "References Report"
+        elif tgt_type == "ExternalEndpoint":
+            return "Calls External Endpoint"
+        elif tgt_type == "CustomScript":
+            return "Triggers Custom Script"
+        elif tgt_type == "CPM":
+            return "Invokes CPM Handler"
+    return str(rtype).replace("_", " ").title()
+
+
+def generate_index_md(workspaces, output_dir, components=None, relationships=None):
     lines = []
     lines.append("# OSVC Configuration Master Index")
     lines.append("")
@@ -390,9 +418,9 @@ def generate_index_md(workspaces, output_dir, components=None):
                 lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Async` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
             lines.append("")
 
-    # 5. Custom Reports
+    # 5. Custom Script Reports
     scripts = components.get("customScripts", []) if components else []
-    lines.append("## Custom Reports")
+    lines.append("## Custom Script Reports")
     lines.append("")
     if scripts:
         lines.append("| Script File Name | Component Type | Functions Count | External Calls / Endpoints | Documentation |")
@@ -437,6 +465,70 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append(f"| `{rid}` | {ws_names} |")
     else:
         lines.append("*No shared cross-workspace resources detected.*")
+    lines.append("")
+
+    # 8. Component Mappings & Linkages
+    lines.append("## Component Mappings & Linkages")
+    lines.append("")
+    rel_list = relationships if relationships else []
+    if rel_list:
+        seen = set()
+        grouped = {
+            "Workspaces Inventory": [],
+            "CPM Event Procedures": [],
+            "BUI Add-Ins & Extensions": [],
+            "Custom PHP Procedural Scripts": [],
+            "Other Cross-Component Linkages": []
+        }
+        for r in rel_list:
+            src_obj = r.get("source") or r.get("from") or {}
+            tgt_obj = r.get("target") or r.get("to") or {}
+            
+            src_str = format_component_ref(src_obj)
+            tgt_str = format_component_ref(tgt_obj)
+
+            # Omit dummy Report 0 references
+            if "Report 0" in tgt_str or "Report 0" in src_str or "report 0" in tgt_str.lower():
+                continue
+
+            rtype_str = format_rel_type(r)
+            ctx = r.get("context") or r.get("details") or "Cross-Component Mapping"
+
+            # Deduplicate rows
+            key = (src_str, rtype_str, tgt_str, ctx)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            entry = {"source": src_str, "type": rtype_str, "target": tgt_str, "context": ctx}
+            src_low = src_str.lower()
+            if "workspace" in src_low:
+                grouped["Workspaces Inventory"].append(entry)
+            elif "cpm" in src_low or "handler" in src_low or "procedure" in src_low:
+                grouped["CPM Event Procedures"].append(entry)
+            elif "bui" in src_low or "addin" in src_low:
+                grouped["BUI Add-Ins & Extensions"].append(entry)
+            elif "script" in src_low or "php" in src_low:
+                grouped["Custom PHP Procedural Scripts"].append(entry)
+            else:
+                grouped["Other Cross-Component Linkages"].append(entry)
+
+        has_any = False
+        for category, items in grouped.items():
+            if items:
+                has_any = True
+                lines.append(f"### {category} Linkages")
+                lines.append("")
+                lines.append("| Source Component | Relationship / Linkage Type | Target Component | Details / Context |")
+                lines.append("| :--- | :--- | :--- | :--- |")
+                for item in sorted(items, key=lambda x: (x["source"], x["target"])):
+                    lines.append(f"| **{item['source']}** | `{item['type']}` | `{item['target']}` | {item['context']} |")
+                lines.append("")
+        if not has_any:
+            lines.append("*No active cross-component linkages detected.*")
+            lines.append("")
+    else:
+        lines.append("*No cross-component linkages detected.*")
     lines.append("")
 
     index_path = os.path.join(output_dir, "index.md")
@@ -627,7 +719,7 @@ def main():
 
             if multi:
                 print("\nWriting master index...")
-                index_path = generate_index_md(workspaces, output_dir, components)
+                index_path = generate_index_md(workspaces, output_dir, components, relationships)
                 with open(os.path.join(markdown_dir, "index.md"), "w", encoding="utf-8") as f:
                     with open(index_path, "r", encoding="utf-8") as idx_f:
                         f.write(idx_f.read())

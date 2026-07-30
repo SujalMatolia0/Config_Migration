@@ -26,6 +26,33 @@ def canonical_module_name(name):
         return "General / Unassigned"
     return base.capitalize() if len(base) > 2 else base
 
+def format_component_ref(obj):
+    if isinstance(obj, str):
+        return obj
+    if isinstance(obj, dict):
+        ctype = obj.get("type") or "Component"
+        name = obj.get("name") or obj.get("file_name") or obj.get("id") or "Unnamed"
+        if ctype == "Report":
+            rid = obj.get("id")
+            rname = obj.get("name")
+            return f"Report {rid} ({rname})" if rid and rname and rname != f"Report {rid}" else f"Report {rid or name}"
+        return f"{ctype}: {name}"
+    return str(obj)
+
+def format_rel_type(rel):
+    rtype = rel.get("type") or rel.get("label") or "Linkage"
+    if isinstance(rel.get("target"), dict):
+        tgt_type = rel["target"].get("type")
+        if tgt_type == "Report":
+            return "References Report"
+        elif tgt_type == "ExternalEndpoint":
+            return "Calls External Endpoint"
+        elif tgt_type == "CustomScript":
+            return "Triggers Custom Script"
+        elif tgt_type == "CPM":
+            return "Invokes CPM Handler"
+    return str(rtype).replace("_", " ").title()
+
 def build_details_summary(node, use_ai_summary=True):
     """Builds a rich, descriptive details summary string for any component node."""
     ntype = (node.get("type") or "").lower()
@@ -362,6 +389,70 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
             lines.append(f"| `{url}` | `{src}` | `{ctx}` | {code_ctx} |")
     else:
         lines.append("*No external HTTP/REST API endpoints detected in custom scripts.*")
+    lines.append("")
+
+    # 7. System Component Mappings & Linkages Matrix
+    lines.append("## System Component Mappings & Linkages Matrix")
+    lines.append("")
+    rel_list = relationships if relationships else []
+    if rel_list:
+        seen = set()
+        grouped = {
+            "Workspaces Inventory": [],
+            "CPM Event Procedures": [],
+            "BUI Add-Ins & Extensions": [],
+            "Custom PHP Procedural Scripts": [],
+            "Other Cross-Component Linkages": []
+        }
+        for r in rel_list:
+            src_obj = r.get("source") or r.get("from") or {}
+            tgt_obj = r.get("target") or r.get("to") or {}
+            
+            src_str = format_component_ref(src_obj)
+            tgt_str = format_component_ref(tgt_obj)
+
+            # Omit dummy Report 0 references
+            if "Report 0" in tgt_str or "Report 0" in src_str or "report 0" in tgt_str.lower():
+                continue
+
+            rtype_str = format_rel_type(r)
+            ctx = r.get("context") or r.get("details") or "Cross-Component Mapping"
+
+            # Deduplicate rows
+            key = (src_str, rtype_str, tgt_str, ctx)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            entry = {"source": src_str, "type": rtype_str, "target": tgt_str, "context": ctx}
+            src_low = src_str.lower()
+            if "workspace" in src_low:
+                grouped["Workspaces Inventory"].append(entry)
+            elif "cpm" in src_low or "handler" in src_low or "procedure" in src_low:
+                grouped["CPM Event Procedures"].append(entry)
+            elif "bui" in src_low or "addin" in src_low:
+                grouped["BUI Add-Ins & Extensions"].append(entry)
+            elif "script" in src_low or "php" in src_low:
+                grouped["Custom PHP Procedural Scripts"].append(entry)
+            else:
+                grouped["Other Cross-Component Linkages"].append(entry)
+
+        has_any = False
+        for category, items in grouped.items():
+            if items:
+                has_any = True
+                lines.append(f"### {category} Linkages")
+                lines.append("")
+                lines.append("| Source Component | Relationship / Linkage Type | Target Component | Details / Context |")
+                lines.append("| :--- | :--- | :--- | :--- |")
+                for item in sorted(items, key=lambda x: (x["source"], x["target"])):
+                    lines.append(f"| **{item['source']}** | `{item['type']}` | `{item['target']}` | {item['context']} |")
+                lines.append("")
+        if not has_any:
+            lines.append("*No active cross-component mappings detected in current dataset.*")
+            lines.append("")
+    else:
+        lines.append("*No active cross-component mappings detected in current dataset.*")
     lines.append("")
 
     with open(report_path, "w", encoding="utf-8") as f:

@@ -9,13 +9,25 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 - **Web Accelerator Platform & Dashboard**: Interactive Flask-based web application (`web_platform.py`) running on `http://127.0.0.1:5050` with a high-contrast Crimson Red & Off-White / Cream aesthetic theme.
 - **Unified Master System Architecture Report (`COMPLETE_SYSTEM_MAPPING.md`)**:
   - **Entity Module Consolidation**: Rolls up fragmented sub-components under canonical primary object headers (`Contact`, `Incident`, `Organization`, `Test_Record`, `General`).
+  - **Deduplicated & Categorized Component Mappings Matrix**: Groups cross-component linkages by asset domain (`Workspaces Inventory Linkages`, `CPM Event Procedures Linkages`, `BUI Add-Ins & Extensions Linkages`, `Custom PHP Procedural Scripts Linkages`) with all duplicate pairs and invalid placeholders removed.
   - **Populated Execution Context & Linkages**: Renders non-empty details (fields, tabs, business rules, report columns, entry points) and linkage counts (`In -> Out`) for every component.
   - **Audit-Critical Orphaned Components**: Explicitly flags unreferenced custom scripts, workspace layouts, and CPM procedures with audit risk reasons.
   - **Consolidated Integration Endpoints Catalog**: Maps outbound REST API endpoints and SOAP services to their exact source script files.
   - **Executive Risk Signals**: Highlights orphaned components, unverified HTTP endpoints, and custom field references using structured callout alerts (`> [!WARNING]`, `> [!IMPORTANT]`, `> [!TIP]`).
+- **Master Configuration Index (`index.md`)**:
+  - **Structured 8-Section Navigation Matrix**: Formatted into exact top-level sections:
+    1. `## Objects` (Primary entity modules & mapped component counts)
+    2. `## Workspaces` (Standard & Custom layout workspace matrix)
+    3. `## Reports` (Standard & Custom Analytics reports catalog)
+    4. `## CPM` (Object Event Handlers, Routing Mappings, Async Queues)
+    5. `## Custom Script Reports` (PHP procedural scripts, functions, SOAP/REST calls)
+    6. `## BUIs` (Browser UI Add-Ins & Extension packages)
+    7. `## Shared Resources` (Cross-workspace shared report dependencies)
+    8. `## Component Mappings & Linkages` (Categorized & deduplicated cross-component linkages)
 - **Interactive Dependency Graph Viewer**:
   - **Universal Double-Click Inspector**: Double-clicking any graph node opens the 3-tab inspector sidebar (`Details`, `Documentation`, `Architecture`).
   - **Layered Architecture Flowcharts**: Renders end-to-end data pipeline flowcharts connecting Workspaces, CPM Event Handlers, Custom Scripts, BUI Add-Ins, and External API Endpoints.
+  - **Crimson & Slate Quick Actions**: Premium gradient action buttons for `View Master Report` (Crimson Red) and `Download MD Report` (Deep Slate).
   - **Smart Graph Search & Auto-Focus**: Real-time auto-zoom and node/edge highlighting when typing in the search bar.
   - **Bulk Selection Toggles**: `Select All` and `Deselect All` object filter controls.
   - **High-Contrast Color System**: Deep Purple (`#9333EA`) for Workspaces, Sky Blue (`#0284C7`) for Standard Fields, Bright Emerald (`#10B981`) for Custom Fields (`c$`).
@@ -27,7 +39,7 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
   - **Tier 1 (Top-Level Component Accordions)**: Collapsible containers per OSVC export component (`Workspaces`, `Analytics Reports`, `CPM Procedures`, `BUI Add-Ins`).
   - **Tier 2 (Sub-Group Labeled Dividers)**: Categorized file tables grouping items by schema domain (`Standard Object Workspaces`, `Custom & Edge Layout Workspaces`, `Object Event Handlers`, `CPM Routing Mappings`, `BUI Extension Packages`).
 - **Content Schema Auto-Classifier**: Inspects XML root schemas (`<analytics_core>`, `<TabSet>`, `<ObjectProcedure>`, `<Rule>`, `<nav_set>`) and ZIP manifests (`init.html`, `manifest.json`), auto-categorizing exports into designated subfolders.
-- **CPM Analysis & AI Summaries**: Analyzes Custom Process Model (CPM) PHP handlers and XML exports, integrating Groq AI API (`llama-3.3-70b-versatile`) with static rule-based fallback.
+- **CPM Analysis & AI Summaries**: Analyzes Custom Process Model (CPM) PHP handlers and XML exports, integrating Groq AI API (`llama-3.3-70b-versatile`) with static rule-based fallback. Optional `--no-ai-summary` flag completely hides AI summary fields across all outputs.
 - **Strict Mode Element Auditing**: Captures and logs all unhandled OSVC XML tags and attributes into `results/unknowns.json`.
 
 ---
