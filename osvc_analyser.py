@@ -622,7 +622,9 @@ def main():
                 write_single_custom_script_json(sc, os.path.join(scripts_json_fmt_dir, single_json_filename))
                 print(f"Single Custom Script JSON written -> {single_json_path}")
 
-
+        # Generate Unified Master System Markdown Report
+        from src.output.master_report_generator import generate_master_system_report
+        generate_master_system_report(output_dir, master_data, components, orphans, endpoints, relationships)
 
     print("\nAnalysis completed successfully.")
 

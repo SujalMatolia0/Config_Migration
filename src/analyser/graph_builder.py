@@ -34,18 +34,14 @@ def get_detail_filename(node_id):
 def determine_node_module(node_type, data):
     if not data:
         return "Other"
-    
-    node_type_lower = (node_type or "").lower()
 
-    # Direct data object hint check
-    if data.get("object") and isinstance(data["object"], str) and data["object"] not in ("Other", "None"):
-        return data["object"]
-    if data.get("object_type") and isinstance(data["object_type"], str):
-        ot = data["object_type"].lower()
-        if "contact" in ot: return "Contact"
-        if "incident" in ot: return "Incident"
-        if "org" in ot or "organization" in ot: return "Organization"
-        if "answer" in ot: return "Answer"
+    # Explicit custom object binding or object type hint
+    obj_hint = data.get("object") or data.get("object_type") or data.get("module")
+    if obj_hint and isinstance(obj_hint, str) and obj_hint not in ("Other", "None", "Unknown"):
+        clean_obj = obj_hint.strip()
+        if clean_obj.lower().startswith("object"):
+            clean_obj = clean_obj[6:]
+        return clean_obj
 
     # Searchable text dump from data dictionary
     search_text = []
@@ -66,29 +62,20 @@ def determine_node_module(node_type, data):
     full_blob = " ".join(search_text)
 
     # 1. Contact Module
-    if any(k in full_blob for k in ["contact", "rncphp\\contact", "contact.org_id", "contact_create", "contact_update", "contactasync", "duplicate_contacts", "registercontact"]):
+    if any(k in full_blob for k in ["contact", "rncphp\\contact", "contact.org_id", "contact_create", "contact_update", "contactasync", "duplicate_contacts", "registercontact", "call", "sms"]):
         return "Contact"
 
     # 2. Incident Module
-    if any(k in full_blob for k in ["incident", "rncphp\\incident", "child_incident", "duplicate_incidents", "closing_notes", "bluebox_greencart", "cityworks", "addsr", "sr_number", "incident_create", "incident_routing"]):
+    if any(k in full_blob for k in ["incident", "rncphp\\incident", "child_incident", "duplicate_incidents", "closing_notes", "bluebox_greencart", "cityworks", "addsr", "sr_number", "incident_create", "incident_routing", "clock", "validation"]):
         return "Incident"
 
     # 3. Organization Module
     if any(k in full_blob for k in ["organization", "org_id", "rncphp\\organization", "getaccounts", "account", "siebel"]):
         return "Organization"
 
-    # 4. Answer Module
-    if "answer" in full_blob:
-        return "Answer"
-
-    # 5. Fallback keyword heuristic on name / file_name / label / id
-    fname = (data.get("file_name") or data.get("name") or data.get("id") or data.get("label") or "").lower()
-    if any(k in fname for k in ["contact", "call", "sms"]):
-        return "Contact"
-    if any(k in fname for k in ["incident", "note", "clock", "validation", "sr"]):
-        return "Incident"
-    if any(k in fname for k in ["org", "account", "siebel"]):
-        return "Organization"
+    # 4. Check for explicit custom object keywords (e.g. test_record)
+    if "test_record" in full_blob or "testrecord" in full_blob:
+        return "Test_Record"
 
     return "Other"
 
@@ -123,9 +110,14 @@ def make_lightweight_node_data(node_type, data):
         light["mdPath"] = f"../reports/report_{rep_name}_{rep_id}.md"
     elif lower_type == "cpm":
         light["mdPath"] = "../cpm/report_CPM_Summary.md"
-    elif lower_type == "buiaddin" and data.get("name"):
-        bname = data["name"].replace(" ", "_")
-        light["mdPath"] = f"../scripts/report_{bname}.md"
+    elif lower_type in ["buiaddin", "bui_addin"] and (data.get("name") or data.get("id")):
+        bname = data.get("name") or data.get("id")
+        b_slug = bname.replace(" ", "_")
+        light["mdPath"] = f"../bui_addins/report_{b_slug}.md"
+    elif lower_type in ["customscript", "custom_script", "script"] and (data.get("file_name") or data.get("name")):
+        sname = data.get("file_name") or data.get("name")
+        s_slug = sname.replace(" ", "_")
+        light["mdPath"] = f"../scripts/report_{s_slug}.md"
 
     # Counts of nested objects for summary UI
     for key in ["tabs", "fields", "rules", "columns", "filters", "soap_actions", "custom_fields_read", "custom_fields_written", "config_vars", "osvc_fields_read", "osvc_fields_written", "api_calls", "modal_views", "lifecycle_listeners", "external_libraries", "hooks", "osvc_objects"]:
@@ -207,9 +199,46 @@ def build_graph(components, relationships, orphans, endpoints):
         return node_id
 
     # ── Component Nodes ────────────────────────────────────────────────────
+    seen_edges = set()
+    SECONDARY_TYPES = {"osvobject", "osvcobject", "customfield", "configsetting", "reportcolumn"}
+
+    def _get_workspace_fields(ws):
+        ws_fields = list(ws.get("fields", []))
+        def _scan_tabs(tabs_list):
+            for t in tabs_list:
+                ws_fields.extend(t.get("fields", []))
+                for ts in t.get("nested_tabsets", []):
+                    for sub_t in ts.get("sub_tabs", []):
+                        _scan_tabs([sub_t])
+        _scan_tabs(ws.get("tabs", []))
+        return ws_fields
 
     for ws in components.get("workspaces", []):
-        add_node("Workspace", ws["name"], ws)
+        ws_node_id = add_node("Workspace", ws["name"], ws)
+        ws_mod = ws.get("module") or ws.get("object_type") or ws["name"]
+
+        ws_fields = _get_workspace_fields(ws)
+        for f in ws_fields:
+            fname = f.get("field_id") or f.get("label") or f.get("name")
+            if fname and str(fname).strip():
+                field_node_id = add_node("WorkspaceField", fname, {
+                    "name": fname,
+                    "object": ws_mod,
+                    "module": ws_mod,
+                    "object_type": ws_mod,
+                    "workspace": ws["name"],
+                    "field_id": fname,
+                    "data": f
+                })
+                edge_key = (ws_node_id, field_node_id, "field")
+                if edge_key not in seen_edges:
+                    seen_edges.add(edge_key)
+                    edges.append({
+                        "id": f"edge-ws-field-{len(edges)}",
+                        "source": ws_node_id,
+                        "target": field_node_id,
+                        "label": "field"
+                    })
 
     for rep in components.get("reports", []):
         # FIX: normalise ID to str for label

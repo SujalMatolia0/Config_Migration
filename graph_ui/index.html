@@ -11,9 +11,19 @@
 </head>
 <body>
 <div id="sidebar">
-  <a href="/" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;color:var(--accent-primary);text-decoration:none;font-weight:700;font-size:12px;padding:6px 10px;background:var(--panel2);border-radius:6px;border:1px solid var(--border-subtle);width:fit-content;transition:background 0.15s;">
-    [Back] Back to Dashboard
-  </a>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border-subtle);">
+    <a href="/" style="display:flex;align-items:center;justify-content:center;gap:6px;color:#990026;text-decoration:none;font-weight:700;font-size:12px;padding:8px 12px;background:var(--panel2);border-radius:6px;border:1px solid rgba(153,0,38,0.25);transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px;">
+      &larr; Back to Dashboard
+    </a>
+    <div style="display:flex;gap:6px;">
+      <button id="viewMasterReportBtn" style="flex:1;padding:7px 8px;font-size:11px;font-weight:700;background:linear-gradient(135deg, #059669, #047857);color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 1px 4px rgba(5,150,105,0.2);">
+        View Master Report
+      </button>
+      <button id="downloadMasterReportBtn" style="flex:1;padding:7px 8px;font-size:11px;font-weight:700;background:linear-gradient(135deg, #0284C7, #0369A1);color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 1px 4px rgba(2,132,199,0.2);">
+        Download MD Report
+      </button>
+    </div>
+  </div>
   <h1>OSVC Dependency Graph</h1>
   <div class="sub" id="metaLine"></div>
   
@@ -21,12 +31,25 @@
     <input type="checkbox" id="focusModeToggle"> <b>Focus Mode</b> (Click parent node to expand branch)
   </label>
 
-  <div style="display:flex;gap:6px;margin-bottom:12px;">
+  <div style="display:flex;gap:6px;margin-bottom:8px;">
     <button id="expandAllBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Expand All</button>
     <button id="collapseAllBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Collapse All</button>
   </div>
 
-  <input id="search" type="search" placeholder="Search components...">
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button id="exportSvgBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Export SVG</button>
+    <button id="exportPngBtn" style="flex:1;padding:6px;font-size:11px;font-weight:600;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:6px;cursor:pointer;color:var(--text-main);">Export PNG</button>
+  </div>
+
+  <input id="search" type="search" placeholder="Search components (auto-focus)...">
+  
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:4px;">
+    <span style="font-size:10px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Filter By OSVC Objects</span>
+    <div style="display:flex;gap:4px;">
+      <button id="selectAllObjectsBtn" style="padding:2px 6px;font-size:10px;font-weight:700;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:4px;cursor:pointer;color:var(--accent-primary);">Select All</button>
+      <button id="deselectAllObjectsBtn" style="padding:2px 6px;font-size:10px;font-weight:700;background:var(--panel2);border:1px solid var(--border-subtle);border-radius:4px;cursor:pointer;color:var(--text-muted);">Deselect All</button>
+    </div>
+  </div>
   <div id="filters"></div>
   <label class="toggle"><input type="checkbox" id="orphansOnly"> Orphans only</label>
   <label class="toggle"><input type="checkbox" id="showLabels" checked> Show node labels</label>
@@ -41,10 +64,16 @@
         <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#990026" flood-opacity="0.15" />
       </filter>
       <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#B0A0A4" opacity="0.7" />
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748B" opacity="0.85" />
+      </marker>
+      <marker id="arrow-mapping" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563EB" />
+      </marker>
+      <marker id="arrow-cross" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#E11D48" />
       </marker>
       <marker id="arrowHl" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M 0 1 L 10 5 L 0 9 z" fill="#990026" />
+        <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563EB" />
       </marker>
     </defs>
     <g id="viewport"><g id="edges"></g><g id="nodes"></g></g>
@@ -57,7 +86,7 @@
   </div>
 </div>
 <div id="inspector">
-  <button id="closeBtn" title="Close">[X]</button>
+  <button id="closeBtn" title="Close">&times;</button>
   <div class="tabs-header">
     <button class="tab-btn active" data-tab="details">Details</button>
     <button class="tab-btn" data-tab="doc">Documentation</button>
@@ -72,10 +101,10 @@
 
 <div id="diagramModal">
   <div class="modal-controls">
-    <button id="modalZoomIn" title="Zoom In">[+] Zoom In</button>
-    <button id="modalZoomOut" title="Zoom Out">[-] Zoom Out</button>
-    <button id="modalReset" title="Reset View">[Reset]</button>
-    <button id="modalClose" title="Close Fullscreen">[X] Close</button>
+    <button id="modalZoomIn" title="Zoom In">+ Zoom In</button>
+    <button id="modalZoomOut" title="Zoom Out">&minus; Zoom Out</button>
+    <button id="modalReset" title="Reset View">Reset</button>
+    <button id="modalClose" title="Close Fullscreen">&times; Close</button>
   </div>
   <div id="modalViewport"></div>
 </div>

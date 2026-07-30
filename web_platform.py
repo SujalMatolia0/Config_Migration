@@ -43,11 +43,11 @@ def detect_osvc_file_type(file_path):
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read(4096)
-                if "ObjectEventHandler" in content or "RNCPM" in content or "RNCPHP" in content:
+                if "ObjectEventHandler" in content or "RNCPM" in content:
                     return "cpm", "CPM Procedure", "Object Event Handlers", "PHP handler implementing ObjectEventHandler"
         except Exception:
             pass
-        return "cpm", "CPM / PHP Script", "Object Event Handlers", "PHP Source Script"
+        return "scripts", "Custom Script (PHP)", "Custom PHP Scripts", "Standalone PHP Source Script"
 
     if ext == ".js":
         return "scripts", "JavaScript Add-In", "Custom Scripts & JS", "JS Source File"
@@ -90,6 +90,7 @@ def list_files():
         "workspace": 0,
         "report": 0,
         "cpm": 0,
+        "scripts": 0,
         "bui": 0,
         "objects": 0,
         "rule": 0,
@@ -357,20 +358,35 @@ def download_results():
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for root, dirs, files in os.walk(RESULTS_DIR):
             dirs[:] = [d for d in dirs if not d.startswith(".")]
-            for fname in files:
-                if fname.startswith(".") or not fname.lower().endswith(".md"):
+            for file in files:
+                if file.startswith("."):
                     continue
-                full = os.path.join(root, fname)
-                arcname = os.path.relpath(full, RESULTS_DIR)
-                zf.write(full, arcname)
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, RESULTS_DIR)
+                zf.write(file_path, arcname)
     buf.seek(0)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     return send_file(
         buf,
         mimetype="application/zip",
         as_attachment=True,
-        download_name=f"osvc_results_{ts}.zip"
+        download_name="OSVC_Accelerator_Results.zip"
     )
+
+@app.route("/api/download-master-report", methods=["GET"])
+def download_master_report():
+    report_path = os.path.join(RESULTS_DIR, "COMPLETE_SYSTEM_MAPPING.md")
+    if not os.path.exists(report_path):
+        return jsonify({"success": False, "error": "Master report not generated yet."}), 404
+    return send_file(
+        report_path,
+        mimetype="text/markdown",
+        as_attachment=True,
+        download_name="COMPLETE_SYSTEM_MAPPING.md"
+    )
+
+@app.route("/results/<path:filename>", methods=["GET"])
+def serve_results_static(filename):
+    return send_from_directory(RESULTS_DIR, filename)
 
 
 def _build_graph_data(master):

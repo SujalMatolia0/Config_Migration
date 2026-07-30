@@ -1884,11 +1884,18 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
         lines.append("### HTML Live Previews")
         lines.append("")
         for hpath, hcode in html_previews.items():
+            raw_hcode = hcode.strip()
             lines.append(f"#### HTML Asset: `{hpath}`")
             lines.append("")
-            # Encode HTML as base64 so the placeholder survives markdown parsing
-            encoded = _b64.b64encode(hcode.strip().encode("utf-8")).decode("ascii")
-            lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{hpath}"></div>')
+            # Encode HTML as base64 for app.js iframe sandboxing AND embed card for VS Code Markdown preview
+            encoded = _b64.b64encode(raw_hcode.encode("utf-8")).decode("ascii")
+            lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{hpath}">')
+            lines.append('  <div class="html-preview-card" style="border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 12px 0; background: #ffffff; color: #1f2328; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">')
+            lines.append(f'    <div class="html-preview-body" style="background: #ffffff; color: #1f2328; font-size: 13px; line-height: 1.5;">')
+            lines.append(raw_hcode)
+            lines.append('    </div>')
+            lines.append('  </div>')
+            lines.append('</div>')
             lines.append("")
 
     lines.append("")
@@ -2085,8 +2092,12 @@ def generate_single_custom_script_markdown(script):
 
     lines = []
     lines.append(f"# Custom Script Analysis: `{fname}`")
+    summary_text = script.get("summary") or "Custom script utility executing internal database queries and API integrations."
+
+    lines.append("## Executive Functional Summary")
     lines.append("")
-    lines.append(f"**Script Type:** {stype}")
+    lines.append("> [!NOTE]")
+    lines.append(f"> {summary_text}")
     lines.append("")
     lines.append("## Script Overview & Attributes")
     lines.append("")
@@ -2214,35 +2225,31 @@ def generate_single_custom_script_markdown(script):
     lines.append("```")
     lines.append("")
 
-    # JavaScript Code Section
-    if script.get("has_js") or script.get("js_content"):
-        lines.append("## JavaScript Code Analysis")
+    # Client-Side JavaScript Functional & Behavioral Summary (ONLY if JS is present)
+    if script.get("has_js") and script.get("js_behaviors"):
+        lines.append("## Client-Side JavaScript Logic & UI Behavior Summary")
         lines.append("")
-        lines.append("The script includes client-side JavaScript / embedded script logic:")
+        lines.append("The script incorporates client-side JavaScript execution logic with the following UI behaviors and event handlers:")
         lines.append("")
-        lines.append("```javascript")
-        lines.append(script.get("js_content", "// JavaScript logic detected").strip())
-        lines.append("```")
+        for beh in script["js_behaviors"]:
+            lines.append(f"- {beh}")
         lines.append("")
 
-    # HTML UI Markup & Live Interactive Preview Section
-    if script.get("has_html") or script.get("html_content"):
-        lines.append("## HTML UI Markup & Live Interactive Preview")
+    # Live Interactive HTML UI Preview (ONLY if real HTML is present)
+    if script.get("has_html") and script.get("html_content") and script.get("html_content").strip():
+        raw_html = script["html_content"].strip()
+        encoded = _b64.b64encode(raw_html.encode("utf-8")).decode("ascii")
+
+        lines.append("## Live Interactive HTML UI Component Preview")
         lines.append("")
-        lines.append("The script contains embedded HTML UI markup. Below is the extracted source code and a live interactive preview:")
+        lines.append("The script defines embedded HTML UI markup. Below is the live rendered interactive component preview:")
         lines.append("")
-        lines.append("### Source Markup")
-        lines.append("")
-        lines.append("```html")
-        lines.append(script.get("html_content", "<!-- HTML UI Markup -->").strip())
-        lines.append("```")
-        lines.append("")
-        lines.append("### Interactive HTML Preview")
-        lines.append("")
-        lines.append('<div class="html-preview-pending">')
-        lines.append('  <template>')
-        lines.append(script.get("html_content", "<div>HTML Preview</div>").strip())
-        lines.append('  </template>')
+        lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{fname}">')
+        lines.append('  <div class="html-preview-card" style="border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 12px 0; background: #ffffff; color: #1f2328; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">')
+        lines.append(f'    <div class="html-preview-body" style="background: #ffffff; color: #1f2328; font-size: 13px; line-height: 1.5;">')
+        lines.append(raw_html)
+        lines.append('    </div>')
+        lines.append('  </div>')
         lines.append('</div>')
         lines.append("")
 

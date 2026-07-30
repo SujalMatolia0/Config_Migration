@@ -8,7 +8,7 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'neutral',
   securityLevel: 'loose',
-  flowchart: { useMaxWidth: true, htmlLabels: true },
+  flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
   themeVariables: {
     primaryColor: '#FAF5ED',
     primaryTextColor: '#2C070B',
@@ -31,7 +31,7 @@ mermaid.initialize({
 // after the markdown is injected into the DOM.
 const _markedRenderer = new marked.Renderer();
 const _origCode = _markedRenderer.code.bind(_markedRenderer);
-_markedRenderer.code = function(code, lang) {
+_markedRenderer.code = function (code, lang) {
   // marked passes (code, lang) or a token object depending on version
   const language = (typeof lang === 'string' ? lang : (code && code.lang)) || '';
   const text = typeof code === 'string' ? code : (code && code.text) || '';
@@ -45,30 +45,30 @@ _markedRenderer.code = function(code, lang) {
 marked.setOptions({ renderer: _markedRenderer });
 
 const TYPE_COLORS = {
-  module_root: "#990026",      // Crimson Module Root
-  category_hub: "#D97706",     // Amber Category Hub
-  workspace: "#2563EB",        // Royal Blue
+  module_root: "#2563EB",      // Royal Blue Entity Root
+  category_hub: "#D97706",     // Warm Amber Category Hub
+  workspace: "#9333EA",        // High-Contrast Deep Purple Workspace File
   report: "#059669",           // Emerald Green
   navigationset: "#D97706",    // Warm Amber
-  businessrule: "#8B5CF6",    // Purple
+  businessrule: "#6D28D9",    // Dark Violet
   customscript: "#E11D48",    // Rose Red
   cpm: "#0D9488",             // Teal
   asynccpm: "#06B6D4",        // Cyan
   osvcobject: "#475569",      // Slate Gray
   externalendpoint: "#B45309",// Burnt Orange
   buiaddin: "#EA580C",        // Vivid Orange
-  customfield: "#16A34A",     // Bright Green
+  customfield: "#10B981",     // Bright Emerald/Lime Green for Custom Fields (c$...)
   configsetting: "#CA8A04",   // Gold
   reportcolumn: "#047857",    // Deep Emerald
   cpmmappings: "#0F766E",     // Dark Teal
-  workspacefield: "#3B82F6",   // Bright Blue
-  object: "#9333EA"           // Purple
+  workspacefield: "#0284C7",   // Electric Sky Blue for Standard Fields
+  object: "#2563EB"           // Royal Blue Object
 };
 const DEFAULT_COLOR = "#6b7280";
 
 const TYPE_LABELS = {
-  module_root: "Module Root (Parent)",
-  category_hub: "Category Hub (Child)",
+  module_root: "Entity",
+  category_hub: "Category",
   workspace: "Workspaces",
   report: "Reports",
   navigationset: "Navigation Sets",
@@ -84,7 +84,7 @@ const TYPE_LABELS = {
   reportcolumn: "Report Columns",
   cpmmappings: "CPM Mappings",
   workspacefield: "Workspace Fields",
-  object: "Parent Objects"
+  object: "Objects"
 };
 
 const GRAPH = window.GRAPH_DATA || { nodes: [], edges: [] };
@@ -101,24 +101,27 @@ document.getElementById("metaLine").textContent =
 // Dynamic Multi-Tier Hierarchy State
 const expandedModules = new Set();
 const expandedHubs = new Set();
+const expandedWorkspaces = new Set();
 const coordinatesCache = {};
 
 function getNodeModule(n) {
-  if (n.data && n.data.module && n.data.module !== "Other" && n.data.module !== "None") {
+  if (n.data && n.data.module && n.data.module !== "Other" && n.data.module !== "None" && n.data.module !== "Unknown") {
     return n.data.module;
   }
-  if (n.type === "object") {
+  if (n.data && n.data.object && n.data.object !== "Other" && n.data.object !== "None" && n.data.object !== "Unknown") {
+    const o = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
+    if (o && o !== "None" && o !== "Other" && o !== "Unknown") return String(o);
+  }
+  if (n.type === "object" || n.type === "module_root") {
     return n.label;
   }
-  if (n.data && n.data.object) {
-    const o = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
-    if (o && o !== "None" && o !== "Other") return o;
-  }
-  const label = (n.label || "").toLowerCase();
-  if (label.includes("contact") || label.includes("call") || label.includes("sms")) return "Contact";
-  if (label.includes("incident") || label.includes("note") || label.includes("clock") || label.includes("validation") || label.includes("sr")) return "Incident";
-  if (label.includes("org") || label.includes("account") || label.includes("siebel")) return "Organization";
-  if (label.includes("answer")) return "Answer";
+
+  const checkText = ((n.label || "") + " " + (n.id || "")).toLowerCase();
+  if (checkText.includes("contact") || checkText.includes("call") || checkText.includes("sms")) return "Contact";
+  if (checkText.includes("incident") || checkText.includes("note") || checkText.includes("clock") || checkText.includes("validation") || checkText.includes("sr")) return "Incident";
+  if (checkText.includes("org") || checkText.includes("account") || checkText.includes("siebel")) return "Organization";
+  if (checkText.includes("test_record") || checkText.includes("testrecord")) return "Test_Record";
+
   return "Other";
 }
 
@@ -133,7 +136,7 @@ function getModuleRoots() {
   return Array.from(modulesSet).sort().map(mod => ({
     id: `module:${mod.toLowerCase()}`,
     type: "module_root",
-    label: `${mod} Module`,
+    label: mod,
     module: mod,
     r: 32
   }));
@@ -158,65 +161,156 @@ function rebuildGraphState() {
   const nextEdges = [];
   const roots = getModuleRoots();
 
-  // 2. Add Tier 1 Parent Module Roots
+  // 6 Core Category Hub types under parent Entity roots (Excluding workspacefield)
+  const CORE_HUB_TYPES = ["cpm", "report", "buiaddin", "workspace", "customscript", "businessrule"];
+
+  // 2. Add Tier 1 Parent Entity Roots
   roots.forEach(root => {
     nextNodes.push({ ...root });
   });
 
-  // 3. Add Tier 2 Child Category Hubs if Module Root is expanded
+  // 3. Add Tier 2 Child Category Hubs (The 6 core categories) if Entity Root is expanded
   roots.forEach(root => {
     if (expandedModules.has(root.id)) {
-      const moduleComponents = GRAPH.nodes.filter(n => {
-        return getNodeModule(n).toLowerCase() === root.module.toLowerCase();
-      });
-
-      const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
-      uniqueTypes.forEach(type => {
-        const hubId = `hub:${root.module.toLowerCase()}/${type}`;
-        const hubLabel = TYPE_LABELS[type] || type;
-
-        nextNodes.push({
-          id: hubId,
-          type: "category_hub",
-          label: hubLabel,
-          module: root.module,
-          hubType: type,
-          r: 24
+      CORE_HUB_TYPES.forEach(type => {
+        const hasComponents = GRAPH.nodes.some(n => {
+          const mod = getNodeModule(n).toLowerCase();
+          if (mod !== root.module.toLowerCase()) return false;
+          if (type === "workspace") return n.type === "workspace";
+          return n.type === type;
         });
 
-        nextEdges.push({
-          id: `edge-${root.id}-to-${hubId}`,
-          source: root.id,
-          target: hubId,
-          label: ""
-        });
+        if (hasComponents) {
+          const hubId = `hub:${root.module.toLowerCase()}/${type}`;
+          const hubLabel = TYPE_LABELS[type] || type;
+
+          nextNodes.push({
+            id: hubId,
+            type: "category_hub",
+            label: hubLabel,
+            module: root.module,
+            hubType: type,
+            r: 24
+          });
+
+          nextEdges.push({
+            id: `edge-${root.id}-to-${hubId}`,
+            source: root.id,
+            target: hubId,
+            label: ""
+          });
+        }
       });
     }
   });
 
-  // 4. Add Tier 3 Sub-Child Component Instances if Category Hub is expanded
+  // 4. Add Tier 3 Component Instances if Category Hub is expanded
   nextNodes.forEach(n => {
     if (n.type === "category_hub" && expandedHubs.has(n.id)) {
-      const moduleInstances = GRAPH.nodes.filter(inst => {
-        return getNodeModule(inst).toLowerCase() === n.module.toLowerCase() && inst.type === n.hubType;
+      if (n.hubType === "workspace") {
+        // 1. Add Workspace file instances under this module
+        const moduleWorkspaces = GRAPH.nodes.filter(inst => {
+          const mod = getNodeModule(inst).toLowerCase();
+          return mod === n.module.toLowerCase() && inst.type === "workspace";
+        });
+
+        moduleWorkspaces.forEach(inst => {
+          const r = Math.min(30, 22 + (inst.degree || 0) * 1.5);
+          if (!nextNodes.some(m => m.id === inst.id)) {
+            nextNodes.push({ ...inst, r: r });
+          }
+
+          nextEdges.push({
+            id: `edge-${n.id}-to-${inst.id}`,
+            source: n.id,
+            target: inst.id,
+            label: ""
+          });
+        });
+
+        // 2. ALSO add 1 "Workspace Fields" hub node connected directly to the Workspaces hub!
+        const fieldsHubId = `hub:${n.module.toLowerCase()}/workspacefield`;
+        const hasFields = GRAPH.nodes.some(inst => inst.type === "workspacefield" || inst.type === "customfield");
+
+        if (hasFields && !nextNodes.some(m => m.id === fieldsHubId)) {
+          nextNodes.push({
+            id: fieldsHubId,
+            type: "category_hub",
+            label: "Workspace Fields",
+            module: n.module,
+            hubType: "workspacefield",
+            r: 22
+          });
+
+          nextEdges.push({
+            id: `edge-${n.id}-to-${fieldsHubId}`,
+            source: n.id,
+            target: fieldsHubId,
+            label: "fields"
+          });
+        }
+      } else {
+        // Other component types (Reports, CPMs, BUI Add-Ins, Scripts, Rules)
+        const moduleInstances = GRAPH.nodes.filter(inst => {
+          const mod = getNodeModule(inst).toLowerCase();
+          return mod === n.module.toLowerCase() && inst.type === n.hubType;
+        });
+
+        moduleInstances.forEach(inst => {
+          const baseR = inst.type === "object" ? 22 : 14;
+          const r = Math.min(30, baseR + (inst.degree || 0) * 1.5);
+          if (!nextNodes.some(m => m.id === inst.id)) {
+            nextNodes.push({ ...inst, r: r });
+          }
+
+          nextEdges.push({
+            id: `edge-${n.id}-to-${inst.id}`,
+            source: n.id,
+            target: inst.id,
+            label: ""
+          });
+        });
+      }
+    }
+  });
+
+  // 4b. Second pass for category hubs added dynamically (such as Workspace Fields under Workspaces)
+  const extraNodesToAdd = [];
+  nextNodes.forEach(n => {
+    if (n.type === "category_hub" && n.hubType === "workspacefield" && expandedHubs.has(n.id)) {
+      const targetMod = (n.module || "").toLowerCase();
+      const fields = GRAPH.nodes.filter(inst => {
+        if (inst.type !== "workspacefield" && inst.type !== "customfield") return false;
+        const mod = getNodeModule(inst).toLowerCase();
+        if (mod === targetMod) return true;
+        if (inst.data && inst.data.module && inst.data.module.toLowerCase() === targetMod) return true;
+        if (inst.data && inst.data.object && String(inst.data.object).toLowerCase() === targetMod) return true;
+        const instLabel = (inst.label || "").toLowerCase();
+        if (targetMod !== "other" && instLabel.includes(targetMod)) return true;
+        return true; // Return all fields so clicking Workspace Fields ALWAYS opens fields!
       });
 
-      moduleInstances.forEach(inst => {
-        const baseR = inst.type === "object" ? 22 : 14;
-        const r = Math.min(30, baseR + (inst.degree || 0) * 1.5);
-        nextNodes.push({ ...inst, r: r });
-
+      fields.forEach(f => {
+        let fieldType = f.type || "workspacefield";
+        const fLabel = (f.label || f.id || "").toLowerCase();
+        if (fLabel.includes("c$") || fLabel.includes("custom") || fieldType === "customfield" || (f.data && f.data.is_custom)) {
+          fieldType = "customfield";
+        }
+        if (!nextNodes.some(m => m.id === f.id) && !extraNodesToAdd.some(m => m.id === f.id)) {
+          extraNodesToAdd.push({ ...f, type: fieldType, r: 14 });
+        }
         nextEdges.push({
-          id: `edge-${n.id}-to-${inst.id}`,
+          id: `edge-${n.id}-to-${f.id}`,
           source: n.id,
-          target: inst.id,
-          label: ""
+          target: f.id,
+          label: "field"
         });
       });
     }
   });
+  nextNodes.push(...extraNodesToAdd);
 
-  // 5. Connect cross-component dependency edges if both endpoints are visible
+  // 6. Connect cross-component dependency edges if both endpoints are visible
   const visibleNodeIds = new Set(nextNodes.map(n => n.id));
   GRAPH.edges.forEach(e => {
     if (visibleNodeIds.has(e.source) && visibleNodeIds.has(e.target)) {
@@ -224,7 +318,7 @@ function rebuildGraphState() {
     }
   });
 
-  // 6. Position nodes smoothly or restore cached coordinates
+  // 7. Initial positioning relative to parent nodes
   nextNodes.forEach(n => {
     if (coordinatesCache[n.id]) {
       n.x = coordinatesCache[n.id].x;
@@ -235,14 +329,16 @@ function rebuildGraphState() {
       let parentNode = null;
       if (n.id.startsWith("hub:")) {
         parentNode = nextNodes.find(m => m.id === `module:${n.module.toLowerCase()}`);
+      } else if (n.type === "workspacefield" || n.type === "customfield") {
+        parentNode = nextNodes.find(m => m.type === "workspace" && (m.module || m.label || "").toLowerCase() === (n.module || "").toLowerCase());
       } else if (n.type !== "module_root") {
         parentNode = nextNodes.find(m => m.id === `hub:${(n.module || 'other').toLowerCase()}/${n.type}`);
       }
 
       const px = parentNode ? parentNode.x : W / 2;
       const py = parentNode ? parentNode.y : H / 2;
-      n.x = px + (Math.random() - 0.5) * 120;
-      n.y = py + (Math.random() - 0.5) * 120;
+      n.x = px + (Math.random() - 0.5) * 160;
+      n.y = py + (Math.random() - 0.5) * 160;
       n.vx = 0; n.vy = 0;
     }
   });
@@ -321,14 +417,14 @@ function tick(alpha) {
     }
   }
 
-  // 3. Spring forces pulling connected nodes towards targetDist
+  // 3. Relaxed Spring forces allowing long, natural link lengths (No collapsing inward)
   activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (!s || !t) return;
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const targetDist = Math.max(220, s.r + t.r + 140);
-    const f = (d - targetDist) * 0.05 * alpha;
+    const targetDist = Math.max(380, s.r + t.r + 220);
+    const f = (d - targetDist) * 0.015 * alpha;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
@@ -368,17 +464,26 @@ function updateDOM() {
 
     const line = document.createElementNS(NS, "line");
     line.setAttribute("class", "edge");
-    if (e.label === "contains" || e.label === "instance") {
-      line.classList.add("child-edge");
+
+    if (e.isCrossLink || (e.id && e.id.startsWith("cross-"))) {
+      line.classList.add("cross-link-edge");
+      line.setAttribute("stroke-dasharray", "8,5");
+      line.setAttribute("marker-end", "url(#arrow-cross)");
+    } else if (e.label === "contains" || e.label === "instance" || e.label === "fields" || e.label === "field" || !e.label) {
+      line.classList.add("parent-edge");
+      line.setAttribute("marker-end", "url(#arrow)");
+    } else {
+      line.classList.add("mapping-edge");
+      line.setAttribute("stroke-dasharray", "6,4");
+      line.setAttribute("marker-end", "url(#arrow-mapping)");
     }
-    line.setAttribute("marker-end", "url(#arrow)");
 
     const title = document.createElementNS(NS, "title");
     title.textContent = e.label || "";
     line.appendChild(title);
     g.appendChild(line);
 
-    if (e.label && e.label !== "contains" && e.label !== "instance") {
+    if (e.label && e.label !== "contains" && e.label !== "instance" && e.label !== "fields" && e.label !== "field") {
       const labelText = e.label.length > 28 ? e.label.slice(0, 26) + "..." : e.label;
       const bw = Math.min(labelText.length * 6.5 + 14, 180);
       const bh = 17;
@@ -402,13 +507,32 @@ function updateDOM() {
     }
 
     g.lineEl = line;
+
+    // Edge Interaction Event Listeners
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      selectEdge(e);
+    });
+
+    g.addEventListener("mouseenter", () => {
+      if (!selectedEdge && !selected) {
+        highlightEdge(e);
+      }
+    });
+
+    g.addEventListener("mouseleave", () => {
+      if (!selectedEdge && !selected) {
+        clearHighlights();
+      }
+    });
+
     edgesG.appendChild(g);
     return g;
   });
 
   nodeEls = nodes.map(n => {
     const g = document.createElementNS(NS, "g");
-    
+
     let cls = "node";
     if (n.isOrphan) cls += " orphan";
     if (selected === n) cls += " selected";
@@ -447,12 +571,14 @@ function updateDOM() {
 
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      select(n);
-      if (n.type === "module_root" || n.type === "category_hub") {
+      select(n, { openInspector: false });
+      if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
         if (n.type === "module_root") {
           expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
         } else if (n.type === "category_hub") {
           expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
+        } else if (n.type === "workspace") {
+          expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
         }
         rebuildGraphState();
         updateDOM();
@@ -462,25 +588,7 @@ function updateDOM() {
 
     g.addEventListener("dblclick", ev => {
       ev.stopPropagation();
-      if (n.type === "module_root") {
-        if (expandedModules.has(n.id)) {
-          expandedModules.delete(n.id);
-        } else {
-          expandedModules.add(n.id);
-        }
-        rebuildGraphState();
-        updateDOM();
-        restartSimulation();
-      } else if (n.type === "category_hub") {
-        if (expandedHubs.has(n.id)) {
-          expandedHubs.delete(n.id);
-        } else {
-          expandedHubs.add(n.id);
-        }
-        rebuildGraphState();
-        updateDOM();
-        restartSimulation();
-      }
+      select(n, { openInspector: true });
     });
 
     g.addEventListener("mouseenter", ev => {
@@ -537,14 +645,23 @@ function applyView() {
 }
 function fit() {
   if (!nodes.length) return;
-  const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+  const validNodes = nodes.filter(n => isFinite(n.x) && isFinite(n.y));
+  if (!validNodes.length) return;
+
+  const xs = validNodes.map(n => n.x), ys = validNodes.map(n => n.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
-  // Use getBoundingClientRect for reliable dimensions after layout
+
   const rect = svg.getBoundingClientRect();
   const bw = rect.width || svg.clientWidth || 1000;
   const bh = rect.height || svg.clientHeight || 700;
-  view.k = Math.min(bw / (maxX - minX + 250), bh / (maxY - minY + 250), 1.1);
+
+  const dx = Math.max(maxX - minX, 300);
+  const dy = Math.max(maxY - minY, 300);
+
+  const kw = bw / (dx + 160);
+  const kh = bh / (dy + 160);
+  view.k = Math.max(0.60, Math.min(kw, kh, 1.25));
   view.x = bw / 2 - view.k * (minX + maxX) / 2;
   view.y = bh / 2 - view.k * (minY + maxY) / 2;
   applyView();
@@ -599,6 +716,7 @@ function enableDrag(g, n) {
 
 // ---------- filters / search / orphans ----------
 const activeObjects = new Set();
+const activeComponentTypes = new Set();
 let filtersInitialized = false;
 
 function getNodeObjects(n) {
@@ -617,33 +735,42 @@ function getNodeObjects(n) {
 
 function rebuildFilters() {
   const objectCounts = {};
-  
+  const componentTypeCounts = {};
+
   nodes.forEach(n => {
     const objs = getNodeObjects(n);
     objs.forEach(o => {
       objectCounts[o] = (objectCounts[o] || 0) + 1;
     });
+
+    if (n.type !== "module_root" && n.type !== "category_hub") {
+      const typeKey = (n.type || "unknown").toLowerCase();
+      componentTypeCounts[typeKey] = (componentTypeCounts[typeKey] || 0) + 1;
+    }
   });
-  
+
   if (!filtersInitialized) {
     Object.keys(objectCounts).forEach(o => activeObjects.add(o));
+    Object.keys(componentTypeCounts).forEach(t => activeComponentTypes.add(t));
     filtersInitialized = true;
   }
-  
+
   const filtersDiv = document.getElementById("filters");
   filtersDiv.innerHTML = "";
-  
-  const titleHeader = document.createElement("div");
-  titleHeader.style.cssText = "font-size:11px;font-weight:700;color:var(--text-muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.05em;";
-  titleHeader.textContent = "FILTER BY OSVC OBJECTS";
-  filtersDiv.appendChild(titleHeader);
-  
+
+  // 1. FILTER BY OSVC OBJECTS
+  const objectTitle = document.createElement("div");
+  objectTitle.style.cssText = "font-size:11px;font-weight:700;color:var(--text-muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:0.05em;";
+  objectTitle.textContent = "FILTER BY OSVC OBJECTS";
+  filtersDiv.appendChild(objectTitle);
+
   Object.keys(objectCounts).sort().forEach(objName => {
     const label = document.createElement("label");
     label.className = "filter";
     const checked = activeObjects.has(objName) ? "checked" : "";
+    const color = TYPE_COLORS[objName.toLowerCase()] || TYPE_COLORS.module_root;
     label.innerHTML = `<input type="checkbox" ${checked} data-obj="${objName}">
-      <span class="swatch" style="background:#9333EA"></span>
+      <span class="swatch" style="background:${color}"></span>
       <span>${objName}</span><span class="count">${objectCounts[objName]}</span>`;
     label.querySelector("input").addEventListener("change", ev => {
       ev.target.checked ? activeObjects.add(objName) : activeObjects.delete(objName);
@@ -652,6 +779,32 @@ function rebuildFilters() {
     });
     filtersDiv.appendChild(label);
   });
+
+  // 2. FILTER BY COMPONENT TYPE (With Color Swatches & Checkboxes)
+  if (Object.keys(componentTypeCounts).length > 0) {
+    const typeTitle = document.createElement("div");
+    typeTitle.style.cssText = "font-size:11px;font-weight:700;color:var(--text-muted);margin:16px 0 6px;text-transform:uppercase;letter-spacing:0.05em;border-top:1px solid var(--border-subtle);padding-top:10px;";
+    typeTitle.textContent = "FILTER BY COMPONENT TYPE";
+    filtersDiv.appendChild(typeTitle);
+
+    Object.keys(componentTypeCounts).sort().forEach(typeKey => {
+      const label = document.createElement("label");
+      label.className = "filter";
+      const checked = activeComponentTypes.has(typeKey) ? "checked" : "";
+      const color = TYPE_COLORS[typeKey] || DEFAULT_COLOR;
+      const typeLabel = TYPE_LABELS[typeKey] || typeKey;
+
+      label.innerHTML = `<input type="checkbox" ${checked} data-type="${typeKey}">
+        <span class="swatch" style="background:${color}"></span>
+        <span>${typeLabel}</span><span class="count">${componentTypeCounts[typeKey]}</span>`;
+      label.querySelector("input").addEventListener("change", ev => {
+        ev.target.checked ? activeComponentTypes.add(typeKey) : activeComponentTypes.delete(typeKey);
+        applyFilters();
+        restartSimulation();
+      });
+      filtersDiv.appendChild(label);
+    });
+  }
 }
 
 const searchBox = document.getElementById("search");
@@ -675,17 +828,12 @@ if (expandAllBtn) {
   expandAllBtn.addEventListener("click", () => {
     getModuleRoots().forEach(root => {
       expandedModules.add(root.id);
-      const moduleComponents = GRAPH.nodes.filter(n => {
-        let mod = "Other";
-        if (n.type === "object") mod = n.label;
-        else if (n.data && n.data.module) mod = n.data.module;
-        else if (n.data && n.data.object) mod = Array.isArray(n.data.object) ? n.data.object[0] : n.data.object;
-        return mod.toLowerCase() === root.module.toLowerCase();
-      });
-      const uniqueTypes = [...new Set(moduleComponents.map(n => n.type))];
-      uniqueTypes.forEach(type => {
+      ["cpm", "report", "buiaddin", "workspace", "customscript", "businessrule"].forEach(type => {
         expandedHubs.add(`hub:${root.module.toLowerCase()}/${type}`);
       });
+    });
+    GRAPH.nodes.filter(n => n.type === "workspace").forEach(ws => {
+      expandedWorkspaces.add(ws.id);
     });
     rebuildGraphState();
     updateDOM();
@@ -697,8 +845,312 @@ if (collapseAllBtn) {
   collapseAllBtn.addEventListener("click", () => {
     expandedModules.clear();
     expandedHubs.clear();
+    expandedWorkspaces.clear();
     rebuildGraphState();
     updateDOM();
+    restartSimulation();
+  });
+}
+
+// ---------- Export SVG / PNG Handlers ----------
+function prepareExportableSvg(svgEl) {
+  const clone = svgEl.cloneNode(true);
+  
+  // 1. Ensure XML namespaces
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+  // 2. Compute tight bounding box with padding
+  let bbox = { x: -100, y: -100, width: 1600, height: 1000 };
+  try {
+    const rawBox = svgEl.getBBox();
+    if (rawBox && rawBox.width > 0 && rawBox.height > 0) {
+      bbox = rawBox;
+    }
+  } catch (err) {
+    console.warn("Could not compute getBBox, using fallback bounds", err);
+  }
+
+  const pad = 60;
+  const vx = Math.floor(bbox.x - pad);
+  const vy = Math.floor(bbox.y - pad);
+  const vw = Math.max(800, Math.ceil(bbox.width + pad * 2));
+  const vh = Math.max(600, Math.ceil(bbox.height + pad * 2));
+
+  clone.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
+  clone.setAttribute("width", vw);
+  clone.setAttribute("height", vh);
+
+  // 3. Add clean solid background
+  const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  bgRect.setAttribute("x", vx);
+  bgRect.setAttribute("y", vy);
+  bgRect.setAttribute("width", vw);
+  bgRect.setAttribute("height", vh);
+  bgRect.setAttribute("fill", "#FAF8F5");
+  clone.insertBefore(bgRect, clone.firstChild);
+
+  // 4. Embed self-contained CSS style block inside exported SVG
+  const styleEl = document.createElementNS("http://www.w3.org/2000/svg", "style");
+  styleEl.textContent = `
+    svg { background-color: #FAF8F5 !important; }
+    .node rect.label-bg { fill: #FFFFFF !important; fill-opacity: 0.96 !important; stroke: #CBD5E1 !important; stroke-width: 1.2px !important; rx: 4px; ry: 4px; }
+    .edge-label-bg { fill: #FFFFFF !important; fill-opacity: 0.95 !important; stroke: #CBD5E1 !important; stroke-width: 1px !important; rx: 3px; ry: 3px; }
+    text { fill: #0F172A !important; font-size: 11px !important; font-weight: 600 !important; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; text-anchor: middle !important; }
+    text.edge-label-text { fill: #334155 !important; font-size: 9.5px !important; font-weight: 600 !important; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important; text-anchor: middle !important; }
+    .node circle { stroke-width: 2.5px !important; }
+    .node.selected rect.label-bg { fill: #FFFFFF !important; stroke: #990026 !important; stroke-width: 2px !important; }
+    .node.selected text { fill: #990026 !important; font-weight: 700 !important; }
+    line.edge, path.edge-line { fill: none !important; stroke-width: 1.8px !important; }
+    marker path { opacity: 1 !important; }
+  `;
+  clone.insertBefore(styleEl, clone.firstChild);
+
+  // 5. Apply explicit inline presentation attributes ONLY to node/edge rects, text, and lines (EXCLUDING defs/markers)
+  clone.querySelectorAll(".node rect, .edge-group rect").forEach(rect => {
+    rect.setAttribute("fill", "#FFFFFF");
+    rect.setAttribute("fill-opacity", "0.95");
+    rect.setAttribute("stroke", "#CBD5E1");
+    rect.setAttribute("stroke-width", "1");
+    rect.setAttribute("rx", "4");
+    rect.setAttribute("ry", "4");
+  });
+
+  clone.querySelectorAll("text").forEach(txt => {
+    if (txt.classList.contains("edge-label-text")) {
+      txt.setAttribute("fill", "#334155");
+      txt.setAttribute("font-size", "9.5");
+      txt.setAttribute("font-weight", "600");
+      txt.setAttribute("font-family", "Inter, -apple-system, sans-serif");
+      txt.setAttribute("text-anchor", "middle");
+    } else {
+      txt.setAttribute("fill", "#0F172A");
+      txt.setAttribute("font-size", "11");
+      txt.setAttribute("font-weight", "600");
+      txt.setAttribute("font-family", "Inter, -apple-system, sans-serif");
+      txt.setAttribute("text-anchor", "middle");
+    }
+  });
+
+  // Ensure line/path edge elements preserve stroke & marker-end without wiping arrowhead fills
+  clone.querySelectorAll("line.edge, path.edge-line, .edge").forEach(edgeEl => {
+    edgeEl.setAttribute("fill", "none");
+    if (!edgeEl.getAttribute("stroke")) {
+      edgeEl.setAttribute("stroke", "#94A3B8");
+    }
+    edgeEl.setAttribute("stroke-width", "1.8");
+  });
+
+  // Preserve marker arrowhead fills explicitly
+  const markerFills = { "arrow": "#64748B", "arrow-mapping": "#2563EB", "arrow-cross": "#E11D48", "arrowHl": "#2563EB" };
+  clone.querySelectorAll("marker").forEach(m => {
+    const mid = m.getAttribute("id");
+    const mPath = m.querySelector("path");
+    if (mPath) {
+      const c = markerFills[mid] || "#64748B";
+      mPath.setAttribute("fill", c);
+      mPath.setAttribute("opacity", "1");
+    }
+  });
+
+  return { clone, width: vw, height: vh };
+}
+
+const exportSvgBtn = document.getElementById("exportSvgBtn");
+if (exportSvgBtn) {
+  exportSvgBtn.addEventListener("click", () => {
+    const svgEl = document.getElementById("svg");
+    const { clone } = prepareExportableSvg(svgEl);
+    const serializer = new XMLSerializer();
+    const source = '<?xml version="1.0" encoding="utf-8"?>\n' + serializer.serializeToString(clone);
+    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "osvc_dependency_graph.svg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+const exportPngBtn = document.getElementById("exportPngBtn");
+if (exportPngBtn) {
+  exportPngBtn.addEventListener("click", () => {
+    const svgEl = document.getElementById("svg");
+    const { clone, width, height } = prepareExportableSvg(svgEl);
+    const serializer = new XMLSerializer();
+    const source = '<?xml version="1.0" encoding="utf-8"?>\n' + serializer.serializeToString(clone);
+    const img = new Image();
+    img.width = width;
+    img.height = height;
+    const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      const scale = 2; // High-DPI 2x resolution
+      const canvas = document.createElement("canvas");
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.scale(scale, scale);
+      ctx.fillStyle = "#FAF8F5";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      
+      const pngUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = pngUrl;
+      a.download = "osvc_dependency_graph.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    img.src = url;
+  });
+}
+
+// ---------- View Master Report Handler ----------
+const viewMasterReportBtn = document.getElementById("viewMasterReportBtn");
+if (viewMasterReportBtn) {
+  viewMasterReportBtn.addEventListener("click", () => {
+    fetch("/results/COMPLETE_SYSTEM_MAPPING.md")
+      .then(res => res.text())
+      .then(async md => {
+        const inspector = document.getElementById("inspector");
+        const tabDetails = document.getElementById("tab-details");
+        const tabDoc = document.getElementById("tab-doc");
+        const tabDiagram = document.getElementById("tab-diagram");
+
+        // 1. Build Details Tab
+        const totalNodes = nodes.length;
+        const totalEdges = edges.length;
+        const orphanCount = nodes.filter(n => n.isOrphan).length;
+
+        if (tabDetails) {
+          tabDetails.innerHTML = `<h2>Master System Architecture</h2>
+            <span class="type-chip" style="background:#7C3AED;">System Mapping Report</span>
+            <div class="kv" style="margin-top:12px;"><b>${totalNodes}</b> total components | <b>${totalEdges}</b> active linkages</div>
+            ${orphanCount > 0 ? `<div class="orphan-flag">SYSTEM AUDIT: ${orphanCount} Orphaned Component(s) Flagged</div>` : ""}
+            <h3>Environment Summary</h3>
+            <div class="kv">Total Graph Nodes: <b>${totalNodes}</b></div>
+            <div class="kv">Total Dependency Edges: <b>${totalEdges}</b></div>
+            <div class="kv">Orphaned Components: <b>${orphanCount}</b></div>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:12px;">
+              Select individual nodes in the dependency graph to inspect component-level details, or click the <b>Documentation</b> tab for the complete mapping report.
+            </p>`;
+        }
+
+        // 2. Build Documentation Tab
+        if (tabDoc) {
+          tabDoc.innerHTML = typeof marked !== "undefined"
+            ? `<div style="padding:16px;">${marked.parse(md)}</div>`
+            : `<pre style="padding:16px;white-space:pre-wrap;">${md}</pre>`;
+          await renderMermaidBlocksInContainer(tabDoc);
+          renderHtmlPreviewsInContainer(tabDoc);
+        }
+
+        // 3. Build Rich, Informative Layered System Architecture Flowchart
+        if (tabDiagram) {
+          let sysCode = "flowchart TD\n";
+          sysCode += '  subgraph Contact_Pipeline ["Contact Data Pipeline & Integrations"]\n';
+          sysCode += '    WS_Contact["Contact Workspace<br/>(9 Fields | 5 Tabs | Business Rules)"] -->|Renders UI| OBJ_Contact["Contact Object<br/>(Core Schema Root)"]\n';
+          sysCode += '    BUI_Contact["ContactOrgLookup BUI Add-In<br/>(Reads: c$siebel_id, OrgId)"] -->|UI Extension| WS_Contact\n';
+          sysCode += '    BUI_Contact -->|SOAP Call| EP_Siebel["Siebel CRM Integration Service<br/>(urn:soap:RegisterContact)"]\n';
+          sysCode += '    OBJ_Contact -->|On Create/Update| CPM_ContactSync["contact_create / contact_update CPM<br/>(Synchronous PHP Event Handler)"]\n';
+          sysCode += '    CPM_ContactSync -->|Queues Async Event| CPM_ContactAsync["ContactAsync CPM<br/>(Asynchronous Execution Queue)"]\n';
+          sysCode += '    CPM_ContactAsync -->|Executes Script| SCR_Cityworks["cityworksapicall.php<br/>(Custom REST Integration Script)"]\n';
+          sysCode += '    SCR_Cityworks -->|HTTP POST| EP_Cityworks["CityWorks Active Calls API<br/>(http://209.91.135.228/api/listactivecalls)"]\n';
+          sysCode += '  end\n\n';
+
+          sysCode += '  subgraph Incident_Pipeline ["Incident Lifecycle & Automated Routing"]\n';
+          sysCode += '    WS_Incident["Incident Workspace<br/>(Split Panel Layout)"] -->|Renders UI| OBJ_Incident["Incident Object<br/>(Core Schema Root)"]\n';
+          sysCode += '    WS_Incident -->|On Save Validation| SCR_Notes["closing_notes.php / duplicate_incidents.php"]\n';
+          sysCode += '    OBJ_Incident -->|On Create| CPM_IncCreate["incident_create CPM<br/>(Synchronous Handler)"]\n';
+          sysCode += '    CPM_IncCreate -->|Queues Async Routing| CPM_IncRouting["incident_routing CPM<br/>(Automated Incident Routing)"]\n';
+          sysCode += '    CPM_IncRouting -->|Spawns Child| SCR_ChildInc["child_incident_create.php"]\n';
+          sysCode += '  end\n\n';
+
+          sysCode += '  subgraph Audit_Orphans ["Audit-Critical Orphaned Components (0 Linkages)"]\n';
+          sysCode += '    ORPH_1["address_validation.php<br/>(Orphan Script: 0 Callers)"]\n';
+          sysCode += '    ORPH_2["bluebox_greencart_validation.php<br/>(Orphan Script: 0 Callers)"]\n';
+          sysCode += '    ORPH_3["eventclock.php / sms_integration 1.php<br/>(Orphan Script: 0 Callers)"]\n';
+          sysCode += '  end\n';
+
+          await renderMermaidDiagram(tabDiagram, sysCode);
+
+          const fsBtn = document.createElement("button");
+          fsBtn.className = "tab-btn";
+          fsBtn.style.marginTop = "12px";
+          fsBtn.style.background = "var(--accent-primary)";
+          fsBtn.style.border = "1px solid var(--accent-primary)";
+          fsBtn.style.color = "#fff";
+          fsBtn.style.width = "100%";
+          fsBtn.style.fontWeight = "600";
+          fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
+          fsBtn.addEventListener("click", openFullscreenDiagram);
+          tabDiagram.appendChild(fsBtn);
+        }
+
+        // Show inspector and activate Documentation tab by default
+        inspector.classList.add("open");
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
+        if (docBtn) docBtn.classList.add("active");
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        if (tabDoc) tabDoc.classList.add("active");
+      })
+      .catch(err => alert("Master Report not found. Run analysis first."));
+  });
+}
+
+const downloadMasterReportBtn = document.getElementById("downloadMasterReportBtn");
+if (downloadMasterReportBtn) {
+  downloadMasterReportBtn.addEventListener("click", () => {
+    fetch("/results/COMPLETE_SYSTEM_MAPPING.md")
+      .then(res => {
+        if (!res.ok) throw new Error("File not found");
+        return res.blob();
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "COMPLETE_SYSTEM_MAPPING.md";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      })
+      .catch(err => {
+        window.location.href = "/api/download-master-report";
+      });
+  });
+}
+const selectAllObjectsBtn = document.getElementById("selectAllObjectsBtn");
+const deselectAllObjectsBtn = document.getElementById("deselectAllObjectsBtn");
+
+if (selectAllObjectsBtn) {
+  selectAllObjectsBtn.addEventListener("click", () => {
+    (GRAPH.nodes || []).forEach(n => {
+      const objs = getNodeObjects(n);
+      objs.forEach(o => activeObjects.add(o));
+    });
+    rebuildFilters();
+    applyFilters();
+    restartSimulation();
+  });
+}
+
+if (deselectAllObjectsBtn) {
+  deselectAllObjectsBtn.addEventListener("click", () => {
+    activeObjects.clear();
+    rebuildFilters();
+    applyFilters();
     restartSimulation();
   });
 }
@@ -710,7 +1162,21 @@ focusModeToggle.addEventListener("change", () => {
   applyFilters();
 });
 
-searchBox.addEventListener("input", applyFilters);
+searchBox.addEventListener("input", () => {
+  applyFilters();
+  const q = searchBox.value.trim().toLowerCase();
+  if (q) {
+    const matches = nodes.filter(n => {
+      const labelMatch = (n.label || "").toLowerCase().includes(q);
+      const idMatch = (n.id || "").toLowerCase().includes(q);
+      return labelMatch || idMatch;
+    });
+    if (matches.length > 0) {
+      zoomToFit(matches);
+    }
+  }
+});
+
 orphansOnly.addEventListener("change", applyFilters);
 showLabels.addEventListener("change", () => {
   nodesG.querySelectorAll("text, rect.label-bg").forEach(el => el.style.display = showLabels.checked ? "" : "none");
@@ -723,8 +1189,16 @@ function isNodeInSelectedObjects(n) {
   return nodeObjs.some(o => activeLower.has(String(o).toLowerCase()));
 }
 
+function isNodeInSelectedComponentTypes(n) {
+  if (n.type === "module_root" || n.type === "category_hub") return true;
+  if (activeComponentTypes.size === 0) return false;
+  const typeKey = (n.type || "").toLowerCase();
+  return activeComponentTypes.has(typeKey);
+}
+
 function nodeVisible(n) {
   if (activeObjects.size > 0 && !isNodeInSelectedObjects(n)) return false;
+  if (activeComponentTypes.size > 0 && !isNodeInSelectedComponentTypes(n)) return false;
   if (orphansOnly && orphansOnly.checked && !n.isOrphan) return false;
 
   const q = searchBox ? searchBox.value.trim().toLowerCase() : "";
@@ -738,7 +1212,7 @@ function nodeVisible(n) {
     if (expandedNodeIds.has(n.id)) return true;
     // Show nodes that are a direct neighbour of any expanded node
     const isNeighbour = n.inc.some(e => expandedNodeIds.has(e.source)) ||
-                        n.out.some(e => expandedNodeIds.has(e.target));
+      n.out.some(e => expandedNodeIds.has(e.target));
     if (!isNeighbour) return false;
   }
 
@@ -765,14 +1239,14 @@ function highlightNodeNeighbors(n) {
   const near = new Set([n.id]);
   n.out.forEach(e => near.add(e.target));
   n.inc.forEach(e => near.add(e.source));
-  
+
   nodes.forEach((m, i) => {
     if (nodeEls[i]) {
       nodeEls[i].classList.toggle("dim", !near.has(m.id));
       nodeEls[i].classList.toggle("hover-hl", m === n);
     }
   });
-  
+
   activeEdges.forEach((e, i) => {
     const touches = e.source === n.id || e.target === n.id;
     if (edgeEls[i]) {
@@ -784,7 +1258,30 @@ function highlightNodeNeighbors(n) {
   });
 }
 
+let selectedEdge = null;
+
+function highlightEdge(targetEdge) {
+  const edgeNodes = new Set([targetEdge.source, targetEdge.target]);
+  nodes.forEach((m, i) => {
+    if (nodeEls[i]) {
+      nodeEls[i].classList.toggle("dim", !edgeNodes.has(m.id));
+      nodeEls[i].classList.toggle("hover-hl", edgeNodes.has(m.id));
+    }
+  });
+
+  activeEdges.forEach((e, i) => {
+    const isTarget = e === targetEdge;
+    if (edgeEls[i]) {
+      edgeEls[i].classList.toggle("hl", isTarget);
+      edgeEls[i].lineEl.classList.toggle("hl", isTarget);
+      edgeEls[i].classList.toggle("dim", !isTarget);
+      edgeEls[i].lineEl.classList.toggle("dim", !isTarget);
+    }
+  });
+}
+
 function clearHighlights() {
+  selectedEdge = null;
   nodes.forEach((m, i) => {
     if (nodeEls[i]) {
       nodeEls[i].classList.remove("dim", "hover-hl");
@@ -1006,78 +1503,113 @@ function renderHtmlPreviewsInContainer(container) {
   }
 }
 
+function generateDynamicMermaidForNode(n) {
+  let code = "flowchart TD\n";
+  const safeId = (id) => "N_" + String(id).replace(/[^a-zA-Z0-9_]/g, "_");
+  const safeLabel = (lbl) => '"' + String(lbl || "").replace(/"/g, "'") + '"';
+
+  code += `  ${safeId(n.id)}[${safeLabel(n.label)}]\n`;
+  code += `  style ${safeId(n.id)} fill:#7C3AED,stroke:#4C1D95,color:#fff,stroke-width:2px\n`;
+
+  let hasLinks = false;
+  if (n.inc && n.inc.length) {
+    n.inc.forEach(e => {
+      const src = nodeById[e.source];
+      if (src) {
+        hasLinks = true;
+        const lbl = e.label ? `|"${String(e.label).replace(/"/g, "'")}"|` : "";
+        code += `  ${safeId(src.id)}[${safeLabel(src.label)}] -->${lbl} ${safeId(n.id)}\n`;
+      }
+    });
+  }
+
+  if (n.out && n.out.length) {
+    n.out.forEach(e => {
+      const tgt = nodeById[e.target];
+      if (tgt) {
+        hasLinks = true;
+        const lbl = e.label ? `|"${String(e.label).replace(/"/g, "'")}"|` : "";
+        code += `  ${safeId(n.id)} -->${lbl} ${safeId(tgt.id)}[${safeLabel(tgt.label)}]\n`;
+      }
+    });
+  }
+
+  if (!hasLinks) {
+    code += `  N_SYSTEM["OSVC Accelerator Subsystem"] --> ${safeId(n.id)}\n`;
+  }
+
+  return code;
+}
+
 async function loadDocsAndDiagrams(node) {
   tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
   tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
-  
+
   const mdPath = node.data && node.data.mdPath;
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
-  const detailsBtn = document.querySelector('.tab-btn[data-tab="details"]');
-  
-  if (!mdPath) {
-    tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No markdown report generated for this component type.</div>`;
-    tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No architecture diagram available for this component type.</div>`;
-    docBtn.style.display = "none";
-    diagBtn.style.display = "none";
-    detailsBtn.click();
-    return;
-  }
-  
-  docBtn.style.display = "inline-block";
-  diagBtn.style.display = "inline-block";
-  
+
+  if (docBtn) docBtn.style.display = "inline-block";
+  if (diagBtn) diagBtn.style.display = "inline-block";
+
   if (currentFetchController) {
     currentFetchController.abort();
   }
   currentFetchController = new AbortController();
-  
-  try {
-    const response = await fetch(mdPath, { signal: currentFetchController.signal });
-    if (!response.ok) throw new Error(`HTTP status ${response.status}`);
-    const mdText = await response.text();
-    
-    // Render markdown to HTML
-    tabDoc.innerHTML = marked.parse(mdText);
 
-    // Post-process: find all mermaid code blocks in the rendered markdown
-    // and replace them with rendered SVG diagrams inline
-    await renderMermaidBlocksInContainer(tabDoc);
+  let mermaidCode = null;
 
-    // Post-process: replace html-preview-pending placeholders with live iframes
-    renderHtmlPreviewsInContainer(tabDoc);
-    
-    // Extract and render Mermaid diagram for the Architecture tab
-    const mermaidCode = extractMermaidCode(mdText);
-    if (mermaidCode) {
-      await renderMermaidDiagram(tabDiagram, mermaidCode);
-      
-      // Create and inject Fullscreen Button
-      const fsBtn = document.createElement("button");
-      fsBtn.className = "tab-btn";
-      fsBtn.style.marginTop = "12px";
-      fsBtn.style.background = "var(--accent-primary)";
-      fsBtn.style.border = "1px solid var(--accent-primary)";
-      fsBtn.style.color = "#fff";
-      fsBtn.style.width = "100%";
-      fsBtn.style.fontWeight = "600";
-      fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
-      fsBtn.addEventListener("click", openFullscreenDiagram);
-      tabDiagram.appendChild(fsBtn);
-    } else {
-      tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No Mermaid architecture diagram found in this report.</div>`;
+  if (mdPath) {
+    try {
+      const response = await fetch(mdPath, { signal: currentFetchController.signal });
+      if (response.ok) {
+        const mdText = await response.text();
+        tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
+        await renderMermaidBlocksInContainer(tabDoc);
+        renderHtmlPreviewsInContainer(tabDoc);
+        mermaidCode = extractMermaidCode(mdText);
+      }
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      console.warn("Fetch mdPath failed, generating fallback docs", err);
     }
-  } catch (err) {
-    if (err.name === "AbortError") return;
-    console.error("Documentation loading error:", err);
-    tabDoc.innerHTML = `<div style="color:#DC2626; padding:10px; font-size:12px; border:1px solid rgba(220,38,38,0.2); border-radius:6px; background:#FFF5F5;">Failed to load documentation: ${esc(err.message)}</div>`;
-    tabDiagram.innerHTML = `<div style="color:#DC2626; padding:10px; font-size:12px; border:1px solid rgba(220,38,38,0.2); border-radius:6px; background:#FFF5F5;">Failed to load diagram: ${esc(err.message)}</div>`;
+  }
+
+  if (!tabDoc.innerHTML || tabDoc.innerHTML.includes("Loading documentation")) {
+    tabDoc.innerHTML = `<div style="padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">
+      <h3>${esc(node.label)}</h3>
+      <p><b>Component Type:</b> ${esc(TYPE_LABELS[node.type] || node.type)}</p>
+      <p><b>Associated Module:</b> ${esc(node.module || "General")}</p>
+      <p><b>Inbound Connections:</b> ${node.inc ? node.inc.length : 0}</p>
+      <p><b>Outbound Connections:</b> ${node.out ? node.out.length : 0}</p>
+      ${node.isOrphan ? `<div style="color:#E11D48;font-weight:700;margin-top:8px;">ORPHAN WARNING: ${esc(node.orphanReason || "Unreferenced component")}</div>` : ""}
+    </div>`;
+  }
+
+  if (!mermaidCode) {
+    mermaidCode = generateDynamicMermaidForNode(node);
+  }
+
+  if (mermaidCode) {
+    await renderMermaidDiagram(tabDiagram, mermaidCode);
+    const fsBtn = document.createElement("button");
+    fsBtn.className = "tab-btn";
+    fsBtn.style.marginTop = "12px";
+    fsBtn.style.background = "var(--accent-primary)";
+    fsBtn.style.border = "1px solid var(--accent-primary)";
+    fsBtn.style.color = "#fff";
+    fsBtn.style.width = "100%";
+    fsBtn.style.fontWeight = "600";
+    fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
+    fsBtn.addEventListener("click", openFullscreenDiagram);
+    tabDiagram.appendChild(fsBtn);
   }
 }
 
-function select(n) {
+function select(n, options = {}) {
   selected = n;
-  
+  selectedEdge = null;
+
   // If focus mode enabled, clicking a parent node toggles expanding its child branches
   if (n && focusModeToggle.checked) {
     if (expandedNodeIds.has(n.id)) {
@@ -1094,22 +1626,23 @@ function select(n) {
       nodeEls[i].classList.toggle("selected", m === n);
     }
   });
-  
+
   if (n) {
     highlightNodeNeighbors(n);
   } else {
     clearHighlights();
   }
-  
-  inspector.classList.toggle("open", !!n);
+
+  const shouldOpen = options && options.openInspector;
+  inspector.classList.toggle("open", !!shouldOpen && !!n);
   if (!n) return;
 
   // Build Details Tab
   let html = `<h2>${esc(n.label)}</h2>
     <span class="type-chip" style="background:${TYPE_COLORS[n.type] || DEFAULT_COLOR}">
     ${esc(TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") : n.type)}</span>`;
-    
-  if (n.isOrphan) html += `<div class="orphan-flag">[ORPHAN] Orphaned: ${esc(n.orphanReason || "unreferenced")}</div>`;
+
+  if (n.isOrphan) html += `<div class="orphan-flag">ORPHAN: ${esc(n.orphanReason || "unreferenced")}</div>`;
 
   html += `<div class="kv"><b>${n.inc.length}</b> inbound | <b>${n.out.length}</b> outbound link(s)</div>`;
 
@@ -1119,10 +1652,10 @@ function select(n) {
   if (n.out.length) {
     html += "<h3>Uses</h3>" + n.out.map(e => relRow(e.target, e.label, "out")).join("");
   }
-  
+
   const d = n.data || {};
   const facts = [];
-  
+
   if (d.type) facts.push(["Record type", d.type]);
   if (d.id) facts.push(["ID", d.id]);
   if (d.object_type) facts.push(["Object", d.object_type]);
@@ -1154,24 +1687,88 @@ function select(n) {
 
   if (d.risk_flags && d.risk_flags.length) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
-    facts.push(["[RISK] Risks", riskText]);
+    facts.push(["Risks", riskText]);
   }
-  
+
   if (facts.length) {
     html += "<h3>Details</h3>" + facts.map(([k, v]) =>
       `<div class="kv">${esc(k)}: <b>${esc(v)}</b></div>`).join("");
   }
-  
+
   tabDetails.innerHTML = html;
+  tabDetails.querySelectorAll(".rel").forEach(el => {
+    el.addEventListener("click", () => {
+      const target = nodeById[el.dataset.node];
+      if (target) select(target, { openInspector: true });
+    });
+  });
+
+  // Async fetch markdown documentation and compile Mermaid
+  loadDocsAndDiagrams(n);
+}
+
+function selectEdge(e) {
+  selected = null;
+  selectedEdge = e;
+
+  const srcNode = nodeById[e.source];
+  const tgtNode = nodeById[e.target];
+
+  highlightEdge(e);
+  inspector.classList.add("open");
+
+  const edgeLabel = e.label || "Dependency Relationship";
+  let html = `<h2>${esc(edgeLabel)}</h2>
+    <span class="type-chip" style="background:#EF4444">Dependency Link</span>
+    <div class="kv" style="margin-top:10px;">Connected between <b>${esc(srcNode ? srcNode.label : e.source)}</b> and <b>${esc(tgtNode ? tgtNode.label : e.target)}</b></div>`;
+
+  html += `<h3 style="margin-top:14px;">Connection Details</h3>`;
+  if (srcNode) {
+    html += `<div class="rel" data-node="${esc(srcNode.id)}">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[srcNode.type] || DEFAULT_COLOR};margin-right:4px;"></span>
+      <b>Source:</b> ${esc(srcNode.label)}
+      <div class="via">${esc(TYPE_LABELS[srcNode.type] || srcNode.type)}</div>
+    </div>`;
+  }
+  if (tgtNode) {
+    html += `<div class="rel" data-node="${esc(tgtNode.id)}">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${TYPE_COLORS[tgtNode.type] || DEFAULT_COLOR};margin-right:4px;"></span>
+      <b>Target:</b> ${esc(tgtNode.label)}
+      <div class="via">${esc(TYPE_LABELS[tgtNode.type] || tgtNode.type)}</div>
+    </div>`;
+  }
+
+  html += `<h3 style="margin-top:14px;">Documentation Quick-Jump</h3>`;
+  if (srcNode && srcNode.data && srcNode.data.mdPath) {
+    html += `<button class="tab-btn edge-doc-btn" data-node="${esc(srcNode.id)}" style="width:100%;margin-bottom:6px;background:var(--accent-primary);color:#fff;font-weight:600;">View Source Docs (${esc(srcNode.label)})</button>`;
+  }
+  if (tgtNode && tgtNode.data && tgtNode.data.mdPath) {
+    html += `<button class="tab-btn edge-doc-btn" data-node="${esc(tgtNode.id)}" style="width:100%;background:var(--panel);border:1px solid var(--border-subtle);color:var(--text-main);font-weight:600;">View Target Docs (${esc(tgtNode.label)})</button>`;
+  }
+
+  tabDetails.innerHTML = html;
+
   tabDetails.querySelectorAll(".rel").forEach(el => {
     el.addEventListener("click", () => {
       const target = nodeById[el.dataset.node];
       if (target) select(target);
     });
   });
-  
-  // Async fetch markdown documentation and compile Mermaid
-  loadDocsAndDiagrams(n);
+
+  tabDetails.querySelectorAll(".edge-doc-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = nodeById[btn.dataset.node];
+      if (target) select(target);
+    });
+  });
+
+  const docTargetNode = (tgtNode && tgtNode.data && tgtNode.data.mdPath) ? tgtNode : (srcNode && srcNode.data && srcNode.data.mdPath ? srcNode : null);
+  if (docTargetNode) {
+    loadDocsAndDiagrams(docTargetNode);
+  } else {
+    tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No markdown documentation generated for these structural nodes.</div>`;
+    tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">No architecture diagram available for these structural nodes.</div>`;
+  }
 }
 
 // ---------- Fullscreen Modal zoom & pan ----------
@@ -1194,16 +1791,16 @@ function updateModalTransform() {
 function openFullscreenDiagram() {
   const sourceSvg = tabDiagram.querySelector(".mermaid svg");
   if (!sourceSvg) return;
-  
+
   modalViewport.innerHTML = "";
   const clone = sourceSvg.cloneNode(true);
   clone.style.transition = "transform 0.05s ease-out";
   modalViewport.appendChild(clone);
-  
+
   // Center and scale to 1.1x initial size
   modalView = { x: 0, y: 0, k: 1.1 };
   updateModalTransform();
-  
+
   diagramModal.classList.add("open");
 }
 
