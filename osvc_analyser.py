@@ -201,29 +201,51 @@ def generate_index_md(workspaces, output_dir, components=None):
     # 2. Workspaces Matrix
     lines.append("## Workspaces Inventory Matrix")
     lines.append("")
-    lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Workspace Documentation |")
-    lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
+    
+    std_ws = [w for w in workspaces if w.get("name") in ["Contact", "Incident", "Organization", "Test_Record"]]
+    custom_ws = [w for w in workspaces if w not in std_ws]
 
-    all_referenced_reports = {}
+    if std_ws:
+        lines.append("### Standard Object Workspaces")
+        lines.append("")
+        lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
+        for ws in std_ws:
+            ws_name = ws.get("name", "Unknown")
+            ws_slug = ws_name.replace(" ", "_")
+            obj_type = ws.get("object_type") or ws.get("module") or "General"
+            tabs, fields, rules = ws.get("tabs", []), ws.get("fields", []), ws.get("rules", [])
+            unk_dict = ws.get("unknowns", {})
+            unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
+            unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
+            ref_ids = collect_ws_referenced_report_ids(ws)
+            for rid in ref_ids:
+                all_referenced_reports.setdefault(rid, []).append(ws_name)
+            ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
+            folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
+            lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
+        lines.append("")
 
-    for ws in workspaces:
-        ws_name = ws.get("name", "Unknown")
-        ws_slug = ws_name.replace(" ", "_")
-        obj_type = ws.get("object_type") or ws.get("module") or "General"
-        tabs = ws.get("tabs", [])
-        fields = ws.get("fields", [])
-        rules = ws.get("rules", [])
-        unk_dict = ws.get("unknowns", {})
-        unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
-        unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
-        ref_ids = collect_ws_referenced_report_ids(ws)
-        for rid in ref_ids:
-            all_referenced_reports.setdefault(rid, []).append(ws_name)
-        ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
-        folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
-        lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
-
-    lines.append("")
+    if custom_ws:
+        lines.append("### Custom & Edge Layout Workspaces")
+        lines.append("")
+        lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
+        for ws in custom_ws:
+            ws_name = ws.get("name", "Unknown")
+            ws_slug = ws_name.replace(" ", "_")
+            obj_type = ws.get("object_type") or ws.get("module") or "General"
+            tabs, fields, rules = ws.get("tabs", []), ws.get("fields", []), ws.get("rules", [])
+            unk_dict = ws.get("unknowns", {})
+            unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
+            unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
+            ref_ids = collect_ws_referenced_report_ids(ws)
+            for rid in ref_ids:
+                all_referenced_reports.setdefault(rid, []).append(ws_name)
+            ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
+            folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
+            lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
+        lines.append("")
 
     # 3. Analytics & Custom Reports Matrix
     all_report_entries = []
@@ -246,7 +268,8 @@ def generate_index_md(workspaces, output_dir, components=None):
             "table": rtable,
             "cols": str(rcols),
             "ref_ws": ref_ws,
-            "doc": doc_link
+            "doc": doc_link,
+            "is_custom": True
         })
 
     for rid, wsl in all_referenced_reports.items():
@@ -259,34 +282,83 @@ def generate_index_md(workspaces, output_dir, components=None):
                 "table": "Referenced Schema",
                 "cols": "—",
                 "ref_ws": ref_ws,
-                "doc": "—"
+                "doc": "—",
+                "is_custom": False
             })
 
     if all_report_entries:
         lines.append("## Analytics & Custom Reports Matrix")
         lines.append("")
-        lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
-        lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
-        for re in sorted(all_report_entries, key=lambda x: str(x["id"])):
-            lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
-        lines.append("")
+        
+        std_reps = [r for r in all_report_entries if not r["is_custom"]]
+        cust_reps = [r for r in all_report_entries if r["is_custom"]]
+
+        if std_reps:
+            lines.append("### Standard Object Reports")
+            lines.append("")
+            lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
+            lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
+            for re in sorted(std_reps, key=lambda x: str(x["id"])):
+                lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
+            lines.append("")
+
+        if cust_reps:
+            lines.append("### Custom Analytics Reports")
+            lines.append("")
+            lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
+            lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
+            for re in sorted(cust_reps, key=lambda x: str(x["id"])):
+                lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
+            lines.append("")
 
     # 4. CPM Handlers Overview
     cpms = components.get("cpm", []) if components else []
     if cpms:
         lines.append("## CPM Handlers & Event Procedures")
         lines.append("")
-        lines.append("| Handler Name / XML | Bound Object | Event Trigger | Mode | Entry Point Method | CPM Summary Document |")
-        lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
-        for c in cpms:
-            fname = c.get("name") or c.get("file_name") or "—"
-            obj = c.get("object_type") or c.get("object") or "—"
-            evt = c.get("operations_label") or c.get("event") or "Event Handler"
-            is_a = "Async" if c.get("is_async") else "Sync"
-            entry = c.get("entry_point") or "ObjectProcedure::apply"
-            cpm_link = "[report_CPM_Summary.md](cpm/report_CPM_Summary.md)"
-            lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `{is_a}` | `{entry}` | {cpm_link} |")
-        lines.append("")
+        
+        event_cpms = [c for c in cpms if not c.get("is_async") and "routing" not in (c.get("name") or "").lower()]
+        routing_cpms = [c for c in cpms if "routing" in (c.get("name") or "").lower()]
+        async_cpms = [c for c in cpms if c.get("is_async")]
+
+        if event_cpms:
+            lines.append("### Object Event Handlers")
+            lines.append("")
+            lines.append("| Handler Name | Bound Object | Event Trigger | Mode | Entry Point | CPM Summary Document |")
+            lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+            for c in event_cpms:
+                fname = c.get("name") or c.get("file_name") or "—"
+                obj = c.get("object_type") or c.get("object") or "—"
+                evt = c.get("operations_label") or c.get("event") or "Event Handler"
+                entry = c.get("entry_point") or "ObjectProcedure::apply"
+                lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Sync` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
+            lines.append("")
+
+        if routing_cpms:
+            lines.append("### CPM Routing Mappings")
+            lines.append("")
+            lines.append("| Handler Name | Bound Object | Event Trigger | Mode | Entry Point | CPM Summary Document |")
+            lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+            for c in routing_cpms:
+                fname = c.get("name") or c.get("file_name") or "—"
+                obj = c.get("object_type") or c.get("object") or "—"
+                evt = c.get("operations_label") or c.get("event") or "Routing Handler"
+                entry = c.get("entry_point") or "ObjectProcedure::apply"
+                lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Sync` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
+            lines.append("")
+
+        if async_cpms:
+            lines.append("### Asynchronous Execution Queues")
+            lines.append("")
+            lines.append("| Handler Name | Bound Object | Event Trigger | Mode | Entry Point | CPM Summary Document |")
+            lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+            for c in async_cpms:
+                fname = c.get("name") or c.get("file_name") or "—"
+                obj = c.get("object_type") or c.get("object") or "—"
+                evt = c.get("operations_label") or c.get("event") or "Async Handler"
+                entry = c.get("entry_point") or "ObjectProcedure::apply"
+                lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Async` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
+            lines.append("")
 
     # 5. BUI Add-Ins & Custom Scripts Overview
     buis = components.get("buiAddins", []) if components else []
@@ -294,21 +366,31 @@ def generate_index_md(workspaces, output_dir, components=None):
     if buis or scripts:
         lines.append("## BUI Add-Ins & Custom PHP Scripts")
         lines.append("")
-        lines.append("| Component Name | Type | Entry Point / File | Risk Flags | Add-In Document |")
-        lines.append("| :--- | :--- | :--- | :---: | :--- |")
-        for b in buis:
-            bname = b.get("name", "BUI Add-In")
-            btype = b.get("type", "BUIAddin")
-            ep = b.get("entry_point", "Unknown")
-            risks = len(b.get("risk_flags", []))
-            doc_link = f"[report_{bname}.md](bui_addins/report_{bname}.md)"
-            lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | {doc_link} |")
-        for s in scripts:
-            sname = s.get("file_name", "Script")
-            ep = s.get("file_name", "Unknown")
-            doc_link = f"[report_{sname}.md](scripts/report_{sname}.md)"
-            lines.append(f"| **{sname}** | `CustomScript` | `{ep}` | 0 | {doc_link} |")
-        lines.append("")
+        
+        if buis:
+            lines.append("### Browser UI (BUI) Add-Ins")
+            lines.append("")
+            lines.append("| Add-In Name | Extension Type | Entry Point | Risk Flags | Documentation |")
+            lines.append("| :--- | :--- | :--- | :---: | :--- |")
+            for b in buis:
+                bname = b.get("name", "BUI Add-In")
+                btype = b.get("type", "BUIAddin")
+                ep = b.get("entry_point", "Unknown")
+                risks = len(b.get("risk_flags", []))
+                lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | [report_{bname}.md](bui_addins/report_{bname}.md) |")
+            lines.append("")
+
+        if scripts:
+            lines.append("### Custom PHP Procedural Scripts")
+            lines.append("")
+            lines.append("| Script File Name | Component Type | Functions Count | External Calls | Documentation |")
+            lines.append("| :--- | :--- | :---: | :--- | :--- |")
+            for s in scripts:
+                sname = s.get("file_name", "Script")
+                funcs = len(s.get("functions", []))
+                soaps = ", ".join(s.get("soap_actions", [])) if s.get("soap_actions") else "—"
+                lines.append(f"| `{sname}` | `CustomScript` | {funcs} | `{soaps}` | [report_{sname}.md](scripts/report_{sname}.md) |")
+            lines.append("")
 
     # 6. Shared Report Dependencies
     shared = {rid: wsl for rid, wsl in all_referenced_reports.items() if len(wsl) > 1}
