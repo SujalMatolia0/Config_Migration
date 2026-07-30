@@ -225,21 +225,50 @@ def generate_index_md(workspaces, output_dir, components=None):
 
     lines.append("")
 
-    # 3. Reports Overview
-    reports = components.get("reports", []) if components else []
-    if reports:
-        lines.append("## Analytics Reports Matrix")
+    # 3. Analytics & Custom Reports Matrix
+    all_report_entries = []
+    seen_report_ids = set()
+
+    reports_list = components.get("reports", []) if components else []
+    for r in reports_list:
+        rid = str(r.get("id", ""))
+        if rid:
+            seen_report_ids.add(rid)
+        rname = r.get("name", f"Report {rid}")
+        rtable = r.get("primary_table") or "Standard Table"
+        rcols = len(r.get("columns", []))
+        ref_ws = ", ".join(f"**{w}**" for w in all_referenced_reports.get(rid, [])) or "Global Catalog"
+        safe_name = rname.replace(" ", "_")
+        doc_link = f"[report_{safe_name}.md](reports/report_{safe_name}.md)" if os.path.exists(os.path.join(output_dir, "reports", f"report_{safe_name}.md")) else "—"
+        all_report_entries.append({
+            "id": rid or "—",
+            "name": rname,
+            "table": rtable,
+            "cols": str(rcols),
+            "ref_ws": ref_ws,
+            "doc": doc_link
+        })
+
+    for rid, wsl in all_referenced_reports.items():
+        if rid not in seen_report_ids:
+            seen_report_ids.add(rid)
+            ref_ws = ", ".join(f"**{w}**" for w in wsl)
+            all_report_entries.append({
+                "id": rid,
+                "name": f"Analytics Report {rid}",
+                "table": "Referenced Schema",
+                "cols": "—",
+                "ref_ws": ref_ws,
+                "doc": "—"
+            })
+
+    if all_report_entries:
+        lines.append("## Analytics & Custom Reports Matrix")
         lines.append("")
-        lines.append("| Report ID | Report Name | Primary Table | Columns | Report Documentation |")
-        lines.append("| :--- | :--- | :--- | :---: | :--- |")
-        for r in reports:
-            rid = r.get("id", "—")
-            rname = r.get("name", "Report")
-            rtable = r.get("primary_table") or "—"
-            rcols = len(r.get("columns", []))
-            safe_name = rname.replace(" ", "_")
-            doc_link = f"[report_{safe_name}.md](reports/report_{safe_name}.md)"
-            lines.append(f"| `{rid}` | **{rname}** | `{rtable}` | {rcols} | {doc_link} |")
+        lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
+        lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
+        for re in sorted(all_report_entries, key=lambda x: str(x["id"])):
+            lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
         lines.append("")
 
     # 4. CPM Handlers Overview
