@@ -6,18 +6,29 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 
 ## Key Features
 
-- **Web Accelerator Platform & Dashboard**: Includes an interactive Flask-based web application (`web_platform.py`) running on `http://127.0.0.1:5050` with a Crimson Red & Off-White / Cream aesthetic theme.
-- **85% / 15% Split Dashboard Architecture**:
-  - **Main Panel (85% Width)**: Features the Smart Drag-and-Drop Uploader, 2-Tier Classified Input Inventory, Generated Results & Report Portal, and System Execution Log Console.
-  - **Sticky Sidebar (15% Width)**: Houses instant controls for AI Summaries, Strict Auditing Mode, Unknown Elements Dumping, and Output Report Formats alongside the primary execution button.
+- **Web Accelerator Platform & Dashboard**: Interactive Flask-based web application (`web_platform.py`) running on `http://127.0.0.1:5050` with a high-contrast Crimson Red & Off-White / Cream aesthetic theme.
+- **Unified Master System Architecture Report (`COMPLETE_SYSTEM_MAPPING.md`)**:
+  - **Entity Module Consolidation**: Rolls up fragmented sub-components under canonical primary object headers (`Contact`, `Incident`, `Organization`, `Test_Record`, `General`).
+  - **Populated Execution Context & Linkages**: Renders non-empty details (fields, tabs, business rules, report columns, entry points) and linkage counts (`In -> Out`) for every component.
+  - **Audit-Critical Orphaned Components**: Explicitly flags unreferenced custom scripts, workspace layouts, and CPM procedures with audit risk reasons.
+  - **Consolidated Integration Endpoints Catalog**: Maps outbound REST API endpoints and SOAP services to their exact source script files.
+  - **Executive Risk Signals**: Highlights orphaned components, unverified HTTP endpoints, and custom field references using structured callout alerts (`> [!WARNING]`, `> [!IMPORTANT]`, `> [!TIP]`).
+- **Interactive Dependency Graph Viewer**:
+  - **Universal Double-Click Inspector**: Double-clicking any graph node opens the 3-tab inspector sidebar (`Details`, `Documentation`, `Architecture`).
+  - **Layered Architecture Flowcharts**: Renders end-to-end data pipeline flowcharts connecting Workspaces, CPM Event Handlers, Custom Scripts, BUI Add-Ins, and External API Endpoints.
+  - **Smart Graph Search & Auto-Focus**: Real-time auto-zoom and node/edge highlighting when typing in the search bar.
+  - **Bulk Selection Toggles**: `Select All` and `Deselect All` object filter controls.
+  - **High-Contrast Color System**: Deep Purple (`#9333EA`) for Workspaces, Sky Blue (`#0284C7`) for Standard Fields, Bright Emerald (`#10B981`) for Custom Fields (`c$`).
+- **High-DPI SVG & PNG Vector Export Engine**:
+  - **Self-Contained SVG Export**: Embeds style blocks, background canvas (`#FAF8F5`), and explicit presentation attributes to ensure SVG files render with 100% fidelity in any viewer.
+  - **Preserved Arrowhead Markers**: Preserves vector arrowheads (`#arrow`, `#arrow-mapping`, `#arrow-cross`) for edge directions.
+  - **2x Resolution PNG Export**: Exports high-DPI raster images with smoothing enabled.
 - **2-Tier Hierarchy File Input System**:
   - **Tier 1 (Top-Level Component Accordions)**: Collapsible containers per OSVC export component (`Workspaces`, `Analytics Reports`, `CPM Procedures`, `BUI Add-Ins`).
-  - **Tier 2 (Sub-Group Labeled Dividers)**: Categorized file tables grouping items by schema domain (e.g. `Standard Object Workspaces`, `Custom & Edge Layout Workspaces`, `Object Event Handlers`, `CPM Routing Mappings`, `BUI Extension Packages`).
-- **Content Schema Auto-Classifier**: Inspects XML root schemas (`<analytics_core>`, `<TabSet>`, `<ObjectProcedure>`, `<Rule>`, `<nav_set>`) and ZIP manifests (`init.html`, `manifest.json`), auto-categorizes exports, and routes files into designated subfolders (`workspaces/`, `reports/`, `cpm/`, `scripts/`).
-- **CPM Analysis & AI Summaries**: Analyzes Custom Process Model (CPM) PHP handlers and XML exports. Integrates Groq AI API (`llama-3.3-70b-versatile`) for automatic logic summaries with rule-based regex fallback.
-- **Strict Mode Element Auditing**: Captures and logs all unhandled OSVC XML tags and attributes into `results/unknowns.json` to eliminate silent data loss.
-- **BUI Add-In & Extension Auditing**: Performs static analysis for Browser UI (BUI) JavaScript/HTML Add-In packages, extracting field reads/writes, lifecycle hooks, external API endpoints, and security findings.
-- **Center-Aligned Mermaid Flowcharts**: Generates Mermaid flow diagrams formatted for clean rendering.
+  - **Tier 2 (Sub-Group Labeled Dividers)**: Categorized file tables grouping items by schema domain (`Standard Object Workspaces`, `Custom & Edge Layout Workspaces`, `Object Event Handlers`, `CPM Routing Mappings`, `BUI Extension Packages`).
+- **Content Schema Auto-Classifier**: Inspects XML root schemas (`<analytics_core>`, `<TabSet>`, `<ObjectProcedure>`, `<Rule>`, `<nav_set>`) and ZIP manifests (`init.html`, `manifest.json`), auto-categorizing exports into designated subfolders.
+- **CPM Analysis & AI Summaries**: Analyzes Custom Process Model (CPM) PHP handlers and XML exports, integrating Groq AI API (`llama-3.3-70b-versatile`) with static rule-based fallback.
+- **Strict Mode Element Auditing**: Captures and logs all unhandled OSVC XML tags and attributes into `results/unknowns.json`.
 
 ---
 
@@ -28,22 +39,29 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 ├── web_platform.py           # Flask web accelerator application & API backend
 ├── templates/
 │   └── index.html            # Crimson & Cream 85/15 web platform UI template
-├── analyser/                 # Analysis and graph building engine
-│   ├── endpoint_extractor.py # External API/Browser URL aggregator
-│   ├── orphan_detector.py    # Orphaned/inactive rule & script scanner
-│   └── relationship_mapper.py# Graph link mapping logic
-├── parsers/                  # Parsers for OSVC exports
-│   ├── workspace_parser.py   # Workspace XML parser
-│   ├── report_parser.py      # Report XML parser
-│   ├── rule_parser.py        # Business Rules XML parser
-│   ├── nav_parser.py         # Navigation Set XML parser
-│   ├── cpm_parser.py         # CPM PHP handler parser & Groq AI summarizer
-│   ├── bui_parser.py         # BUI Add-In package parser
-│   └── script_parser.py      # JS/PHP custom script static analyzer
-├── output/                   # Report output utilities
-│   ├── markdown_generator.py # Theme-agnostic Markdown report generator
-│   ├── json_writer.py        # Master JSON & summary JSON schema writers
-│   └── report_builder.py     # HTML/PDF report generators
+├── graph_ui/                 # D3 & Mermaid dependency graph visualization suite
+│   ├── index.html            # Standalone graph viewer template
+│   ├── app.js                # Graph engine, node inspector & vector export handlers
+│   └── style.css             # High-contrast graph styling & theme tokens
+├── src/
+│   ├── analyser/             # Analysis and graph building engine
+│   │   ├── endpoint_extractor.py # External API/Browser URL aggregator
+│   │   ├── orphan_detector.py    # Orphaned/inactive rule & script scanner
+│   │   ├── relationship_mapper.py# Graph link mapping logic
+│   │   └── graph_builder.py     # Graph node & edge schema builder
+│   ├── parsers/              # Parsers for OSVC exports
+│   │   ├── workspace_parser.py   # Workspace XML parser
+│   │   ├── report_parser.py      # Report XML parser
+│   │   ├── rule_parser.py        # Business Rules XML parser
+│   │   ├── nav_parser.py         # Navigation Set XML parser
+│   │   ├── cpm_parser.py         # CPM PHP handler parser & Groq AI summarizer
+│   │   ├── bui_parser.py         # BUI Add-In package parser
+│   │   └── script_parser.py      # JS/PHP custom script static analyzer
+│   └── output/               # Report output utilities
+│       ├── master_report_generator.py # Complete master system report generator
+│       ├── markdown_generator.py # Theme-agnostic Markdown report generator
+│       ├── json_writer.py        # Master JSON & summary JSON schema writers
+│       └── report_builder.py     # HTML/PDF report generators
 ├── input/                    # Organized input OSVC exports
 │   ├── workspaces/           # Workspace XML files
 │   ├── cpm/                  # CPM PHP handlers & Mappings.xml
@@ -52,16 +70,14 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 │   ├── scripts/              # Custom PHP/JS scripts & BUI packages
 │   └── navigation/           # Navigation Set XML files
 ├── results/                  # Generated reports and analysis outputs
+│   ├── COMPLETE_SYSTEM_MAPPING.md # Unified Master System Architecture Report
 │   ├── master.json           # Global master JSON data schema
-│   ├── report.html           # Global interactive HTML dashboard
 │   ├── index.md              # Global cross-workspace index
 │   ├── unknowns.json         # Coverage gaps and unhandled element inventory
+│   ├── graph/                # Generated interactive graph viewer
 │   ├── json/                 # Format-sorted JSON files
 │   ├── markdown/             # Format-sorted Markdown reports
-│   ├── html/                 # Format-sorted HTML dashboards
-│   ├── workspaces/           # Per-workspace reports
-│   ├── cpm/                  # CPM procedure summaries (MD + JSON)
-│   └── scripts/              # BUI Add-In summaries (MD + JSON)
+│   └── workspaces/           # Per-workspace reports & graphs
 ├── osvc_analyser.py          # Orchestrator CLI entry point
 ├── schema.json               # Master JSON validation schema
 └── README.md
@@ -105,8 +121,8 @@ Open `http://127.0.0.1:5050` in your web browser.
 
 - **Drag-and-Drop Uploads**: Drag OSVC XML, PHP, or ZIP files directly into the Smart Dropzone. The Auto-Classifier inspects schema headers, categorizes files, and routes them automatically.
 - **Grouped 2-Tier Inventory**: Expand top-level component accordions (`Workspaces`, `Reports`, `CPM`, `BUI`) to view sub-group labeled tables (`Standard Object Workspaces`, `Object Event Handlers`, `Routing Mappings`).
-- **Interactive Control Sidebar**: Toggle AI Summaries, Strict Auditing Mode, or Unknowns Dumping, and select output formats.
-- **One-Click Execution**: Click `RUN ACCELERATOR` to execute analysis and open interactive HTML/Markdown report viewers in the portal.
+- **Interactive Control Sidebar**: Toggle AI Summaries, Strict Auditing Mode, or Unknowns Dumping.
+- **One-Click Execution**: Click `RUN ACCELERATOR` to execute analysis, generate global graph visualizations, and compile `COMPLETE_SYSTEM_MAPPING.md`.
 
 ---
 
@@ -134,21 +150,10 @@ Place OSVC configuration exports in the `input/` directory and run the orchestra
 .venv/bin/python osvc_analyser.py --input ./input --output ./results --no-ai-summary
 ```
 
-### Build PDF reports:
-```bash
-.venv/bin/python osvc_analyser.py --input ./input --output ./results --format pdf
-```
-
 ---
 
-## Launching the Flow Diagram Visualizer
+## Vector & Image Exporting
 
-To start the React Flow visualization UI:
-
-```bash
-cd ui
-npm install
-npm run dev
-```
-
-Open `http://localhost:3000` in your browser.
+From the interactive graph viewer (`/results/graph/index.html`):
+- Click **Export SVG** to download a self-contained vector graphic with embedded style blocks and preserved arrowheads.
+- Click **Export PNG** to save a crisp 2x resolution High-DPI raster image.
