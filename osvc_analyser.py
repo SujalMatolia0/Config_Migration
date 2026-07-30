@@ -177,8 +177,28 @@ def generate_index_md(workspaces, output_dir, components=None):
     lines.append("> [!NOTE]")
     lines.append("> **Master Index Overview**: Central navigation matrix linking all analyzed Oracle Service Cloud Workspaces, Analytics Reports, CPM Handlers, BUI Add-Ins, Custom PHP Scripts, and Dependency Graphs.")
     lines.append("")
-    
+
+    # Pre-collect all workspace-referenced report IDs
     all_referenced_reports = {}
+    for ws in workspaces:
+        ws_name = ws.get("name", "Unknown")
+        ref_ids = collect_ws_referenced_report_ids(ws)
+        for rid in ref_ids:
+            all_referenced_reports.setdefault(rid, []).append(ws_name)
+
+    # Helper for workspace primary object
+    def get_ws_primary_object(ws):
+        wname = ws.get("name", "")
+        low = wname.lower()
+        if "contact" in low:
+            return "Contact"
+        elif "incident" in low:
+            return "Incident"
+        elif "org" in low:
+            return "Organization"
+        elif "test" in low:
+            return "Test_Record"
+        return ws.get("object_type") or ws.get("module") or "General"
 
     # 1. Objects
     lines.append("## Objects")
@@ -196,7 +216,8 @@ def generate_index_md(workspaces, output_dir, components=None):
     lines.append("## Workspaces")
     lines.append("")
     
-    std_ws = [w for w in workspaces if w.get("name") in ["Contact", "Incident", "Organization", "Test_Record"]]
+    std_names = ["contact", "incident", "organization", "test_record"]
+    std_ws = [w for w in workspaces if w.get("name", "").lower() in std_names]
     custom_ws = [w for w in workspaces if w not in std_ws]
 
     if std_ws:
@@ -207,14 +228,12 @@ def generate_index_md(workspaces, output_dir, components=None):
         for ws in std_ws:
             ws_name = ws.get("name", "Unknown")
             ws_slug = ws_name.replace(" ", "_")
-            obj_type = ws.get("object_type") or ws.get("module") or "General"
+            obj_type = get_ws_primary_object(ws)
             tabs, fields, rules = ws.get("tabs", []), ws.get("fields", []), ws.get("rules", [])
             unk_dict = ws.get("unknowns", {})
             unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
             unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
             ref_ids = collect_ws_referenced_report_ids(ws)
-            for rid in ref_ids:
-                all_referenced_reports.setdefault(rid, []).append(ws_name)
             ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
             folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
             lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
@@ -228,14 +247,12 @@ def generate_index_md(workspaces, output_dir, components=None):
         for ws in custom_ws:
             ws_name = ws.get("name", "Unknown")
             ws_slug = ws_name.replace(" ", "_")
-            obj_type = ws.get("object_type") or ws.get("module") or "General"
+            obj_type = get_ws_primary_object(ws)
             tabs, fields, rules = ws.get("tabs", []), ws.get("fields", []), ws.get("rules", [])
             unk_dict = ws.get("unknowns", {})
             unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
             unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
             ref_ids = collect_ws_referenced_report_ids(ws)
-            for rid in ref_ids:
-                all_referenced_reports.setdefault(rid, []).append(ws_name)
             ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
             folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
             lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
@@ -296,8 +313,36 @@ def generate_index_md(workspaces, output_dir, components=None):
                 lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
             lines.append("")
 
+        if cust_reps:
+            lines.append("### Custom Analytics Reports")
+            lines.append("")
+            lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
+            lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
+            for re in sorted(cust_reps, key=lambda x: str(x["id"])):
+                lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
+            lines.append("")
+
+    # Helper for CPM object binding
+    def get_cpm_object(c):
+        obj = c.get("object_type") or c.get("object")
+        if obj and obj != "—":
+            return obj
+        bclasses = c.get("bound_classes", [])
+        if bclasses:
+            return bclasses[0]
+        name = (c.get("name") or "").lower()
+        if "contact" in name:
+            return "Contact"
+        elif "incident" in name:
+            return "Incident"
+        elif "org" in name:
+            return "Organization"
+        return "General"
+
     # 4. CPM
-    cpms = components.get("cpm", []) if components else []
+    raw_cpms = components.get("cpm", []) if components else []
+    cpms = [c for c in raw_cpms if (c.get("name") or c.get("file_name") or "") != "Mappings.xml"]
+
     if cpms:
         lines.append("## CPM")
         lines.append("")
@@ -313,7 +358,7 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
             for c in event_cpms:
                 fname = c.get("name") or c.get("file_name") or "—"
-                obj = c.get("object_type") or c.get("object") or "—"
+                obj = get_cpm_object(c)
                 evt = c.get("operations_label") or c.get("event") or "Event Handler"
                 entry = c.get("entry_point") or "ObjectProcedure::apply"
                 lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Sync` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
@@ -326,7 +371,7 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
             for c in routing_cpms:
                 fname = c.get("name") or c.get("file_name") or "—"
-                obj = c.get("object_type") or c.get("object") or "—"
+                obj = get_cpm_object(c)
                 evt = c.get("operations_label") or c.get("event") or "Routing Handler"
                 entry = c.get("entry_point") or "ObjectProcedure::apply"
                 lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Sync` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
@@ -339,7 +384,7 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
             for c in async_cpms:
                 fname = c.get("name") or c.get("file_name") or "—"
-                obj = c.get("object_type") or c.get("object") or "—"
+                obj = get_cpm_object(c)
                 evt = c.get("operations_label") or c.get("event") or "Async Handler"
                 entry = c.get("entry_point") or "ObjectProcedure::apply"
                 lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Async` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
