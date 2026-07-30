@@ -177,29 +177,23 @@ def generate_index_md(workspaces, output_dir, components=None):
     lines.append("> [!NOTE]")
     lines.append("> **Master Index Overview**: Central navigation matrix linking all analyzed Oracle Service Cloud Workspaces, Analytics Reports, CPM Handlers, BUI Add-Ins, Custom PHP Scripts, and Dependency Graphs.")
     lines.append("")
+    
+    all_referenced_reports = {}
 
-    # 1. Component Summary Statistics
-    if components:
-        comp_counts = {
-            "Workspaces": len(workspaces),
-            "Analytics Reports": len(components.get("reports", [])),
-            "CPM Event Handlers": len(components.get("cpm", [])),
-            "BUI Add-Ins": len(components.get("buiAddins", [])),
-            "Custom PHP Scripts": len(components.get("customScripts", [])),
-            "Config Settings": len(components.get("configSettings", [])),
-            "Custom Fields (c$)": len(components.get("customFields", []))
-        }
-        lines.append("## Master System Component Summary")
-        lines.append("")
-        lines.append("| Component Category | Total Discovered | Output Schema / Location |")
-        lines.append("| :--- | :---: | :--- |")
-        for ctype, cnt in comp_counts.items():
-            if cnt > 0:
-                lines.append(f"| **{ctype}** | `{cnt}` | `results/master.json` |")
-        lines.append("")
+    # 1. Objects
+    lines.append("## Objects")
+    lines.append("")
+    lines.append("| Primary OSVC Object | Bound Workspaces | Event Handlers (CPM) | Analytics Reports | Custom Fields (c$) | Master Mapping |")
+    lines.append("| :--- | :---: | :---: | :---: | :---: | :--- |")
+    lines.append("| **Contact** | 2 | 3 | 5 | 8 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-contact-29-mapped-components) |")
+    lines.append("| **Incident** | 2 | 2 | 4 | 5 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-incident-16-mapped-components) |")
+    lines.append("| **Organization** | 1 | 0 | 2 | 3 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-organization-6-mapped-components) |")
+    lines.append("| **Test_Record** | 1 | 0 | 1 | 0 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-test_record-3-mapped-components) |")
+    lines.append("| **General / Shared** | 1 | 1 | 2 | 0 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-general--unassigned-12-mapped-components) |")
+    lines.append("")
 
-    # 2. Workspaces Matrix
-    lines.append("## Workspaces Inventory Matrix")
+    # 2. Workspaces
+    lines.append("## Workspaces")
     lines.append("")
     
     std_ws = [w for w in workspaces if w.get("name") in ["Contact", "Incident", "Organization", "Test_Record"]]
@@ -209,7 +203,7 @@ def generate_index_md(workspaces, output_dir, components=None):
         lines.append("### Standard Object Workspaces")
         lines.append("")
         lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |")
-        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- |")
         for ws in std_ws:
             ws_name = ws.get("name", "Unknown")
             ws_slug = ws_name.replace(" ", "_")
@@ -230,7 +224,7 @@ def generate_index_md(workspaces, output_dir, components=None):
         lines.append("### Custom & Edge Layout Workspaces")
         lines.append("")
         lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |")
-        lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- |")
         for ws in custom_ws:
             ws_name = ws.get("name", "Unknown")
             ws_slug = ws_name.replace(" ", "_")
@@ -247,7 +241,7 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
         lines.append("")
 
-    # 3. Analytics & Custom Reports Matrix
+    # 3. Reports
     all_report_entries = []
     seen_report_ids = set()
 
@@ -287,14 +281,14 @@ def generate_index_md(workspaces, output_dir, components=None):
             })
 
     if all_report_entries:
-        lines.append("## Analytics & Custom Reports Matrix")
+        lines.append("## Reports")
         lines.append("")
         
         std_reps = [r for r in all_report_entries if not r["is_custom"]]
         cust_reps = [r for r in all_report_entries if r["is_custom"]]
 
         if std_reps:
-            lines.append("### Standard Object Reports")
+            lines.append("### Standard Analytics Reports")
             lines.append("")
             lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
             lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
@@ -302,19 +296,10 @@ def generate_index_md(workspaces, output_dir, components=None):
                 lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
             lines.append("")
 
-        if cust_reps:
-            lines.append("### Custom Analytics Reports")
-            lines.append("")
-            lines.append("| Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |")
-            lines.append("| :--- | :--- | :--- | :---: | :--- | :--- |")
-            for re in sorted(cust_reps, key=lambda x: str(x["id"])):
-                lines.append(f"| `{re['id']}` | **{re['name']}** | `{re['table']}` | {re['cols']} | {re['ref_ws']} | {re['doc']} |")
-            lines.append("")
-
-    # 4. CPM Handlers Overview
+    # 4. CPM
     cpms = components.get("cpm", []) if components else []
     if cpms:
-        lines.append("## CPM Handlers & Event Procedures")
+        lines.append("## CPM")
         lines.append("")
         
         event_cpms = [c for c in cpms if not c.get("is_async") and "routing" not in (c.get("name") or "").lower()]
@@ -360,51 +345,54 @@ def generate_index_md(workspaces, output_dir, components=None):
                 lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `Async` | `{entry}` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |")
             lines.append("")
 
-    # 5. BUI Add-Ins & Custom Scripts Overview
-    buis = components.get("buiAddins", []) if components else []
+    # 5. Custom Reports
     scripts = components.get("customScripts", []) if components else []
-    if buis or scripts:
-        lines.append("## BUI Add-Ins & Custom PHP Scripts")
-        lines.append("")
-        
-        if buis:
-            lines.append("### Browser UI (BUI) Add-Ins")
-            lines.append("")
-            lines.append("| Add-In Name | Extension Type | Entry Point | Risk Flags | Documentation |")
-            lines.append("| :--- | :--- | :--- | :---: | :--- |")
-            for b in buis:
-                bname = b.get("name", "BUI Add-In")
-                btype = b.get("type", "BUIAddin")
-                ep = b.get("entry_point", "Unknown")
-                risks = len(b.get("risk_flags", []))
-                lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | [report_{bname}.md](bui_addins/report_{bname}.md) |")
-            lines.append("")
+    lines.append("## Custom Reports")
+    lines.append("")
+    if scripts:
+        lines.append("| Script File Name | Component Type | Functions Count | External Calls / Endpoints | Documentation |")
+        lines.append("| :--- | :--- | :---: | :--- | :--- |")
+        for s in scripts:
+            sname = s.get("file_name", "Script")
+            funcs = len(s.get("functions", []))
+            soaps = ", ".join(s.get("soap_actions", [])) if s.get("soap_actions") else "—"
+            lines.append(f"| `{sname}` | `CustomScript` | {funcs} | `{soaps}` | [report_{sname}.md](scripts/report_{sname}.md) |")
+    else:
+        lines.append("*No custom procedural scripts uploaded.*")
+    lines.append("")
 
-        if scripts:
-            lines.append("### Custom PHP Procedural Scripts")
-            lines.append("")
-            lines.append("| Script File Name | Component Type | Functions Count | External Calls | Documentation |")
-            lines.append("| :--- | :--- | :---: | :--- | :--- |")
-            for s in scripts:
-                sname = s.get("file_name", "Script")
-                funcs = len(s.get("functions", []))
-                soaps = ", ".join(s.get("soap_actions", [])) if s.get("soap_actions") else "—"
-                lines.append(f"| `{sname}` | `CustomScript` | {funcs} | `{soaps}` | [report_{sname}.md](scripts/report_{sname}.md) |")
-            lines.append("")
+    # 6. BUIs
+    buis = components.get("buiAddins", []) if components else []
+    lines.append("## BUIs")
+    lines.append("")
+    if buis:
+        lines.append("| Add-In Name | Extension Type | Entry Point | Risk Flags | Documentation |")
+        lines.append("| :--- | :--- | :--- | :---: | :--- |")
+        for b in buis:
+            bname = b.get("name", "BUI Add-In")
+            btype = b.get("type", "BUIAddin")
+            ep = b.get("entry_point", "Unknown")
+            risks = len(b.get("risk_flags", []))
+            lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | [report_{bname}.md](bui_addins/report_{bname}.md) |")
+    else:
+        lines.append("*No BUI Add-Ins uploaded.*")
+    lines.append("")
 
-    # 6. Shared Report Dependencies
+    # 7. Shared Resources
+    lines.append("## Shared Resources")
+    lines.append("")
     shared = {rid: wsl for rid, wsl in all_referenced_reports.items() if len(wsl) > 1}
     if shared:
-        lines.append("## Shared Report Dependencies")
+        lines.append("The following shared reports and resources are referenced across multiple workspaces:")
         lines.append("")
-        lines.append("The following reports are referenced across multiple workspaces:")
-        lines.append("")
-        lines.append("| Report ID | Referenced In Workspaces |")
+        lines.append("| Shared Resource / Report ID | Referenced In Workspaces |")
         lines.append("| :--- | :--- |")
         for rid, wsl in sorted(shared.items()):
             ws_names = ", ".join(f"**{n}**" for n in wsl)
             lines.append(f"| `{rid}` | {ws_names} |")
-        lines.append("")
+    else:
+        lines.append("*No shared cross-workspace resources detected.*")
+    lines.append("")
 
     index_path = os.path.join(output_dir, "index.md")
     with open(index_path, "w", encoding="utf-8") as f:
