@@ -1504,9 +1504,50 @@ function renderHtmlPreviewsInContainer(container) {
 }
 
 function generateDynamicMermaidForNode(n) {
-  let code = "flowchart TD\n";
+  let code = "flowchart LR\n";
   const safeId = (id) => "N_" + String(id).replace(/[^a-zA-Z0-9_]/g, "_");
   const safeLabel = (lbl) => '"' + String(lbl || "").replace(/"/g, "'") + '"';
+
+  const ntype = (n.type || "").toLowerCase();
+  const data = n.data || {};
+
+  if (ntype === "cpm" || ntype === "asynccpm") {
+    const name = n.label || data.name || n.id;
+    const obj = data.object_type || n.module || "Object";
+    const evt = data.operations_label || data.script_type || "Event Trigger";
+    const isAsync = data.is_async || ntype === "asynccpm" ? "Async Execution Queue" : "Synchronous Event Handler";
+    const entry = data.entry_point || "ObjectProcedure::apply";
+
+    code += `  subgraph CPM_Proc ["CPM Procedure: ${name}"]\n`;
+    code += `    EVT["Trigger Event: ${evt}"] -->|Fires on| OBJ["Entity Object: ${obj}"]\n`;
+    code += `    OBJ -->|Executes| PROC["${isAsync}<br/>(Entry: ${entry})"]\n`;
+    code += `  end\n\n`;
+
+    let hasLinks = false;
+    if (n.inc && n.inc.length) {
+      n.inc.forEach(e => {
+        const src = nodeById[e.source];
+        if (src) {
+          hasLinks = true;
+          const lbl = e.label ? `|"${String(e.label).replace(/"/g, "'")}"|` : "|inbound|";
+          code += `  ${safeId(src.id)}[${safeLabel(src.label)}] -->${lbl} PROC\n`;
+        }
+      });
+    }
+
+    if (n.out && n.out.length) {
+      n.out.forEach(e => {
+        const tgt = nodeById[e.target];
+        if (tgt) {
+          hasLinks = true;
+          const lbl = e.label ? `|"${String(e.label).replace(/"/g, "'")}"|` : "|outbound|";
+          code += `  PROC -->${lbl} ${safeId(tgt.id)}[${safeLabel(tgt.label)}]\n`;
+        }
+      });
+    }
+
+    return code;
+  }
 
   code += `  ${safeId(n.id)}[${safeLabel(n.label)}]\n`;
   code += `  style ${safeId(n.id)} fill:#7C3AED,stroke:#4C1D95,color:#fff,stroke-width:2px\n`;
@@ -1567,7 +1608,7 @@ async function loadDocsAndDiagrams(node) {
         tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
         await renderMermaidBlocksInContainer(tabDoc);
         renderHtmlPreviewsInContainer(tabDoc);
-        mermaidCode = extractMermaidCode(mdText);
+        mermaidCode = extractMermaidCode(mdText, node);
       }
     } catch (err) {
       if (err.name === "AbortError") return;
