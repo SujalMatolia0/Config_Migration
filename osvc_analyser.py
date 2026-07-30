@@ -170,68 +170,68 @@ def generate_index_md(workspaces, output_dir, components=None):
     lines = []
     lines.append("# OSVC Configuration Master Index")
     lines.append("")
-    lines.append(f"*Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*")
+    lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
+    lines.append(f"**Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  ")
     lines.append("")
-    lines.append("---")
+    
+    lines.append("> [!NOTE]")
+    lines.append("> **Master Index Overview**: Central navigation matrix linking all analyzed Oracle Service Cloud Workspaces, Analytics Reports, CPM Handlers, BUI Add-Ins, Custom PHP Scripts, and Dependency Graphs.")
     lines.append("")
 
-    # 1. Summary Statistics
+    # 1. Component Summary Statistics
     if components:
         comp_counts = {
             "Workspaces": len(workspaces),
-            "Reports": len(components.get("reports", [])),
-            "CPM Handlers": len(components.get("cpm", [])),
+            "Analytics Reports": len(components.get("reports", [])),
+            "CPM Event Handlers": len(components.get("cpm", [])),
             "BUI Add-Ins": len(components.get("buiAddins", [])),
-            "Custom Scripts": len(components.get("customScripts", [])),
+            "Custom PHP Scripts": len(components.get("customScripts", [])),
             "Config Settings": len(components.get("configSettings", [])),
-            "Custom Fields": len(components.get("customFields", []))
+            "Custom Fields (c$)": len(components.get("customFields", []))
         }
         lines.append("## Master System Component Summary")
         lines.append("")
-        lines.append("| Component Type | Count | Master Output Path |")
-        lines.append("|---|---|---|")
+        lines.append("| Component Category | Total Discovered | Output Schema / Location |")
+        lines.append("| :--- | :---: | :--- |")
         for ctype, cnt in comp_counts.items():
             if cnt > 0:
                 lines.append(f"| **{ctype}** | `{cnt}` | `results/master.json` |")
         lines.append("")
-        lines.append("---")
-        lines.append("")
 
-    # 2. Workspaces Overview
-    lines.append("## Workspaces Overview")
+    # 2. Workspaces Matrix
+    lines.append("## Workspaces Inventory Matrix")
     lines.append("")
-    lines.append("| Workspace | Tabs | Fields | Rules | Unknown Elements | Referenced Reports | Documentation |")
-    lines.append("|---|---|---|---|---|---|---|")
+    lines.append("| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Workspace Documentation |")
+    lines.append("| :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |")
 
     all_referenced_reports = {}
 
     for ws in workspaces:
         ws_name = ws.get("name", "Unknown")
         ws_slug = ws_name.replace(" ", "_")
+        obj_type = ws.get("object_type") or ws.get("module") or "General"
         tabs = ws.get("tabs", [])
         fields = ws.get("fields", [])
         rules = ws.get("rules", [])
         unk_dict = ws.get("unknowns", {})
         unk_cnt = len(unk_dict.get("unknown_attrs", [])) + len(unk_dict.get("unknown_children", []))
-        unk_str = f"**{unk_cnt}** *(needs review)*" if unk_cnt > 0 else "0"
+        unk_str = f"`{unk_cnt}`" if unk_cnt > 0 else "0"
         ref_ids = collect_ws_referenced_report_ids(ws)
         for rid in ref_ids:
             all_referenced_reports.setdefault(rid, []).append(ws_name)
         ref_ids_str = ", ".join(f"`{r}`" for r in sorted(ref_ids)) if ref_ids else "—"
         folder_link = f"[report.md](workspaces/{ws_slug}/report.md)"
-        lines.append(f"| **{ws_name}** | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
+        lines.append(f"| **{ws_name}** | `{obj_type}` | {len(tabs)} | {len(fields)} | {len(rules)} | {unk_str} | {ref_ids_str} | {folder_link} |")
 
     lines.append("")
 
-    # 3. Reports Section
+    # 3. Reports Overview
     reports = components.get("reports", []) if components else []
     if reports:
-        lines.append("---")
+        lines.append("## Analytics Reports Matrix")
         lines.append("")
-        lines.append("## Reports Overview")
-        lines.append("")
-        lines.append("| Report ID | Report Name | Primary Table | Columns | Report Document |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| Report ID | Report Name | Primary Table | Columns | Report Documentation |")
+        lines.append("| :--- | :--- | :--- | :---: | :--- |")
         for r in reports:
             rid = r.get("id", "—")
             rname = r.get("name", "Report")
@@ -242,53 +242,54 @@ def generate_index_md(workspaces, output_dir, components=None):
             lines.append(f"| `{rid}` | **{rname}** | `{rtable}` | {rcols} | {doc_link} |")
         lines.append("")
 
-    # 4. CPM Handlers Section
+    # 4. CPM Handlers Overview
     cpms = components.get("cpm", []) if components else []
     if cpms:
-        lines.append("---")
+        lines.append("## CPM Handlers & Event Procedures")
         lines.append("")
-        lines.append("## CPM Handlers & Event Scripts")
-        lines.append("")
-        lines.append("| Object | Event | Type | Handler File | CPM Summary Report |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| Handler Name / XML | Bound Object | Event Trigger | Mode | Entry Point Method | CPM Summary Document |")
+        lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
         for c in cpms:
-            obj = c.get("object", "—")
-            event = c.get("event", "—")
-            ctype = c.get("type", "CPM")
-            fname = c.get("file_name") or c.get("name") or "—"
+            fname = c.get("name") or c.get("file_name") or "—"
+            obj = c.get("object_type") or c.get("object") or "—"
+            evt = c.get("operations_label") or c.get("event") or "Event Handler"
+            is_a = "Async" if c.get("is_async") else "Sync"
+            entry = c.get("entry_point") or "ObjectProcedure::apply"
             cpm_link = "[report_CPM_Summary.md](cpm/report_CPM_Summary.md)"
-            lines.append(f"| `{obj}` | `{event}` | `{ctype}` | `{fname}` | {cpm_link} |")
+            lines.append(f"| `{fname}` | `{obj}` | `{evt}` | `{is_a}` | `{entry}` | {cpm_link} |")
         lines.append("")
 
-    # 5. BUI Add-Ins Section
+    # 5. BUI Add-Ins & Custom Scripts Overview
     buis = components.get("buiAddins", []) if components else []
-    if buis:
-        lines.append("---")
+    scripts = components.get("customScripts", []) if components else []
+    if buis or scripts:
+        lines.append("## BUI Add-Ins & Custom PHP Scripts")
         lines.append("")
-        lines.append("## BUI Add-Ins & Browser Extensions")
-        lines.append("")
-        lines.append("| Add-In Name | Extension Type | Entry Point | Risk Flags | Add-In Document |")
-        lines.append("|---|---|---|---|---|")
+        lines.append("| Component Name | Type | Entry Point / File | Risk Flags | Add-In Document |")
+        lines.append("| :--- | :--- | :--- | :---: | :--- |")
         for b in buis:
             bname = b.get("name", "BUI Add-In")
             btype = b.get("type", "BUIAddin")
             ep = b.get("entry_point", "Unknown")
             risks = len(b.get("risk_flags", []))
-            doc_link = f"[report_{bname}.md](scripts/report_{bname}.md)"
+            doc_link = f"[report_{bname}.md](bui_addins/report_{bname}.md)"
             lines.append(f"| **{bname}** | `{btype}` | `{ep}` | {risks} | {doc_link} |")
+        for s in scripts:
+            sname = s.get("file_name", "Script")
+            ep = s.get("file_name", "Unknown")
+            doc_link = f"[report_{sname}.md](scripts/report_{sname}.md)"
+            lines.append(f"| **{sname}** | `CustomScript` | `{ep}` | 0 | {doc_link} |")
         lines.append("")
 
-    # 6. Shared Resources
+    # 6. Shared Report Dependencies
     shared = {rid: wsl for rid, wsl in all_referenced_reports.items() if len(wsl) > 1}
     if shared:
-        lines.append("---")
-        lines.append("")
         lines.append("## Shared Report Dependencies")
         lines.append("")
-        lines.append("The following reports are referenced by more than one workspace:")
+        lines.append("The following reports are referenced across multiple workspaces:")
         lines.append("")
         lines.append("| Report ID | Referenced In Workspaces |")
-        lines.append("|---|---|")
+        lines.append("| :--- | :--- |")
         for rid, wsl in sorted(shared.items()):
             ws_names = ", ".join(f"**{n}**" for n in wsl)
             lines.append(f"| `{rid}` | {ws_names} |")
