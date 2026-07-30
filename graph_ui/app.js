@@ -1333,10 +1333,35 @@ function relRow(otherId, via, dir) {
     <div class="via">${esc(via)}</div></div>`;
 }
 
-function extractMermaidCode(markdown) {
+function extractMermaidCode(markdown, node) {
   if (!markdown) return null;
-  const match = markdown.match(/```mermaid([\s\S]*?)```/);
-  return match ? match[1].trim() : null;
+  const blocks = [];
+  const regex = /```mermaid([\s\S]*?)```/g;
+  let match;
+  while ((match = regex.exec(markdown)) !== null) {
+    blocks.push(match[1].trim());
+  }
+  if (!blocks.length) return null;
+
+  // 1. For CPM reports or CPM nodes: prioritize the master multi-layer Flow Diagram (Mappings_Layer / Procedures_Layer)
+  for (const b of blocks) {
+    if (b.includes("Mappings_Layer") || b.includes("Procedures_Layer") || b.includes("Objects_Layer")) {
+      return b;
+    }
+  }
+
+  // 2. Otherwise match node-specific block if present
+  if (node && (node.label || node.id || (node.data && node.data.name))) {
+    const term = (node.label || node.id || (node.data && node.data.name) || "").toLowerCase();
+    for (const b of blocks) {
+      if (b.toLowerCase().includes(term)) {
+        return b;
+      }
+    }
+  }
+
+  // 3. Fallback to last or first block
+  return blocks[blocks.length - 1] || blocks[0];
 }
 
 async function renderMermaidDiagram(container, mermaidCode) {
