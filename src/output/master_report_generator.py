@@ -26,7 +26,7 @@ def canonical_module_name(name):
         return "General / Unassigned"
     return base.capitalize() if len(base) > 2 else base
 
-def build_details_summary(node):
+def build_details_summary(node, use_ai_summary=True):
     """Builds a rich, descriptive details summary string for any component node."""
     ntype = (node.get("type") or "").lower()
     data = node.get("data") or {}
@@ -49,7 +49,10 @@ def build_details_summary(node):
         ops = data.get("operations_label") or data.get("script_type") or "Event Handler"
         is_async = "Async Execution" if data.get("is_async") or ntype == "asynccpm" else "Synchronous Execution"
         entry = data.get("entry_point") or "ObjectProcedure::apply"
-        return f"Trigger: `{ops}` | {is_async} | Entry: `{entry}`"
+        res = f"Trigger: `{ops}` | {is_async} | Entry: `{entry}`"
+        if use_ai_summary and data.get("key_logic"):
+            res += f" | **AI Logic Summary**: {data.get('key_logic')}"
+        return res
 
     elif ntype == "customscript":
         fname = data.get("file_name") or label
@@ -109,7 +112,7 @@ def generate_mermaid_for_module(mod_name, mod_nodes, degree_map):
     return "\n".join(lines)
 
 
-def generate_master_system_report(results_dir, master_data, components=None, orphans=None, endpoints=None, relationships=None):
+def generate_master_system_report(results_dir, master_data, components=None, orphans=None, endpoints=None, relationships=None, use_ai_summary=True):
     """
     Generates a single, unified master system mapping markdown report (COMPLETE_SYSTEM_MAPPING.md)
     consolidating all workspaces, objects, CPMs, scripts, BUI add-ins, and cross-component mappings.
@@ -278,7 +281,7 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
             nlabel = n.get("label", "")
             deg = degree_map.get(nid, {"in": 0, "out": 0})
             dep_str = f"`{deg['in']} in -> {deg['out']} out`"
-            details = build_details_summary(n)
+            details = build_details_summary(n, use_ai_summary=use_ai_summary)
             lines.append(f"| `{nlabel}` | `{ntype}` | {dep_str} | {details} |")
         
         lines.append("")

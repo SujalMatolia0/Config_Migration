@@ -654,7 +654,7 @@ def main():
 
         # Generate Unified Master System Markdown Report
         from src.output.master_report_generator import generate_master_system_report
-        generate_master_system_report(output_dir, master_data, components, orphans, endpoints, relationships)
+        generate_master_system_report(output_dir, master_data, components, orphans, endpoints, relationships, use_ai_summary=args.use_ai_summary)
 
     print("\nAnalysis completed successfully.")
 
