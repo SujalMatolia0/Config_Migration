@@ -32,6 +32,10 @@ DATA_TYPE_NAMES = {
 VAL_ATTR_NAMES = {
     "1": "Standard (1)",
     "9": "Custom/System Field (9)",
+    "257": "Standard Field/Date (257)",
+    "512": "Lookup Reference (512)",
+    "513": "Menu / Lookup Field (513)",
+    "1025": "Custom Menu Field (1025)",
     "32769": "Masked/Login (32769)",
     "131081": "Custom Extended Field (131081)"
 }
@@ -249,13 +253,38 @@ def parse_analytics_core_report(root, file_path):
                 except Exception:
                     pass
 
+        # Extract embedded report custom scripts
+        scripts_elem = ns_find(n_item, "scripts")
+        node_scripts = []
+        if scripts_elem is not None:
+            for s_item in ns_findall(scripts_elem, "script_item"):
+                init_c = ns_text(s_item, "init_code")
+                proc_c = ns_text(s_item, "process_code")
+                finish_c = ns_text(s_item, "finish_code")
+                php_v = ns_text(s_item, "php_version")
+                
+                all_code = f"{init_c}\n{proc_c}\n{finish_c}"
+                cf_refs = re.findall(r"CustomFields\.c\.[a-zA-Z0-9_]+", all_code)
+                includes = re.findall(r"require_once\s*\([^\)]+\)", all_code)
+                
+                if init_c or proc_c or finish_c:
+                    node_scripts.append({
+                        "init_code": init_c,
+                        "process_code": proc_c,
+                        "finish_code": finish_c,
+                        "php_version": php_v,
+                        "custom_fields": sorted(list(set(cf_refs))),
+                        "includes": sorted(list(set(includes)))
+                    })
+
         node_details.append({
             "n_id": n_id,
             "group_type": group_type,
             "style_id": style_id,
             "row_limit": row_limit or "None",
             "hidden_sections": hidden_sections,
-            "display_options": display_options
+            "display_options": display_options,
+            "scripts": node_scripts
         })
 
     # Columns
@@ -379,34 +408,58 @@ def parse_analytics_core_report(root, file_path):
     filters_container = ns_find(root, "filters")
     has_filters_container = filters_container is not None
     if filters_container is not None:
-        for f_item in ns_findall(filters_container, "fltr_item"):
+        for f_item in ns_findall(filters_container, "filter_item") + ns_findall(filters_container, "fltr_item"):
             f_id = ns_text(f_item, "fltr_id")
-            val = ns_text(f_item, "val")
-            filters.append({
-                "id": f_id,
-                "val": val
-            })
+            val = ns_text(f_item, "val") or ns_text(f_item, "val1")
+            val_col_refs = ns_text(f_item, "val1_col_refs")
+            
+            prompt_label = None
+            raw_f_xml = ns_text(f_item, "xml_data")
+            if raw_f_xml:
+                clean_f_xml = html.unescape(raw_f_xml)
+                clean_f_xml = re.sub(r"<\?xml[^\?]*\?>", "", clean_f_xml).strip()
+                if clean_f_xml:
+                    try:
+                        f_sub_root = etree.fromstring(clean_f_xml.encode("utf-8"), parser=etree.XMLParser(recover=True))
+                        prompt_elem = ns_find_descendant(f_sub_root, "LabelStr")
+                        if prompt_elem is not None and prompt_elem.text:
+                            prompt_label = prompt_elem.text.strip()
+                    except Exception:
+                        pass
+            
+            if f_id or val or prompt_label:
+                filters.append({
+                    "id": f_id or str(len(filters) + 1),
+                    "val": val or "—",
+                    "prompt_label": prompt_label or val or f"Filter #{f_id}",
+                    "val_col_refs": val_col_refs
+                })
 
-    RECOGNIZED_REPORT_TAGS = {
-        "ac_id", "ac_public", "ac_type", "created", "updated", "folder_id",
-        "owner_acct_id", "interface_id", "image", "time_zone", "version",
-        "opts", "aux", "label", "tables", "nodes", "cols", "filters", "perms"
-    }
-
-    raw_unhandled_tags = []
+    all_xml_properties = {}
     for child in root:
         local_t = get_local_tag(child)
-        if local_t and local_t not in RECOGNIZED_REPORT_TAGS:
-            try:
-                raw_snippet = etree.tostring(child, encoding="unicode").strip()
-                if len(raw_snippet) > 300:
-                    raw_snippet = raw_snippet[:300] + "... [truncated]"
-                raw_unhandled_tags.append({
-                    "tag": local_t,
-                    "raw_xml": raw_snippet
-                })
-            except Exception:
-                pass
+        if local_t:
+            val_txt = child.text.strip() if child.text else None
+            is_nil = child.attrib.get("{http://www.w3.org/2001/XMLSchema-instance}nil") == "true" or child.attrib.get("nil") == "true"
+            attrs = {k.split("}")[-1]: v for k, v in child.attrib.items()}
+            
+            all_xml_properties[local_t] = {
+                "tag": local_t,
+                "value": "null (nil)" if is_nil else (val_txt or ("(complex element)" if len(child) > 0 else "empty")),
+                "is_nil": is_nil,
+                "attributes": attrs
+            }
+
+    # Capture unknown tags and attributes recursively across the full XML tree
+    from src.parsers.utils import capture_unknown_recursive
+    from src.parsers.known_tags_registry import KNOWN_REPORT_ALL_TAGS, KNOWN_REPORT_ALL_ATTRS
+    
+    unk = capture_unknown_recursive(root, KNOWN_REPORT_ALL_TAGS, KNOWN_REPORT_ALL_ATTRS, f"Report: {report_name}")
+    u_attrs = unk.get("unknown_attrs", {})
+    u_children = unk.get("unknown_children", [])
+
+    unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+    unknown_children_list = u_children
 
     return {
         "id": report_id,
@@ -433,7 +486,12 @@ def parse_analytics_core_report(root, file_path):
         "perms_by_type": perms_by_type,
         "filters": filters,
         "sub_reports": sub_reports,
-        "raw_unhandled_tags": raw_unhandled_tags
+        "all_xml_properties": all_xml_properties,
+        "raw_unhandled_tags": unknown_children_list,
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 def parse_standard_report(root, file_path):
@@ -443,6 +501,17 @@ def parse_standard_report(root, file_path):
 
     if not report_name:
         report_name = os.path.basename(file_path).replace(".xml", "")
+
+    from src.parsers.utils import capture_unknown_recursive
+    from src.parsers.known_tags_registry import KNOWN_REPORT_ALL_TAGS, KNOWN_REPORT_ALL_ATTRS
+    
+    unk = capture_unknown_recursive(root, KNOWN_REPORT_ALL_TAGS, KNOWN_REPORT_ALL_ATTRS, f"Report: {report_name}")
+    u_attrs = unk.get("unknown_attrs", {})
+    u_children = unk.get("unknown_children", [])
+
+    unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+    unknown_children_list = u_children
+    unknown_children_list = u_children
 
     columns = []
     for col in ns_findall_descendants(root, "Column"):
@@ -506,7 +575,11 @@ def parse_standard_report(root, file_path):
         "sub_reports": sub_reports,
         "tables": [],
         "permissions": [],
-        "perms_by_type": {}
+        "perms_by_type": {},
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 def parse_report_file(file_path):

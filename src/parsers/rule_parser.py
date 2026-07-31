@@ -1,5 +1,7 @@
 import os
 from lxml import etree
+from src.parsers.utils import capture_unknown
+from src.parsers.known_tags_registry import KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN
 
 def parse_rule_file(file_path):
     """
@@ -13,6 +15,16 @@ def parse_rule_file(file_path):
     root = tree.getroot()
 
     rules = []
+    unhandled_elements = []
+
+    # Check root for unhandled attributes or tags
+    root_unk = capture_unknown(root, KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN, "Business Rule Root")
+    if root_unk and "unknown_children" in root_unk:
+        for child in root_unk["unknown_children"]:
+            unhandled_elements.append({
+                "tag": child["tag"],
+                "raw_xml": child["raw"]
+            })
 
     # If the root element itself is a <Rule>, wrap it, otherwise find all <Rule> descendants
     rule_nodes = [root] if root.tag == "Rule" else root.findall(".//Rule")
@@ -79,10 +91,20 @@ def parse_rule_file(file_path):
             "actions": actions
         })
 
+    u_attrs = root_unk.get("unknown_attrs", {}) if root_unk else {}
+    u_children = root_unk.get("unknown_children", []) if root_unk else []
+    unknown_attrs_list = [{"attribute": k, "value": str(v.get("value") if isinstance(v, dict) else v)} for k, v in u_attrs.items()]
+    unknown_children_list = u_children
+
     return {
         "file_name": os.path.basename(file_path),
         "format": "business_rule",
-        "rules": rules
+        "rules": rules,
+        "unhandled_elements": unknown_children_list,
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 if __name__ == "__main__":

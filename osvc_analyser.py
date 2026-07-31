@@ -639,22 +639,52 @@ def main():
     all_unknowns_summary = {
         "generated_at": datetime.now().isoformat(),
         "strict_mode": args.strict,
-        "workspaces": []
+        "summary": {},
+        "components": {
+            "workspaces": [],
+            "reports": [],
+            "cpm": [],
+            "rules": [],
+            "navigation": [],
+            "bui_addins": [],
+            "customObjects": [],
+            "objectRelationships": []
+        }
     }
     total_unknown_count = 0
-    for ws in components.get("workspaces", []):
-        unk = ws.get("unknowns", {})
-        u_attrs = unk.get("unknown_attrs", [])
-        u_children = unk.get("unknown_children", [])
-        cnt = len(u_attrs) + len(u_children)
-        total_unknown_count += cnt
-        if cnt > 0:
-            all_unknowns_summary["workspaces"].append({
-                "name": ws.get("name"),
-                "total_unknowns": cnt,
-                "unknown_attrs": u_attrs,
-                "unknown_children": u_children
-            })
+
+    cat_map = {
+        "workspaces": "workspaces",
+        "reports": "reports",
+        "cpm": "cpm",
+        "businessRules": "rules",
+        "navigationSets": "navigation",
+        "buiAddins": "bui_addins",
+        "customObjects": "customObjects",
+        "objectRelationships": "objectRelationships"
+    }
+
+    for comp_cat, target_key in cat_map.items():
+        comp_items = components.get(comp_cat, [])
+        cat_count = 0
+        for item in comp_items:
+            unk = item.get("unknowns", {})
+            u_attrs = unk.get("unknown_attrs", [])
+            u_children = unk.get("unknown_children", []) or item.get("unhandled_elements", []) or item.get("raw_unhandled_tags", [])
+            cnt = len(u_attrs) + len(u_children)
+            total_unknown_count += cnt
+            cat_count += cnt
+            if cnt > 0:
+                item_name = item.get("name") or item.get("file_name") or "Unknown Component"
+                all_unknowns_summary["components"][target_key].append({
+                    "name": item_name,
+                    "total_unknowns": cnt,
+                    "unknown_attrs": u_attrs,
+                    "unknown_children": u_children
+                })
+        all_unknowns_summary["summary"][target_key] = cat_count
+
+    all_unknowns_summary["total_unknowns"] = total_unknown_count
 
     if args.dump_unknowns or total_unknown_count > 0:
         with open(unknowns_json_path, "w", encoding="utf-8") as f:

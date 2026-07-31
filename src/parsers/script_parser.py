@@ -796,7 +796,12 @@ def parse_script_file(file_path):
         "has_js": has_js,
         "js_behaviors": js_behaviors,
         "html_content": full_html[:6000],
-        "js_content": full_js[:6000]
+        "js_content": full_js[:6000],
+        "unhandled_elements": [],
+        "unknowns": {
+            "unknown_attrs": [],
+            "unknown_children": []
+        }
     }
 
 if __name__ == "__main__":

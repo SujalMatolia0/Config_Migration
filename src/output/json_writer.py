@@ -64,7 +64,7 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
 
     total_comps = sum(
         len(components.get(k, []))
-        for k in ["workspaces", "reports", "cpm", "buiAddins", "customScripts", "navigationSets", "businessRules", "customObjects"]
+        for k in ["workspaces", "reports", "cpm", "buiAddins", "customScripts", "navigationSets", "businessRules", "customObjects", "objectRelationships"]
     )
 
     meta = {

@@ -1,73 +1,18 @@
 import os
 from lxml import etree
 from src.parsers.utils import capture_unknown
-
-KNOWN_WORKSPACE_ATTRS = {
-    "Type", "UIType", "ServerVersion", "ClientVersion", "IsMultiEdit", "Id", "Name",
-    "BrowserCompatibilityMode", "SpellCheckAllowCancel", "SpellCheckOnSave"
-}
-
-KNOWN_WORKSPACE_CHILDREN = {
-    "Table", "TabSet", "RecordTypes", "RecordType", "Info", "InfoItem", "Rules", "Rule",
-    "Triggers", "Trigger", "Conditions", "Condition", "Then", "Else", "Action", "Field",
-    "Menu", "Browser", "RelationshipItem", "Report", "AddinItem", "AddInItem", "TitleBar",
-    "Spacer", "Links", "LinkItem", "Flag", "QuickAccessToolbar", "Ribbon", "Tab"
-}
-
-KNOWN_TABSET_ATTRS = {
-    "Id", "Row", "Column", "RowSpan", "ColumnSpan", "SummaryPanelHeight", "SummaryPanelAlignment",
-    "CanReorderTabs", "WrapTabs", "SummaryTab", "ThresholdHeight", "TabDisplayStyle", "Margin", "TabIndex"
-}
-KNOWN_TABSET_CHILDREN = {"Tab"}
-
-KNOWN_TAB_ATTRS = {"Text", "TextLabelName", "Id", "Row", "Column", "TextColor"}
-KNOWN_TAB_CHILDREN = {
-    "Table", "Field", "RelationshipItem", "Report", "Browser", "AddinItem", "AddInItem",
-    "Menu", "TitleBar", "Spacer", "TabSet"
-}
-
-KNOWN_FIELD_ATTRS = {
-    "ObjectId", "FieldId", "LabelText", "Id", "Row", "Column", "DefaultPhoneType", "DefaultValue",
-    "InitialValue", "Value", "ReportId", "ReadOnlyOption", "HiddenOption", "RequiredOption",
-    "AcceptsReturn", "BooleanRenderView", "Height", "LayoutLabelAlignment", "Multiline",
-    "RequiredForSolved", "RowSpan", "ColumnSpan", "ShowParent", "SpellCheck", "TabIndex", "TrimTextWhitespace"
-}
-KNOWN_FIELD_CHILDREN = set()
-
-KNOWN_RELATIONSHIP_ATTRS = {
-    "ItemType", "AcId", "Id", "Row", "Column", "ExecuteOnNew", "ShowReadTransactions",
-    "DefaultChannelForNote", "SearchReportId", "CanSendOnSave", "CanUseSmartAssistant",
-    "DefaultChannelForCustomerEntry", "DefaultThreadOnNew", "StatusChangeOnResponse",
-    "AlwaysShowEmailHeader", "AlwaysUsePlainText", "CanAddBCC", "CanAddCC", "CanAddCustomerEntry",
-    "CanAddNote", "CanAddResponse", "CanFollowIncidentLinks", "CanFollowLinks", "CanSearchKb",
-    "CanToggleToPlainText", "CommitResponseOnSave", "ConfirmResponse", "DefaultThreadOnEdit",
-    "DefaultToPlainText", "DelayReportExecution", "Font", "IsUsingDefaultEmailFont", "Margin",
-    "Padding", "ReassignOnResponse", "ResponsePanelCoupled", "SendResponseDefault", "ShowRowCount",
-    "ThreadOrientation", "ThumbnailsEnabled", "ThumbnailsThreshold", "FilterOnPrimaryKeyOnly",
-    "RefreshReportOnDataChange", "TabIndex"
-}
-KNOWN_RELATIONSHIP_CHILDREN = set()
-
-KNOWN_BROWSER_ATTRS = {
-    "Url", "SuppressErrors", "Id", "Height", "Width", "Row", "Column", "DelayPageLoad",
-    "SendUrlAsPostData", "SetFixedHeight", "ChildBrowsers", "TabIndex", "HttpMethod", "PostData"
-}
-KNOWN_BROWSER_CHILDREN = set()
-
-KNOWN_ADDIN_ATTRS = {
-    "ItemType", "AddInName", "FileId", "BuiExtension", "Id", "Row", "Column", "Height",
-    "Width", "AssemblyName", "Assembly"
-}
-KNOWN_ADDIN_CHILDREN = set()
-
-KNOWN_RULE_ATTRS = {"Name", "Active", "Id"}
-KNOWN_RULE_CHILDREN = {"Trigger", "Conditions", "Condition", "Then", "Else", "Action"}
-
-KNOWN_CONDITION_ATTRS = {"LogicalExpression", "Operator", "Value", "Type"}
-KNOWN_CONDITION_CHILDREN = {"Source", "Operator", "Value"}
-
-KNOWN_ACTION_ATTRS = {"Type"}
-KNOWN_ACTION_CHILDREN = {"Object", "Operation", "Value"}
+from src.parsers.known_tags_registry import (
+    KNOWN_WORKSPACE_ATTRS, KNOWN_WORKSPACE_CHILDREN,
+    KNOWN_TABSET_ATTRS, KNOWN_TABSET_CHILDREN,
+    KNOWN_TAB_ATTRS, KNOWN_TAB_CHILDREN,
+    KNOWN_FIELD_ATTRS, KNOWN_FIELD_CHILDREN,
+    KNOWN_RELATIONSHIP_ATTRS, KNOWN_RELATIONSHIP_CHILDREN,
+    KNOWN_BROWSER_ATTRS, KNOWN_BROWSER_CHILDREN,
+    KNOWN_ADDIN_ATTRS, KNOWN_ADDIN_CHILDREN,
+    KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN,
+    KNOWN_CONDITION_ATTRS, KNOWN_CONDITION_CHILDREN,
+    KNOWN_ACTION_ATTRS, KNOWN_ACTION_CHILDREN
+)
 
 def get_closest_tab(element):
     parent = element.getparent()
@@ -108,10 +53,11 @@ def parse_workspace_file(file_path, strict=False):
             return
         if "unknown_attrs" in unk:
             for k, v in unk["unknown_attrs"].items():
-                entry = {"location": ctx, "attribute": k, "value": str(v)}
+                val_str = str(v.get("value") if isinstance(v, dict) else v)
+                entry = {"location": ctx, "attribute": k, "value": val_str}
                 ws_unknown_attrs.append(entry)
                 if strict:
-                    print(f"[WARNING] Strict Mode: Unknown attribute on {ctx} -> {k}=\"{v}\"")
+                    print(f"[WARNING] Strict Mode: Unknown attribute on {ctx} -> {k}=\"{val_str}\"")
         if "unknown_children" in unk:
             for child in unk["unknown_children"]:
                 entry = {"location": ctx, "tag": child["tag"], "attrs": child["attrs"], "raw": child["raw"]}

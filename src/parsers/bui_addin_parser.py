@@ -367,6 +367,24 @@ def parse_bui_addin(target_path):
         if fk.lower().endswith(".html") or fk.lower().endswith(".htm"):
             html_previews[fk] = fc
 
+    # Extract any manifest XML unhandled elements
+    unhandled_xml_elements = []
+    unhandled_xml_attrs = []
+    for fk, fc in files_map.items():
+        if fk.lower().endswith(".xml") or fk.lower().endswith(".manifest"):
+            try:
+                from lxml import etree
+                from src.parsers.utils import capture_unknown
+                m_tree = etree.fromstring(fc.encode("utf-8"), parser=etree.XMLParser(recover=True))
+                m_unk = capture_unknown(m_tree, {"name", "id", "version", "type"}, {"item", "entry", "file"}, f"BUI Manifest: {fk}")
+                if m_unk and "unknown_children" in m_unk:
+                    unhandled_xml_elements.extend(m_unk["unknown_children"])
+                if m_unk and "unknown_attrs" in m_unk:
+                    for k, v in m_unk["unknown_attrs"].items():
+                        unhandled_xml_attrs.append({"attribute": k, "value": str(v.get("value") if isinstance(v, dict) else v)})
+            except Exception:
+                pass
+
     return {
         "name": addin_name,
         "format": "bui_addin",
@@ -387,5 +405,10 @@ def parse_bui_addin(target_path):
         "modal_views_details": modal_views_details,
         "workspace_objects_opened": sorted(list(workspace_objects_opened)),
         "extension_ids_registered": {k: sorted(list(v)) for k, v in extension_ids_registered.items()},
-        "risk_flags": risk_flags
+        "risk_flags": risk_flags,
+        "unhandled_elements": unhandled_xml_elements,
+        "unknowns": {
+            "unknown_attrs": unhandled_xml_attrs,
+            "unknown_children": unhandled_xml_elements
+        }
     }

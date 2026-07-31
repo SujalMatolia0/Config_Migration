@@ -1,5 +1,7 @@
 import os
 from lxml import etree
+from src.parsers.utils import capture_unknown
+from src.parsers.known_tags_registry import KNOWN_NAV_ATTRS, KNOWN_NAV_CHILDREN
 
 def parse_nav_file(file_path):
     """
@@ -14,6 +16,15 @@ def parse_nav_file(file_path):
 
     nav_set_name = root.get("Name") or root.get("name") or os.path.basename(file_path).replace(".xml", "")
     
+    unhandled_elements = []
+    root_unk = capture_unknown(root, KNOWN_NAV_ATTRS, KNOWN_NAV_CHILDREN, "Navigation Set Root")
+    if root_unk and "unknown_children" in root_unk:
+        for child in root_unk["unknown_children"]:
+            unhandled_elements.append({
+                "tag": child["tag"],
+                "raw_xml": child["raw"]
+            })
+
     # Navigation items list
     items = []
     # Search for all item-like nodes (e.g., NavItem, Item, MenuItem)
@@ -44,10 +55,7 @@ def parse_nav_file(file_path):
                 "report_id": report_id
             })
 
-    if not items:
-        # Log all tag names found for debugging
-        all_tags = set(el.tag.split('}')[-1] for el in root.iter())
-        print(f"[nav_parser] No items found. Tags in file: {all_tags}")
+
 
     # Profiles referenced in this navigation set
     profiles = []
@@ -57,10 +65,20 @@ def parse_nav_file(file_path):
         if prof_name and prof_name not in profiles:
             profiles.append(prof_name)
 
+    u_attrs = root_unk.get("unknown_attrs", {}) if root_unk else {}
+    u_children = root_unk.get("unknown_children", []) if root_unk else []
+    unknown_attrs_list = [{"attribute": k, "value": str(v.get("value") if isinstance(v, dict) else v)} for k, v in u_attrs.items()]
+    unknown_children_list = u_children
+
     return {
         "name": nav_set_name,
         "items": items,
-        "profiles": profiles
+        "profiles": profiles,
+        "unhandled_elements": unknown_children_list,
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 if __name__ == "__main__":

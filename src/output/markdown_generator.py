@@ -212,6 +212,27 @@ def generate_report_markdown(ws):
     multi_edit_str = "multi-edit" if ws.get("is_multi_edit") else "single record, not multi-edit"
     lines.append(f"- Workspace Type: **{record_type_label}** ({multi_edit_str})")
     lines.append("")
+
+    # Unhandled Schema Elements Alert Callout
+    unk = ws.get("unknowns", {})
+    unhandled_children = unk.get("unknown_children", []) or ws.get("unhandled_elements", [])
+    unhandled_attrs = unk.get("unknown_attrs", [])
+    
+    if unhandled_children or unhandled_attrs:
+        total_cnt = len(unhandled_children) + len(unhandled_attrs)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for item in unhandled_children:
+            t_name = item.get("tag") or item.get("name") or "unknown"
+            snippet = item.get("raw") or item.get("snippet") or ""
+            clean_snip = snippet.replace("\n", " ").replace("\r", "")
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+        for item in unhandled_attrs:
+            a_name = item.get("attribute") or "attr"
+            a_val = item.get("value") or ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
     
@@ -1054,6 +1075,27 @@ def generate_analytics_report_markdown(report):
     lines.append(f"- Sort: `{sort_summary}`")
     lines.append(f"- Filters: {filter_summary}")
     lines.append("")
+
+    # Unhandled Schema Elements Alert Callout
+    r_unk = report.get("unknowns", {})
+    r_children = r_unk.get("unknown_children", []) or report.get("raw_unhandled_tags", []) or report.get("unhandled_elements", [])
+    r_attrs = r_unk.get("unknown_attrs", [])
+
+    if r_children or r_attrs:
+        total_cnt = len(r_children) + len(r_attrs)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for item in r_children:
+            t_name = item.get("tag") or item.get("name") or "unknown"
+            snippet = item.get("raw") or item.get("raw_xml") or item.get("snippet") or ""
+            clean_snip = snippet.replace("\n", " ").replace("\r", "")
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+        for item in r_attrs:
+            a_name = item.get("attribute") or "attr"
+            a_val = item.get("value") or ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
 
@@ -1124,15 +1166,15 @@ def generate_analytics_report_markdown(report):
         else:
             lines.append("*No filters configured in report XML.*")
     else:
-        lines.append("| Filter ID / Name | Target Field | Operator | Default Value / Expression | Notes |")
+        lines.append("| Filter ID | Prompt / Filter Name | Target Field / Expression | Table Ref | Notes |")
         lines.append("|---|---|---|---|---|")
         for idx, flt in enumerate(filters, 1):
-            fid = f"`{flt.get('id')}`" if flt.get('id') else (f"`{flt.get('name')}`" if flt.get('name') else f"`#{idx}`")
-            f_field = f"`{flt.get('field')}`" if flt.get('field') else "—"
-            op_val = f"`{flt.get('operator')}`" if flt.get('operator') else "—"
-            def_val = f"`{flt.get('val')}`" if flt.get('val') is not None and str(flt.get('val')).strip() else "—"
-            notes = "Configured report filter"
-            lines.append(f"| {fid} | {f_field} | {op_val} | {def_val} | {notes} |")
+            fid = f"`{flt.get('id')}`" if flt.get('id') else f"`#{idx}`"
+            fname = f"**{flt.get('prompt_label')}**" if flt.get('prompt_label') else "—"
+            def_val = f"`{flt.get('val')}`" if flt.get('val') is not None and str(flt.get('val')).strip() != "—" else "—"
+            tref = f"`{flt.get('val_col_refs')}`" if flt.get('val_col_refs') else "—"
+            notes = "User prompt filter" if flt.get('prompt_label') else "Configured report filter"
+            lines.append(f"| {fid} | {fname} | {def_val} | {tref} | {notes} |")
 
     lines.append("")
     lines.append("---")
@@ -1149,6 +1191,80 @@ def generate_analytics_report_markdown(report):
         for ptype, pids in perms_by_type.items():
             pid_str = ", ".join(f"`{pid}`" for pid in pids)
             lines.append(f"- **{ptype}:** profiles {pid_str}")
+
+    # Embedded Custom PHP Scripts
+    all_scripts = []
+    for nd in report.get("node_details", []):
+        all_scripts.extend(nd.get("scripts", []))
+    
+    if all_scripts:
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+        lines.append(f"### Embedded Custom PHP Scripts ({len(all_scripts)})")
+        lines.append("")
+        for idx, sc in enumerate(all_scripts, 1):
+            php_ver = sc.get("php_version") or "Standard PHP"
+            cfs = ", ".join(f"`{c}`" for c in sc.get("custom_fields", [])) or "None"
+            incs = ", ".join(f"`{i}`" for i in sc.get("includes", [])) or "None"
+            
+            lines.append(f"#### Custom Script #{idx} (PHP Version: `{php_ver}`)")
+            lines.append(f"- **Referenced Custom Fields**: {cfs}")
+            lines.append(f"- **Included System Libraries**: {incs}")
+            lines.append("")
+            
+            # Flow Preview Diagram (Mermaid)
+            lines.append("**Visual Execution Flow Preview**:")
+            lines.append("")
+            lines.append("```mermaid")
+            lines.append("graph TD")
+            lines.append("  classDef init fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0369a1;")
+            lines.append("  classDef api fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#6b21a8;")
+            lines.append("  classDef process fill:#dcfce7,stroke:#15803d,stroke-width:2px,color:#166534;")
+            lines.append("")
+            lines.append(f"  subgraph Init_Stage[\"1. Script Initialization Stage (init_code)\"]")
+            lines.append(f"    S{idx}_Init[\"Initialize ConnectAPI Context & System Includes\"]:::init")
+            if sc.get("custom_fields"):
+                cf_label = "<br/><b>" + "<br/>".join(sc["custom_fields"]) + "</b>"
+                lines.append(f"    S{idx}_CF[\"Fetch ConnectAPI Custom Field Definitions{cf_label}\"]:::api")
+            lines.append("  end")
+            lines.append("")
+            lines.append(f"  subgraph Process_Stage[\"2. Row Execution Stage (process_code)\"]")
+            lines.append(f"    S{idx}_Proc[\"Evaluate Grid Row & Map Column Values\"]:::process")
+            lines.append("  end")
+            lines.append("")
+            if sc.get("custom_fields"):
+                lines.append(f"  S{idx}_Init --> S{idx}_CF")
+                lines.append(f"  S{idx}_CF --> S{idx}_Proc")
+            else:
+                lines.append(f"  S{idx}_Init --> S{idx}_Proc")
+            lines.append("```")
+            lines.append("")
+
+            # Interactive Code Toggle Button / Collapsible Details
+            lines.append("<details>")
+            lines.append("<summary><b>[Code Toggle] Click to View Raw PHP Script Code</b></summary>")
+            lines.append("")
+            if sc.get("init_code"):
+                lines.append("##### Initialization Code (`init_code`):")
+                lines.append("```php")
+                lines.append(sc["init_code"])
+                lines.append("```")
+                lines.append("")
+            if sc.get("process_code"):
+                lines.append("##### Process Code (`process_code`):")
+                lines.append("```php")
+                lines.append(sc["process_code"])
+                lines.append("```")
+                lines.append("")
+            if sc.get("finish_code"):
+                lines.append("##### Finish Code (`finish_code`):")
+                lines.append("```php")
+                lines.append(sc["finish_code"])
+                lines.append("```")
+                lines.append("")
+            lines.append("</details>")
+            lines.append("")
 
     # Flow Diagram (Mermaid)
     lines.append("")
@@ -1291,6 +1407,23 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None, use_ai
     lines.append(f"- **Execution Breakdown**: {len(sync_procs)} Synchronous, {len(async_procs)} Asynchronous")
     lines.append(f"- **Orphan Procedures**: {len(cpm_orphan_names)} unmapped")
     lines.append("")
+
+    # Aggregate unhandled elements in CPM
+    cpm_unhandled = []
+    for item in cpm_list:
+        unk = item.get("unknowns", {})
+        c_children = unk.get("unknown_children", []) or item.get("unhandled_elements", [])
+        for ch in c_children:
+            cpm_unhandled.append({"proc": item.get("name") or item.get("file_name"), "tag": ch.get("tag"), "raw": ch.get("raw") or ch.get("raw_xml")})
+
+    if cpm_unhandled:
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {len(cpm_unhandled)} raw XML element(s) were present in CPM exports:")
+        for item in cpm_unhandled:
+            clean_snip = (item.get("raw") or "").replace("\n", " ").replace("\r", "")
+            lines.append(f"> - [{item['proc']}] `<{item['tag']}>`: `{clean_snip[:120]}`")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
 
@@ -1636,6 +1769,23 @@ def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None
     lines.append("")
     lines.append(f"- **Total BUI Add-Ins Analyzed**: {len(bui_addins)}")
     lines.append("")
+
+    # Aggregate unhandled elements in BUI Add-Ins
+    bui_unhandled = []
+    for item in bui_addins:
+        unk = item.get("unknowns", {})
+        b_children = unk.get("unknown_children", []) or item.get("unhandled_elements", [])
+        for ch in b_children:
+            bui_unhandled.append({"addin": item.get("name"), "tag": ch.get("tag"), "raw": ch.get("raw") or ch.get("raw_xml")})
+
+    if bui_unhandled:
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {len(bui_unhandled)} raw XML element(s) were present in BUI Add-In manifests:")
+        for item in bui_unhandled:
+            clean_snip = (item.get("raw") or "").replace("\n", " ").replace("\r", "")
+            lines.append(f"> - [{item['addin']}] `<{item['tag']}>`: `{clean_snip[:120]}`")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
 
@@ -1854,6 +2004,27 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
     lines.append(f"- **Total Package Files**: {len(files)}")
     lines.append(f"- **Risk Findings Count**: {len(risks)}")
     lines.append("")
+
+    # Unhandled Schema Elements Alert Callout
+    b_unk = bui.get("unknowns", {})
+    b_children = b_unk.get("unknown_children", []) or bui.get("unhandled_elements", [])
+    b_attrs = b_unk.get("unknown_attrs", [])
+
+    if b_children or b_attrs:
+        total_cnt = len(b_children) + len(b_attrs)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for item in b_children:
+            t_name = item.get("tag") or item.get("name") or "unknown"
+            snippet = item.get("raw") or item.get("raw_xml") or item.get("snippet") or ""
+            clean_snip = snippet.replace("\n", " ").replace("\r", "")
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+        for item in b_attrs:
+            a_name = item.get("attribute") or "attr"
+            a_val = item.get("value") or ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+        lines.append("")
+
     lines.append("---")
     lines.append("")
 

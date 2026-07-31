@@ -38,8 +38,10 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 - **2-Tier Hierarchy File Input System**:
   - **Tier 1 (Top-Level Component Accordions)**: Collapsible containers per OSVC export component (`Workspaces`, `Analytics Reports`, `CPM Procedures`, `BUI Add-Ins`).
   - **Tier 2 (Sub-Group Labeled Dividers)**: Categorized file tables grouping items by schema domain (`Standard Object Workspaces`, `Custom & Edge Layout Workspaces`, `Object Event Handlers`, `CPM Routing Mappings`, `BUI Extension Packages`).
-- **Content Schema Auto-Classifier**: Inspects XML root schemas (`<analytics_core>`, `<TabSet>`, `<ObjectProcedure>`, `<Rule>`, `<nav_set>`) and ZIP manifests (`init.html`, `manifest.json`), auto-categorizing exports into designated subfolders.
-- **CPM Analysis & AI Summaries**: Analyzes Custom Process Model (CPM) PHP handlers and XML exports, integrating Groq AI API (`llama-3.3-70b-versatile`) with static rule-based fallback. Optional `--no-ai-summary` flag completely hides AI summary fields across all outputs.
+- **Universal Parser Fallback & Unhandled Schema Safeguard**:
+  - All parsers (`workspace_parser.py`, `report_parser.py`, `cpm_parser.py`, `rule_parser.py`, `nav_parser.py`, `bui_addin_parser.py`) implement cross-component schema inspection (`capture_unknown`) to ensure no novel or custom XML tag is silently ignored. Unhandled tags are captured and surfaced in report documentation as formatted callout alerts (`> [!WARNING] Unhandled Schema Elements`).
+- **Embedded Report Custom PHP Script Analysis**:
+  - Parses embedded row-processing PHP scripts inside Analytics Core reports (`init_code`, `process_code`, `finish_code`), static analysis of ConnectAPI calls (`CustomFields.c.cs_request_type`), visual execution flow previews (Mermaid diagrams), and interactive `<details>` code toggle buttons (`[Code Toggle] Click to View Raw PHP Script Code`).
 - **Strict Mode Element Auditing**: Captures and logs all unhandled OSVC XML tags and attributes into `results/unknowns.json`.
 
 ---
@@ -169,3 +171,11 @@ Place OSVC configuration exports in the `input/` directory and run the orchestra
 From the interactive graph viewer (`/results/graph/index.html`):
 - Click **Export SVG** to download a self-contained vector graphic with embedded style blocks and preserved arrowheads.
 - Click **Export PNG** to save a crisp 2x resolution High-DPI raster image.
+
+---
+
+## Source Code Distribution Package
+
+For technical review and architecture verification:
+- Archive: `OSVC_Config_Accelerator_Core_Code.zip` (151 KB)
+- Package Contents: `osvc_analyser.py`, `web_platform.py`, `.agents/AGENTS.md`, `src/parsers/`, `src/analyser/`, `src/output/`, `graph_ui/`, `templates/`

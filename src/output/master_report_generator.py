@@ -217,7 +217,41 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
     lines.append(f"| Orphaned Components | {len(all_orphans)} | Audit Flagged |")
     lines.append("")
 
+    # Aggregate Unhandled XML Elements across all components
+    master_unhandled = []
+    if components:
+        for cat in ["workspaces", "reports", "cpm", "businessRules", "navigationSets", "buiAddins", "customObjects", "objectRelationships"]:
+            for item in components.get(cat, []):
+                unk = item.get("unknowns", {})
+                u_children = unk.get("unknown_children", []) or item.get("unhandled_elements", []) or item.get("raw_unhandled_tags", [])
+                u_attrs = unk.get("unknown_attrs", [])
+                iname = item.get("name") or item.get("file_name") or "Component"
+                for ch in u_children:
+                    master_unhandled.append({
+                        "comp": iname,
+                        "tag": ch.get("tag") or "unknown",
+                        "snippet": ch.get("raw") or ch.get("raw_xml") or ch.get("snippet") or ""
+                    })
+                for at in u_attrs:
+                    master_unhandled.append({
+                        "comp": iname,
+                        "tag": f"attr:{at.get('attribute')}",
+                        "snippet": str(at.get("value"))
+                    })
+
     # Structured Alert Boxes
+    if master_unhandled:
+        lines.append("> [!WARNING]")
+        lines.append(f"> **{len(master_unhandled)} Unhandled Schema Element(s) Captured**: Raw XML elements/attributes present in source export were preserved via universal fallback handling.")
+        lines.append("")
+        lines.append("| Component | Tag | Raw Snippet / Value |")
+        lines.append("|---|---|---|")
+        for item in master_unhandled:
+            comp_name = item.get("comp") or "Component"
+            tag_str = item.get("tag") or "unknown"
+            snip_str = (item.get("snippet") or "").replace("\n", " ").replace("\r", "")
+            lines.append(f"| `{comp_name}` | `<{tag_str}>` | `{snip_str[:100]}` |")
+        lines.append("")
     if all_orphans:
         lines.append("> [!WARNING]")
         lines.append(f"> **{len(all_orphans)} Orphaned Component(s) Flagged**: Custom scripts or components exist in dataset with zero active workspace or CPM bindings.")

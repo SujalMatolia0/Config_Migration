@@ -47,6 +47,14 @@ def parse_custom_object_file(file_path):
                     "fields": k_fields
                 })
                 
+        from src.parsers.utils import capture_unknown_recursive
+        from src.parsers.known_tags_registry import KNOWN_OBJECT_ALL_TAGS, KNOWN_OBJECT_ALL_ATTRS
+        unk = capture_unknown_recursive(root, KNOWN_OBJECT_ALL_TAGS, KNOWN_OBJECT_ALL_ATTRS, f"CustomObject: {obj_name}")
+        u_attrs = unk.get("unknown_attrs", {})
+        u_children = unk.get("unknown_children", [])
+        unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+        unknown_children_list = u_children
+
         return {
             "format": "custom_object",
             "type": "CustomObject",
@@ -61,7 +69,12 @@ def parse_custom_object_file(file_path):
             "is_agent_visible": root.get("IsAgentVisible") == "True",
             "is_analytics_visible": root.get("IsAnalyticsVisible") == "True",
             "fields": fields,
-            "keys": keys
+            "keys": keys,
+            "unhandled_elements": unknown_children_list,
+            "unknowns": {
+                "unknown_attrs": unknown_attrs_list,
+                "unknown_children": unknown_children_list
+            }
         }
     except Exception as e:
         return {
@@ -82,9 +95,19 @@ def parse_relationship_file(file_path):
         tree = etree.parse(file_path, parser=parser)
         root = tree.getroot()
         
+        from src.parsers.utils import capture_unknown_recursive
+        from src.parsers.known_tags_registry import KNOWN_OBJECT_ALL_TAGS, KNOWN_OBJECT_ALL_ATTRS
+        
+        unk = capture_unknown_recursive(root, KNOWN_OBJECT_ALL_TAGS, KNOWN_OBJECT_ALL_ATTRS, f"Relationship: {os.path.basename(file_path)}")
+        u_attrs = unk.get("unknown_attrs", {})
+        u_children = unk.get("unknown_children", [])
+        unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+        unknown_children_list = u_children
+
         return {
             "format": "relationship",
             "type": "Relationship",
+            "name": os.path.basename(file_path).replace(".xml", ""),
             "file_name": os.path.basename(file_path),
             "file_path": file_path,
             "id": root.get("Id"),
@@ -93,7 +116,12 @@ def parse_relationship_file(file_path):
             "child_key_id": root.get("ChildKeyId"),
             "relationship_type": root.get("RelationshipType"),
             "parent_cardinality": root.get("ParentCardinality"),
-            "child_cardinality": root.get("ChildCardinality")
+            "child_cardinality": root.get("ChildCardinality"),
+            "unhandled_elements": unknown_children_list,
+            "unknowns": {
+                "unknown_attrs": unknown_attrs_list,
+                "unknown_children": unknown_children_list
+            }
         }
     except Exception as e:
         return {

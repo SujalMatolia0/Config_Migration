@@ -66,12 +66,26 @@ def parse_cpm_mappings(file_path):
         if cn and cn not in declared_classes:
             declared_classes.append(cn)
 
+    from src.parsers.utils import capture_unknown_recursive
+    from src.parsers.known_tags_registry import KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS
+
+    unk = capture_unknown_recursive(root, KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS, "CPM Mappings Root")
+    u_attrs = unk.get("unknown_attrs", {})
+    u_children = unk.get("unknown_children", [])
+
+    unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+    unknown_children_list = u_children
+
     return {
         "format": "cpm_mappings",
         "file_name": os.path.basename(file_path),
         "declared_classes": declared_classes,
         "mappings": mappings,
-        "suppress_flags": suppress_flags
+        "suppress_flags": suppress_flags,
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 def decode_php_version(php_ver):
@@ -589,6 +603,17 @@ def parse_cpm_object_procedure(file_path):
     # Perform static analysis on PHP code
     analysis = analyze_php_content(php_content, proc_name)
 
+    # Capture unhandled elements in CPM XML using capture_unknown_recursive
+    from src.parsers.utils import capture_unknown_recursive
+    from src.parsers.known_tags_registry import KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS
+
+    unk = capture_unknown_recursive(root, KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS, f"CPM Procedure: {proc_name}")
+    u_attrs = unk.get("unknown_attrs", {})
+    u_children = unk.get("unknown_children", [])
+
+    unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+    unknown_children_list = u_children
+
     return {
         "format": "cpm_procedure",
         "file_name": os.path.basename(file_path),
@@ -618,7 +643,12 @@ def parse_cpm_object_procedure(file_path):
         "extracted_functions": analysis["extracted_functions"],
         "constants_defined": analysis["constants_defined"],
         "log_files": analysis["log_files"],
-        "message_templates": analysis["message_templates"]
+        "message_templates": analysis["message_templates"],
+        "unhandled_elements": unknown_children_list,
+        "unknowns": {
+            "unknown_attrs": unknown_attrs_list,
+            "unknown_children": unknown_children_list
+        }
     }
 
 def parse_cpm_file(file_path):
@@ -635,7 +665,26 @@ def parse_cpm_file(file_path):
     elif tag == "ObjectProcedure":
         return parse_cpm_object_procedure(file_path)
     else:
-        # Fallback for plain PHP files
+        # Fallback for XML with unknown root tag or plain PHP files
+        from src.parsers.utils import capture_unknown_recursive
+        from src.parsers.known_tags_registry import KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS
+
+        unk = capture_unknown_recursive(root, KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS, f"CPM XML Fallback: {tag}")
+        u_attrs = unk.get("unknown_attrs", {})
+        u_children = unk.get("unknown_children", [])
+        
+        # If the root tag itself is not a known CPM tag, capture it
+        if tag not in ["ClassMappings", "Mappings", "ObjectProcedure"]:
+            try:
+                raw_root = etree.tostring(root, encoding="unicode").strip()
+                if len(raw_root) > 300: raw_root = raw_root[:300] + "... [truncated]"
+                u_children.append({"tag": tag, "raw": raw_root})
+            except Exception:
+                pass
+
+        unknown_attrs_list = [{"attribute": item.get("attribute"), "path": item.get("path"), "value": item.get("value")} for item in u_attrs.values()] if isinstance(u_attrs, dict) else u_attrs
+        unknown_children_list = u_children
+
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             content = f.read()
         analysis = analyze_php_content(content)
@@ -663,7 +712,12 @@ def parse_cpm_file(file_path):
             "imports": analysis["imports"],
             "osvc_objects": analysis["osvc_objects"],
             "has_curl": analysis["has_curl"],
-            "risk_flags": analysis["risk_flags"]
+            "risk_flags": analysis["risk_flags"],
+            "unhandled_elements": unknown_children_list,
+            "unknowns": {
+                "unknown_attrs": unknown_attrs_list,
+                "unknown_children": unknown_children_list
+            }
         }
 
 if __name__ == "__main__":
