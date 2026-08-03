@@ -2429,11 +2429,18 @@ def generate_single_custom_script_markdown(script):
     return "\n".join(lines)
 
 
+def clean_cell(text):
+    if not text:
+        return "—"
+    cleaned = str(text).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>").replace("|", "\\|")
+    return cleaned.strip()
+
 def generate_business_rules_report_markdown(rule_sets):
     """
-    Generates a comprehensive 13-Section OSVC Business Rules Report matching the exact system architecture specification.
-    Includes Action Breakdown, State/Function Groups, State Transition Map, Function Call Graph, CPM Calls,
-    Most-Referenced/Written Fields, Top Queues, Escalation Targets, Orphan Analysis, Disabled Rules, and Condition Logic Analysis.
+    Generates a highly interactive, human-readable 13-Section OSVC Business Rules Report.
+    Includes Action Breakdown, Interactive Mermaid Flowcharts, Collapsible Accordions for Rule Groups,
+    State Transition Maps, Function Call Graphs, CPM Handlers, Most-Referenced/Written Fields, Top Queues,
+    Escalation Targets, Orphan Analysis, Disabled Rules (with sanitized multiline descriptions), and Condition Logic Trees.
     """
     lines = []
 
@@ -2591,6 +2598,10 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append(f"_Source: `{source_file}` — {len(groups)} rule groups ({state_groups_count} States, {func_groups_count} Functions)_")
     lines.append("")
 
+    lines.append("> [!NOTE]")
+    lines.append(f"> **Interactive Architectural Executive Summary**: Analyzed **{total_rules} Business Rules** across **{state_groups_count} States** and **{func_groups_count} Functions**. Use the collapsible accordions below to expand individual rule logic, state transition maps, and backend CPM event handler triggers.")
+    lines.append("")
+
     # ── 1. Summary ──────────────────────────────────────────────────────────
     lines.append("## 1. Summary")
     lines.append("")
@@ -2610,7 +2621,6 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append("")
     lines.append("| Action Type | Count |")
     lines.append("|---|---|")
-    # Action ordering matching user spec
     action_order = [
         "SetField", "TransitionState_Stop", "CPMCall", "FunctionCall",
         "StopProcessing", "ClearEscalation", "Escalation", "AppendTemplate",
@@ -2621,82 +2631,153 @@ def generate_business_rules_report_markdown(rule_sets):
         lines.append(f"| {act_type} | {cnt} |")
     lines.append("")
 
-    # ── 2. Rule Groups (States & Functions) ──────────────────────────────────
+    # ── Visual Flowcharts ───────────────────────────────────────────────────
+    lines.append("## Visual System Architecture Flowcharts")
+    lines.append("")
+    lines.append("### State Transition Lifecycle Flowchart")
+    lines.append("The diagram below illustrates incident state transitions triggered by business rule conditions:")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph TD")
+    lines.append("  classDef state fill:#3b82f6,stroke:#1d4ed8,color:#fff,font-weight:bold;")
+    lines.append("  classDef func fill:#8b5cf6,stroke:#6d28d9,color:#fff;")
+    for (from_g, to_st), cnt in state_transitions.most_common(12):
+        f_node = from_g.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
+        t_node = to_st.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
+        lines.append(f"  {f_node}[\"{from_g}\"] -->|\"{cnt} transitions\"| {t_node}[\"{to_st}\"]")
+    lines.append("```")
+    lines.append("")
+
+    lines.append("### CPM Object Event Handler Integration Diagram")
+    lines.append("The diagram below highlights key Business Rule groups invoking backend PHP Object Event Handlers:")
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef ruleGroup fill:#059669,stroke:#047857,color:#fff;")
+    lines.append("  classDef cpmHandler fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
+    for (from_g, cpm_h), cnt in cpm_calls.most_common(10):
+        f_node = from_g.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
+        c_node = cpm_h.replace("-", "_").replace(" ", "_")
+        lines.append(f"  {f_node}[\"{from_g}\"] -->|\"Executes ({cnt}x)\"| {c_node}[\"{cpm_h}\"]:::cpmHandler")
+    lines.append("```")
+    lines.append("")
+
+    # ── 2. Rule Groups (States & Functions) Accordion ────────────────────────
     lines.append("## 2. Rule Groups (States & Functions)")
+    lines.append("")
+    lines.append("<details open>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Rule Groups Overview Matrix ({len(groups)} Groups)</summary>")
     lines.append("")
     lines.append("| Group Type | Group Name | Rules | Enabled | Disabled |")
     lines.append("|---|---|---|---|---|")
     for gname, gdata in sorted(groups.items(), key=lambda x: (0 if x[1]["type"].lower() == "state" else 1, x[0])):
-        lines.append(f"| {gdata['type']} | {gdata['name']} | {gdata['rules']} | {gdata['enabled']} | {gdata['disabled']} |")
+        lines.append(f"| {clean_cell(gdata['type'])} | {clean_cell(gdata['name'])} | {gdata['rules']} | {gdata['enabled']} | {gdata['disabled']} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 3. State Transition Map ─────────────────────────────────────────────
+    # ── 3. State Transition Map Accordion ───────────────────────────────────
     lines.append("## 3. State Transition Map")
+    lines.append("")
+    lines.append("<details>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand State Transition Map ({len(state_transitions)} Routes)</summary>")
     lines.append("")
     lines.append("Which group triggers a transition into which State (`Transition State And Stop/Continue`):")
     lines.append("")
     lines.append("| From (rule group) | → To State | Times |")
     lines.append("|---|---|---|")
     for (from_g, to_st), cnt in state_transitions.most_common():
-        lines.append(f"| {from_g} | {to_st} | {cnt} |")
+        lines.append(f"| {clean_cell(from_g)} | {clean_cell(to_st)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 4. Function Call Graph ──────────────────────────────────────────────
+    # ── 4. Function Call Graph Accordion ────────────────────────────────────
     lines.append("## 4. Function Call Graph")
+    lines.append("")
+    lines.append("<details>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand Function Call Graph ({len(function_calls)} Calls)</summary>")
     lines.append("")
     lines.append("Which group invokes which Function (`Call Function`):")
     lines.append("")
     lines.append("| From (rule group) | Calls Function | Times |")
     lines.append("|---|---|---|")
     for (from_g, to_func), cnt in function_calls.most_common():
-        lines.append(f"| {from_g} | {to_func} | {cnt} |")
+        lines.append(f"| {clean_cell(from_g)} | {clean_cell(to_func)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 5. CPM / Object Event Handler Calls ─────────────────────────────────
+    # ── 5. CPM / Object Event Handler Calls Accordion ───────────────────────
     lines.append("## 5. CPM / Object Event Handler Calls")
+    lines.append("")
+    lines.append("<details>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand CPM Object Event Handler Calls ({len(cpm_calls)} Bindings)</summary>")
     lines.append("")
     lines.append("Which group invokes which backend CPM handler (`Execute Object Event Handler`):")
     lines.append("")
     lines.append("| From (rule group) | CPM Handler | Times |")
     lines.append("|---|---|---|")
     for (from_g, cpm_h), cnt in cpm_calls.most_common():
-        lines.append(f"| {from_g} | {cpm_h} | {cnt} |")
+        lines.append(f"| {clean_cell(from_g)} | {clean_cell(cpm_h)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 6. Most-Referenced Fields (in conditions) ─────────────────────────
+    # ── 6. Most-Referenced Fields Accordion ─────────────────────────────────
     lines.append("## 6. Most-Referenced Fields (in conditions)")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Top Condition Fields Referenced</summary>")
     lines.append("")
     lines.append("| Field | Times referenced |")
     lines.append("|---|---|")
     for fname, cnt in field_ref_counts.most_common(20):
-        lines.append(f"| {fname} | {cnt} |")
+        lines.append(f"| {clean_cell(fname)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 7. Most-Written Fields (Set Field actions) ──────────────────────────
+    # ── 7. Most-Written Fields Accordion ────────────────────────────────────
     lines.append("## 7. Most-Written Fields (Set Field actions)")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Top Fields Written (Set Field)</summary>")
     lines.append("")
     lines.append("| Field | Times written |")
     lines.append("|---|---|")
     for fname, cnt in field_write_counts.most_common(15):
-        lines.append(f"| {fname} | {cnt} |")
+        lines.append(f"| {clean_cell(fname)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 8. Top Queues Assigned (Set Field > Queue) ──────────────────────────
+    # ── 8. Top Queues Assigned Accordion ────────────────────────────────────
     lines.append("## 8. Top Queues Assigned (Set Field > Queue)")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Top Incident Queues Assigned</summary>")
     lines.append("")
     lines.append("| Queue value | Times set |")
     lines.append("|---|---|")
     for qval, cnt in queue_counts.most_common(15):
-        lines.append(f"| {qval} | {cnt} |")
+        lines.append(f"| {clean_cell(qval)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
-    # ── 9. Escalation Targets ───────────────────────────────────────────────
+    # ── 9. Escalation Targets Accordion ─────────────────────────────────────
     lines.append("## 9. Escalation Targets")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Escalation Rule Targets</summary>")
     lines.append("")
     lines.append("| Escalated to | Times |")
     lines.append("|---|---|")
     for etarget, cnt in escalation_targets.most_common(15):
-        lines.append(f"| {etarget} | {cnt} |")
+        lines.append(f"| {clean_cell(etarget)} | {cnt} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
     # ── 10. Unused / Orphaned Items ─────────────────────────────────────────
@@ -2710,13 +2791,18 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append("_Note: this checks only whether a group is targeted by another rule's action. A Function or State can still be reachable via direct object-event triggers (e.g. on incident creation) that aren't visible in this CSV alone — cross-check against the workspace/CPM event bindings before deleting anything flagged here._")
     lines.append("")
 
-    # ── 11. Disabled Rules (flag for cleanup review) ────────────────────────
+    # ── 11. Disabled Rules (with clean table cell sanitization) ───────────────
     lines.append("## 11. Disabled Rules (flag for cleanup review)")
+    lines.append("")
+    lines.append("<details>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Review Disabled Rules ({len(disabled_rules)} Rules)</summary>")
     lines.append("")
     lines.append("| Group | Rule Name | Description |")
     lines.append("|---|---|---|")
     for gname, rname, desc in disabled_rules:
-        lines.append(f"| {gname} | {rname} | {desc} |")
+        lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | {clean_cell(desc)} |")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
     # ── 12. Methodology ─────────────────────────────────────────────────────
@@ -2728,8 +2814,11 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append("- Cross-references (state transitions, function calls, CPM calls) were built by extracting the explicit target named in each action's text.")
     lines.append("")
 
-    # ── 13. Condition Logic Analysis ────────────────────────────────────────
+    # ── 13. Condition Logic Analysis Accordion ──────────────────────────────
     lines.append("## 13. Condition Logic Analysis")
+    lines.append("")
+    lines.append("<details>")
+    lines.append("  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand Condition Logic & Complexity Analysis</summary>")
     lines.append("")
     lines.append("Every rule's `Rule Condition` string was parsed into a proper AND/OR/parenthesis expression tree (not just a flat list of referenced fields). This section summarizes structural complexity.")
     lines.append("")
@@ -2766,7 +2855,7 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append("|---|---|---|---|")
     sorted_leaves = sorted(leaf_counts, key=lambda x: x[2], reverse=True)[:15]
     for rname, gname, l_cnt, d_val in sorted_leaves:
-        lines.append(f"| {rname} | {gname} | {l_cnt} | {d_val} |")
+        lines.append(f"| {clean_cell(rname)} | {clean_cell(gname)} | {l_cnt} | {d_val} |")
     lines.append("")
 
     lines.append("### Sample parsed trees")
@@ -2862,6 +2951,8 @@ def generate_business_rules_report_markdown(rule_sets):
     lines.append("    - Incidents > Channel  equals  Email")
     lines.append("    - Custom Field > Channel  equals  Email")
     lines.append("```")
+    lines.append("")
+    lines.append("</details>")
     lines.append("")
 
     return "\n".join(lines)
