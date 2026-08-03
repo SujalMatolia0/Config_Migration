@@ -569,26 +569,45 @@ function updateDOM() {
     g.appendChild(title);
     nodesG.appendChild(g);
 
+    let clickTimeout = null;
+
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: true });
-      if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
-        if (n.type === "module_root") {
-          expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
-        } else if (n.type === "category_hub") {
-          expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
-        } else if (n.type === "workspace") {
-          expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
-        }
-        rebuildGraphState();
-        updateDOM();
-        restartSimulation();
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
       }
+
+      clickTimeout = setTimeout(() => {
+        clickTimeout = null;
+        // SINGLE CLICK: highlight node and toggle branch expansion (do NOT open side inspector)
+        select(n, { openInspector: false });
+
+        if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace" || n.type === "businessrule") {
+          if (n.type === "module_root") {
+            expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
+          } else if (n.type === "category_hub") {
+            expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
+          } else if (n.type === "workspace") {
+            expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
+          } else if (n.type === "businessrule") {
+            expandedNodeIds.has(n.id) ? expandedNodeIds.delete(n.id) : expandedNodeIds.add(n.id);
+          }
+          rebuildGraphState();
+          updateDOM();
+          restartSimulation();
+        }
+      }, 220);
     });
 
     g.addEventListener("dblclick", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: true, focusReport: true });
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+      }
+      // DOUBLE CLICK: open the side inspector panel
+      select(n, { openInspector: true });
     });
 
     g.addEventListener("mouseenter", ev => {
