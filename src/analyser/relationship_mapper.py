@@ -314,6 +314,25 @@ def map_relationships(components):
                         "via":  f"Event Routing: {obj_name} ({m.get('interface')} / {m.get('operation')})"
                     })
 
+    # ── 5f. Business Rules → CPM Event Handlers & State Transitions ──────────
+    for br_set in business_rules_list:
+        rules_list = br_set.get("rules", [])
+        set_name = br_set.get("name") or br_set.get("file_name") or "Business Rules"
+        for r in rules_list:
+            rname = r.get("name") or "Rule"
+            for h in r.get("cpm_handlers_invoked", []):
+                relationships.append({
+                    "from": {"type": "BusinessRule", "name": f"{rname}"},
+                    "to":   {"type": "CPM", "name": h},
+                    "via":  f"Triggers CPM Handler '{h}'"
+                })
+            for st in r.get("state_transitions", []):
+                relationships.append({
+                    "from": {"type": "BusinessRule", "name": f"{rname}"},
+                    "to":   {"type": "RuleState", "name": st},
+                    "via":  f"Transitions State to '{st}'"
+                })
+
     # ── 6. Reports → OSVC Tables ───────────────────────────────────────────
     for rep in reports:
         rep_id   = normalise_id(rep.get("id"))

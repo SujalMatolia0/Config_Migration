@@ -2,6 +2,7 @@ import os
 import re
 import urllib.parse
 import base64 as _b64
+from datetime import datetime
 
 def get_all_tabs_flat(tabs_list):
     flat = []
@@ -2422,6 +2423,107 @@ def generate_single_custom_script_markdown(script):
         lines.append('    </div>')
         lines.append('  </div>')
         lines.append('</div>')
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_business_rules_report_markdown(rule_sets):
+    """
+    Generates a comprehensive Markdown report for Business Rules exports (both XML and CSV formats).
+    Includes executive summary, rule metrics, state transitions, invoked CPM handlers, and expandable rule details.
+    """
+    lines = []
+    lines.append("# Business Rules Execution & Policy Report")
+    lines.append("")
+    lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
+    lines.append("")
+
+    total_rules = 0
+    enabled_count = 0
+    disabled_count = 0
+    all_cpm_handlers = set()
+    all_states = set()
+    all_functions = set()
+    all_custom_fields = set()
+    all_rules = []
+
+    for rset in rule_sets:
+        total_rules += rset.get("total_rules", len(rset.get("rules", [])))
+        enabled_count += rset.get("enabled_count", 0)
+        disabled_count += rset.get("disabled_count", 0)
+        all_cpm_handlers.update(rset.get("cpm_handlers_invoked", []))
+        all_states.update(rset.get("states", []))
+        all_functions.update(rset.get("functions", []))
+        all_custom_fields.update(rset.get("custom_fields_referenced", []))
+        all_rules.extend(rset.get("rules", []))
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> **Business Rules Summary**: Analyzed **{total_rules} total rules** across **{len(all_states)} States** and **{len(all_functions)} Functions**, invoking **{len(all_cpm_handlers)} unique CPM Object Event Handlers**.")
+    lines.append("")
+
+    lines.append("## Executive Metrics")
+    lines.append("")
+    lines.append(f"- **Total Rules Defined**: `{total_rules}`")
+    lines.append(f"- **Active / Enabled Rules**: `{enabled_count}`")
+    lines.append(f"- **Inactive / Disabled Rules**: `{disabled_count}`")
+    lines.append(f"- **Total States Defined**: `{len(all_states)}`")
+    lines.append(f"- **Total Functions Defined**: `{len(all_functions)}`")
+    lines.append(f"- **Invoked CPM Handlers Count**: `{len(all_cpm_handlers)}`")
+    lines.append(f"- **Referenced Custom Fields Count**: `{len(all_custom_fields)}`")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # 1. Invoked CPM Object Event Handlers Section
+    if all_cpm_handlers:
+        lines.append("## Invoked CPM Object Event Handlers")
+        lines.append("")
+        lines.append("The following CPM Object Event Handlers are directly triggered by Business Rule actions:")
+        lines.append("")
+        lines.append("| CPM Handler Name | Triggering Business Rule(s) | Impact / Context |")
+        lines.append("| :--- | :--- | :--- |")
+        for h_name in sorted(list(all_cpm_handlers)):
+            trig_rules = [r.get("name") for r in all_rules if h_name in r.get("cpm_handlers_invoked", [])]
+            rule_str = ", ".join(f"`{r}`" for r in trig_rules[:3])
+            if len(trig_rules) > 3:
+                rule_str += f" *(+{len(trig_rules)-3} more)*"
+            lines.append(f"| **`{h_name}`** | {rule_str} | Invokes object event procedure during rule action |")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
+
+    # 2. State & Function Group Breakdown
+    lines.append("## Business Rules Group & State Breakdown")
+    lines.append("")
+
+    # Group rules by Group Name
+    groups_map = {}
+    for r in all_rules:
+        gname = r.get("group_name") or r.get("group_type") or "General Rules"
+        groups_map.setdefault(gname, []).append(r)
+
+    for gname, grules in sorted(groups_map.items()):
+        act_cnt = sum(1 for r in grules if r.get("active", True))
+        lines.append(f"### Group: `{gname}` ({len(grules)} Rules, {act_cnt} Active)")
+        lines.append("")
+        lines.append("| Status | Deployed | Rule Name | Description / Logic Summary | Conditions | Actions / Handlers |")
+        lines.append("| :---: | :---: | :--- | :--- | :--- | :--- |")
+        for r in grules[:50]:
+            status_tag = "[Active]" if r.get("active", True) else "[Disabled]"
+            dep_tag = "Yes" if r.get("deployed", True) else "No"
+            rname = r.get("name") or "Unnamed Rule"
+            desc = r.get("description") or "—"
+            cond = r.get("condition_raw") or "—"
+            if len(cond) > 80: cond = cond[:80] + "..."
+            
+            acts = r.get("actions_raw") or []
+            act_str = "; ".join(acts) if isinstance(acts, list) else str(acts)
+            if len(act_str) > 100: act_str = act_str[:100] + "..."
+            
+            lines.append(f"| `{status_tag}` | `{dep_tag}` | **{rname}** | {desc} | `{cond}` | `{act_str}` |")
+        if len(grules) > 50:
+            lines.append(f"| ... | ... | *+{len(grules)-50} additional rules in {gname}* | ... | ... | ... |")
         lines.append("")
 
     return "\n".join(lines)

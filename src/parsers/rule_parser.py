@@ -5,10 +5,13 @@ from src.parsers.known_tags_registry import KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDRE
 
 def parse_rule_file(file_path):
     """
-    Parses an OSVC Business Rules XML export file and returns structured metadata.
+    Parses an OSVC Business Rules export file (.xml or .csv) and returns structured metadata.
     """
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Rules file not found: {file_path}")
+
+    if file_path.lower().endswith(".csv"):
+        return parse_rule_csv_file(file_path)
 
     parser = etree.XMLParser(recover=True, remove_comments=True)
     tree = etree.parse(file_path, parser=parser)
@@ -104,6 +107,121 @@ def parse_rule_file(file_path):
         "unknowns": {
             "unknown_attrs": unknown_attrs_list,
             "unknown_children": unknown_children_list
+        }
+    }
+
+def parse_rule_csv_file(file_path):
+    """
+    Parses an OSVC Business Rules CSV export file and extracts rules, conditions, actions,
+    invoked CPM handlers, state transitions, and custom fields referenced.
+    """
+    import csv
+    import re
+
+    rules = []
+    cpm_handlers_set = set()
+    process_scripts_set = set()
+    custom_fields_set = set()
+    states_set = set()
+    functions_set = set()
+
+    enabled_count = 0
+    disabled_count = 0
+
+    with open(file_path, "r", encoding="utf-8-sig", errors="ignore") as f:
+        reader = csv.reader(f)
+        header = next(reader, None)
+        
+        for row_idx, row in enumerate(reader, start=1):
+            if not row or len(row) < 4:
+                continue
+            
+            gtype = row[0].strip() if len(row) > 0 else ""
+            gname = row[1].strip() if len(row) > 1 else ""
+            is_enabled_str = row[2].strip() if len(row) > 2 else "Yes"
+            rname = row[3].strip() if len(row) > 3 else f"Rule {row_idx}"
+            desc = row[4].strip() if len(row) > 4 else ""
+            vtype = row[5].strip() if len(row) > 5 else ""
+            vdef = row[6].strip() if len(row) > 6 else ""
+            deployed_str = row[7].strip() if len(row) > 7 else "Yes"
+            cond_raw = row[8].strip() if len(row) > 8 else ""
+            act_cols = [c.strip() for c in row[9:] if c.strip()]
+            act_raw = " ".join(act_cols)
+
+            is_active = is_enabled_str.lower() in ["yes", "true", "1"]
+            if is_active:
+                enabled_count += 1
+            else:
+                disabled_count += 1
+
+            if gtype.lower() == "state" and gname:
+                states_set.add(gname)
+            elif gtype.lower() == "function" and gname:
+                functions_set.add(gname)
+
+            # Extract CPM Object Event Handlers: "Execute Object Event Handler (\w+)"
+            cpm_handlers = []
+            for m in re.finditer(r"Execute Object Event Handler\s+([\w_]+)", act_raw, re.IGNORECASE):
+                h_name = m.group(1).strip()
+                cpm_handlers.append(h_name)
+                cpm_handlers_set.add(h_name)
+
+            # Extract Process Scripts: "Execute Process Script (\w+)"
+            process_scripts = []
+            for m in re.finditer(r"Execute Process Script\s+([\w_]+)", act_raw, re.IGNORECASE):
+                s_name = m.group(1).strip()
+                process_scripts.append(s_name)
+                process_scripts_set.add(s_name)
+
+            # Extract State Transitions: "Transition State (?:And \w+\s+)?([^\n]+)"
+            state_transitions = []
+            for m in re.finditer(r"Transition State\s+(?:And\s+\w+\s+)?([^\d\n\.]+[\w\s-]+?)(?:\s+\d+\.|$)", act_raw, re.IGNORECASE):
+                st_name = m.group(1).strip()
+                state_transitions.append(st_name)
+
+            # Extract Custom Fields: "Custom Field > ([^=><\n]+)"
+            custom_fields = []
+            for m in re.finditer(r"Custom Field\s*>\s*([^\s=><][^=><\n]+?)(?:\s+equals|\s+contains|\s+assign|\s+AND|\s+OR|\s+not|\s+match|$)", cond_raw + " " + act_raw, re.IGNORECASE):
+                cf_name = m.group(1).strip()
+                if cf_name and len(cf_name) < 80:
+                    custom_fields.append(cf_name)
+                    custom_fields_set.add(cf_name)
+
+            rules.append({
+                "id": f"CSV_Rule_{row_idx}",
+                "name": rname,
+                "group_type": gtype,
+                "group_name": gname,
+                "active": is_active,
+                "deployed": deployed_str.lower() in ["yes", "true", "1"],
+                "description": desc,
+                "variable_type": vtype,
+                "variable_default": vdef,
+                "condition_raw": cond_raw,
+                "actions_raw": act_cols,
+                "cpm_handlers_invoked": sorted(list(set(cpm_handlers))),
+                "process_scripts_invoked": sorted(list(set(process_scripts))),
+                "state_transitions": sorted(list(set(state_transitions))),
+                "custom_fields_referenced": sorted(list(set(custom_fields)))
+            })
+
+    return {
+        "file_name": os.path.basename(file_path),
+        "format": "business_rules_csv",
+        "name": os.path.basename(file_path).replace(".csv", ""),
+        "total_rules": len(rules),
+        "enabled_count": enabled_count,
+        "disabled_count": disabled_count,
+        "states": sorted(list(states_set)),
+        "functions": sorted(list(functions_set)),
+        "cpm_handlers_invoked": sorted(list(cpm_handlers_set)),
+        "process_scripts_invoked": sorted(list(process_scripts_set)),
+        "custom_fields_referenced": sorted(list(custom_fields_set)),
+        "rules": rules,
+        "unhandled_elements": [],
+        "unknowns": {
+            "unknown_attrs": [],
+            "unknown_children": []
         }
     }
 

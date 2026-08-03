@@ -28,7 +28,17 @@ from graph_ui.build import build_graph_ui
 
 def detect_and_parse_file(file_path, components, strict=False):
     _, ext = os.path.splitext(file_path.lower())
-    if ext == ".xml":
+    if ext == ".csv":
+        try:
+            with open(file_path, "r", encoding="utf-8-sig", errors="ignore") as chk_f:
+                header = chk_f.readline()
+                if "Rule Name" in header or "Rule Condition" in header or "Group Type" in header:
+                    print(f"  -> Parsing Business Rules CSV: {os.path.basename(file_path)}")
+                    components["businessRules"].append(parse_rule_file(file_path))
+                    return
+        except Exception:
+            pass
+    elif ext == ".xml":
         try:
             parser = etree.XMLParser(recover=True, remove_comments=True)
             tree = etree.parse(file_path, parser=parser)
@@ -888,6 +898,19 @@ def main():
                 write_single_custom_script_json(sc, single_json_path)
                 write_single_custom_script_json(sc, os.path.join(scripts_json_fmt_dir, single_json_filename))
                 print(f"Single Custom Script JSON written -> {single_json_path}")
+
+        rule_items = components.get("businessRules", [])
+        if rule_items:
+            from src.output.markdown_generator import generate_business_rules_report_markdown
+            rules_md_content = generate_business_rules_report_markdown(rule_items)
+            rules_md_path = os.path.join(rules_dir, "report_Business_Rules.md")
+            with open(rules_md_path, "w", encoding="utf-8") as f:
+                f.write(rules_md_content)
+            rules_md_fmt_dir = os.path.join(markdown_dir, "rules")
+            os.makedirs(rules_md_fmt_dir, exist_ok=True)
+            with open(os.path.join(rules_md_fmt_dir, "report_Business_Rules.md"), "w", encoding="utf-8") as f:
+                f.write(rules_md_content)
+            print(f"Business Rules Summary report written -> {rules_md_path}")
 
         # Generate Unified Master System Markdown Report
         from src.output.master_report_generator import generate_master_system_report
