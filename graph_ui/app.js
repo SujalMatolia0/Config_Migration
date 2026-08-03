@@ -1529,12 +1529,64 @@ function renderHtmlPreviewsInContainer(container) {
 }
 
 function generateDynamicMermaidForNode(n) {
-  let code = "flowchart LR\n";
+  let code = "flowchart TD\n";
   const safeId = (id) => "N_" + String(id).replace(/[^a-zA-Z0-9_]/g, "_");
   const safeLabel = (lbl) => '"' + String(lbl || "").replace(/"/g, "'") + '"';
 
   const ntype = (n.type || "").toLowerCase();
   const data = n.data || {};
+  const targetObj = data.object || (n.label.includes("Contact") ? "Contact" : (n.label.includes("Incident") ? "Incident" : null));
+
+  if (ntype === "businessrule" || targetObj) {
+    const objName = targetObj || "Business Rules";
+    const totalRules = data.total_rules || (n.inc ? n.inc.length : 0);
+    const breakdown = data.action_type_breakdown || {};
+
+    code += `  classDef objNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;\n`;
+    code += `  classDef ruleNode fill:#7c3aed,stroke:#5b21b6,color:#fff,font-weight:bold;\n`;
+    code += `  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;\n`;
+    code += `  classDef actNode fill:#059669,stroke:#047857,color:#fff;\n\n`;
+
+    code += `  OBJ["OSVC Entity Object: ${objName}"]:::objNode\n`;
+    code += `  RULE_HUB["${objName} Business Rules Engine<br/>(${totalRules} Rules)"]:::ruleNode\n`;
+    code += `  OBJ -->|"Triggers Execution Set"| RULE_HUB\n\n`;
+
+    // Add Action Type Sub-Groups
+    code += `  subgraph Action_Types ["Action Type Sub-Groups (${objName})"]\n`;
+    for (const [atype, cnt] of Object.entries(breakdown)) {
+      const aId = safeId(`ACT_${atype}`);
+      code += `    ${aId}["${atype} (${cnt}x)"]:::actNode\n`;
+      code += `    RULE_HUB --> ${aId}\n`;
+    }
+    code += `  end\n\n`;
+
+    // Add connected CPM Handlers for this Object
+    if (n.out && n.out.length) {
+      code += `  subgraph CPM_Handlers ["Connected CPM Event Handlers"]\n`;
+      n.out.forEach(e => {
+        const tgt = nodeById[e.target];
+        if (tgt) {
+          const tId = safeId(tgt.id);
+          code += `    ${tId}["${tgt.label}"]:::cpmNode\n`;
+          code += `    RULE_HUB -->|"${e.label || 'Executes'}"| ${tId}\n`;
+        }
+      });
+      code += `  end\n`;
+    } else if (n.inc && n.inc.length) {
+      code += `  subgraph Connected_Nodes ["Connected System Nodes"]\n`;
+      n.inc.forEach(e => {
+        const src = nodeById[e.source];
+        if (src) {
+          const sId = safeId(src.id);
+          code += `    ${sId}["${src.label}"]\n`;
+          code += `    ${sId} --> RULE_HUB\n`;
+        }
+      });
+      code += `  end\n`;
+    }
+
+    return code;
+  }
 
   if (ntype === "cpm" || ntype === "asynccpm") {
     const name = n.label || data.name || n.id;
@@ -1611,7 +1663,7 @@ async function loadDocsAndDiagrams(node) {
   tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
   tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
 
-  const mdPath = node.data && node.data.mdPath;
+  const data = (typeof node.data === "function" ? node.data() : node.data) || {};
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
 
@@ -1623,52 +1675,100 @@ async function loadDocsAndDiagrams(node) {
   }
   currentFetchController = new AbortController();
 
-  let mermaidCode = null;
+  let targetObj = data.object || (node.label && node.label.includes("Contact") ? "Contact" : (node.label && node.label.includes("Incident") ? "Incident" : "General"));
+  const lbl = (node.label || data.name || data.label || "").trim();
+  const cleanLbl = lbl.replace(/ /g, "_");
+  const ntype = (node.type || data.type || "").toLowerCase();
 
-  if (mdPath) {
+  // Construct prioritized candidate list for fetching markdown files
+  const candidates = [];
+  if (data.mdPath) candidates.push(data.mdPath);
+  if (node.mdPath && !candidates.includes(node.mdPath)) candidates.push(node.mdPath);
+
+  if (ntype === "businessrule") {
+    candidates.push(`../rules/report_Business_Rules_${targetObj}.md`);
+    candidates.push(`../rules/report_Business_Rules.md`);
+  } else if (ntype.includes("bui")) {
+    candidates.push(`../bui_addins/report_${cleanLbl}.md`);
+    candidates.push(`../bui_addins/report_BUI_Addins.md`);
+    candidates.push(`../scripts/report_${cleanLbl}.md`);
+  } else if (ntype.includes("script")) {
+    candidates.push(`../scripts/report_${cleanLbl}.md`);
+    candidates.push(`../scripts/report_Custom_Scripts.md`);
+    candidates.push(`../bui_addins/report_${cleanLbl}.md`);
+  } else if (ntype === "report") {
+    candidates.push(`../reports/report_${cleanLbl}.md`);
+  } else if (ntype === "cpm" || ntype === "cpmmappings") {
+    candidates.push(`../cpm/report_CPM_Summary.md`);
+  } else if (ntype === "workspace") {
+    candidates.push(`../workspaces/${cleanLbl}/report.md`);
+  }
+
+  // Global fallback list
+  candidates.push(`../rules/report_Business_Rules_${targetObj}.md`);
+  candidates.push(`../rules/report_Business_Rules.md`);
+  candidates.push(`../cpm/report_CPM_Summary.md`);
+
+  let fetchedOk = false;
+
+  for (const path of candidates) {
+    if (fetchedOk) break;
     try {
-      const response = await fetch(mdPath, { signal: currentFetchController.signal });
+      const response = await fetch(path, { signal: currentFetchController.signal });
       if (response.ok) {
-        const mdText = await response.text();
-        tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
+        let mdText = await response.text();
+        if (!mdText || mdText.trim().length === 0) continue;
+
+        let parsedHtml = "";
+        if (typeof marked !== "undefined") {
+          try {
+            marked.setOptions({ gfm: true, breaks: true });
+            parsedHtml = marked.parse(mdText);
+          } catch (e) {
+            parsedHtml = `<pre style="white-space:pre-wrap;font-size:11px;">${esc(mdText)}</pre>`;
+          }
+        } else {
+          parsedHtml = `<pre style="white-space:pre-wrap;font-size:11px;">${esc(mdText)}</pre>`;
+        }
+
+        // Apply badges for Enabled / Disabled status
+        parsedHtml = parsedHtml
+          .replace(/\| Enabled \|/g, '| <span class="badge-status badge-enabled">Enabled</span> |')
+          .replace(/\| Disabled \|/g, '| <span class="badge-status badge-disabled">Disabled</span> |');
+
+        tabDoc.innerHTML = parsedHtml;
         await renderMermaidBlocksInContainer(tabDoc);
         renderHtmlPreviewsInContainer(tabDoc);
-        mermaidCode = extractMermaidCode(mdText, node);
+
+        const mermaidCode = generateDynamicMermaidForNode(node);
+        if (mermaidCode) {
+          await renderMermaidDiagram(tabDiagram, mermaidCode);
+          const fsBtn = document.createElement("button");
+          fsBtn.className = "tab-btn";
+          fsBtn.style.marginTop = "12px";
+          fsBtn.style.background = "var(--accent-primary)";
+          fsBtn.style.border = "1px solid var(--accent-primary)";
+          fsBtn.style.color = "#fff";
+          fsBtn.style.width = "100%";
+          fsBtn.style.fontWeight = "600";
+          fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
+          fsBtn.addEventListener("click", openFullscreenDiagram);
+          tabDiagram.appendChild(fsBtn);
+        }
+        fetchedOk = true;
+        break;
       }
     } catch (err) {
       if (err.name === "AbortError") return;
-      console.warn("Fetch mdPath failed, generating fallback docs", err);
     }
   }
 
-  if (!tabDoc.innerHTML || tabDoc.innerHTML.includes("Loading documentation")) {
+  if (!fetchedOk) {
     tabDoc.innerHTML = `<div style="padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">
-      <h3>${esc(node.label)}</h3>
+      <h3>${esc(node.label || data.name || "Component")}</h3>
       <p><b>Component Type:</b> ${esc(TYPE_LABELS[node.type] || node.type)}</p>
-      <p><b>Associated Module:</b> ${esc(node.module || "General")}</p>
-      <p><b>Inbound Connections:</b> ${node.inc ? node.inc.length : 0}</p>
-      <p><b>Outbound Connections:</b> ${node.out ? node.out.length : 0}</p>
-      ${node.isOrphan ? `<div style="color:#E11D48;font-weight:700;margin-top:8px;">ORPHAN WARNING: ${esc(node.orphanReason || "Unreferenced component")}</div>` : ""}
+      <p><b>Associated Module:</b> ${esc(node.module || data.module || "General")}</p>
     </div>`;
-  }
-
-  if (!mermaidCode) {
-    mermaidCode = generateDynamicMermaidForNode(node);
-  }
-
-  if (mermaidCode) {
-    await renderMermaidDiagram(tabDiagram, mermaidCode);
-    const fsBtn = document.createElement("button");
-    fsBtn.className = "tab-btn";
-    fsBtn.style.marginTop = "12px";
-    fsBtn.style.background = "var(--accent-primary)";
-    fsBtn.style.border = "1px solid var(--accent-primary)";
-    fsBtn.style.color = "#fff";
-    fsBtn.style.width = "100%";
-    fsBtn.style.fontWeight = "600";
-    fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
-    fsBtn.addEventListener("click", openFullscreenDiagram);
-    tabDiagram.appendChild(fsBtn);
   }
 }
 
@@ -1758,6 +1858,20 @@ function select(n, options = {}) {
   if (d.risk_flags && d.risk_flags.length) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
     facts.push(["Risks", riskText]);
+  }
+
+  if (n.type === "businessrule" || n.label.includes("Business Rules")) {
+    if (d.total_rules) facts.push(["Total Rules", d.total_rules]);
+    if (d.object) facts.push(["Target Object", d.object]);
+    if (d.action_type_breakdown) {
+      let atHtml = "<h3>Action Type Breakdown Sub-Groups</h3><table style='width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;'>";
+      atHtml += "<tr style='background:var(--panel2);text-align:left;'><th>Action Type</th><th>Rule Count</th></tr>";
+      for (const [atype, cnt] of Object.entries(d.action_type_breakdown)) {
+        atHtml += `<tr><td style='padding:4px;border-bottom:1px solid var(--border-subtle);'><b>${esc(atype)}</b></td><td style='padding:4px;border-bottom:1px solid var(--border-subtle);'>${cnt}</td></tr>`;
+      }
+      atHtml += "</table>";
+      html += atHtml;
+    }
   }
 
   if (facts.length) {

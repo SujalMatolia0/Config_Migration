@@ -919,9 +919,10 @@ def main():
 
         rule_items = components.get("businessRules", [])
         if rule_items:
-            from src.output.markdown_generator import generate_business_rules_report_markdown
+            from src.output.markdown_generator import generate_business_rules_report_markdown, generate_single_object_business_rules_markdown
             from src.output.json_writer import write_business_rules_summary_json
 
+            # 1. Master Combined Business Rules MD File
             rules_md_content = generate_business_rules_report_markdown(rule_items)
             rules_md_path = os.path.join(rules_dir, "report_Business_Rules.md")
             with open(rules_md_path, "w", encoding="utf-8") as f:
@@ -938,6 +939,26 @@ def main():
             os.makedirs(rules_json_fmt_dir, exist_ok=True)
             write_business_rules_summary_json(rule_items, os.path.join(rules_json_fmt_dir, "report_Business_Rules.json"))
             print(f"Business Rules Summary JSON written -> {rules_json_path}")
+
+            # 2. Individual MD Files per OSVC Object
+            from collections import defaultdict
+            object_rules_map = defaultdict(list)
+            for rset in rule_items:
+                for r in rset.get("rules", []):
+                    obj = r.get("object") or "Incident"
+                    if obj.lower() in ["contacts", "contact"]: obj = "Contact"
+                    elif obj.lower() in ["incidents", "incident"]: obj = "Incident"
+                    elif obj.lower() in ["organizations", "organization", "org"]: obj = "Organization"
+                    object_rules_map[obj].append(r)
+
+            for obj_name, obj_rules in object_rules_map.items():
+                obj_md_content = generate_single_object_business_rules_markdown(obj_name, obj_rules)
+                obj_md_path = os.path.join(rules_dir, f"report_Business_Rules_{obj_name}.md")
+                with open(obj_md_path, "w", encoding="utf-8") as f:
+                    f.write(obj_md_content)
+                with open(os.path.join(rules_md_fmt_dir, f"report_Business_Rules_{obj_name}.md"), "w", encoding="utf-8") as f:
+                    f.write(obj_md_content)
+                print(f"Single Object Business Rules report written -> {obj_md_path}")
 
         # Generate Unified Master System Markdown Report
         from src.output.master_report_generator import generate_master_system_report

@@ -329,9 +329,11 @@ def write_single_custom_script_json(script_item, output_file):
         json.dump(script_item, f, indent=2, ensure_ascii=False)
 
 def write_business_rules_summary_json(rule_items, output_file):
+    import csv
     output_dir = os.path.dirname(output_file)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
+    
     total_rules = sum(r.get("total_rules", len(r.get("rules", []))) for r in rule_items)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump({
@@ -339,3 +341,47 @@ def write_business_rules_summary_json(rule_items, output_file):
             "rule_sets_count": len(rule_items),
             "rule_sets": rule_items
         }, f, indent=2, ensure_ascii=False)
+
+    # Export CSV files by Object and Action Type under results/csv/rules/
+    results_base = output_dir
+    while os.path.basename(results_base) in ("rules", "json"):
+        results_base = os.path.dirname(results_base)
+    csv_rules_dir = os.path.join(results_base, "csv", "rules")
+    os.makedirs(csv_rules_dir, exist_ok=True)
+
+    # Flatten rules across sets
+    all_rules = []
+    for rset in rule_items:
+        all_rules.extend(rset.get("rules", []))
+
+    # Group rules by Object and Action Type
+    object_action_rules = {}
+    for r in all_rules:
+        obj = r.get("object") or "Incidents"
+        actions_by_type = r.get("actions_by_type", {})
+        if not actions_by_type:
+            # fallback categorization
+            actions_by_type = {"Other": r.get("actions_raw", [])}
+
+        for atype, act_list in actions_by_type.items():
+            key = (obj, atype)
+            if key not in object_action_rules:
+                object_action_rules[key] = []
+            object_action_rules[key].append({
+                "rule_name": r.get("name"),
+                "group_name": r.get("group_name"),
+                "group_type": r.get("group_type"),
+                "status": "Enabled" if r.get("active", True) else "Disabled",
+                "condition": r.get("condition_raw"),
+                "actions": " | ".join(act_list)
+            })
+
+    # Write individual CSV file for each Object and Action Type
+    for (obj, atype), r_rows in object_action_rules.items():
+        csv_file_name = f"{obj}_{atype}.csv"
+        csv_p = os.path.join(csv_rules_dir, csv_file_name)
+        with open(csv_p, "w", encoding="utf-8-sig", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["Object", "Action Type", "Rule Group", "Rule Name", "Status", "Condition", "Actions"])
+            for row in r_rows:
+                writer.writerow([obj, atype, row["group_name"], row["rule_name"], row["status"], row["condition"], row["actions"]])

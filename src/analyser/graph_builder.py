@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict, Counter
 try:
     from .utils import normalise_id
 except ImportError:
@@ -100,24 +101,24 @@ def make_lightweight_node_data(node_type, data):
     }
 
     # Add relative path to report markdown
-    lower_type = node_type.lower()
-    if lower_type == "workspace" and data.get("name"):
-        ws_slug = data["name"].replace(" ", "_")
-        light["mdPath"] = f"../workspaces/{ws_slug}/report.md"
-    elif lower_type == "report":
-        rep_name = (data.get("name") or "Report").replace(" ", "_")
-        rep_id = data.get("id") or "doc"
-        light["mdPath"] = f"../reports/report_{rep_name}_{rep_id}.md"
-    elif lower_type == "cpm":
-        light["mdPath"] = "../cpm/report_CPM_Summary.md"
-    elif lower_type in ["buiaddin", "bui_addin"] and (data.get("name") or data.get("id")):
-        bname = data.get("name") or data.get("id")
-        b_slug = bname.replace(" ", "_")
-        light["mdPath"] = f"../bui_addins/report_{b_slug}.md"
-    elif lower_type in ["customscript", "custom_script", "script"] and (data.get("file_name") or data.get("name")):
-        sname = data.get("file_name") or data.get("name")
-        s_slug = sname.replace(" ", "_")
-        light["mdPath"] = f"../scripts/report_{s_slug}.md"
+    if data.get("mdPath"):
+        light["mdPath"] = data["mdPath"]
+    else:
+        lower_type = node_type.lower()
+        if lower_type == "workspace" and data.get("name"):
+            ws_slug = data["name"].replace(" ", "_")
+            light["mdPath"] = f"../workspaces/{ws_slug}/report.md"
+        elif lower_type == "report":
+            rep_name = (data.get("name") or "Report").replace(" ", "_")
+            light["mdPath"] = f"../reports/report_{rep_name}.md"
+        elif lower_type in ["cpm", "cpmmappings"]:
+            light["mdPath"] = "../cpm/report_CPM_Summary.md"
+        elif lower_type in ["buiaddin", "bui_addin"] and (data.get("name") or data.get("id")):
+            bname = data.get("name") or data.get("id")
+            light["mdPath"] = f"../bui_addins/report_{bname}.md"
+        elif lower_type in ["customscript", "custom_script", "script"] and (data.get("file_name") or data.get("name")):
+            sname = data.get("file_name") or data.get("name")
+            light["mdPath"] = f"../scripts/report_{sname}.md"
 
     # Counts of nested objects for summary UI
     for key in ["tabs", "fields", "rules", "columns", "filters", "soap_actions", "custom_fields_read", "custom_fields_written", "config_vars", "osvc_fields_read", "osvc_fields_written", "api_calls", "modal_views", "lifecycle_listeners", "external_libraries", "hooks", "osvc_objects"]:
@@ -214,7 +215,9 @@ def build_graph(components, relationships, orphans, endpoints):
         return ws_fields
 
     for ws in components.get("workspaces", []):
-        ws_node_id = add_node("Workspace", ws["name"], ws)
+        ws_data = dict(ws)
+        ws_data["mdPath"] = f"../workspaces/{ws['name'].replace(' ', '_')}/report.md"
+        ws_node_id = add_node("Workspace", ws["name"], ws_data)
         ws_mod = ws.get("module") or ws.get("object_type") or ws["name"]
 
         ws_fields = _get_workspace_fields(ws)
@@ -241,51 +244,71 @@ def build_graph(components, relationships, orphans, endpoints):
                     })
 
     for rep in components.get("reports", []):
-        # FIX: normalise ID to str for label
         rep_label = rep.get("name") or f"Report {normalise_id(rep.get('id'))}"
-        add_node("Report", rep_label, rep)
+        rep_clean = rep_label.replace(" ", "_")
+        rep_data = dict(rep)
+        rep_data["mdPath"] = f"../reports/report_{rep_clean}.md"
+        add_node("Report", rep_label, rep_data)
 
     for ns in components.get("navigationSets", []):
         add_node("NavigationSet", ns["name"], ns)
 
-    # Collect mapped business rule names from relationships
-    mapped_br_names = {
-        rel.get("from", {}).get("name")
-        for rel in relationships
-        if rel.get("from", {}).get("type") == "BusinessRule"
-    }
-
+    # Group rules by Object for canvas hub nodes
+    object_br_groups = defaultdict(list)
     for br in components.get("businessRules", []):
-        br_name = br.get("name") or br.get("file_name") or "Business Rules"
-        # Always add the primary Business Rules summary node (linked to report)
-        add_node("BusinessRule", br_name, {
-            "name": br_name,
-            "type": "BusinessRule",
-            "total_rules": len(br.get("rules", [])),
-            "mdPath": "../rules/report_Business_Rules.md"
-        })
-        # Only add individual rule nodes if they have explicit cross-component linkages
         for r in br.get("rules", []):
-            rname = r.get("name")
-            if rname and rname in mapped_br_names:
-                add_node("BusinessRule", rname, r)
+            obj = r.get("object") or "Incident"
+            if obj.lower() in ["contacts", "contact"]:
+                obj = "Contact"
+            elif obj.lower() in ["incidents", "incident"]:
+                obj = "Incident"
+            elif obj.lower() in ["organizations", "organization", "org"]:
+                obj = "Organization"
+            object_br_groups[obj].append(r)
+
+    if not object_br_groups and components.get("businessRules"):
+        object_br_groups["Incident"] = []
+
+    for obj_name, obj_rules in object_br_groups.items():
+        hub_label = f"{obj_name} Business Rules"
+        act_type_counts = Counter()
+        for r in obj_rules:
+            for atype in r.get("actions_by_type", {}):
+                act_type_counts[atype] += 1
+
+        add_node("BusinessRule", hub_label, {
+            "name": hub_label,
+            "type": "BusinessRule",
+            "object": obj_name,
+            "total_rules": len(obj_rules),
+            "action_type_breakdown": dict(act_type_counts),
+            "rules": obj_rules,
+            "mdPath": f"../rules/report_Business_Rules_{obj_name}.md"
+        })
 
     for script in components.get("customScripts", []):
-        add_node("CustomScript", script["file_name"], script)
+        s_name = script.get("file_name", "script.php")
+        s_data = dict(script)
+        s_data["mdPath"] = f"../scripts/report_{s_name}.md"
+        add_node("CustomScript", s_name, s_data)
 
     for cpm in components.get("cpm", []):
+        cpm_data = dict(cpm)
+        cpm_data["mdPath"] = "../cpm/report_CPM_Summary.md"
         if cpm.get("format") in ("cpm_procedure", "cpm_php"):
-            # FIX: use name/display_name, not missing 'class_name'
             label = cpm.get("name") or cpm.get("display_name") or cpm.get("file_name")
-            add_node("CPM", label, cpm)
+            add_node("CPM", label, cpm_data)
         elif cpm.get("format") == "cpm_mappings":
-            add_node("CPMMappings", "Mappings.xml", cpm)
+            add_node("CPMMappings", "Mappings.xml", cpm_data)
 
     for ep in endpoints:
         add_node("ExternalEndpoint", ep["url"], ep)
 
     for bui in components.get("buiAddins", []):
-        add_node("BUIAddin", bui.get("name", "BUI Add-In"), bui)
+        b_name = bui.get("name", "BUI Add-In")
+        b_data = dict(bui)
+        b_data["mdPath"] = f"../bui_addins/report_{b_name}.md"
+        add_node("BUIAddin", b_name, b_data)
 
     # ── Edges ──────────────────────────────────────────────────────────────
     SECONDARY_TYPES = {"osvobject", "osvcobject", "customfield", "configsetting", "reportcolumn"}

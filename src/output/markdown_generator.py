@@ -3,7 +3,7 @@ import re
 import urllib.parse
 import base64 as _b64
 from datetime import datetime
-from collections import Counter
+from collections import Counter, defaultdict
 
 def get_all_tabs_flat(tabs_list):
     flat = []
@@ -2437,14 +2437,14 @@ def clean_cell(text):
 
 def generate_business_rules_report_markdown(rule_sets):
     """
-    Generates a highly interactive, human-readable 13-Section OSVC Business Rules Report.
-    Includes Action Breakdown, Interactive Mermaid Flowcharts, Collapsible Accordions for Rule Groups,
-    State Transition Maps, Function Call Graphs, CPM Handlers, Most-Referenced/Written Fields, Top Queues,
-    Escalation Targets, Orphan Analysis, Disabled Rules (with sanitized multiline descriptions), and Condition Logic Trees.
+    Generates a highly structured, Object-first OSVC Business Rules Report.
+    Rules are organized by primary OSVC Object (Incidents, Contacts, Organizations, etc.),
+    then sub-grouped by Action Type (SetField, TransitionState_Stop, CPMCall, FunctionCall, etc.).
+    Includes Table of Objects, Object Flowcharts, Sub-Field Flowcharts, Action CSV exports, and Accordions.
     """
     lines = []
 
-    # Flatten rules and aggregate across rule_sets
+    # Flatten rules across rule_sets
     all_rules = []
     source_file = "Business Rules"
     for rset in rule_sets:
@@ -2460,27 +2460,22 @@ def generate_business_rules_report_markdown(rule_sets):
     disabled_pct = (disabled_count / total_rules * 100) if total_rules > 0 else 0
     deployed_pct = (deployed_count / total_rules * 100) if total_rules > 0 else 0
 
+    # Group rules by Object
+    rules_by_object = defaultdict(list)
+    object_action_counts = defaultdict(Counter)
+    object_cpm_calls = defaultdict(Counter)
+    object_state_transitions = defaultdict(Counter)
     groups = {}
-    rule_calling_func = set()
-    rule_trans_state = set()
-    rule_calling_cpm = set()
 
     action_breakdown = Counter()
     state_transitions = Counter()
     function_calls = Counter()
     cpm_calls = Counter()
-
     field_ref_counts = Counter()
     field_write_counts = Counter()
     queue_counts = Counter()
     escalation_targets = Counter()
-
     disabled_rules = []
-
-    depth_dist = Counter()
-    unconditional_rules = []
-    mixed_chain_rules = []
-    leaf_counts = []
 
     for r_idx, r in enumerate(all_rules, start=1):
         r_id = r.get("id") or f"R_{r_idx}"
@@ -2491,9 +2486,18 @@ def generate_business_rules_report_markdown(rule_sets):
         desc = r.get("description") or ""
         cond = r.get("condition_raw") or ""
         actions = r.get("actions_raw") or []
+        obj = r.get("object") or "Incident"
+        if obj.lower() in ["contacts", "contact"]:
+            obj = "Contact"
+        elif obj.lower() in ["incidents", "incident"]:
+            obj = "Incident"
+        elif obj.lower() in ["organizations", "organization", "org"]:
+            obj = "Organization"
+
+        rules_by_object[obj].append(r)
 
         if not is_en:
-            disabled_rules.append((gname, rname, desc))
+            disabled_rules.append((obj, gname, rname, desc))
 
         if gname not in groups:
             groups[gname] = {"type": gtype, "name": gname, "rules": 0, "enabled": 0, "disabled": 0}
@@ -2515,189 +2519,312 @@ def generate_business_rules_report_markdown(rule_sets):
                     if fname and len(fname) < 60:
                         field_ref_counts[fname] += 1
 
-        # Action Breakdown & Cross-Refs
+        # Action Breakdown & Categorization
         for act in actions:
             sub_acts = re.split(r"\s+\d+\.\s+", act)
             for sa in sub_acts:
-                sa = sa.replace("Then >", "").replace("Else >", "").strip()
-                if not sa:
+                sa_c = sa.replace("Then >", "").replace("Else >", "").strip()
+                if not sa_c:
                     continue
 
-                if sa.startswith("Set Field"):
-                    action_breakdown["SetField"] += 1
-                    m = re.search(r"Set Field\s+([A-Z][\w\s-]+\s*>\s*[\w\s-]+?)(?:\s+assign|\s+equal|\s+to|\s*$)", sa, re.I)
+                if sa_c.startswith("Set Field"):
+                    atype = "SetField"
+                    m = re.search(r"Set Field\s+([A-Z][\w\s-]+\s*>\s*[\w\s-]+?)(?:\s+assign|\s+equal|\s+to|\s*$)", sa_c, re.I)
                     if m:
                         fw = m.group(1).strip()
                         field_write_counts[fw] += 1
                         if fw.lower() == "incidents > queue":
-                            qm = re.search(r"assign as\s+([^\d\n\.]+)", sa, re.I)
+                            qm = re.search(r"assign as\s+([^\d\n\.]+)", sa_c, re.I)
                             if qm:
-                                qval = qm.group(1).strip()
-                                queue_counts[qval] += 1
-                elif "Transition State And Stop" in sa or "Transition State And Continue" in sa:
-                    if "Stop" in sa:
-                        action_breakdown["TransitionState_Stop"] += 1
-                    else:
-                        action_breakdown["TransitionState_Continue"] += 1
-                    rule_trans_state.add(r_id)
-                    tm = re.search(r"Transition State\s+And\s+(?:Stop|Continue)\s+([^\n]+?)(?:\s+\d+\.|$)", sa, re.I)
+                                queue_counts[qm.group(1).strip()] += 1
+                elif "Transition State And Stop" in sa_c:
+                    atype = "TransitionState_Stop"
+                    tm = re.search(r"Transition State And Stop\s+([^\n]+?)(?:\s+\d+\.|$)", sa_c, re.I)
                     if tm:
                         st_name = tm.group(1).strip()
                         state_transitions[(gname, st_name)] += 1
-                elif "Execute Object Event Handler" in sa:
-                    action_breakdown["CPMCall"] += 1
-                    rule_calling_cpm.add(r_id)
-                    cm = re.search(r"Execute Object Event Handler\s+([\w_]+)", sa, re.I)
+                        object_state_transitions[obj][(gname, st_name)] += 1
+                elif "Transition State And Continue" in sa_c:
+                    atype = "TransitionState_Continue"
+                    tm = re.search(r"Transition State And Continue\s+([^\n]+?)(?:\s+\d+\.|$)", sa_c, re.I)
+                    if tm:
+                        st_name = tm.group(1).strip()
+                        state_transitions[(gname, st_name)] += 1
+                        object_state_transitions[obj][(gname, st_name)] += 1
+                elif "Execute Object Event Handler" in sa_c:
+                    atype = "CPMCall"
+                    cm = re.search(r"Execute Object Event Handler\s+([\w_]+)", sa_c, re.I)
                     if cm:
-                        cpm_calls[(gname, cm.group(1).strip())] += 1
-                elif "Call Function" in sa:
-                    action_breakdown["FunctionCall"] += 1
-                    rule_calling_func.add(r_id)
-                    fm = re.search(r"Call Function\s+([^\*0-9\s]+[^\n\*]*?)(?:\s*\*\*\*|\s+\d+\.|$)", sa, re.I)
+                        c_name = cm.group(1).strip()
+                        cpm_calls[(gname, c_name)] += 1
+                        object_cpm_calls[obj][c_name] += 1
+                elif "Call Function" in sa_c:
+                    atype = "FunctionCall"
+                    fm = re.search(r"Call Function\s+([^\*0-9\s]+[^\n\*]*?)(?:\s*\*\*\*|\s+\d+\.|$)", sa_c, re.I)
                     if fm:
                         function_calls[(gname, fm.group(1).strip())] += 1
-                elif "Stop Processing" in sa:
-                    action_breakdown["StopProcessing"] += 1
-                elif "Clear Escalation" in sa:
-                    action_breakdown["ClearEscalation"] += 1
-                elif "Escalation" in sa or "Revalidate" in sa:
-                    action_breakdown["Escalation"] += 1
-                    em = re.search(r"Escalation\s+([^\n]+)", sa, re.I)
+                elif "Stop Processing" in sa_c:
+                    atype = "StopProcessing"
+                elif "Clear Escalation" in sa_c:
+                    atype = "ClearEscalation"
+                elif "Escalation" in sa_c or "Revalidate" in sa_c:
+                    atype = "Escalation"
+                    em = re.search(r"Escalation\s+([^\n]+)", sa_c, re.I)
                     if em:
                         escalation_targets[em.group(1).strip()] += 1
-                elif "Append Response Template" in sa:
-                    action_breakdown["AppendTemplate"] += 1
-                elif "Send Marketing Email" in sa:
-                    action_breakdown["SendMarketingEmail"] += 1
-                elif "Send Email" in sa or "Email Incident" in sa:
-                    action_breakdown["SendEmail"] += 1
+                elif "Append Response Template" in sa_c:
+                    atype = "AppendTemplate"
+                elif "Send Marketing Email" in sa_c:
+                    atype = "SendMarketingEmail"
+                elif "Send Email" in sa_c or "Email Incident" in sa_c:
+                    atype = "SendEmail"
                 else:
-                    action_breakdown["Other"] += 1
+                    atype = "Other"
 
-        # Condition Complexity Analysis
-        clean_cond = cond.replace("If (", "").rstrip(")").strip()
-        if not clean_cond:
-            unconditional_rules.append((rname, gname, is_en))
-            depth_dist[0] += 1
-        else:
-            p_depth = max(clean_cond.count("("), clean_cond.count(")"))
-            d_val = 1 if p_depth == 0 else p_depth + 1
-            depth_dist[min(d_val, 4)] += 1
+                action_breakdown[atype] += 1
+                object_action_counts[obj][atype] += 1
 
-            if " AND " in clean_cond and " OR " in clean_cond and "(" not in clean_cond:
-                mixed_chain_rules.append((rname, gname))
-
-            leaves = len(re.split(r"\s+(?:AND|OR)\s+", clean_cond))
-            leaf_counts.append((rname, gname, leaves, d_val))
-
-    state_groups_count = sum(1 for g in groups.values() if g["type"].lower() == "state")
-    func_groups_count = sum(1 for g in groups.values() if g["type"].lower() == "function")
-
-    lines.append("# OSVC Business Rules Report")
+    lines.append("# OSVC Business Rules Report (Object & Action-Type Reorganization)")
     lines.append("")
-    lines.append(f"_Source: `{source_file}` — {len(groups)} rule groups ({state_groups_count} States, {func_groups_count} Functions)_")
+    lines.append(f"_Source: `{source_file}` — {total_rules} Business Rules organized across {len(rules_by_object)} Primary OSVC Objects_")
     lines.append("")
 
     lines.append("> [!NOTE]")
-    lines.append(f"> **Interactive Architectural Executive Summary**: Analyzed **{total_rules} Business Rules** across **{state_groups_count} States** and **{func_groups_count} Functions**. Use the collapsible accordions below to expand individual rule logic, state transition maps, and backend CPM event handler triggers.")
+    lines.append(f"> **Object & Action-Type Architecture**: Rules are categorized **by Primary OSVC Object first** (`Incident`, `Contact`, `Organization`), then **sub-grouped by Action Type** (`SetField`, `TransitionState_Stop`, `CPMCall`, `FunctionCall`, etc.). Expand each object accordion below for sub-field flowcharts and rule tables.")
     lines.append("")
 
-    # ── 1. Summary ──────────────────────────────────────────────────────────
-    lines.append("## 1. Summary")
+    # ── 1. Table of Objects ──────────────────────────────────────────────────
+    lines.append("## 1. Table of OSVC Objects & Action Breakdown")
     lines.append("")
-    lines.append("| Metric | Value |")
-    lines.append("|---|---|")
-    lines.append(f"| Total rules | {total_rules} |")
-    lines.append(f"| Enabled | {enabled_count} ({enabled_pct:.1f}%) |")
-    lines.append(f"| Disabled | {disabled_count} ({disabled_pct:.1f}%) |")
-    lines.append(f"| Deployed | {deployed_count} ({deployed_pct:.1f}%) |")
-    lines.append(f"| Rule groups | {len(groups)} total — {state_groups_count} States, {func_groups_count} Functions |")
-    lines.append(f"| Rules calling other Functions | {len(rule_calling_func)} |")
-    lines.append(f"| Rules transitioning State | {len(rule_trans_state)} |")
-    lines.append(f"| Rules calling CPM/object event handlers | {len(rule_calling_cpm)} |")
+    lines.append("| OSVC Object | Total Rules | Enabled | Disabled | Primary Action Breakdown | CSV Summary Export |")
+    lines.append("|---|---|---|---|---|---|")
+    for obj_name, obj_rules in sorted(rules_by_object.items(), key=lambda x: len(x[1]), reverse=True):
+        obj_en = sum(1 for r in obj_rules if r.get("active", True))
+        obj_dis = len(obj_rules) - obj_en
+        top_actions = ", ".join([f"{act}: {cnt}" for act, cnt in object_action_counts[obj_name].most_common(4)])
+        csv_link = f"`results/csv/rules/{obj_name}_*.csv`"
+        lines.append(f"| **{clean_cell(obj_name)}** | {len(obj_rules)} | {obj_en} | {obj_dis} | {clean_cell(top_actions)} | {csv_link} |")
     lines.append("")
 
-    lines.append("### Action type breakdown (all actions across all rules)")
+    # ── 2. System Architecture Flowcharts ───────────────────────────────────
+    lines.append("## 2. Object Level System Architecture Flowchart")
+    lines.append("The diagram below illustrates incident and contact object lifecycle flow and CPM event handler triggers:")
     lines.append("")
-    lines.append("| Action Type | Count |")
-    lines.append("|---|---|")
+    lines.append("```mermaid")
+    lines.append("graph TD")
+    lines.append("  classDef objNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;")
+    lines.append("  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
+    lines.append("  classDef actNode fill:#059669,stroke:#047857,color:#fff;")
+    for obj_name, obj_rules in rules_by_object.items():
+        node_id = f"OBJ_{obj_name}"
+        lines.append(f"  {node_id}[\"Object: {obj_name} ({len(obj_rules)} Rules)\"]:::objNode")
+    for (from_g, cpm_h), cnt in cpm_calls.most_common(8):
+        c_node = cpm_h.replace("-", "_").replace(" ", "_")
+        lines.append(f"  OBJ_Incident -->|\"Executes ({cnt}x)\"| {c_node}[\"{cpm_h}\"]:::cpmNode")
+    lines.append("```")
+    lines.append("")
+
+    # ── 3. Object Accordions with Sub-Groups by Action Type ────────────────
+    lines.append("## 3. Business Rules Breakdown by Object & Action Type")
+    lines.append("")
+
     action_order = [
         "SetField", "TransitionState_Stop", "CPMCall", "FunctionCall",
         "StopProcessing", "ClearEscalation", "Escalation", "AppendTemplate",
         "Other", "SendEmail", "SendMarketingEmail", "TransitionState_Continue"
     ]
-    for act_type in action_order:
-        cnt = action_breakdown.get(act_type, 0)
-        lines.append(f"| {act_type} | {cnt} |")
-    lines.append("")
 
-    # ── Visual Flowcharts ───────────────────────────────────────────────────
-    lines.append("## Visual System Architecture Flowcharts")
-    lines.append("")
-    lines.append("### State Transition Lifecycle Flowchart")
-    lines.append("The diagram below illustrates incident state transitions triggered by business rule conditions:")
-    lines.append("")
-    lines.append("```mermaid")
-    lines.append("graph TD")
-    lines.append("  classDef state fill:#3b82f6,stroke:#1d4ed8,color:#fff,font-weight:bold;")
-    lines.append("  classDef func fill:#8b5cf6,stroke:#6d28d9,color:#fff;")
-    for (from_g, to_st), cnt in state_transitions.most_common(12):
-        f_node = from_g.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
-        t_node = to_st.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
-        lines.append(f"  {f_node}[\"{from_g}\"] -->|\"{cnt} transitions\"| {t_node}[\"{to_st}\"]")
-    lines.append("```")
-    lines.append("")
+    for obj_name, obj_rules in sorted(rules_by_object.items(), key=lambda x: len(x[1]), reverse=True):
+        lines.append(f"<details open>")
+        lines.append(f"  <summary style=\"font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;\">Object: {obj_name} ({len(obj_rules)} Rules)</summary>")
+        lines.append("")
 
-    lines.append("### CPM Object Event Handler Integration Diagram")
-    lines.append("The diagram below highlights key Business Rule groups invoking backend PHP Object Event Handlers:")
-    lines.append("")
-    lines.append("```mermaid")
-    lines.append("graph LR")
-    lines.append("  classDef ruleGroup fill:#059669,stroke:#047857,color:#fff;")
-    lines.append("  classDef cpmHandler fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
-    for (from_g, cpm_h), cnt in cpm_calls.most_common(10):
-        f_node = from_g.replace("-", "_").replace(" ", "_").replace("&", "And").replace("/", "_")
-        c_node = cpm_h.replace("-", "_").replace(" ", "_")
-        lines.append(f"  {f_node}[\"{from_g}\"] -->|\"Executes ({cnt}x)\"| {c_node}[\"{cpm_h}\"]:::cpmHandler")
-    lines.append("```")
-    lines.append("")
+        # Sub-field flowchart for this object
+        if object_cpm_calls[obj_name] or object_state_transitions[obj_name]:
+            lines.append(f"#### {obj_name} Sub-Field Lifecycle Flowchart")
+            lines.append("```mermaid")
+            lines.append("graph LR")
+            lines.append("  classDef stNode fill:#3b82f6,stroke:#1d4ed8,color:#fff;")
+            lines.append("  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
+            for (from_g, st_target), cnt in object_state_transitions[obj_name].most_common(6):
+                f_n = from_g.replace("-", "_").replace(" ", "_")
+                t_n = st_target.replace("-", "_").replace(" ", "_")
+                lines.append(f"  {f_n}[\"{from_g}\"] -->|\"{cnt} transitions\"| {t_n}[\"{st_target}\"]:::stNode")
+            for cpm_h, cnt in object_cpm_calls[obj_name].most_common(6):
+                c_n = cpm_h.replace("-", "_").replace(" ", "_")
+                lines.append(f"  OBJ_{obj_name}[\"{obj_name}\"] -->|\"CPM Call ({cnt}x)\"| {c_n}[\"{cpm_h}\"]:::cpmNode")
+            lines.append("```")
+            lines.append("")
 
-    # ── 2. Rule Groups (States & Functions) Accordion ────────────────────────
-    lines.append("## 2. Rule Groups (States & Functions)")
-    lines.append("")
-    lines.append("<details open>")
-    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Rule Groups Overview Matrix ({len(groups)} Groups)</summary>")
-    lines.append("")
-    lines.append("| Group Type | Group Name | Rules | Enabled | Disabled |")
-    lines.append("|---|---|---|---|---|")
-    for gname, gdata in sorted(groups.items(), key=lambda x: (0 if x[1]["type"].lower() == "state" else 1, x[0])):
-        lines.append(f"| {clean_cell(gdata['type'])} | {clean_cell(gdata['name'])} | {gdata['rules']} | {gdata['enabled']} | {gdata['disabled']} |")
-    lines.append("")
-    lines.append("</details>")
-    lines.append("")
+        # Group rules by Action Type
+        rules_by_action = defaultdict(list)
+        for r in obj_rules:
+            act_map = r.get("actions_by_type", {})
+            if not act_map:
+                rules_by_action["Other"].append(r)
+            else:
+                for atype in act_map:
+                    rules_by_action[atype].append(r)
 
-    # ── 3. State Transition Map Accordion ───────────────────────────────────
-    lines.append("## 3. State Transition Map")
+        for atype in action_order:
+            a_rules = rules_by_action.get(atype, [])
+            if not a_rules:
+                continue
+
+            lines.append(f"  <details open>")
+            lines.append(f"    <summary style=\"font-weight: 600; font-size: 15px; cursor: pointer;\">Action Type: {atype} ({len(a_rules)} Rules)</summary>")
+            lines.append("")
+            lines.append(f"Export CSV: `{obj_name}_{atype}.csv`")
+            lines.append("")
+            lines.append("| Rule Group | Rule Name | Status | Condition | Action Text |")
+            lines.append("|---|---|---|---|---|")
+            for r in a_rules:
+                gname = r.get("group_name") or "General"
+                rname = r.get("name") or "Rule"
+                st_str = "Enabled" if r.get("active", True) else "Disabled"
+                cond_str = clean_cell(r.get("condition_raw") or "If ()")
+                act_list = r.get("actions_by_type", {}).get(atype, r.get("actions_raw", []))
+                act_str = clean_cell(" | ".join(act_list))
+                lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | {st_str} | {cond_str} | {act_str} |")
+            lines.append("")
+            lines.append("  </details>")
+            lines.append("")
+
+        lines.append("</details>")
+        lines.append("")
+
+    # ── 4. Global Action Summary Matrix ─────────────────────────────────────
+    lines.append("## 4. Global Action Type Summary Matrix")
     lines.append("")
-    lines.append("<details>")
-    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand State Transition Map ({len(state_transitions)} Routes)</summary>")
-    lines.append("")
-    lines.append("Which group triggers a transition into which State (`Transition State And Stop/Continue`):")
-    lines.append("")
-    lines.append("| From (rule group) | → To State | Times |")
+    lines.append("| Action Type | Global Count | Percentage |")
     lines.append("|---|---|---|")
-    for (from_g, to_st), cnt in state_transitions.most_common():
-        lines.append(f"| {clean_cell(from_g)} | {clean_cell(to_st)} | {cnt} |")
+    for atype in action_order:
+        cnt = action_breakdown.get(atype, 0)
+        pct = (cnt / sum(action_breakdown.values()) * 100) if action_breakdown else 0
+        lines.append(f"| **{atype}** | {cnt} | {pct:.1f}% |")
+    lines.append("")
+
+    # ── 5. Disabled Rules Cleanup ───────────────────────────────────────────
+    lines.append("## 5. Disabled Rules Cleanup Review")
+    lines.append("")
+    lines.append("<details>")
+    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Review Disabled Rules ({len(disabled_rules)} Rules)</summary>")
+    lines.append("")
+    lines.append("| Object | Rule Group | Rule Name | Description |")
+    lines.append("|---|---|---|---|")
+    for obj_name, gname, rname, desc in disabled_rules:
+        lines.append(f"| {clean_cell(obj_name)} | {clean_cell(gname)} | {clean_cell(rname)} | {clean_cell(desc)} |")
     lines.append("")
     lines.append("</details>")
     lines.append("")
 
-    # ── 4. Function Call Graph Accordion ────────────────────────────────────
-    lines.append("## 4. Function Call Graph")
+    return "\n".join(lines)
+
+def generate_single_object_business_rules_markdown(obj_name, obj_rules):
+    """
+    Generates a dedicated standalone Business Rules Markdown report for a single OSVC Object.
+    """
+    lines = []
+    total_rules = len(obj_rules)
+    enabled_count = sum(1 for r in obj_rules if r.get("active", True))
+    disabled_count = total_rules - enabled_count
+
+    action_counts = Counter()
+    cpm_calls = Counter()
+    state_transitions = Counter()
+    rules_by_action = defaultdict(list)
+
+    for r in obj_rules:
+        gname = r.get("group_name") or "General"
+        for st in r.get("state_transitions", []):
+            state_transitions[(gname, st)] += 1
+        for h in r.get("cpm_handlers_invoked", []):
+            cpm_calls[h] += 1
+
+        act_map = r.get("actions_by_type", {})
+        if not act_map:
+            rules_by_action["Other"].append(r)
+            action_counts["Other"] += 1
+        else:
+            for atype, act_list in act_map.items():
+                rules_by_action[atype].append(r)
+                action_counts[atype] += len(act_list)
+
+    lines.append(f"# OSVC Business Rules Report — Object: {obj_name}")
     lines.append("")
-    lines.append("<details>")
-    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Click to Expand Function Call Graph ({len(function_calls)} Calls)</summary>")
+    lines.append(f"_Source: Standalone Analysis — {total_rules} Business Rules for Object `{obj_name}`_")
     lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> **Entity Focus**: Dedicated report for OSVC Object **`{obj_name}`**. Contains action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.")
+    lines.append("")
+
+    # 1. Summary Matrix
+    lines.append("## 1. Object Summary")
+    lines.append("")
+    lines.append("| Metric | Value |")
+    lines.append("|---|---|")
+    lines.append(f"| Target Object | **{clean_cell(obj_name)}** |")
+    lines.append(f"| Total Rules | {total_rules} |")
+    lines.append(f"| Enabled Rules | {enabled_count} |")
+    lines.append(f"| Disabled Rules | {disabled_count} |")
+    lines.append(f"| Action Breakdown | {clean_cell(', '.join([f'{a}: {c}' for a, c in action_counts.most_common()]))} |")
+    lines.append(f"| CSV Exports | `results/csv/rules/{obj_name}_*.csv` |")
+    lines.append("")
+
+    # 2. Sub-Field Lifecycle Flowchart
+    if state_transitions or cpm_calls:
+        lines.append(f"## 2. {obj_name} Sub-Field Lifecycle Flowchart")
+        lines.append("")
+        lines.append("```mermaid")
+        lines.append("graph LR")
+        lines.append("  classDef stNode fill:#3b82f6,stroke:#1d4ed8,color:#fff;")
+        lines.append("  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
+        for (from_g, st_target), cnt in state_transitions.most_common(8):
+            f_n = from_g.replace("-", "_").replace(" ", "_")
+            t_n = st_target.replace("-", "_").replace(" ", "_")
+            lines.append(f"  {f_n}[\"{from_g}\"] -->|\"{cnt} transitions\"| {t_n}[\"{st_target}\"]:::stNode")
+        for cpm_h, cnt in cpm_calls.most_common(8):
+            c_n = cpm_h.replace("-", "_").replace(" ", "_")
+            lines.append(f"  OBJ_{obj_name}[\"{obj_name}\"] -->|\"CPM Call ({cnt}x)\"| {c_n}[\"{cpm_h}\"]:::cpmNode")
+        lines.append("```")
+        lines.append("")
+
+    # 3. Action Type Sub-Accordions
+    lines.append(f"## 3. Business Rules Breakdown by Action Type")
+    lines.append("")
+
+    action_order = [
+        "SetField", "TransitionState_Stop", "CPMCall", "FunctionCall",
+        "StopProcessing", "ClearEscalation", "Escalation", "AppendTemplate",
+        "Other", "SendEmail", "SendMarketingEmail", "TransitionState_Continue"
+    ]
+
+    for atype in action_order:
+        a_rules = rules_by_action.get(atype, [])
+        if not a_rules:
+            continue
+
+        lines.append(f"<details open>")
+        lines.append(f"  <summary style=\"font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;\">Action Type: {atype} ({len(a_rules)} Rules)</summary>")
+        lines.append("")
+        lines.append(f"Export CSV: `{obj_name}_{atype}.csv`")
+        lines.append("")
+        lines.append("| Rule Group | Rule Name | Status | Condition | Action Text |")
+        lines.append("|---|---|---|---|---|")
+        for r in a_rules:
+            gname = r.get("group_name") or "General"
+            rname = r.get("name") or "Rule"
+            st_str = "Enabled" if r.get("active", True) else "Disabled"
+            cond_str = clean_cell(r.get("condition_raw") or "If ()")
+            act_list = (r.get("actions_by_type") or {}).get(atype, r.get("actions_raw", []))
+            act_str = clean_cell(" | ".join(act_list))
+            lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | {st_str} | {cond_str} | {act_str} |")
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
     lines.append("Which group invokes which Function (`Call Function`):")
     lines.append("")
     lines.append("| From (rule group) | Calls Function | Times |")

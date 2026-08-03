@@ -187,9 +187,59 @@ def parse_rule_csv_file(file_path):
                     custom_fields.append(cf_name)
                     custom_fields_set.add(cf_name)
 
+            # Determine OSVC Target Object (Incident, Contact, Organization, etc.)
+            full_rule_text = f"{gname} {cond_raw} {act_raw}".lower()
+            if "contacts >" in full_rule_text or "contact >" in full_rule_text or "contact" in gname.lower():
+                target_obj = "Contact"
+            elif "organizations >" in full_rule_text or "org >" in full_rule_text or "organization" in gname.lower():
+                target_obj = "Organization"
+            elif "opportunities >" in full_rule_text or "opportunity >" in full_rule_text:
+                target_obj = "Opportunity"
+            else:
+                target_obj = "Incident"
+
+            # Categorize actions by Action Type
+            actions_by_type = {}
+            primary_action_type = "Other"
+            for act in act_cols:
+                sub_acts = re.split(r"\s+\d+\.\s+", act)
+                for sa in sub_acts:
+                    sa_clean = sa.replace("Then >", "").replace("Else >", "").strip()
+                    if not sa_clean:
+                        continue
+                    if sa_clean.startswith("Set Field"):
+                        atype = "SetField"
+                    elif "Transition State And Stop" in sa_clean:
+                        atype = "TransitionState_Stop"
+                    elif "Transition State And Continue" in sa_clean:
+                        atype = "TransitionState_Continue"
+                    elif "Execute Object Event Handler" in sa_clean:
+                        atype = "CPMCall"
+                    elif "Call Function" in sa_clean:
+                        atype = "FunctionCall"
+                    elif "Stop Processing" in sa_clean:
+                        atype = "StopProcessing"
+                    elif "Clear Escalation" in sa_clean:
+                        atype = "ClearEscalation"
+                    elif "Escalation" in sa_clean or "Revalidate" in sa_clean:
+                        atype = "Escalation"
+                    elif "Append Response Template" in sa_clean:
+                        atype = "AppendTemplate"
+                    elif "Send Marketing Email" in sa_clean:
+                        atype = "SendMarketingEmail"
+                    elif "Send Email" in sa_clean or "Email Incident" in sa_clean:
+                        atype = "SendEmail"
+                    else:
+                        atype = "Other"
+
+                    actions_by_type.setdefault(atype, []).append(sa_clean)
+                    if primary_action_type == "Other" and atype != "Other":
+                        primary_action_type = atype
+
             rules.append({
                 "id": f"CSV_Rule_{row_idx}",
                 "name": rname,
+                "object": target_obj,
                 "group_type": gtype,
                 "group_name": gname,
                 "active": is_active,
@@ -199,6 +249,8 @@ def parse_rule_csv_file(file_path):
                 "variable_default": vdef,
                 "condition_raw": cond_raw,
                 "actions_raw": act_cols,
+                "primary_action_type": primary_action_type,
+                "actions_by_type": actions_by_type,
                 "cpm_handlers_invoked": sorted(list(set(cpm_handlers))),
                 "process_scripts_invoked": sorted(list(set(process_scripts))),
                 "state_transitions": sorted(list(set(state_transitions))),

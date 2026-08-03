@@ -317,20 +317,20 @@ def map_relationships(components):
     # ── 5f. Business Rules → CPM Event Handlers & State Transitions ──────────
     for br_set in business_rules_list:
         rules_list = br_set.get("rules", [])
-        set_name = br_set.get("name") or br_set.get("file_name") or "Business Rules"
         for r in rules_list:
-            rname = r.get("name") or "Rule"
+            obj_name = r.get("object") or "Incident"
+            if obj_name.lower() in ["contacts", "contact"]:
+                obj_name = "Contact"
+            elif obj_name.lower() in ["incidents", "incident"]:
+                obj_name = "Incident"
+            elif obj_name.lower() in ["organizations", "organization", "org"]:
+                obj_name = "Organization"
+            br_node_name = f"{obj_name} Business Rules"
             for h in r.get("cpm_handlers_invoked", []):
                 relationships.append({
-                    "from": {"type": "BusinessRule", "name": f"{rname}"},
+                    "from": {"type": "BusinessRule", "name": br_node_name},
                     "to":   {"type": "CPM", "name": h},
-                    "via":  f"Triggers CPM Handler '{h}'"
-                })
-            for st in r.get("state_transitions", []):
-                relationships.append({
-                    "from": {"type": "BusinessRule", "name": f"{rname}"},
-                    "to":   {"type": "RuleState", "name": st},
-                    "via":  f"Transitions State to '{st}'"
+                    "via":  f"{obj_name} Business Rule triggers CPM Handler '{h}'"
                 })
 
     # ── 6. Reports → OSVC Tables ───────────────────────────────────────────

@@ -360,6 +360,158 @@ svg.panning { cursor: grabbing; }
 #diagramModal.open {
   display: flex;
 }
+/* ==========================================================================
+   Modern & Premium Business Rules & Documentation Styling
+   ========================================================================== */
+
+/* Accordion Summary Headers */
+.tab-content details {
+  background: var(--panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tab-content details[open] {
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 12px rgba(153, 0, 38, 0.08);
+}
+
+.tab-content summary {
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--panel2);
+  color: var(--text-main);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid transparent;
+  transition: background 0.15s ease;
+}
+
+.tab-content details[open] > summary {
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(153, 0, 38, 0.04);
+}
+
+.tab-content summary:hover {
+  background: var(--panel2);
+  color: var(--accent-primary);
+}
+
+.tab-content details .details-body,
+.tab-content details > table,
+.tab-content details > div,
+.tab-content details > p {
+  padding: 12px 14px;
+}
+
+/* Rule Table Styling */
+.tab-content table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  margin: 12px 0 !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border-subtle) !important;
+  overflow: hidden !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03) !important;
+}
+
+.tab-content th {
+  background: linear-gradient(135deg, var(--panel2), #FAF5ED) !important;
+  color: var(--text-main) !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  padding: 10px 12px !important;
+  border-bottom: 2px solid var(--border-subtle) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+}
+
+.tab-content th:last-child {
+  border-right: none !important;
+}
+
+.tab-content td {
+  padding: 9px 12px !important;
+  font-size: 12px !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  vertical-align: top !important;
+  line-height: 1.5 !important;
+}
+
+.tab-content td:last-child {
+  border-right: none !important;
+}
+
+.tab-content tr:last-child td {
+  border-bottom: none !important;
+}
+
+.tab-content tr:nth-child(even) td {
+  background: rgba(153, 0, 38, 0.015);
+}
+
+.tab-content tr:hover td {
+  background: rgba(153, 0, 38, 0.04) !important;
+}
+
+/* Status & Action Type Badges */
+.badge-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-enabled {
+  background: #DEF7EC;
+  color: #03543F;
+  border: 1px solid #03543F33;
+}
+
+.badge-disabled {
+  background: #FDE8E8;
+  color: #9B1C1C;
+  border: 1px solid #9B1C1C33;
+}
+
+.badge-action {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  background: #EBF5FF;
+  color: #1E429F;
+  border: 1px solid #1E429F33;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+/* Markdown Code Blocks inside details */
+.tab-content code {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background: rgba(153, 0, 38, 0.06) !important;
+  color: var(--accent-primary) !important;
+  border: 1px solid rgba(153, 0, 38, 0.15) !important;
+}
 .modal-controls {
   position: absolute;
   top: 20px;
