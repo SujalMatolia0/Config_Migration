@@ -319,3 +319,15 @@ def write_single_custom_script_json(script_item, output_file):
         os.makedirs(output_dir, exist_ok=True)
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(script_item, f, indent=2, ensure_ascii=False)
+
+def write_business_rules_summary_json(rule_items, output_file):
+    output_dir = os.path.dirname(output_file)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    total_rules = sum(r.get("total_rules", len(r.get("rules", []))) for r in rule_items)
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump({
+            "total_rules": total_rules,
+            "rule_sets_count": len(rule_items),
+            "rule_sets": rule_items
+        }, f, indent=2, ensure_ascii=False)

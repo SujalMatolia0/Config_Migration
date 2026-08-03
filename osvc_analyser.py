@@ -902,6 +902,8 @@ def main():
         rule_items = components.get("businessRules", [])
         if rule_items:
             from src.output.markdown_generator import generate_business_rules_report_markdown
+            from src.output.json_writer import write_business_rules_summary_json
+
             rules_md_content = generate_business_rules_report_markdown(rule_items)
             rules_md_path = os.path.join(rules_dir, "report_Business_Rules.md")
             with open(rules_md_path, "w", encoding="utf-8") as f:
@@ -911,6 +913,13 @@ def main():
             with open(os.path.join(rules_md_fmt_dir, "report_Business_Rules.md"), "w", encoding="utf-8") as f:
                 f.write(rules_md_content)
             print(f"Business Rules Summary report written -> {rules_md_path}")
+
+            rules_json_path = os.path.join(rules_dir, "report_Business_Rules.json")
+            write_business_rules_summary_json(rule_items, rules_json_path)
+            rules_json_fmt_dir = os.path.join(json_dir, "rules")
+            os.makedirs(rules_json_fmt_dir, exist_ok=True)
+            write_business_rules_summary_json(rule_items, os.path.join(rules_json_fmt_dir, "report_Business_Rules.json"))
+            print(f"Business Rules Summary JSON written -> {rules_json_path}")
 
         # Generate Unified Master System Markdown Report
         from src.output.master_report_generator import generate_master_system_report
