@@ -248,9 +248,27 @@ def build_graph(components, relationships, orphans, endpoints):
     for ns in components.get("navigationSets", []):
         add_node("NavigationSet", ns["name"], ns)
 
+    # Collect mapped business rule names from relationships
+    mapped_br_names = {
+        rel.get("from", {}).get("name")
+        for rel in relationships
+        if rel.get("from", {}).get("type") == "BusinessRule"
+    }
+
     for br in components.get("businessRules", []):
+        br_name = br.get("name") or br.get("file_name") or "Business Rules"
+        # Always add the primary Business Rules summary node (linked to report)
+        add_node("BusinessRule", br_name, {
+            "name": br_name,
+            "type": "BusinessRule",
+            "total_rules": len(br.get("rules", [])),
+            "mdPath": "../rules/report_Business_Rules.md"
+        })
+        # Only add individual rule nodes if they have explicit cross-component linkages
         for r in br.get("rules", []):
-            add_node("BusinessRule", r["name"], r)
+            rname = r.get("name")
+            if rname and rname in mapped_br_names:
+                add_node("BusinessRule", rname, r)
 
     for script in components.get("customScripts", []):
         add_node("CustomScript", script["file_name"], script)
