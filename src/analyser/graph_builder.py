@@ -328,7 +328,16 @@ def build_graph(components, relationships, orphans, endpoints):
             "label":  via_label
         })
 
+    # Filter out unmapped floating BusinessRule nodes that have 0 edges on the graph
+    active_edge_node_ids = {e["source"] for e in edges} | {e["target"] for e in edges}
+    final_nodes = [
+        n for n in nodes
+        if n.get("type") != "businessrule"
+        or n.get("label") == "Business Rules"
+        or n.get("id") in active_edge_node_ids
+    ]
+
     return {
-        "nodes": nodes,
+        "nodes": final_nodes,
         "edges": edges
     }

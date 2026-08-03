@@ -571,7 +571,7 @@ function updateDOM() {
 
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: false });
+      select(n, { openInspector: true });
       if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
         if (n.type === "module_root") {
           expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
@@ -588,7 +588,7 @@ function updateDOM() {
 
     g.addEventListener("dblclick", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: true });
+      select(n, { openInspector: true, focusReport: true });
     });
 
     g.addEventListener("mouseenter", ev => {
@@ -1701,6 +1701,10 @@ function select(n, options = {}) {
 
   const shouldOpen = options && options.openInspector;
   inspector.classList.toggle("open", !!shouldOpen && !!n);
+  if (options && options.focusReport) {
+    const rTabBtn = document.querySelector('.tab-btn[data-tab="report"]');
+    if (rTabBtn) rTabBtn.click();
+  }
   if (!n) return;
 
   // Build Details Tab
