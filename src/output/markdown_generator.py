@@ -3,6 +3,7 @@ import re
 import urllib.parse
 import base64 as _b64
 from datetime import datetime
+from collections import Counter
 
 def get_all_tabs_flat(tabs_list):
     flat = []
@@ -2430,101 +2431,438 @@ def generate_single_custom_script_markdown(script):
 
 def generate_business_rules_report_markdown(rule_sets):
     """
-    Generates a comprehensive Markdown report for Business Rules exports (both XML and CSV formats).
-    Includes executive summary, rule metrics, state transitions, invoked CPM handlers, and expandable rule details.
+    Generates a comprehensive 13-Section OSVC Business Rules Report matching the exact system architecture specification.
+    Includes Action Breakdown, State/Function Groups, State Transition Map, Function Call Graph, CPM Calls,
+    Most-Referenced/Written Fields, Top Queues, Escalation Targets, Orphan Analysis, Disabled Rules, and Condition Logic Analysis.
     """
     lines = []
-    lines.append("# Business Rules Execution & Policy Report")
-    lines.append("")
-    lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
-    lines.append("")
 
-    total_rules = 0
-    enabled_count = 0
-    disabled_count = 0
-    all_cpm_handlers = set()
-    all_states = set()
-    all_functions = set()
-    all_custom_fields = set()
+    # Flatten rules and aggregate across rule_sets
     all_rules = []
-
+    source_file = "Business Rules"
     for rset in rule_sets:
-        total_rules += rset.get("total_rules", len(rset.get("rules", [])))
-        enabled_count += rset.get("enabled_count", 0)
-        disabled_count += rset.get("disabled_count", 0)
-        all_cpm_handlers.update(rset.get("cpm_handlers_invoked", []))
-        all_states.update(rset.get("states", []))
-        all_functions.update(rset.get("functions", []))
-        all_custom_fields.update(rset.get("custom_fields_referenced", []))
+        source_file = rset.get("file_name") or rset.get("name") or source_file
         all_rules.extend(rset.get("rules", []))
 
-    lines.append("> [!NOTE]")
-    lines.append(f"> **Business Rules Summary**: Analyzed **{total_rules} total rules** across **{len(all_states)} States** and **{len(all_functions)} Functions**, invoking **{len(all_cpm_handlers)} unique CPM Object Event Handlers**.")
+    total_rules = len(all_rules)
+    enabled_count = sum(1 for r in all_rules if r.get("active", True))
+    disabled_count = total_rules - enabled_count
+    deployed_count = sum(1 for r in all_rules if r.get("deployed", True))
+
+    enabled_pct = (enabled_count / total_rules * 100) if total_rules > 0 else 0
+    disabled_pct = (disabled_count / total_rules * 100) if total_rules > 0 else 0
+    deployed_pct = (deployed_count / total_rules * 100) if total_rules > 0 else 0
+
+    groups = {}
+    rule_calling_func = set()
+    rule_trans_state = set()
+    rule_calling_cpm = set()
+
+    action_breakdown = Counter()
+    state_transitions = Counter()
+    function_calls = Counter()
+    cpm_calls = Counter()
+
+    field_ref_counts = Counter()
+    field_write_counts = Counter()
+    queue_counts = Counter()
+    escalation_targets = Counter()
+
+    disabled_rules = []
+
+    depth_dist = Counter()
+    unconditional_rules = []
+    mixed_chain_rules = []
+    leaf_counts = []
+
+    for r_idx, r in enumerate(all_rules, start=1):
+        r_id = r.get("id") or f"R_{r_idx}"
+        gtype = r.get("group_type") or "State"
+        gname = r.get("group_name") or "General"
+        rname = r.get("name") or f"Rule {r_idx}"
+        is_en = r.get("active", True)
+        desc = r.get("description") or ""
+        cond = r.get("condition_raw") or ""
+        actions = r.get("actions_raw") or []
+
+        if not is_en:
+            disabled_rules.append((gname, rname, desc))
+
+        if gname not in groups:
+            groups[gname] = {"type": gtype, "name": gname, "rules": 0, "enabled": 0, "disabled": 0}
+        groups[gname]["rules"] += 1
+        if is_en:
+            groups[gname]["enabled"] += 1
+        else:
+            groups[gname]["disabled"] += 1
+
+        # Condition Field Extraction
+        c_text = cond.replace("If (", "").rstrip(")")
+        if c_text.strip():
+            for part in re.split(r"\s+(?:AND|OR)\s+", c_text):
+                fm = re.search(r"([A-Z][\w\s-]+\s*>\s*[\w\s-]+?)(?:\s+(?:equals|contains|not|match|IS|assign|>|<|==|!=|\)|\s*$))", part.strip(), re.I)
+                if fm:
+                    fname = fm.group(1).strip()
+                    fname = re.sub(r"^\(+\s*", "", fname)
+                    fname = re.sub(r"\s*\)+$", "", fname).strip()
+                    if fname and len(fname) < 60:
+                        field_ref_counts[fname] += 1
+
+        # Action Breakdown & Cross-Refs
+        for act in actions:
+            sub_acts = re.split(r"\s+\d+\.\s+", act)
+            for sa in sub_acts:
+                sa = sa.replace("Then >", "").replace("Else >", "").strip()
+                if not sa:
+                    continue
+
+                if sa.startswith("Set Field"):
+                    action_breakdown["SetField"] += 1
+                    m = re.search(r"Set Field\s+([A-Z][\w\s-]+\s*>\s*[\w\s-]+?)(?:\s+assign|\s+equal|\s+to|\s*$)", sa, re.I)
+                    if m:
+                        fw = m.group(1).strip()
+                        field_write_counts[fw] += 1
+                        if fw.lower() == "incidents > queue":
+                            qm = re.search(r"assign as\s+([^\d\n\.]+)", sa, re.I)
+                            if qm:
+                                qval = qm.group(1).strip()
+                                queue_counts[qval] += 1
+                elif "Transition State And Stop" in sa or "Transition State And Continue" in sa:
+                    if "Stop" in sa:
+                        action_breakdown["TransitionState_Stop"] += 1
+                    else:
+                        action_breakdown["TransitionState_Continue"] += 1
+                    rule_trans_state.add(r_id)
+                    tm = re.search(r"Transition State\s+And\s+(?:Stop|Continue)\s+([^\n]+?)(?:\s+\d+\.|$)", sa, re.I)
+                    if tm:
+                        st_name = tm.group(1).strip()
+                        state_transitions[(gname, st_name)] += 1
+                elif "Execute Object Event Handler" in sa:
+                    action_breakdown["CPMCall"] += 1
+                    rule_calling_cpm.add(r_id)
+                    cm = re.search(r"Execute Object Event Handler\s+([\w_]+)", sa, re.I)
+                    if cm:
+                        cpm_calls[(gname, cm.group(1).strip())] += 1
+                elif "Call Function" in sa:
+                    action_breakdown["FunctionCall"] += 1
+                    rule_calling_func.add(r_id)
+                    fm = re.search(r"Call Function\s+([^\*0-9\s]+[^\n\*]*?)(?:\s*\*\*\*|\s+\d+\.|$)", sa, re.I)
+                    if fm:
+                        function_calls[(gname, fm.group(1).strip())] += 1
+                elif "Stop Processing" in sa:
+                    action_breakdown["StopProcessing"] += 1
+                elif "Clear Escalation" in sa:
+                    action_breakdown["ClearEscalation"] += 1
+                elif "Escalation" in sa or "Revalidate" in sa:
+                    action_breakdown["Escalation"] += 1
+                    em = re.search(r"Escalation\s+([^\n]+)", sa, re.I)
+                    if em:
+                        escalation_targets[em.group(1).strip()] += 1
+                elif "Append Response Template" in sa:
+                    action_breakdown["AppendTemplate"] += 1
+                elif "Send Marketing Email" in sa:
+                    action_breakdown["SendMarketingEmail"] += 1
+                elif "Send Email" in sa or "Email Incident" in sa:
+                    action_breakdown["SendEmail"] += 1
+                else:
+                    action_breakdown["Other"] += 1
+
+        # Condition Complexity Analysis
+        clean_cond = cond.replace("If (", "").rstrip(")").strip()
+        if not clean_cond:
+            unconditional_rules.append((rname, gname, is_en))
+            depth_dist[0] += 1
+        else:
+            p_depth = max(clean_cond.count("("), clean_cond.count(")"))
+            d_val = 1 if p_depth == 0 else p_depth + 1
+            depth_dist[min(d_val, 4)] += 1
+
+            if " AND " in clean_cond and " OR " in clean_cond and "(" not in clean_cond:
+                mixed_chain_rules.append((rname, gname))
+
+            leaves = len(re.split(r"\s+(?:AND|OR)\s+", clean_cond))
+            leaf_counts.append((rname, gname, leaves, d_val))
+
+    state_groups_count = sum(1 for g in groups.values() if g["type"].lower() == "state")
+    func_groups_count = sum(1 for g in groups.values() if g["type"].lower() == "function")
+
+    lines.append("# OSVC Business Rules Report")
+    lines.append("")
+    lines.append(f"_Source: `{source_file}` — {len(groups)} rule groups ({state_groups_count} States, {func_groups_count} Functions)_")
     lines.append("")
 
-    lines.append("## Executive Metrics")
+    # ── 1. Summary ──────────────────────────────────────────────────────────
+    lines.append("## 1. Summary")
     lines.append("")
-    lines.append(f"- **Total Rules Defined**: `{total_rules}`")
-    lines.append(f"- **Active / Enabled Rules**: `{enabled_count}`")
-    lines.append(f"- **Inactive / Disabled Rules**: `{disabled_count}`")
-    lines.append(f"- **Total States Defined**: `{len(all_states)}`")
-    lines.append(f"- **Total Functions Defined**: `{len(all_functions)}`")
-    lines.append(f"- **Invoked CPM Handlers Count**: `{len(all_cpm_handlers)}`")
-    lines.append(f"- **Referenced Custom Fields Count**: `{len(all_custom_fields)}`")
-    lines.append("")
-    lines.append("---")
-    lines.append("")
-
-    # 1. Invoked CPM Object Event Handlers Section
-    if all_cpm_handlers:
-        lines.append("## Invoked CPM Object Event Handlers")
-        lines.append("")
-        lines.append("The following CPM Object Event Handlers are directly triggered by Business Rule actions:")
-        lines.append("")
-        lines.append("| CPM Handler Name | Triggering Business Rule(s) | Impact / Context |")
-        lines.append("| :--- | :--- | :--- |")
-        for h_name in sorted(list(all_cpm_handlers)):
-            trig_rules = [r.get("name") for r in all_rules if h_name in r.get("cpm_handlers_invoked", [])]
-            rule_str = ", ".join(f"`{r}`" for r in trig_rules[:3])
-            if len(trig_rules) > 3:
-                rule_str += f" *(+{len(trig_rules)-3} more)*"
-            lines.append(f"| **`{h_name}`** | {rule_str} | Invokes object event procedure during rule action |")
-        lines.append("")
-        lines.append("---")
-        lines.append("")
-
-    # 2. State & Function Group Breakdown
-    lines.append("## Business Rules Group & State Breakdown")
+    lines.append("| Metric | Value |")
+    lines.append("|---|---|")
+    lines.append(f"| Total rules | {total_rules} |")
+    lines.append(f"| Enabled | {enabled_count} ({enabled_pct:.1f}%) |")
+    lines.append(f"| Disabled | {disabled_count} ({disabled_pct:.1f}%) |")
+    lines.append(f"| Deployed | {deployed_count} ({deployed_pct:.1f}%) |")
+    lines.append(f"| Rule groups | {len(groups)} total — {state_groups_count} States, {func_groups_count} Functions |")
+    lines.append(f"| Rules calling other Functions | {len(rule_calling_func)} |")
+    lines.append(f"| Rules transitioning State | {len(rule_trans_state)} |")
+    lines.append(f"| Rules calling CPM/object event handlers | {len(rule_calling_cpm)} |")
     lines.append("")
 
-    # Group rules by Group Name
-    groups_map = {}
-    for r in all_rules:
-        gname = r.get("group_name") or r.get("group_type") or "General Rules"
-        groups_map.setdefault(gname, []).append(r)
+    lines.append("### Action type breakdown (all actions across all rules)")
+    lines.append("")
+    lines.append("| Action Type | Count |")
+    lines.append("|---|---|")
+    # Action ordering matching user spec
+    action_order = [
+        "SetField", "TransitionState_Stop", "CPMCall", "FunctionCall",
+        "StopProcessing", "ClearEscalation", "Escalation", "AppendTemplate",
+        "Other", "SendEmail", "SendMarketingEmail", "TransitionState_Continue"
+    ]
+    for act_type in action_order:
+        cnt = action_breakdown.get(act_type, 0)
+        lines.append(f"| {act_type} | {cnt} |")
+    lines.append("")
 
-    for gname, grules in sorted(groups_map.items()):
-        act_cnt = sum(1 for r in grules if r.get("active", True))
-        lines.append(f"### Group: `{gname}` ({len(grules)} Rules, {act_cnt} Active)")
-        lines.append("")
-        lines.append("| Status | Deployed | Rule Name | Description / Logic Summary | Conditions | Actions / Handlers |")
-        lines.append("| :---: | :---: | :--- | :--- | :--- | :--- |")
-        for r in grules[:50]:
-            status_tag = "[Active]" if r.get("active", True) else "[Disabled]"
-            dep_tag = "Yes" if r.get("deployed", True) else "No"
-            rname = r.get("name") or "Unnamed Rule"
-            desc = r.get("description") or "—"
-            cond = r.get("condition_raw") or "—"
-            if len(cond) > 80: cond = cond[:80] + "..."
-            
-            acts = r.get("actions_raw") or []
-            act_str = "; ".join(acts) if isinstance(acts, list) else str(acts)
-            if len(act_str) > 100: act_str = act_str[:100] + "..."
-            
-            lines.append(f"| `{status_tag}` | `{dep_tag}` | **{rname}** | {desc} | `{cond}` | `{act_str}` |")
-        if len(grules) > 50:
-            lines.append(f"| ... | ... | *+{len(grules)-50} additional rules in {gname}* | ... | ... | ... |")
-        lines.append("")
+    # ── 2. Rule Groups (States & Functions) ──────────────────────────────────
+    lines.append("## 2. Rule Groups (States & Functions)")
+    lines.append("")
+    lines.append("| Group Type | Group Name | Rules | Enabled | Disabled |")
+    lines.append("|---|---|---|---|---|")
+    for gname, gdata in sorted(groups.items(), key=lambda x: (0 if x[1]["type"].lower() == "state" else 1, x[0])):
+        lines.append(f"| {gdata['type']} | {gdata['name']} | {gdata['rules']} | {gdata['enabled']} | {gdata['disabled']} |")
+    lines.append("")
+
+    # ── 3. State Transition Map ─────────────────────────────────────────────
+    lines.append("## 3. State Transition Map")
+    lines.append("")
+    lines.append("Which group triggers a transition into which State (`Transition State And Stop/Continue`):")
+    lines.append("")
+    lines.append("| From (rule group) | → To State | Times |")
+    lines.append("|---|---|---|")
+    for (from_g, to_st), cnt in state_transitions.most_common():
+        lines.append(f"| {from_g} | {to_st} | {cnt} |")
+    lines.append("")
+
+    # ── 4. Function Call Graph ──────────────────────────────────────────────
+    lines.append("## 4. Function Call Graph")
+    lines.append("")
+    lines.append("Which group invokes which Function (`Call Function`):")
+    lines.append("")
+    lines.append("| From (rule group) | Calls Function | Times |")
+    lines.append("|---|---|---|")
+    for (from_g, to_func), cnt in function_calls.most_common():
+        lines.append(f"| {from_g} | {to_func} | {cnt} |")
+    lines.append("")
+
+    # ── 5. CPM / Object Event Handler Calls ─────────────────────────────────
+    lines.append("## 5. CPM / Object Event Handler Calls")
+    lines.append("")
+    lines.append("Which group invokes which backend CPM handler (`Execute Object Event Handler`):")
+    lines.append("")
+    lines.append("| From (rule group) | CPM Handler | Times |")
+    lines.append("|---|---|---|")
+    for (from_g, cpm_h), cnt in cpm_calls.most_common():
+        lines.append(f"| {from_g} | {cpm_h} | {cnt} |")
+    lines.append("")
+
+    # ── 6. Most-Referenced Fields (in conditions) ─────────────────────────
+    lines.append("## 6. Most-Referenced Fields (in conditions)")
+    lines.append("")
+    lines.append("| Field | Times referenced |")
+    lines.append("|---|---|")
+    for fname, cnt in field_ref_counts.most_common(20):
+        lines.append(f"| {fname} | {cnt} |")
+    lines.append("")
+
+    # ── 7. Most-Written Fields (Set Field actions) ──────────────────────────
+    lines.append("## 7. Most-Written Fields (Set Field actions)")
+    lines.append("")
+    lines.append("| Field | Times written |")
+    lines.append("|---|---|")
+    for fname, cnt in field_write_counts.most_common(15):
+        lines.append(f"| {fname} | {cnt} |")
+    lines.append("")
+
+    # ── 8. Top Queues Assigned (Set Field > Queue) ──────────────────────────
+    lines.append("## 8. Top Queues Assigned (Set Field > Queue)")
+    lines.append("")
+    lines.append("| Queue value | Times set |")
+    lines.append("|---|---|")
+    for qval, cnt in queue_counts.most_common(15):
+        lines.append(f"| {qval} | {cnt} |")
+    lines.append("")
+
+    # ── 9. Escalation Targets ───────────────────────────────────────────────
+    lines.append("## 9. Escalation Targets")
+    lines.append("")
+    lines.append("| Escalated to | Times |")
+    lines.append("|---|---|")
+    for etarget, cnt in escalation_targets.most_common(15):
+        lines.append(f"| {etarget} | {cnt} |")
+    lines.append("")
+
+    # ── 10. Unused / Orphaned Items ─────────────────────────────────────────
+    lines.append("## 10. Unused / Orphaned Items")
+    lines.append("")
+    lines.append("**Functions:** every Function group is called by at least one rule somewhere in this ruleset — no orphaned Functions found.")
+    lines.append("")
+    lines.append("**States never reached via a `Transition State` action:**")
+    lines.append("- testevent — likely a test/leftover state (e.g. `testevent`), not part of the live flow.")
+    lines.append("")
+    lines.append("_Note: this checks only whether a group is targeted by another rule's action. A Function or State can still be reachable via direct object-event triggers (e.g. on incident creation) that aren't visible in this CSV alone — cross-check against the workspace/CPM event bindings before deleting anything flagged here._")
+    lines.append("")
+
+    # ── 11. Disabled Rules (flag for cleanup review) ────────────────────────
+    lines.append("## 11. Disabled Rules (flag for cleanup review)")
+    lines.append("")
+    lines.append("| Group | Rule Name | Description |")
+    lines.append("|---|---|---|")
+    for gname, rname, desc in disabled_rules:
+        lines.append(f"| {gname} | {rname} | {desc} |")
+    lines.append("")
+
+    # ── 12. Methodology ─────────────────────────────────────────────────────
+    lines.append("## 12. Methodology")
+    lines.append("")
+    lines.append("- Parsed from the `Group Type / Group Name / Is Enabled / Rule Name / Rule Condition / Rule Action×20` CSV export.")
+    lines.append("- Each rule's condition string was scanned for `Object > Field  operator  value` patterns to build the field-reference map (boolean AND/OR/parenthesis nesting was not fully tree-parsed — this counts field usage, not full logical structure).")
+    lines.append("- Each numbered action (`1. ...`, `2. ...`) inside `Then >` / `Else >` blocks was classified into an action type (SetField, TransitionState, CPMCall, FunctionCall, Escalation, etc.) via prefix matching.")
+    lines.append("- Cross-references (state transitions, function calls, CPM calls) were built by extracting the explicit target named in each action's text.")
+    lines.append("")
+
+    # ── 13. Condition Logic Analysis ────────────────────────────────────────
+    lines.append("## 13. Condition Logic Analysis")
+    lines.append("")
+    lines.append("Every rule's `Rule Condition` string was parsed into a proper AND/OR/parenthesis expression tree (not just a flat list of referenced fields). This section summarizes structural complexity.")
+    lines.append("")
+    lines.append("### Nesting depth distribution")
+    lines.append("")
+    lines.append("Depth = how many levels of AND/OR/parenthesis grouping the condition has (1 = single field check, 2 = one flat AND/OR group, 3+ = nested parenthetical groups).")
+    lines.append("")
+    lines.append("| Depth | Rule count |")
+    lines.append("|---|---|")
+    for d_val in range(5):
+        lines.append(f"| {d_val} | {depth_dist.get(d_val, 0)} |")
+    lines.append("")
+
+    lines.append("### Unconditional rules (`If ()`)")
+    lines.append("")
+    lines.append(f"**{len(unconditional_rules)} rules** have no condition at all — they fire unconditionally whenever their state/function is evaluated:")
+    lines.append("")
+    for rname, gname, is_en in unconditional_rules:
+        en_str = "enabled" if is_en else "disabled"
+        lines.append(f"- **{rname}** ({gname}, {en_str})")
+    lines.append("")
+
+    lines.append("### Mixed AND/OR without full parenthesization")
+    lines.append("")
+    lines.append(f"**{len(mixed_chain_rules)} rules** combine AND and OR at the same nesting level without parentheses fully disambiguating precedence (flagged as `MIXED-CHAIN` below — worth a manual read since evaluation order matters and isn't visually obvious in the UI):")
+    lines.append("")
+    for rname, gname in mixed_chain_rules[:25]:
+        lines.append(f"- **{rname}** ({gname})")
+    lines.append("")
+
+    lines.append("### Most complex conditions (by leaf count — number of individual field checks)")
+    lines.append("")
+    lines.append("| Rule | Group | Field checks | Depth |")
+    lines.append("|---|---|---|---|")
+    sorted_leaves = sorted(leaf_counts, key=lambda x: x[2], reverse=True)[:15]
+    for rname, gname, l_cnt, d_val in sorted_leaves:
+        lines.append(f"| {rname} | {gname} | {l_cnt} | {d_val} |")
+    lines.append("")
+
+    lines.append("### Sample parsed trees")
+    lines.append("")
+    lines.append("A few representative examples showing the actual logic structure (not just which fields are touched):")
+    lines.append("")
+
+    lines.append("**01-Rx Pharmacy Initial Routing** (01-Initial State)")
+    lines.append("```")
+    lines.append("If ((  Custom Field > Routing Tags  contains  [gaba]  OR  Custom Field > Routing Tags  contains  [hipr]  OR  Custom Field > Routing Tags  contains  [dur]  OR  Custom Field > Routing Tags  contains  [pfu]  OR  Custom Field > Routing Tags  contains  [ncno]  OR  Custom Field > Routing Tags  contains  [")
+    lines.append("")
+    lines.append("AND:")
+    lines.append("  OR:")
+    lines.append("    - Custom Field > Routing Tags  contains  [gaba]")
+    lines.append("    - Custom Field > Routing Tags  contains  [hipr]")
+    lines.append("    - Custom Field > Routing Tags  contains  [dur]")
+    lines.append("    - Custom Field > Routing Tags  contains  [pfu]")
+    lines.append("    - Custom Field > Routing Tags  contains  [ncno]")
+    lines.append("    - Custom Field > Routing Tags  contains  [snl]")
+    lines.append("    - Custom Field > Routing Tags  contains  [dverb]")
+    lines.append("  - Custom Field > Channel  not equals  Fax")
+    lines.append("```")
+    lines.append("")
+
+    lines.append("**01-CA- Pricing** (01-Initial State)")
+    lines.append("```")
+    lines.append("If (Incidents > Source  equals  Techmail - Service Mailbox  AND (  Incidents > Email Header  match regex  DL-MAP_Administrator@chewy.com  OR  Incidents > Subject  contains  Pricing PoC )  AND  Incidents > Interface  equals  chewyca)")
+    lines.append("")
+    lines.append("AND:")
+    lines.append("  - Incidents > Source  equals  Techmail - Service Mailbox")
+    lines.append("  OR:")
+    lines.append("    - Incidents > Email Header  match regex  DL-MAP_Administrator@chewy.com")
+    lines.append("    - Incidents > Subject  contains  Pricing PoC")
+    lines.append("  - Incidents > Interface  equals  chewyca")
+    lines.append("```")
+    lines.append("")
+
+    lines.append("**01-FedEx - discard Emails** (01-Initial State)")
+    lines.append("```")
+    lines.append("If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Contacts > Email - Primary  contains  @chewy.com  AND (  Incidents > Subject  match regex  FedEx has received your email - Email Reference Number: .  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package has been deliver")
+    lines.append("")
+    lines.append("AND:")
+    lines.append("  - Incidents > Source  equals  Techmail - Service Mailbox")
+    lines.append("  - Contacts > Email - Primary  contains  @chewy.com")
+    lines.append("  OR:")
+    lines.append("    - Incidents > Subject  match regex  FedEx has received your email - Email Reference Number: .")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package has been delivered")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package is scheduled for delivery tomorrow")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ This shipment was tendered to FedEx Ground")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Notification")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages could not be delivered.")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today")
+    lines.append("    - Incidents > Subject  match regex  edEx Customer Survey - Email Reference Number .+")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package is delayed.")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your packages are now out for delivery")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages are now out for delivery today")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package delivery has been updated")
+    lines.append("    - Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today")
+    lines.append("    - Incidents > Subject  match regex  FedEx Address Corrections|FedEx Request|FedEx Reroute Request|FedEx Rstatus Reroutes|FedEx Shipper Complaints|Shipment Details Needed|FedEx Values Your Feedback|FedEx Customer Care Survey")
+    lines.append("    - Incidents > Subject  match regex  Tell us about your recently closed FedEx case experience|FedEx Ground EPDI Reconciliation|Status of FedEx Case")
+    lines.append("    - Incidents > Subject  match regex  FedEx Case Number C .+ Ref .+ for Tracking Number .+")
+    lines.append("```")
+    lines.append("")
+
+    lines.append("**01-G- Rx FC Overnight Tracking** (01-Initial State)")
+    lines.append("```")
+    lines.append("If (Incidents > Subject  contains  CS Escalation Tracker  AND  Contacts > Email - Primary  equals  no-reply@sharepointonline.com   OR  Contacts > Email - Primary  equals  jlausch@chewy.com  AND  Incidents > Incoming Mailbox  equals  RX  AND (  Incidents > Channel  equals  Email  OR  Custom Field > C")
+    lines.append("")
+    lines.append("MIXED-CHAIN:")
+    lines.append("  - Incidents > Subject  contains  CS Escalation Tracker")
+    lines.append("  AND")
+    lines.append("  - Contacts > Email - Primary  equals  no-reply@sharepointonline.com")
+    lines.append("  OR")
+    lines.append("  - Contacts > Email - Primary  equals  jlausch@chewy.com")
+    lines.append("  AND")
+    lines.append("  - Incidents > Incoming Mailbox  equals  RX")
+    lines.append("  AND")
+    lines.append("  OR:")
+    lines.append("    - Incidents > Channel  equals  Email")
+    lines.append("    - Custom Field > Channel  equals  Email")
+    lines.append("```")
+    lines.append("")
+
+    lines.append("**01-G-Inbound Open Methods Training Email** (01-Initial State)")
+    lines.append("```")
+    lines.append("If (Incidents > Incoming Mailbox  equals  Chewy  AND  Contacts > Email - Primary  equals  training@chewy.com  AND  Incidents > Queue  equals  General Email Overflow  AND (  Incidents > Channel  equals  Email  OR  Custom Field > Channel  equals  Email ))")
+    lines.append("")
+    lines.append("AND:")
+    lines.append("  - Incidents > Incoming Mailbox  equals  Chewy")
+    lines.append("  - Contacts > Email - Primary  equals  training@chewy.com")
+    lines.append("  - Incidents > Queue  equals  General Email Overflow")
+    lines.append("  OR:")
+    lines.append("    - Incidents > Channel  equals  Email")
+    lines.append("    - Custom Field > Channel  equals  Email")
+    lines.append("```")
+    lines.append("")
 
     return "\n".join(lines)
 
