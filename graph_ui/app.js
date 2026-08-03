@@ -1731,10 +1731,12 @@ async function loadDocsAndDiagrams(node) {
           parsedHtml = `<pre style="white-space:pre-wrap;font-size:11px;">${esc(mdText)}</pre>`;
         }
 
-        // Apply badges for Enabled / Disabled status
+        // Apply badges for Enabled / Disabled status and wrap tables in .table-wrapper
         parsedHtml = parsedHtml
           .replace(/\| Enabled \|/g, '| <span class="badge-status badge-enabled">Enabled</span> |')
-          .replace(/\| Disabled \|/g, '| <span class="badge-status badge-disabled">Disabled</span> |');
+          .replace(/\| Disabled \|/g, '| <span class="badge-status badge-disabled">Disabled</span> |')
+          .replace(/<table/g, '<div class="table-wrapper"><table')
+          .replace(/<\/table>/g, '</table></div>');
 
         tabDoc.innerHTML = parsedHtml;
         await renderMermaidBlocksInContainer(tabDoc);
