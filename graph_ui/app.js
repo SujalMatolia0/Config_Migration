@@ -47,10 +47,10 @@ marked.setOptions({ renderer: _markedRenderer });
 const TYPE_COLORS = {
   module_root: "#2563EB",      // Royal Blue Entity Root
   category_hub: "#D97706",     // Warm Amber Category Hub
-  workspace: "#9333EA",        // High-Contrast Deep Purple Workspace File
+  workspace: "#4F46E5",        // High-Contrast Vivid Indigo Blue Workspace File
   report: "#059669",           // Emerald Green
   navigationset: "#D97706",    // Warm Amber
-  businessrule: "#6D28D9",    // Dark Violet
+  businessrule: "#EC4899",     // High-Contrast Vivid Magenta Pink Business Rule
   customscript: "#E11D48",    // Rose Red
   cpm: "#0D9488",             // Teal
   asynccpm: "#06B6D4",        // Cyan
