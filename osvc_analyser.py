@@ -461,7 +461,25 @@ def generate_index_md(workspaces, output_dir, components=None, relationships=Non
         lines.append("*No BUI Add-Ins uploaded.*")
     lines.append("")
 
-    # 7. Shared Resources
+    # 7. Business Rules
+    br_sets = components.get("businessRules", []) if components else []
+    lines.append("## Business Rules Reports")
+    lines.append("")
+    if br_sets:
+        lines.append("| Rule Set / Source File | Format | Total Rules | Enabled Rules | Invoked CPM Handlers | Documentation |")
+        lines.append("| :--- | :--- | :---: | :---: | :---: | :--- |")
+        for br in br_sets:
+            fname = br.get("file_name") or br.get("name") or "Business_Rules.csv"
+            fmt = br.get("format", "business_rules_csv")
+            tot = br.get("total_rules", len(br.get("rules", [])))
+            en = br.get("enabled_count", sum(1 for r in br.get("rules", []) if r.get("active", True)))
+            cpms = len(br.get("cpm_handlers_invoked", []))
+            lines.append(f"| `{fname}` | `{fmt}` | {tot} | {en} | {cpms} | [report_Business_Rules.md](rules/report_Business_Rules.md) |")
+    else:
+        lines.append("*No Business Rules uploaded.*")
+    lines.append("")
+
+    # 8. Shared Resources
     lines.append("## Shared Resources")
     lines.append("")
     shared = {rid: wsl for rid, wsl in all_referenced_reports.items() if len(wsl) > 1}

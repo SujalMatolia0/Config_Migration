@@ -198,17 +198,20 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
     num_scr = len([n for n in nodes if n.get("type") == "customscript"])
     num_bui = len([n for n in nodes if n.get("type") == "buiaddin"])
     num_obj = len([n for n in nodes if n.get("type") in ["object", "module_root"]])
+    num_br = len(components.get("businessRules", [])) if components else 0
+    total_br_rules = sum(b.get("total_rules", len(b.get("rules", []))) for b in components.get("businessRules", [])) if components else 0
 
     lines.append("## Executive System Summary & Risk Overview")
     lines.append("")
     lines.append("> [!NOTE]")
-    lines.append("> **System Mapping Overview**: Structured inventory of all parsed Oracle Service Cloud workspaces, analytics reports, CPM procedures, custom scripts, and external REST/SOAP integration endpoints.")
+    lines.append("> **System Mapping Overview**: Structured inventory of all parsed Oracle Service Cloud workspaces, analytics reports, CPM procedures, business rules, custom scripts, and external REST/SOAP integration endpoints.")
     lines.append("")
 
     lines.append("| Component Category | Total Discovered Count | Status |")
     lines.append("| :--- | :---: | :--- |")
     lines.append(f"| Workspaces | {num_ws} | Parsed & Mapped |")
     lines.append(f"| Analytics Reports | {num_rep} | Parsed & Mapped |")
+    lines.append(f"| Business Rules Sets | {num_br} ({total_br_rules} Rules) | Parsed & Policy Mapped |")
     lines.append(f"| CPM Procedures & Handlers | {num_cpm} | Parsed & Event Mapped |")
     lines.append(f"| PHP Custom Scripts | {num_scr} | Analyzed |")
     lines.append(f"| BUI Add-Ins | {num_bui} | Archive Extracted |")

@@ -91,7 +91,8 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         "cpm": {},
         "bui_addins": {},
         "custom_scripts": {},
-        "custom_objects": {}
+        "custom_objects": {},
+        "business_rules": {}
     }
 
     # Workspaces
@@ -198,6 +199,13 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         os.makedirs(os.path.dirname(out_p), exist_ok=True)
         with open(out_p, "w", encoding="utf-8") as f:
             json.dump(comp_data, f, indent=2, ensure_ascii=False)
+
+    # Business Rules
+    sorted_br = sorted(components.get("businessRules", []), key=lambda x: x.get("file_name", "").lower())
+    for br in sorted_br:
+        r_name = br.get("name") or br.get("file_name") or "Business_Rules"
+        slug = r_name.replace(" ", "_")
+        flat_index["business_rules"][slug] = "rules/report_Business_Rules.md"
 
     # Ensure all dictionary keys in flat_index are sorted alphabetically
     for key in flat_index:
