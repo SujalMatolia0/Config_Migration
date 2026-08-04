@@ -52,6 +52,16 @@ def detect_osvc_file_type(file_path):
     if ext == ".js":
         return "scripts", "JavaScript Add-In", "Custom Scripts & JS", "JS Source File"
 
+    if ext == ".csv":
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read(2048).lower()
+                if "rule" in content or "state" in content or "object" in content or "action" in content or "if" in content or "then" in content or "rule" in lower:
+                    return "rule", "Business Rule CSV", "Business Rules & Engine Logic", "Detected CSV Business Rules export format"
+        except Exception:
+            pass
+        return "rule", "Business Rule CSV", "Business Rules & Engine Logic", "CSV Business Rules File"
+
     if ext in [".xml", ".txt"]:
         try:
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
