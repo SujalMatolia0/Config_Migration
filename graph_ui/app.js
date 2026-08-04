@@ -281,13 +281,19 @@ function rebuildGraphState() {
       const targetMod = (n.module || "").toLowerCase();
       const fields = GRAPH.nodes.filter(inst => {
         if (inst.type !== "workspacefield" && inst.type !== "customfield") return false;
+        
         const mod = getNodeModule(inst).toLowerCase();
-        if (mod === targetMod) return true;
-        if (inst.data && inst.data.module && inst.data.module.toLowerCase() === targetMod) return true;
-        if (inst.data && inst.data.object && String(inst.data.object).toLowerCase() === targetMod) return true;
-        const instLabel = (inst.label || "").toLowerCase();
-        if (targetMod !== "other" && instLabel.includes(targetMod)) return true;
-        return true; // Return all fields so clicking Workspace Fields ALWAYS opens fields!
+        const dataMod = (inst.data && (inst.data.module || inst.data.object || inst.data.object_type) || "").toLowerCase();
+        const instLabel = (inst.label || inst.id || "").toLowerCase();
+        const instId = (inst.id || "").toLowerCase();
+
+        if (targetMod !== "other") {
+          if (mod === targetMod || dataMod === targetMod) return true;
+          if (instId.includes(":" + targetMod + ".") || instId.includes(":" + targetMod + ":") || instId.startsWith("workspacefield:" + targetMod)) return true;
+          if (instLabel.startsWith(targetMod + ".")) return true;
+          return false; // STRICT: Do NOT return fields belonging to other modules!
+        }
+        return mod === "other" || dataMod === "other";
       });
 
       fields.forEach(f => {
@@ -443,6 +449,92 @@ function tick(alpha) {
       n.x = W / 2 + (Math.random() - 0.5) * 400;
       n.y = H / 2 + (Math.random() - 0.5) * 400;
       n.vx = 0; n.vy = 0;
+    }
+  });
+
+  // 5. Strict Equal Angle Geometric Constraint (360/N deg full 360 circle for Root Parent Nodes & 140 deg Outward Sector Arc for Child Hubs)
+  nodes.forEach(parent => {
+    if (!parent.out || parent.out.length === 0) return;
+    const children = parent.out
+      .map(e => nodeById[e.target])
+      .filter(c => c && c !== parent && !c.fixed);
+    const N = children.length;
+    if (N === 0) return;
+
+    // Sort children deterministically by ID so layout is 100% stable
+    children.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+
+    const isRootObject = parent.type === "module_root" || (parent.id && parent.id.startsWith("module:"));
+
+    if (isRootObject) {
+      // FULL 360 DEGREE EQUAL ANGLE STARBURST CIRCLE (0 deg, 60 deg, 120 deg, 180 deg, 240 deg, 300 deg around parent)
+      const angleStep = (2 * Math.PI) / N; // Exact 360 / N degrees (60 deg for 6 hubs)
+      const targetRadius = Math.max(340, 40 * N);
+
+      children.forEach((child, idx) => {
+        // Start at -Math.PI / 2 (-90 deg) so Child 0 points straight UP (12 o'clock)!
+        const targetAngle = -Math.PI / 2 + idx * angleStep;
+        const tx = parent.x + targetRadius * Math.cos(targetAngle);
+        const ty = parent.y + targetRadius * Math.sin(targetAngle);
+
+        child.x += (tx - child.x) * 0.70;
+        child.y += (ty - child.y) * 0.70;
+      });
+    } else {
+      // Find true primary structural parent node
+      let inParentNode = null;
+      if (parent.inc && parent.inc.length) {
+        const structEdge = parent.inc.find(e => 
+          e.label === "contains" || e.label === "instance" || e.label === "fields" || !e.label || 
+          (nodeById[e.source] && (nodeById[e.source].type === "module_root" || nodeById[e.source].type === "category_hub" || nodeById[e.source].type === "workspace"))
+        ) || parent.inc[0];
+        inParentNode = nodeById[structEdge.source] || null;
+      }
+
+      const isFieldHub = (parent.id && parent.id.toLowerCase().includes("field")) ||
+                         children.every(c => c.type === "workspacefield" || c.type === "customfield" || c.type === "object_field");
+
+      if (isFieldHub) {
+        // SPACIOUS ALTERNATING RADIUS ARC FOR FIELDS (200 deg Arc, Inner 220px, Outer 310px)
+        const dirAngle = inParentNode ? Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x) : Math.PI;
+        const arcSpan = (200 * Math.PI) / 180;
+        const step = N > 1 ? arcSpan / (N - 1) : 0;
+        const startAngle = dirAngle - arcSpan / 2;
+
+        children.forEach((child, idx) => {
+          const targetAngle = startAngle + idx * step;
+          const radius = (idx % 2 === 0) ? 220 : 310;
+          const tx = parent.x + radius * Math.cos(targetAngle);
+          const ty = parent.y + radius * Math.sin(targetAngle);
+
+          child.x += (tx - child.x) * 0.75;
+          child.y += (ty - child.y) * 0.75;
+        });
+      } else if (inParentNode && inParentNode !== parent) {
+        // CHILD HUB NODE: Restricted Outward Sector Arc (140 deg facing away from parent)
+        const dirAngle = Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x);
+        const arcSpan = (140 * Math.PI) / 180;
+        const radius = Math.min(260, Math.max(180, 16 * N));
+
+        if (N === 1) {
+          const tx = parent.x + radius * Math.cos(dirAngle);
+          const ty = parent.y + radius * Math.sin(dirAngle);
+          children[0].x += (tx - children[0].x) * 0.70;
+          children[0].y += (ty - children[0].y) * 0.70;
+        } else {
+          const step = arcSpan / (N - 1);
+          const startAngle = dirAngle - arcSpan / 2;
+
+          children.forEach((child, idx) => {
+            const targetAngle = startAngle + idx * step;
+            const tx = parent.x + radius * Math.cos(targetAngle);
+            const ty = parent.y + radius * Math.sin(targetAngle);
+
+            child.x += (tx - child.x) * 0.70;
+            child.y += (ty - child.y) * 0.70;
+          });
+        }
+      }
     }
   });
 }
