@@ -396,7 +396,11 @@ def download_master_report():
 
 @app.route("/results/<path:filename>", methods=["GET"])
 def serve_results_static(filename):
-    return send_from_directory(RESULTS_DIR, filename)
+    resp = send_from_directory(RESULTS_DIR, filename)
+    resp.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
 
 
 def _build_graph_data(master):
