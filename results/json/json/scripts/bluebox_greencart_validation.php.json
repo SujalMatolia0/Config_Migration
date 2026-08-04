@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "type": "custom_script",
+    "name": "bluebox_greencart_validation.php",
+    "osvc_object": [
+      "Other"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.707320"
+  },
+  "data": {
+    "file_name": "bluebox_greencart_validation.php",
+    "script_type": "Server-side Utility",
+    "summary": "This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.",
+    "imports": [],
+    "osvc_objects": [
+      "ConnectAPIErrorBase"
+    ],
+    "external_calls": [],
+    "urls": [],
+    "exposed_routes": [],
+    "risk_flags": [],
+    "internal_apis": [
+      {
+        "type": "Agent Authenticator",
+        "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+        "operation": "Validate Agent Session"
+      }
+    ],
+    "external_soap_apis": [],
+    "external_rest_apis": [],
+    "flow_steps": [
+      {
+        "stage": "Authentication",
+        "action": "Validate Agent Session ID"
+      }
+    ],
+    "has_html": false,
+    "has_js": true,
+    "js_behaviors": [
+      "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+      "Attaches dynamic workspace field value change listeners to trigger real-time search and validation as fields are edited.",
+      "Loads ArcGIS JavaScript API components for map rendering and geocoding coordinate selection."
+    ],
+    "html_content": "",
+    "js_content": "var p_id = <?php echo json_encode($session_id); ?>;\n\tvar address = <?php echo json_encode($address); ?>;\n\tvar cat_id = <?php echo json_encode($cat_id); ?>;\n\n\t/*\n\tcall the fucntion to check the address in OSvC BlueBoxGreenCartAddr config object through REST API\n\t*/\n\tfunction validateAddress(triggeredBy)\n\t{\n\t\tvar contractor = \"\";// default Contractor  name\n\t\tif(address != 'null' && address != '')//ex: 23 A Stanyon Street, Sudbury\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet city = adrInfo[1].trim();//ex: Sudbury\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\n\t\t\tlet streetNum = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\n\t\t\tlet modifiedStreetName = \"\";\n\t\t\tlet fstWordOfStreet = \"\";\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\tstreetNum = streetNum +\" \"+streetInfo[1].trim();\n\t\t\t\tfstWordOfStreet = streetInfo[2];\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\n\t\t\t\tmodifiedStreetName = streetInfo.slice(3, streetInfo.length).join(\" \");//leave the first word of actual street name\n\t\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t\tfstWordOfStreet = streetInfo[1];\n\t\t\t\tmodifiedStreetName = streetInfo.slice(2, streetInfo.length).join(\" \");//leave the first word of actual street name\n\t\t\t}\n\n\t\t\t//streetName = streetName.substring(0, streetName.lastIndexOf(\" \"));// remove last st with %\n\t\t\t\n\t\t\t//There is a mismatch in street name between what we get from ESRI and what's in OSvC config object\n\t\t\t//So replace below road name suffix with abbreviations\n\t\t\tvar streetsSuffix = {\n\t\t\t\t'Road':'RD',\n\t\t\t\t'Street':'ST',\n\t\t\t\t'Place':'PL',\n\t\t\t\t'Crescent':'CRES',\n\t\t\t\t'Court':'CRT',\n\t\t\t\t'Drive':'DR',\n\t\t\t\t'Avenue':'AVE',\t\t\t\t\n\t\t\t\t'Boulevard':'BLVD',\n\t\t\t\t'Circle':'CIR',\n\t\t\t\t'Expressway':'EXPY',\n\t\t\t\t'Freeway':'FWY',\n\t\t\t\t'Lane':'LN',\n\t\t\t\t'Parkway':'PKY',\n\t\t\t\t'Square':'SQ',\n\t\t\t\t'Turnpike':'TPKE',\t\t\t\t\n\t\t\t\t'North':'N',\n\t\t\t\t'East':'E',\n\t\t\t\t'South':'S',\n\t\t\t\t'West':'W',\n\t\t\t\t'Northeast':'NE',\n\t\t\t\t'Southeast':'SE',\n\t\t\t\t'Southwest':'SW',\n\t\t\t\t'Northwest':'NW'\n\t\t\t};\t\t\t\n\n\n\t\t\tfor (var key in streetsSuffix ) {\n\t\t\t\t//var re = new RegExp(key, 'gi');\n\t\t\t\tvar re = new RegExp(\"\\\\b(?:\" + key + \")\\\\b\",\"g\");\n\t\t\t\tmodifiedStreetName = modifiedStreetName.replace(re, streetsSuffix[key]);\n\t\t\t}\t\n\t\t\t\n\t\t\tmodifiedStreetName = fstWordOfStreet+\" \"+modifiedStreetName;\n\t\t\t//REST API URL + Query string...NOTE: not passing street number on where clause as street number can be in range like 4-8 or 2a-2f. So not possible to apply that in where clause\n\t\t\tvar url = \"/services/rest/connect/latest/queryResults/?query=SELECT StreetNumber, Contractor FROM Config.BlueBoxGreenCartAddr WHERE BinRequest = 1 AND ( StreetName = '\"+streetName.replace(\"'\", \"''\")+\"' OR StreetName = '\"+modifiedStreetName.replace(\"'\", \"''\")+\"' ) AND CommunityName = '\"+city+\"'\";\n\t\t\t\n\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\txhr.open('GET', url, false);\n\t\t\txhr.setRequestHeader('Content-Type', 'application/json');\n\t\t\txhr.setRequestHeader('OSvC-CREST-Application-Context', 'Sudbury Address Validation');\n\t\t\txhr.setRequestHeader('Authorization', 'Session ' + p_id);\n\t\t\txhr.onload = function() {\n\t\t\t\tif (xhr.status === 200)\n\t\t\t\t{\t\t\t\t\t\t\t\t\t\n\t\t\t\t\tvar output = [];\n\t\t\t\t\tJSON.parse(xhr.responseText).items[0].rows.forEach(function(row)\n\t\t\t\t\t{\n\t\t\t\t\t\tlet osvcStNum = row[0].trim();\n\t\t\t\t\t\tosvcStNum = osvcStNum.replace(/ +(?= )/g,'');// replace multi space with single\n\t\t\t\t\t\t//Parse the street number to make sure address match\n\t\t\t\t\t\tif(streetNum == osvcStNum)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tcontractor = row[1];\n\t\t\t\t\t\t\t//adrValidationFlag = true;\n\t\t\t\t\t\t\t//break;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t/*else if(osvcStNum.indexOf('-') !== -1)//if street num contains - that is range\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tvar tmp = row[0].split(\"-\");\n\t\t\t\t\t\t\tif(streetNum >= tmp[0].trim() && streetNum <= tmp[1].trim())\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tcontractor = row[1];\n\t\t\t\t\t\t\t\t//adrValidationFlag = true;\n\t\t\t\t\t\t\t\t//break;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\t*/\n\t\t\t\t\t});\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t}\n\t\t\t\telse if (xhr.status !== 200) \n\t\t\t\t{\n\t\t\t\t}\n\t\t\t};\n\t\t\txhr.send();\n\t\t}\n\t\tif(contractor == \"\")\n\t\t\talert(\"The address does not seem eligible to receive blue box(es) and green cart(s).\");\n\t\telse\n\t\t{\n\t\t\tif (typeof setContractor === \"function\")\n\t\t\t\tsetContractor(contractor);\n\t\t\tif(triggeredBy == 'manually')\n\t\t\t\talert(\"The address is eligible to receive blue box(es) and green cart(s).\");\n\t\t}\n\t\treturn contractor;\n\t}\n\t\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\t\n\t\tfunction onbeforesave()\n\t\t{\n\t\t\tif (cat_id == 36 && typeof validateAddress === \"function\")\n\t\t\t{\t\t\t\n\t\t\t\tif(validateAddress('auto') == \"\")\n\t\t\t\t{\t\t\t\t\n\t\t\t\t\twindow.external.beforesavecomplete(false, \"The address does not seem eligible to receive blue box(es) and green cart(s).\");\n\t\t\t\t}\t\t\n\t\t\t}\n\t\t}\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction ondataupdated(changed_object)\n\t\t{\n\t\t\tif(cat_id != i.Category.split(\",\")[1])\n\t\t\t{\n\t\t\t\tcat_id = i.Category.split(\",\")[1];\n\t\t\t}\n\n\t\t\tif(address != i.GetCustomFieldByName(\"c$incident_location\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\taddress = i.GetCustomFieldByName(\"c$incident_location\");\t\n\t\t\t}\t\t\n\t\t}\t\n\t\t\n\t\tfunction setContractor(contractor)\n\t\t{\n\t\t\ti.SetCustomFieldByName(\"c$bb_gc_contractor\",contractor);\n\t\t}\n\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\t\t\t\n\t\t        namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t        namedLogger.trace('Load CGS custom Form Extionsion');\n\t\t\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspac",
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

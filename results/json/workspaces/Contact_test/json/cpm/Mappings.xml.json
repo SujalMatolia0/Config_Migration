@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "type": "cpm",
+    "name": "Mappings.xml",
+    "osvc_object": [
+      "Unknown"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.735087"
+  },
+  "data": {
+    "format": "cpm_mappings",
+    "file_name": "Mappings.xml",
+    "declared_classes": [
+      "Answer",
+      "CommunityComment",
+      "CommunityCommentRtg",
+      "CommunityQuestion",
+      "CommunityQuestionRtg",
+      "Contact",
+      "Incident",
+      "Opportunity",
+      "Organization",
+      "Task"
+    ],
+    "mappings": [
+      {
+        "object": "Contact",
+        "interface": "scriptpro",
+        "operation": "Create",
+        "procedure": "contact_create"
+      },
+      {
+        "object": "Contact",
+        "interface": "scriptpro",
+        "operation": "Update",
+        "procedure": "contact_update"
+      },
+      {
+        "object": "Contact",
+        "interface": "scriptpro_customerservice_2",
+        "operation": "Create",
+        "procedure": "contact_create_internal"
+      },
+      {
+        "object": "Contact",
+        "interface": "scriptpro_customerservice_2",
+        "operation": "Update",
+        "procedure": "contact_update_internal"
+      },
+      {
+        "object": "Incident",
+        "interface": "scriptpro",
+        "operation": "Create",
+        "procedure": "incident_create"
+      }
+    ],
+    "suppress_flags": [
+      {
+        "object": "Contact",
+        "interface": "scriptpro"
+      },
+      {
+        "object": "Contact",
+        "interface": "scriptpro_customerservice_2"
+      },
+      {
+        "object": "Incident",
+        "interface": "scriptpro"
+      }
+    ],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

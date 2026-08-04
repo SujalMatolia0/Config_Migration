@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "type": "custom_script",
+    "name": "address_validation.php",
+    "osvc_object": [
+      "Other"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.707320"
+  },
+  "data": {
+    "file_name": "address_validation.php",
+    "script_type": "Server-side Utility",
+    "summary": "This script provides **Address Validation & Geocoding Service**. It interacts with external REST APIs (ArcGIS / CityWorks Geocoding Service), queries OSVC Configuration settings, and validates customer street address inputs.",
+    "imports": [],
+    "osvc_objects": [
+      "Configuration",
+      "ConnectAPIErrorBase",
+      "ROQL"
+    ],
+    "external_calls": [
+      "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+      "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css",
+      "REST cURL POST/GET: https://js.arcgis.com/4.20/"
+    ],
+    "urls": [
+      "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+      "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+      "https://js.arcgis.com/4.20/"
+    ],
+    "exposed_routes": [],
+    "risk_flags": [
+      {
+        "type": "Hardcoded Credential",
+        "detail": "Potential credentials found in variable assignments (count: 1)"
+      }
+    ],
+    "internal_apis": [
+      {
+        "type": "ROQL Query",
+        "detail": "SELECT LayerName, LayerAPI, UsedInSearchWidget, SearchField FROM Config.FeatureLayer WHERE LayerName =",
+        "operation": "SELECT Query"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_SERVER_URL)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_OSVC_URL)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_USERNAME)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_PASSWORD)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_GENERATE_TOKEN)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CA_CRT_BUNDLE_LOCATION)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_SEARCH_RADIUS)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Agent Authenticator",
+        "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+        "operation": "Validate Agent Session"
+      }
+    ],
+    "external_soap_apis": [],
+    "external_rest_apis": [
+      {
+        "protocol": "REST / HTTP",
+        "method": "POST/GET",
+        "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "details": "cURL POST/GET request"
+      },
+      {
+        "protocol": "REST / HTTP",
+        "method": "POST/GET",
+        "endpoint": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "details": "cURL POST/GET request"
+      },
+      {
+        "protocol": "REST / HTTP",
+        "method": "POST/GET",
+        "endpoint": "https://js.arcgis.com/4.20/",
+        "details": "cURL POST/GET request"
+      }
+    ],
+    "flow_steps": [
+      {
+        "stage": "Internal DB",
+        "action": "Execute ROQL Query: SELECT LayerName, LayerAPI, UsedInSearchWidget, SearchField ..."
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_SERVER_URL)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_OSVC_URL)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_USERNAME)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_PASSWORD)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_GENERATE_TOKEN)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_CA_CRT_BUNDLE_LOCATION)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_SEARCH_RADIUS)"
+      },
+      {
+        "stage": "Authentication",
+        "action": "Validate Agent Session ID"
+      },
+      {
+        "stage": "External REST",
+        "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+      },
+      {
+        "stage": "External REST",
+        "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css"
+      },
+      {
+        "stage": "External REST",
+        "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
+      }
+    ],
+    "has_html": true,
+    "has_js": true,
+    "js_behaviors": [
+      "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+      "Loads ArcGIS JavaScript API components for map rendering and geocoding coordinate selection."
+    ],
+    "html_content": "﻿\n\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" >\n  <meta name=\"viewport\" content=\"initial-scale=1, maximum-scale=1, user-scalable=no\">\n\n  <style>\n    html, body {\n      padding: 0;\n      margin: 0;\n      height: 100%;\n      width: 100%;\n      overflow-x:hidden;\n      \n    }\n\t.esri-search\n\t{\n\t\twidth: 95% !important;\n\t}\n\t.esri-search--show-suggestions .esri-search__suggestions-menu, .esri-search--sources .esri-search__sources-menu {\n\t    overflow: scroll !important;\n\t    visibility: visible;\n\t    max-height: 90px !important;\n\t    animation: esri-fade-in 250ms ease-out;\n\t}\t\n\t.esri_map_only\n\t{\n\t\theight:98%;\n\t\tborder: 1px solid black;\n\t}\n\t.esri_map\n\t{\n\t\theight:58%;\n\t\tborder: 1px solid black;\n\t}\n\t\n\t.rn_PageContent {\n\t\tpadding-top: 2em;\n\t}\n    .esri-search__input{\n\t\tmargin-bottom:0 !important;\n\t}\n\t.esri-menu__header{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__sources-button{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__suggestions-list{\t\n\t\tborder-top: solid 1px rgba(110,110,110,0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t}\n\t.esri-view-height-less-than-medium .esri-popup__main-container {\n\t\tmax-height: 150px !important;\n\t}\n  </style>\n  <link rel=\"stylesheet\" href=\"https://js.arcgis.com/4.20/esri/themes/light/main.css\">\n  <script src=\"https://js.arcgis.com/4.20/\"></script>\n  <script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>\n\n  <script>  \n\t//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"\";\n    \tlet token = \"\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = ;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set th",
+    "js_content": "//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"<?php echo $serverURL; ?>\";\n    \tlet token = \"<?php echo $sessionToken; ?>\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = <?php echo json_encode($featureLayers); ?>;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set the fields in Service Cloud/B2C. \n\t\t\ttheWorkspaceRecord.updateField(recordType+'HouseNumber', houseNumber);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'StreetName', streetName);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'City', city);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'PostalCode', postalCode);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'Unit', unitNum);\t\t\t\n\t\t}\n\t}\n\n/*\n\tConfigure observation of ArcGIS to handle the 'renderNoResultsWarning'function\n\tThis function creates a warning message that says no results have been found even\n\tif they were. This is rendered from the search when no *exact* results have been found.\n\n\tIf there were a new property, if the layer wasn't exact, or for any other reason,\n\tthis could be shown be misleading:\n\ttherefor -> observe the dom object and update to a proper message.\n\t\n\tAttempted to overload the search.renderNoResultsWarning, update Search.messages\n\tto no avail. This is simplest.\n\t*/\n\n\t// Options for the esri observer\n\tconst config = { attributes: true, childList: true, subtree: true };\n\n\t// Callback function for when esri warning div is modified\n\tconst callback = (mutationList, observer) => {\n\t\tfor (const mutation of mutationList) {\n\t\t\tif (mutation.type === \"childList\") {\n\t\t\t\t// take copy of the text in the warning div\n\t\t\t\tlet warningText = mutation.target.lastChild.textContent;\n\t\t\t\tif(warningText.includes(\"There were no results found for\")){\n\t\t\t\t\t// remove the header\n\t\t\t\t\tmutation.target.parentNode.firstChild.textContent = \"\";\n\n\t\t\t\t\tconst textCommaCount = (warningText.split(",
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

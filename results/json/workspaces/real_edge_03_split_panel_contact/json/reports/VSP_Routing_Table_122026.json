@@ -1,0 +1,577 @@
+{
+  "meta": {
+    "type": "report",
+    "name": "VSP Routing Table",
+    "ac_id": "122026",
+    "osvc_object": [
+      "Unknown"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.833716"
+  },
+  "data": {
+    "id": "122026",
+    "name": "VSP Routing Table",
+    "format": "analytics_core",
+    "ac_type": "1",
+    "ac_public": false,
+    "created": "0001-01-01T00:00:00",
+    "updated": "2024-08-22T14:22:06Z",
+    "folder_id": "200614",
+    "owner_acct_id": "0",
+    "interface_id": "1",
+    "image": "8",
+    "time_zone": "0",
+    "version": "19",
+    "opts": "1028",
+    "aux": "1.0.10169,1.0.24,1.0.237",
+    "node_count": 1,
+    "node_details": [
+      {
+        "n_id": "1",
+        "group_type": "0",
+        "style_id": "12",
+        "row_limit": "None",
+        "hidden_sections": [
+          "ReportHeader",
+          "SearchCriteria",
+          "Charts",
+          "ReportFooter",
+          "Exceptions"
+        ],
+        "display_options": [
+          "ShowDataAreaAsGrid"
+        ],
+        "scripts": [
+          {
+            "init_code": "/* ----------------------------- Initialization ----------------------------- */\nrequire_once (get_cfg_var('doc_root') . \"/include/ConnectPHP/Connect_init.phph\");\nrequire_once (get_cfg_var('doc_root') . \"/include/config/config.phph\");\ninitConnectAPI();\n\n$context = RightNow\\Connect\\v1_4\\ConnectAPI::getCurrentContext();\n$context->ApplicationContext = \"SurveyAgentNotify\";\n\nglobal $menuItems ;\n$menuItems = array();\n\nglobal $requestTypeMenu;\n$requestTypeMenu = RightNow\\Connect\\v1_3\\ConnectAPI::getNamedValues('RightNow\\Connect\\v1_3\\Incident','CustomFields.c.cs_request_type' );\nforeach ($requestTypeMenu as $item) {\n    \t\t$menuItems[$item->ID] = $item->LookupName;\n    \t}",
+            "process_code": "global $menuItems ;\nglobal $requestTypeMenu;\n$rows[0][5]->val = $menuItems[$rows[0][4]->val] ;",
+            "finish_code": "",
+            "php_version": "50600",
+            "custom_fields": [
+              "CustomFields.c.cs_request_type"
+            ],
+            "includes": [
+              "require_once (get_cfg_var('doc_root')"
+            ]
+          }
+        ]
+      }
+    ],
+    "has_filters_container": true,
+    "tables": [
+      {
+        "tbl_id": "1",
+        "tbl_enum": "10169",
+        "alias": "VSP$RoutingTable",
+        "join_type": "Primary",
+        "join_type_code": "",
+        "join_def_enum": "",
+        "join_def_idx": "",
+        "join_condition": "—"
+      }
+    ],
+    "columns": [
+      {
+        "col_id": "1",
+        "col_self_ref": "1",
+        "val_col_refs": "VSP$RoutingTable.ID;10169",
+        "val_attrs": "Standard (1)",
+        "val_attrs_code": "1",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 1,
+        "val": "VSP$RoutingTable.ID",
+        "source_field": "VSP$RoutingTable.ID",
+        "table_alias": "VSP$RoutingTable",
+        "label": "ID",
+        "label_str": "ID",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer/ID (3)",
+        "data_type_code": "3",
+        "header_align": "Far",
+        "data_align": "Far",
+        "number_type": "Number",
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "2",
+        "col_self_ref": "2",
+        "val_col_refs": "VSP$RoutingTable.CreatedTime;10169",
+        "val_attrs": "Standard (1)",
+        "val_attrs_code": "1",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 2,
+        "val": "VSP$RoutingTable.CreatedTime",
+        "source_field": "VSP$RoutingTable.CreatedTime",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Date Created",
+        "label_str": "Date Created",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "DateTime (4)",
+        "data_type_code": "4",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": "DateTime",
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "3",
+        "col_self_ref": "3",
+        "val_col_refs": "VSP$RoutingTable.CreatedByAccount;10169",
+        "val_attrs": "Menu / Lookup Field (513)",
+        "val_attrs_code": "513",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 3,
+        "val": "VSP$RoutingTable.CreatedByAccount",
+        "source_field": "VSP$RoutingTable.CreatedByAccount",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Created By",
+        "label_str": "Created By",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer (1)",
+        "data_type_code": "1",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "4",
+        "col_self_ref": "4",
+        "val_col_refs": "VSP$RoutingTable.Queue;10169",
+        "val_attrs": "Menu / Lookup Field (513)",
+        "val_attrs_code": "513",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 4,
+        "val": "VSP$RoutingTable.Queue",
+        "source_field": "VSP$RoutingTable.Queue",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Queue",
+        "label_str": "Queue",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer (1)",
+        "data_type_code": "1",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "2",
+        "sort_direction": "1",
+        "sort_info": "Sort #2 ↑ (secondary)"
+      },
+      {
+        "col_id": "5",
+        "col_self_ref": "5",
+        "val_col_refs": "VSP$RoutingTable.RequestTypeID;10169",
+        "val_attrs": "Standard (1)",
+        "val_attrs_code": "1",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 5,
+        "val": "VSP$RoutingTable.RequestTypeID",
+        "source_field": "VSP$RoutingTable.RequestTypeID",
+        "table_alias": "VSP$RoutingTable",
+        "label": "RequestTypeID",
+        "label_str": "RequestTypeID",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer/ID (3)",
+        "data_type_code": "3",
+        "header_align": "Far",
+        "data_align": "Far",
+        "number_type": "Number",
+        "date_format_type": null,
+        "sort_order": "1",
+        "sort_direction": "1",
+        "sort_info": "Sort #1 ↑ (primary)"
+      },
+      {
+        "col_id": "6",
+        "col_self_ref": "6",
+        "val_col_refs": "",
+        "val_attrs": "Attrs 0",
+        "val_attrs_code": "0",
+        "col_rf_table": null,
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 6,
+        "val": "''",
+        "source_field": "''",
+        "table_alias": "—",
+        "label": "Request Type Name",
+        "label_str": "Request Type Name",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "String (5)",
+        "data_type_code": "5",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "7",
+        "col_self_ref": "7",
+        "val_col_refs": "VSP$RoutingTable.StaffAccount;10169",
+        "val_attrs": "Menu / Lookup Field (513)",
+        "val_attrs_code": "513",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 7,
+        "val": "VSP$RoutingTable.StaffAccount",
+        "source_field": "VSP$RoutingTable.StaffAccount",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Assignee",
+        "label_str": "Assignee",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer (1)",
+        "data_type_code": "1",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "8",
+        "col_self_ref": "8",
+        "val_col_refs": "VSP$RoutingTable.Post24HrsRoutingAgent;10169",
+        "val_attrs": "Menu / Lookup Field (513)",
+        "val_attrs_code": "513",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 8,
+        "val": "VSP$RoutingTable.Post24HrsRoutingAgent",
+        "source_field": "VSP$RoutingTable.Post24HrsRoutingAgent",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Post_24Hrs_Assignee",
+        "label_str": "Post_24Hrs_Assignee",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer (1)",
+        "data_type_code": "1",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "9",
+        "col_self_ref": "9",
+        "val_col_refs": "VSP$RoutingTable.Category;10169",
+        "val_attrs": "Standard (1)",
+        "val_attrs_code": "1",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 9,
+        "val": "VSP$RoutingTable.Category",
+        "source_field": "VSP$RoutingTable.Category",
+        "table_alias": "VSP$RoutingTable",
+        "label": "Category",
+        "label_str": "Category",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Integer (1)",
+        "data_type_code": "1",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      },
+      {
+        "col_id": "10",
+        "col_self_ref": "10",
+        "val_col_refs": "VSP$RoutingTable.AutoResponseText;10169",
+        "val_attrs": "Standard (1)",
+        "val_attrs_code": "1",
+        "col_rf_table": "VSP$RoutingTable",
+        "col_rf_verified": true,
+        "col_rf_mismatch_detail": null,
+        "display_order": 10,
+        "val": "VSP$RoutingTable.AutoResponseText",
+        "source_field": "VSP$RoutingTable.AutoResponseText",
+        "table_alias": "VSP$RoutingTable",
+        "label": "AutoResponseText",
+        "label_str": "AutoResponseText",
+        "label_id": null,
+        "label_source": "literal",
+        "label_tag": "`[literal]`",
+        "data_type": "Boolean (6)",
+        "data_type_code": "6",
+        "header_align": "Near",
+        "data_align": "Near",
+        "number_type": null,
+        "date_format_type": null,
+        "sort_order": "",
+        "sort_direction": "",
+        "sort_info": ""
+      }
+    ],
+    "permissions": [],
+    "perms_by_type": {},
+    "filters": [
+      {
+        "id": "1",
+        "val": "VSP$RoutingTable.RequestTypeID",
+        "prompt_label": "Request Type ID",
+        "val_col_refs": "VSP$RoutingTable.RequestTypeID;10169"
+      }
+    ],
+    "sub_reports": [],
+    "all_xml_properties": {
+      "ac_id": {
+        "tag": "ac_id",
+        "value": "122026",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "ac_public": {
+        "tag": "ac_public",
+        "value": "false",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "ac_type": {
+        "tag": "ac_type",
+        "value": "1",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "aux": {
+        "tag": "aux",
+        "value": "1.0.10169,1.0.24,1.0.237",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "cdate_offset": {
+        "tag": "cdate_offset",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "co_version": {
+        "tag": "co_version",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "created": {
+        "tag": "created",
+        "value": "0001-01-01T00:00:00",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "file_id": {
+        "tag": "file_id",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "filters": {
+        "tag": "filters",
+        "value": "(complex element)",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "fltr_expr": {
+        "tag": "fltr_expr",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "folder_id": {
+        "tag": "folder_id",
+        "value": "200614",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "image": {
+        "tag": "image",
+        "value": "8",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "interface_id": {
+        "tag": "interface_id",
+        "value": "1",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "items": {
+        "tag": "items",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "label": {
+        "tag": "label",
+        "value": "(complex element)",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "nodes": {
+        "tag": "nodes",
+        "value": "(complex element)",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "notes": {
+        "tag": "notes",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "opts": {
+        "tag": "opts",
+        "value": "1028",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "owner_acct_id": {
+        "tag": "owner_acct_id",
+        "value": "0",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "params": {
+        "tag": "params",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "perms": {
+        "tag": "perms",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "rpt": {
+        "tag": "rpt",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "run_vals": {
+        "tag": "run_vals",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "schedules": {
+        "tag": "schedules",
+        "value": "empty",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "style_id": {
+        "tag": "style_id",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "tables": {
+        "tag": "tables",
+        "value": "(complex element)",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "time_zone": {
+        "tag": "time_zone",
+        "value": "0",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "updated": {
+        "tag": "updated",
+        "value": "2024-08-22T14:22:06Z",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "version": {
+        "tag": "version",
+        "value": "19",
+        "is_nil": false,
+        "attributes": {}
+      },
+      "xml_data": {
+        "tag": "xml_data",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      },
+      "xml_report": {
+        "tag": "xml_report",
+        "value": "null (nil)",
+        "is_nil": true,
+        "attributes": {
+          "nil": "true"
+        }
+      }
+    },
+    "raw_unhandled_tags": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    },
+    "export_signature": "Version: 26.5.0.293 | 2.X9+aSUuL0hTSrjG9QKGASr8wnGi4UQVLJw2+jzQeBzeUkJY0"
+  }
+}

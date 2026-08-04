@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "type": "cpm",
+    "name": "ContactAsync",
+    "osvc_object": [
+      "Contact"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.745584"
+  },
+  "data": {
+    "format": "cpm_procedure",
+    "file_name": "ObjectProcedureContactAsync.xml",
+    "id": "100007",
+    "display_name": "ContactAsync",
+    "name": "ContactAsync",
+    "version": "100300 [internal version stamp]",
+    "version_raw": "100300",
+    "operations_code": "2",
+    "operations_label": "Update",
+    "is_async": true,
+    "php_version": "5.6.0 (50600)",
+    "php_version_raw": "50600",
+    "bound_classes": [
+      "Contact"
+    ],
+    "php_content": "<?\n \n/*\n* CPMObjectEventHandler: ContactAsync\n* Package: RN\n* Objects: Contact\n* Actions: Update\n* Version: 1.3\n*/\n \n// This object procedure binds to v1_3 of the Connect PHP API\nuse \\RightNow\\Connect\\v1_3 as RNCPHP;\n \n// This object procedure binds to the v1 interface of the process\n// designer\nuse \\RightNow\\CPM\\v1 as RNCPM;\n \n/**\n* An Object Event Handler must provide two classes:\n* - One with the same name as the CPMObjectEventHandler tag\n* above that implements the ObjectEventHandler interface.\n* - And one of the same name with a \"_TestHarness\" suffix\n* that implements the ObjectEventHandler_TestHarness interface.\n*\n* Each method must have an implementation.\n*/\n \nclass ContactAsync implements RNCPM\\ObjectEventHandler\n{\n\tpublic static function apply( $run_mode, $action, $obj, $n_cycles )\n\t{\n\t\t\n\t\ttry \n\t\t{\n\t\t\tIncidentAutomation_Utils::out($logger, sprintf(\"ContactAsync Begin, email: %s\", $obj->Emails[0]->Address));\t\n\t\t\t$returnValue = self::setRegisterinSiebel($obj->Emails[0]->Address, '');\n\t\t\tIncidentAutomation_Utils::out($logger, sprintf(\"returnValue: %s\", print_r($returnValue)));\t\n\t\t\tif (!empty($returnValue['error_number'])) {\n\t\t\t\tself::sendSiebelExceptionEmail('RegisterContact', null, \"Error Number: \".$returnValue['error_number'].\", Error String: \".$returnValue['error_string'], $obj->Emails[0]->Address);\n\t\t\t}\n\t\t}\n\t\tcatch (RNCPHP\\ConnectAPIError $err)  \n\t\t{\n\t\t\t$logger = \"Exception: \".$err->getCode();\n\t\t\t$logger .= \"\\nMessage: \".$err->getMessage();\n\t\t\techo(\"Exception Message was: \" . $err->getMessage() );\n\t\t\tthrow $err;\t\t\t\n\t\t}\n\t\t\n\t\treturn;\n\t} // apply()\n \n    public static function setRegisterinSiebel($email, $register)\n    {\n\t\t$xml_request = self::getSoapTop() . \"<soapenv:Body>\n\t\t\t      <cus:RegisterContact_Input>\n\t\t\t         <cus:Email>$email</cus:Email>\n\t\t\t         <cus:Register>$register</cus:Register>\n\t\t\t      </cus:RegisterContact_Input>\n\t\t\t   </soapenv:Body>\n\t\t\t</soapenv:Envelope>\";\n\t\ttry {\n\t\t\t$xml_response = self::sendSoapRequest('RegisterContact', $xml_request, $email);\n\t\t}\n\t\tcatch (Exception $e) {\n\t\t\treturn array(\"error_number\" => \"10000\", \"error_string\" => $e->getMessage() . \" Please contact the call center.\");\n\t\t}\n\t\tif (empty($xml_response)) {\n\t\t\treturn array(\"error_number\" => \"10000\", \"error_string\" => \"Oops! Something went wrong. Please wait a moment and try again. If the problem continues, contact Customer Service for assistance.\");\n\t\t}\n\t\t//echo \"request: $xml_request\";\n    \t//echo \"\\nresponse: $xml_response\";\n\t\t//logMessage(\"request: $xml_request\");\n\t\t//logMessage(\"response: $xml_response\");\n// if Siebel is down we get the following error\n// <SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>Error Code: 10879185 Error Message: Error: Login failed attempting to connect to siebel.TCPIP.None.None://SEATST002:2321/SBA_TEST/EAIObjMgr_enu</faultstring><detail><siebelf:errorstack xmlns:siebelf=\"http://www.siebel.com/ws/fault\"><siebelf:error><siebelf:errorsymbol /><siebelf:errormsg>Error: Login failed attempting to connect to siebel.TCPIP.None.None://SEATST002:2321/SBA_TEST/EAIObjMgr_enu</siebelf:errormsg></siebelf:error></siebelf:errorstack></detail></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>\n\t\t$error_regex = '/<ns:ErrorNumber>(?P<error_number>.*?)<\\/ns:ErrorNumber>\\s*<ns:ErrorString>(?P<error_string>.*?)<\\/ns:ErrorString>/si';\n\t\tpreg_match($error_regex, $xml_response, $error_matches);\n\t\t//print_r($error_matches);\n\t\tif ($error_matches && ($error_matches['error_number']) && ($error_matches['error_number'] != \"0\")) {\n\t\t\treturn $error_matches;\n\t\t}\n\n\t\treturn array();\n    }\n\t\n\tpublic static function getSoapTop()\n\t{\n\t\t$username = RNCPHP\\Configuration::fetch( 'CUSTOM_CFG_SIEBEL_USERNAME' )->Value;\n\t\t$password = RNCPHP\\Configuration::fetch( 'CUSTOM_CFG_SIEBEL_PASSWORD' )->Value;\n\t\treturn \"<soapenv:Envelope xmlns:soapenv=\\\"http://schemas.xmlsoap.org/soap/envelope/\\\" xmlns:cus=\\\"http://siebel.com/CustomUI\\\">\n\t\t\t\t   <soapenv:Header>\n\t\t\t\t\t\t<UsernameToken xmlns=\\\"http://siebel.com/webservices\\\">$username</UsernameToken>\n\t\t\t\t\t\t<PasswordText xmlns=\\\"http://siebel.com/webservices\\\">$password</PasswordText>\n\t\t\t\t\t\t<SessionType xmlns=\\\"http://siebel.com/webservices\\\">None</SessionType> \n\t\t\t\t   </soapenv:Header>\";\n\t}\n\t\n\tpublic static function sendSoapRequest($soapAction, $xml_request, $email)\n\t{\n\t\ttry {\n\t\t\t$url = RNCPHP\\Configuration::fetch( 'CUSTOM_CFG_SIEBEL_URL' )->Value;\n        \tload_curl();\n\t\t\t$ch = curl_init();\n\t\t\tcurl_setopt($ch, CURLOPT_URL, $url);\n\t\t\tcurl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n\t\t\tcurl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);\n\t\t\tcurl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);\n\n\t\t\t$headers = array();\n\t\t\tarray_push($headers, \"Content-Type: text/xml; charset=utf-8\");\n\t\t\tarray_push($headers, \"Accept: text/xml\");\n\t\t\tarray_push($headers, \"Cache-Control: no-cache\");\n\t\t\tarray_push($headers, \"Pragma: no-cache\");\n\t\t\tarray_push($headers, \"SOAPAction: \\\"document/http://siebel.com/CustomUI:$soapAction\\\"\");\n\t\t\tif($xml_request != null) {\n\t\t\t\tcurl_setopt($ch, CURLOPT_POSTFIELDS, \"$xml_request\");\n\t\t\t\tarray_push($headers, \"Content-Length: \" . strlen($xml_request));\n\t\t\t}\n\t\t\t//curl_setopt($ch, CURLOPT_USERPWD, \"user_name:password\"); /* If required */\n\t\t\tcurl_setopt($ch, CURLOPT_POST, true);\n\t\t\tcurl_setopt($ch, CURLOPT_HTTPHEADER, $headers);\n\t\t\t//curl_setopt($curl, CURLOPT_HEADER, false); \n\t\t\t$response = curl_exec($ch);\n\t\t\t$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);\n\t\t\tIncidentAutomation_Utils::out($logger, sprintf(\"xml_request: %s\", $xml_request));\t\n\t\t\tIncidentAutomation_Utils::out($logger, sprintf(\"response: %s\", $response));\t\n\t\t\t//echo 'Curl error: ' . curl_error($ch);\n\t\t\t//echo \"response: \" . $response;\n\t\t\t//echo \"code: \" . $code;\n\t\t\tif ($code != 200)\t\t// need to catch errors\n\t\t\t{\n\t\t\t\tself::sendSiebelExceptionEmail($soapAction, $xml_request, curl_error($ch).\"<br/>Code: $code<br/>Response: $response\", $email);\n\t\t\t}\n\t\t\tcurl_close($ch);\n\n\t\t\t//print_r($response);\n\t\t\t$soap_regex = '/<SOAP-ENV:Envelope.*<\\/SOAP-ENV:Envelope>/si';\n\t\t\tpreg_match($soap_regex, $response, $matches);\n\t\t\tif (count($matches) != 1)\n\t\t\t{\n\t\t\t\t//self::sendSiebelExceptionEmail($soapAction, $xml_request, \"<br/>Response: $response\", $email);\n\t\t\t\treturn null;\n\t\t\t}\n\t\t\t//print_r($matches[0]);\n\t\t\t$soap_response = $matches[0];\t\n\t\t}\n\t\tcatch (Exception $e) {\n\t\t\tself::sendSiebelExceptionEmail($soapAction, $xml_request, $e->getMessage().\"\\nCode: $code\\nResponse: $response\", $email);\n\t\t}\n\t\treturn $soap_response;\n\t}\n\n\tpublic static function sendSiebelExceptionEmail($soapAction, $xml_request, $error_message, $email) {\n\t\ttry {\n\t\t\t//create mail message object\n\t\t\t$mm = new RNCPHP\\MailMessage();\n\t\t \n\t\t\t//set TO,CC,BCC fields as necessary\n\t\t\t$mm->To->EmailAddresses = array(RNCPHP\\Configuration::fetch('CUSTOM_CFG_WEB_SERVICE_ERROR_EMAIL')->Value);  // isoscalerts@scriptpro.com\n\t\t \n\t\t\t//set subject\n\t\t\t$mm->Subject = RNCPHP\\MessageBase::fetch('CUSTOM_MSG_WEB_SERVICE_ERROR_SUBJECT')->Value;\n\t\t\t$html_body = str_replace( \n              array('$soapAction', '$customer_number'),  \n              array($soapAction, $email),\n              RNCPHP\\MessageBase::fetch('CUSTOM_MSG_WEB_SERVICE_ERROR_BODY')->Value.\" \".date(\"m/d/Y h:i:s A\").\"<br/>Error Message: $error_message\");\n\t\t\t\n\t\t\t//set body of the email\n\t\t\t$mm->Body->Text = $html_body;\n\t\t\t$mm->Body->Html = $html_body;\n\t\t \n\t\t\t//set marketing options\n\t\t\t$mm->Options->IncludeOECustomHeaders = false;\n\t\t \n\t\t\t//send email\n\t\t\t$mm->send();\n\t\t}\n\t\tcatch ( Exception $err ){\n\t\t\techo \"<br><b>Exception</b>: line \".__LINE__.\": \".$err->getMessage().\"</br>\";\n\t\t}\n    }\n\n} // class ContactAsync\n \n \n/*\nThe Test Harness\n*/\n \n \nclass ContactAsync_TestHarness implements RNCPM\\ObjectEventHandler_TestHarness\n{\n\tstatic $contact_invented = NULL;\n\t \n\tpublic static function setup()\n\t{\n\t\t// For this test, create a new\n\t\t// contact as expected.\n\t\t//$contact = new RNCPHP\\Contact;\n\t\t$contact = RNCPHP\\Contact::fetch(3971);\n\t\t$contact->Name = new RNCPHP\\PersonName();\n\t\t$contact->Name->First = \"Sample_first\";\n\t\t$contact->Name->Last = \"Sample_last\";\n\t\t \n\t\tstatic::$contact_invented = $contact;\n\t\treturn;\n\t}\n\t \n\tpublic static function fetchObject( $action, $object_type )\n\t{\n\t\t// Return the object that we\n\t\t// want to test with.\n\t\t// You could also return an array of objects\n\t\t// to test more than one variation of an object.\n\t\treturn(static::$contact_invented);\n\t}\n\t \n\tpublic static function validate( $action, $object )\n\t{\n\t\t// assume validation is OK\n\t\treturn true;\n\t}\n\t \n\tpublic static function cleanup()\n\t{\n\t\t// Destroy every object invented\n\t\t// by this test.\n\t\t// Not necessary since in test\n\t\t// mode and nothing is committed,\n\t\t// but good practice if only to\n\t\t// document the side effects of\n\t\t// this test.\n\t\t\n\t\t\ttry\n\t\t\t{\n\t\t\t\tstatic::$contact_invented->destroy();\n\t\t\t}\n\t\t\tcatch (RNCPHP\\ConnectAPIError $err)  \n\t\t\t{\n\t\t\t\t$logger = \"Exception: \".$err->getCode();\n\t\t\t\t$logger .= \"\\nMessage: \".$err->getMessage();\n\t\t\t\t//throw $err;\n\t\t\t}\n\t\t\n\t\tstatic::$contact_invented = NULL;\n\t\treturn;\n\t}\n}\n\nclass IncidentAutomation_Utils {\n    public static function out(&$logger, $message) {\n        if (!is_null($logger))\n            $logger .= \"$message\\n\";\n\n        $log_filename = '/vhosts/scriptpro/euf/assets/logs/ContactAsync.log';           //  https://scriptpro--tst.custhelp.com/euf/assets/logs/ContactAsync.log\n        $log_fp = fopen($log_filename, \"a\");\n        fputs($log_fp, date('Y-m-d H:i:s', time()) . \" : \" . $message.\"\\n\");\n        fclose($log_fp);\n\n        echo \"$message\\n\";\n    }\n}\n",
+    "soap_actions": [
+      "RegisterContact"
+    ],
+    "config_vars": [
+      "CUSTOM_CFG_SIEBEL_PASSWORD",
+      "CUSTOM_CFG_SIEBEL_URL",
+      "CUSTOM_CFG_SIEBEL_USERNAME",
+      "CUSTOM_CFG_WEB_SERVICE_ERROR_EMAIL"
+    ],
+    "custom_fields_read": [],
+    "custom_fields_written": [],
+    "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code primarily handles the registration of contacts in Siebel through a SOAP request, and it sends an exception email if any errors occur during the registration process. The code uses the Connect PHP API and the Process Designer interface to interact with the Oracle Service Cloud and Siebel systems, respectively, and it logs various messages and responses for debugging purposes.",
+    "urls": [
+      "http://www.siebel.com/ws/fault"
+    ],
+    "imports": [],
+    "osvc_objects": [
+      "Configuration",
+      "ConnectAPIError",
+      "Contact",
+      "MailMessage",
+      "MessageBase",
+      "PersonName"
+    ],
+    "has_curl": true,
+    "risk_flags": [],
+    "flow_diagram": "graph TD\n  START[\"apply() called for ContactAsync\"]\n  START --> CALL_1[\"self::sendSiebelExceptionEmail()\"]\n  CALL_1 --> CALL_2[\"self::setRegisterinSiebel()\"]\n  CALL_2 --> SAVE_4[\"Save Record\"]\n  CALL_2 -.->|Exception| ERR_EX_3[\"Catch ConnectAPIError\"]\n  ERR_EX_3 --> SAVE_4\n  SAVE_4 --> EXIT_5[\"Exit\"]",
+    "extracted_functions": [
+      "apply",
+      "setRegisterinSiebel",
+      "getSoapTop",
+      "sendSoapRequest",
+      "sendSiebelExceptionEmail"
+    ],
+    "constants_defined": [],
+    "log_files": [],
+    "message_templates": [
+      "CUSTOM_MSG_WEB_SERVICE_ERROR_BODY",
+      "CUSTOM_MSG_WEB_SERVICE_ERROR_SUBJECT"
+    ],
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

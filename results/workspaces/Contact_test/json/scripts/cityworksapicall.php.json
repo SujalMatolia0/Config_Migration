@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "type": "custom_script",
+    "name": "cityworksapicall.php",
+    "osvc_object": [
+      "Other"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.726560"
+  },
+  "data": {
+    "file_name": "cityworksapicall.php",
+    "script_type": "Server-side Utility",
+    "summary": "This script acts as the **CityWorks Integration Authenticator & Dispatcher**. It fetches CityWorks credentials (`CUSTOM_CFG_CITYWORKS_DEV_URL`, `USERNAME`, `PASSWORD`) from OSVC Configuration, performs an HTTP REST authentication cURL request to generate an access token, and triggers automated work order dispatch via `IncidentToCityWorksSR`.",
+    "imports": [
+      "include/init.phph"
+    ],
+    "osvc_objects": [
+      "Configuration",
+      "ConnectAPI"
+    ],
+    "external_calls": [
+      "cURL REST Client Invocation"
+    ],
+    "urls": [],
+    "exposed_routes": [],
+    "risk_flags": [],
+    "internal_apis": [
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_URL)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_USERNAME)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_PASSWORD)",
+        "operation": "Fetch Configuration"
+      }
+    ],
+    "external_soap_apis": [],
+    "external_rest_apis": [
+      {
+        "protocol": "REST / HTTP",
+        "method": "GET",
+        "endpoint": "Dynamic / Configured REST Endpoint",
+        "details": "cURL GET request via Configuration"
+      }
+    ],
+    "flow_steps": [
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_URL)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_USERNAME)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_PASSWORD)"
+      },
+      {
+        "stage": "External REST",
+        "action": "cURL GET HTTP Request"
+      }
+    ],
+    "has_html": false,
+    "has_js": false,
+    "js_behaviors": [],
+    "html_content": "",
+    "js_content": "",
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

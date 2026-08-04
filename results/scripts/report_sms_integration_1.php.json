@@ -1,0 +1,108 @@
+{
+  "file_name": "sms_integration 1.php",
+  "script_type": "Server-side Utility",
+  "summary": "This script handles **SMS Webhook Integration**. It receives XML POST payloads (`php://input`), authenticates integration agent credentials via `AgentAuthenticator::authenticateCredentials()`, parses customer response keywords (`YES` / `OUI`), updates Contact preferred language custom fields, and dispatches SMS subscription confirmations.",
+  "imports": [],
+  "osvc_objects": [
+    "Configuration",
+    "ConnectAPIErrorBase",
+    "NamedIDLabel",
+    "Note",
+    "NoteArray",
+    "RNObject",
+    "ROQL"
+  ],
+  "external_calls": [
+    "cURL REST Client Invocation"
+  ],
+  "urls": [],
+  "exposed_routes": [],
+  "risk_flags": [
+    {
+      "type": "Hardcoded Credential",
+      "detail": "Potential credentials found in variable assignments (count: 1)"
+    }
+  ],
+  "internal_apis": [
+    {
+      "type": "ROQL Query",
+      "detail": "SELECT Contact FROM Contact WHERE (Phones.PhoneList.Rawnumber =",
+      "operation": "SELECT Query"
+    },
+    {
+      "type": "ROQL Query",
+      "detail": "SELECT \".$lang.\" as data FROM Config.EmailSmsTemplate WHERE TemplateLabel =",
+      "operation": "SELECT Query"
+    },
+    {
+      "type": "Connect PHP Fetch",
+      "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_SMS_API_URL)",
+      "operation": "Fetch Configuration"
+    },
+    {
+      "type": "Connect PHP Fetch",
+      "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_SMS_API_SHORTCODE)",
+      "operation": "Fetch Configuration"
+    },
+    {
+      "type": "Agent Authenticator",
+      "detail": "AgentAuthenticator::authenticateCredentials($username, $password)",
+      "operation": "Validate Agent Credentials"
+    }
+  ],
+  "external_soap_apis": [
+    {
+      "protocol": "XML Payload Ingestion",
+      "endpoint": "php://input",
+      "action": "Parse Incoming XML Payload"
+    }
+  ],
+  "external_rest_apis": [
+    {
+      "protocol": "REST / HTTP",
+      "method": "POST/GET",
+      "endpoint": "Dynamic / Configured REST Endpoint",
+      "details": "cURL POST/GET request via Configuration"
+    }
+  ],
+  "flow_steps": [
+    {
+      "stage": "Internal DB",
+      "action": "Execute ROQL Query: SELECT Contact FROM Contact WHERE (Phones.PhoneList.Rawnumbe..."
+    },
+    {
+      "stage": "Internal DB",
+      "action": "Execute ROQL Query: SELECT \".$lang.\" as data FROM Config.EmailSmsTemplate WHERE ..."
+    },
+    {
+      "stage": "Internal API",
+      "action": "Fetch Configuration instance (CUSTOM_CFG_SMS_API_URL)"
+    },
+    {
+      "stage": "Internal API",
+      "action": "Fetch Configuration instance (CUSTOM_CFG_SMS_API_SHORTCODE)"
+    },
+    {
+      "stage": "Authentication",
+      "action": "Authenticate Agent Credentials"
+    },
+    {
+      "stage": "Ingestion",
+      "action": "Receive & Parse XML POST Payload"
+    },
+    {
+      "stage": "External REST",
+      "action": "cURL POST/GET HTTP Request"
+    }
+  ],
+  "has_html": false,
+  "has_js": false,
+  "js_behaviors": [],
+  "html_content": "",
+  "js_content": "",
+  "unhandled_elements": [],
+  "unknowns": {
+    "unknown_attrs": [],
+    "unknown_children": []
+  }
+}

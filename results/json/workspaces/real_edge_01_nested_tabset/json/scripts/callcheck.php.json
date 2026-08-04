@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "type": "custom_script",
+    "name": "callcheck.php",
+    "osvc_object": [
+      "Other"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.801837"
+  },
+  "data": {
+    "file_name": "callcheck.php",
+    "script_type": "Server-side Utility",
+    "summary": "This script performs **Active Telephony Call Verification**. It validates agent session tokens, queries an external telephony REST API (`http://209.91.135.228/api/listactivecalls/`), and matches active caller numbers against OSVC Contact accounts for screen-pop automation.",
+    "imports": [],
+    "osvc_objects": [
+      "Account",
+      "Configuration"
+    ],
+    "external_calls": [
+      "REST cURL POST/GET: http://209.91.135.228/api/listactivecalls/"
+    ],
+    "urls": [
+      "http://209.91.135.228/api/listactivecalls/"
+    ],
+    "exposed_routes": [],
+    "risk_flags": [],
+    "internal_apis": [
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Account::fetch($_POST['acctid'])",
+        "operation": "Fetch Account"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ACTIVECALL_API_URL)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Connect PHP Fetch",
+        "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ACTIVECALL_API_KEY)",
+        "operation": "Fetch Configuration"
+      },
+      {
+        "type": "Agent Authenticator",
+        "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+        "operation": "Validate Agent Session"
+      }
+    ],
+    "external_soap_apis": [],
+    "external_rest_apis": [
+      {
+        "protocol": "REST / HTTP",
+        "method": "POST/GET",
+        "endpoint": "http://209.91.135.228/api/listactivecalls/",
+        "details": "cURL POST/GET request"
+      }
+    ],
+    "flow_steps": [
+      {
+        "stage": "Internal API",
+        "action": "Fetch Account instance ($_POST['acctid'])"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ACTIVECALL_API_URL)"
+      },
+      {
+        "stage": "Internal API",
+        "action": "Fetch Configuration instance (CUSTOM_CFG_ACTIVECALL_API_KEY)"
+      },
+      {
+        "stage": "Authentication",
+        "action": "Validate Agent Session ID"
+      },
+      {
+        "stage": "External REST",
+        "action": "cURL POST/GET call -> http://209.91.135.228/api/listactivecalls/"
+      }
+    ],
+    "has_html": false,
+    "has_js": false,
+    "js_behaviors": [],
+    "html_content": "",
+    "js_content": "",
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

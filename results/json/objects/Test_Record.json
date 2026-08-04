@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "type": "custom_object",
+    "name": "Test_Record",
+    "generatedAt": "2026-08-04T10:29:06.683358"
+  },
+  "data": {
+    "format": "custom_object",
+    "type": "CustomObject",
+    "file_name": "ObjectTest_Record_2.xml",
+    "file_path": "/Users/tkboom/Workspace/Office/Config Accelerator/input/objects/ObjectTest_Record_2.xml",
+    "id": "10001",
+    "name": "Test_Record",
+    "label": "Test Record",
+    "package": "CO",
+    "package_id": "2",
+    "description": "",
+    "is_agent_visible": true,
+    "is_analytics_visible": true,
+    "fields": [
+      {
+        "id": "10003",
+        "name": "ID",
+        "label": "ID",
+        "data_type": "Integer",
+        "is_nullable": false,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10004",
+        "name": "CreatedByAccount",
+        "label": "Created By",
+        "data_type": "Menu",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10005",
+        "name": "UpdatedByAccount",
+        "label": "Updated By",
+        "data_type": "Menu",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10006",
+        "name": "CreatedTime",
+        "label": "Date Created",
+        "data_type": "Date Time",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10007",
+        "name": "FileAttachments",
+        "label": "File Attachments",
+        "data_type": "Files",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "File Attachments for the object"
+      },
+      {
+        "id": "10008",
+        "name": "Labels",
+        "label": "Labels",
+        "data_type": "Labels",
+        "is_nullable": false,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10009",
+        "name": "UpdatedTime",
+        "label": "Date Last Updated",
+        "data_type": "Date Time",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10010",
+        "name": "Notes",
+        "label": "Notes",
+        "data_type": "Notes",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "Notes for the object"
+      },
+      {
+        "id": "10011",
+        "name": "Descriptions",
+        "label": "Descriptions",
+        "data_type": "Description",
+        "is_nullable": true,
+        "is_system": true,
+        "package_name": "CO",
+        "description": "System Field"
+      },
+      {
+        "id": "10012",
+        "name": "test_record_field",
+        "label": "Test Record Profile",
+        "data_type": "Text",
+        "is_nullable": true,
+        "is_system": false,
+        "package_name": "CO",
+        "description": "this is for testing"
+      },
+      {
+        "id": "10013",
+        "name": "TestInteger",
+        "label": "Answer",
+        "data_type": "Integer",
+        "is_nullable": true,
+        "is_system": false,
+        "package_name": "CO",
+        "description": ""
+      },
+      {
+        "id": "10014",
+        "name": "TestMenu",
+        "label": "TestMenu",
+        "data_type": "Menu",
+        "is_nullable": true,
+        "is_system": false,
+        "package_name": "CO",
+        "description": ""
+      },
+      {
+        "id": "10015",
+        "name": "Testyesno",
+        "label": "Testyesno",
+        "data_type": "Yes/No",
+        "is_nullable": true,
+        "is_system": false,
+        "package_name": "CO",
+        "description": ""
+      }
+    ],
+    "keys": [
+      {
+        "id": "10001",
+        "type": "1",
+        "fields": [
+          "10003"
+        ]
+      },
+      {
+        "id": "10002",
+        "type": "3",
+        "fields": [
+          "10004"
+        ]
+      },
+      {
+        "id": "10003",
+        "type": "3",
+        "fields": [
+          "10005"
+        ]
+      },
+      {
+        "id": "10004",
+        "type": "3",
+        "fields": [
+          "10012"
+        ]
+      },
+      {
+        "id": "10005",
+        "type": "3",
+        "fields": [
+          "10013"
+        ]
+      },
+      {
+        "id": "10006",
+        "type": "3",
+        "fields": [
+          "10014"
+        ]
+      }
+    ],
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

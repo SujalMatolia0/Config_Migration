@@ -1,0 +1,5 @@
+﻿Object,Action Type,Rule Group,Rule Name,Status,Condition,Actions
+Contacts,ClearEscalation,F01-Email Routing,01-Route to Andrew Stein,Disabled,If (Contacts > Email - Primary  equals  ejbatema@comcast.net  OR  Contacts > Email - Primary  equals  bhn@elaiproject.org  OR  Contacts > Email - Primary  equals  thinktanky@gmail.com),Clear Escalation
+Contacts,ClearEscalation,F01-Email Routing,01-Route to Elliot Basner,Disabled,If (Contacts > Email - Primary  equals  sandra.costello2011@gmail.com),Clear Escalation
+Contacts,ClearEscalation,F01-Email Routing,01-Route to Dylan O'Donoghue,Disabled,If (Contacts > Email - Primary  equals  alling.christine.a@gmail.com),Clear Escalation
+Contacts,ClearEscalation,F01-Email Routing,01-Route to Execuite Esco,Disabled,If (Contacts > Contact Type  equals  Executive Esco  OR  Contacts > Email - Primary  equals  sandra.costello2011@gmail.com  OR  Contacts > Email - Primary  equals  thatjohnkichi@gmail.com),Clear Escalation

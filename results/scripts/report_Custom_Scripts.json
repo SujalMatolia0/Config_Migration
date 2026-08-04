@@ -1,0 +1,796 @@
+{
+  "custom_script_count": 10,
+  "items": [
+    {
+      "file_name": "address_validation.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script provides **Address Validation & Geocoding Service**. It interacts with external REST APIs (ArcGIS / CityWorks Geocoding Service), queries OSVC Configuration settings, and validates customer street address inputs.",
+      "imports": [],
+      "osvc_objects": [
+        "Configuration",
+        "ConnectAPIErrorBase",
+        "ROQL"
+      ],
+      "external_calls": [
+        "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "REST cURL POST/GET: https://js.arcgis.com/4.20/"
+      ],
+      "urls": [
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "https://js.arcgis.com/4.20/"
+      ],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 1)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT LayerName, LayerAPI, UsedInSearchWidget, SearchField FROM Config.FeatureLayer WHERE LayerName =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_SERVER_URL)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_OSVC_URL)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_USERNAME)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_PASSWORD)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_GENERATE_TOKEN)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CA_CRT_BUNDLE_LOCATION)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ESRI_SEARCH_RADIUS)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+          "details": "cURL POST/GET request"
+        },
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+          "details": "cURL POST/GET request"
+        },
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "https://js.arcgis.com/4.20/",
+          "details": "cURL POST/GET request"
+        }
+      ],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT LayerName, LayerAPI, UsedInSearchWidget, SearchField ..."
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_SERVER_URL)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_OSVC_URL)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_USERNAME)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_PASSWORD)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_GENERATE_TOKEN)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_CA_CRT_BUNDLE_LOCATION)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ESRI_SEARCH_RADIUS)"
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
+        }
+      ],
+      "has_html": true,
+      "has_js": true,
+      "js_behaviors": [
+        "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+        "Loads ArcGIS JavaScript API components for map rendering and geocoding coordinate selection."
+      ],
+      "html_content": "﻿\n\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" >\n  <meta name=\"viewport\" content=\"initial-scale=1, maximum-scale=1, user-scalable=no\">\n\n  <style>\n    html, body {\n      padding: 0;\n      margin: 0;\n      height: 100%;\n      width: 100%;\n      overflow-x:hidden;\n      \n    }\n\t.esri-search\n\t{\n\t\twidth: 95% !important;\n\t}\n\t.esri-search--show-suggestions .esri-search__suggestions-menu, .esri-search--sources .esri-search__sources-menu {\n\t    overflow: scroll !important;\n\t    visibility: visible;\n\t    max-height: 90px !important;\n\t    animation: esri-fade-in 250ms ease-out;\n\t}\t\n\t.esri_map_only\n\t{\n\t\theight:98%;\n\t\tborder: 1px solid black;\n\t}\n\t.esri_map\n\t{\n\t\theight:58%;\n\t\tborder: 1px solid black;\n\t}\n\t\n\t.rn_PageContent {\n\t\tpadding-top: 2em;\n\t}\n    .esri-search__input{\n\t\tmargin-bottom:0 !important;\n\t}\n\t.esri-menu__header{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__sources-button{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__suggestions-list{\t\n\t\tborder-top: solid 1px rgba(110,110,110,0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t}\n\t.esri-view-height-less-than-medium .esri-popup__main-container {\n\t\tmax-height: 150px !important;\n\t}\n  </style>\n  <link rel=\"stylesheet\" href=\"https://js.arcgis.com/4.20/esri/themes/light/main.css\">\n  <script src=\"https://js.arcgis.com/4.20/\"></script>\n  <script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>\n\n  <script>  \n\t//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"\";\n    \tlet token = \"\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = ;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set th",
+      "js_content": "//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"<?php echo $serverURL; ?>\";\n    \tlet token = \"<?php echo $sessionToken; ?>\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = <?php echo json_encode($featureLayers); ?>;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set the fields in Service Cloud/B2C. \n\t\t\ttheWorkspaceRecord.updateField(recordType+'HouseNumber', houseNumber);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'StreetName', streetName);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'City', city);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'PostalCode', postalCode);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'Unit', unitNum);\t\t\t\n\t\t}\n\t}\n\n/*\n\tConfigure observation of ArcGIS to handle the 'renderNoResultsWarning'function\n\tThis function creates a warning message that says no results have been found even\n\tif they were. This is rendered from the search when no *exact* results have been found.\n\n\tIf there were a new property, if the layer wasn't exact, or for any other reason,\n\tthis could be shown be misleading:\n\ttherefor -> observe the dom object and update to a proper message.\n\t\n\tAttempted to overload the search.renderNoResultsWarning, update Search.messages\n\tto no avail. This is simplest.\n\t*/\n\n\t// Options for the esri observer\n\tconst config = { attributes: true, childList: true, subtree: true };\n\n\t// Callback function for when esri warning div is modified\n\tconst callback = (mutationList, observer) => {\n\t\tfor (const mutation of mutationList) {\n\t\t\tif (mutation.type === \"childList\") {\n\t\t\t\t// take copy of the text in the warning div\n\t\t\t\tlet warningText = mutation.target.lastChild.textContent;\n\t\t\t\tif(warningText.includes(\"There were no results found for\")){\n\t\t\t\t\t// remove the header\n\t\t\t\t\tmutation.target.parentNode.firstChild.textContent = \"\";\n\n\t\t\t\t\tconst textCommaCount = (warningText.split(",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "bluebox_greencart_validation.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.",
+      "imports": [],
+      "osvc_objects": [
+        "ConnectAPIErrorBase"
+      ],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        }
+      ],
+      "has_html": false,
+      "has_js": true,
+      "js_behaviors": [
+        "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+        "Attaches dynamic workspace field value change listeners to trigger real-time search and validation as fields are edited.",
+        "Loads ArcGIS JavaScript API components for map rendering and geocoding coordinate selection."
+      ],
+      "html_content": "",
+      "js_content": "var p_id = <?php echo json_encode($session_id); ?>;\n\tvar address = <?php echo json_encode($address); ?>;\n\tvar cat_id = <?php echo json_encode($cat_id); ?>;\n\n\t/*\n\tcall the fucntion to check the address in OSvC BlueBoxGreenCartAddr config object through REST API\n\t*/\n\tfunction validateAddress(triggeredBy)\n\t{\n\t\tvar contractor = \"\";// default Contractor  name\n\t\tif(address != 'null' && address != '')//ex: 23 A Stanyon Street, Sudbury\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet city = adrInfo[1].trim();//ex: Sudbury\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\n\t\t\tlet streetNum = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\n\t\t\tlet modifiedStreetName = \"\";\n\t\t\tlet fstWordOfStreet = \"\";\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\tstreetNum = streetNum +\" \"+streetInfo[1].trim();\n\t\t\t\tfstWordOfStreet = streetInfo[2];\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\n\t\t\t\tmodifiedStreetName = streetInfo.slice(3, streetInfo.length).join(\" \");//leave the first word of actual street name\n\t\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t\tfstWordOfStreet = streetInfo[1];\n\t\t\t\tmodifiedStreetName = streetInfo.slice(2, streetInfo.length).join(\" \");//leave the first word of actual street name\n\t\t\t}\n\n\t\t\t//streetName = streetName.substring(0, streetName.lastIndexOf(\" \"));// remove last st with %\n\t\t\t\n\t\t\t//There is a mismatch in street name between what we get from ESRI and what's in OSvC config object\n\t\t\t//So replace below road name suffix with abbreviations\n\t\t\tvar streetsSuffix = {\n\t\t\t\t'Road':'RD',\n\t\t\t\t'Street':'ST',\n\t\t\t\t'Place':'PL',\n\t\t\t\t'Crescent':'CRES',\n\t\t\t\t'Court':'CRT',\n\t\t\t\t'Drive':'DR',\n\t\t\t\t'Avenue':'AVE',\t\t\t\t\n\t\t\t\t'Boulevard':'BLVD',\n\t\t\t\t'Circle':'CIR',\n\t\t\t\t'Expressway':'EXPY',\n\t\t\t\t'Freeway':'FWY',\n\t\t\t\t'Lane':'LN',\n\t\t\t\t'Parkway':'PKY',\n\t\t\t\t'Square':'SQ',\n\t\t\t\t'Turnpike':'TPKE',\t\t\t\t\n\t\t\t\t'North':'N',\n\t\t\t\t'East':'E',\n\t\t\t\t'South':'S',\n\t\t\t\t'West':'W',\n\t\t\t\t'Northeast':'NE',\n\t\t\t\t'Southeast':'SE',\n\t\t\t\t'Southwest':'SW',\n\t\t\t\t'Northwest':'NW'\n\t\t\t};\t\t\t\n\n\n\t\t\tfor (var key in streetsSuffix ) {\n\t\t\t\t//var re = new RegExp(key, 'gi');\n\t\t\t\tvar re = new RegExp(\"\\\\b(?:\" + key + \")\\\\b\",\"g\");\n\t\t\t\tmodifiedStreetName = modifiedStreetName.replace(re, streetsSuffix[key]);\n\t\t\t}\t\n\t\t\t\n\t\t\tmodifiedStreetName = fstWordOfStreet+\" \"+modifiedStreetName;\n\t\t\t//REST API URL + Query string...NOTE: not passing street number on where clause as street number can be in range like 4-8 or 2a-2f. So not possible to apply that in where clause\n\t\t\tvar url = \"/services/rest/connect/latest/queryResults/?query=SELECT StreetNumber, Contractor FROM Config.BlueBoxGreenCartAddr WHERE BinRequest = 1 AND ( StreetName = '\"+streetName.replace(\"'\", \"''\")+\"' OR StreetName = '\"+modifiedStreetName.replace(\"'\", \"''\")+\"' ) AND CommunityName = '\"+city+\"'\";\n\t\t\t\n\t\t\tvar xhr = new XMLHttpRequest();\n\t\t\txhr.open('GET', url, false);\n\t\t\txhr.setRequestHeader('Content-Type', 'application/json');\n\t\t\txhr.setRequestHeader('OSvC-CREST-Application-Context', 'Sudbury Address Validation');\n\t\t\txhr.setRequestHeader('Authorization', 'Session ' + p_id);\n\t\t\txhr.onload = function() {\n\t\t\t\tif (xhr.status === 200)\n\t\t\t\t{\t\t\t\t\t\t\t\t\t\n\t\t\t\t\tvar output = [];\n\t\t\t\t\tJSON.parse(xhr.responseText).items[0].rows.forEach(function(row)\n\t\t\t\t\t{\n\t\t\t\t\t\tlet osvcStNum = row[0].trim();\n\t\t\t\t\t\tosvcStNum = osvcStNum.replace(/ +(?= )/g,'');// replace multi space with single\n\t\t\t\t\t\t//Parse the street number to make sure address match\n\t\t\t\t\t\tif(streetNum == osvcStNum)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tcontractor = row[1];\n\t\t\t\t\t\t\t//adrValidationFlag = true;\n\t\t\t\t\t\t\t//break;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t/*else if(osvcStNum.indexOf('-') !== -1)//if street num contains - that is range\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tvar tmp = row[0].split(\"-\");\n\t\t\t\t\t\t\tif(streetNum >= tmp[0].trim() && streetNum <= tmp[1].trim())\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\tcontractor = row[1];\n\t\t\t\t\t\t\t\t//adrValidationFlag = true;\n\t\t\t\t\t\t\t\t//break;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\t*/\n\t\t\t\t\t});\t\t\t\t\t\t\t\t\t\t\t\n\t\t\t\t}\n\t\t\t\telse if (xhr.status !== 200) \n\t\t\t\t{\n\t\t\t\t}\n\t\t\t};\n\t\t\txhr.send();\n\t\t}\n\t\tif(contractor == \"\")\n\t\t\talert(\"The address does not seem eligible to receive blue box(es) and green cart(s).\");\n\t\telse\n\t\t{\n\t\t\tif (typeof setContractor === \"function\")\n\t\t\t\tsetContractor(contractor);\n\t\t\tif(triggeredBy == 'manually')\n\t\t\t\talert(\"The address is eligible to receive blue box(es) and green cart(s).\");\n\t\t}\n\t\treturn contractor;\n\t}\n\t\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\t\n\t\tfunction onbeforesave()\n\t\t{\n\t\t\tif (cat_id == 36 && typeof validateAddress === \"function\")\n\t\t\t{\t\t\t\n\t\t\t\tif(validateAddress('auto') == \"\")\n\t\t\t\t{\t\t\t\t\n\t\t\t\t\twindow.external.beforesavecomplete(false, \"The address does not seem eligible to receive blue box(es) and green cart(s).\");\n\t\t\t\t}\t\t\n\t\t\t}\n\t\t}\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction ondataupdated(changed_object)\n\t\t{\n\t\t\tif(cat_id != i.Category.split(\",\")[1])\n\t\t\t{\n\t\t\t\tcat_id = i.Category.split(\",\")[1];\n\t\t\t}\n\n\t\t\tif(address != i.GetCustomFieldByName(\"c$incident_location\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\taddress = i.GetCustomFieldByName(\"c$incident_location\");\t\n\t\t\t}\t\t\n\t\t}\t\n\t\t\n\t\tfunction setContractor(contractor)\n\t\t{\n\t\t\ti.SetCustomFieldByName(\"c$bb_gc_contractor\",contractor);\n\t\t}\n\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\t\t\t\n\t\t        namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t        namedLogger.trace('Load CGS custom Form Extionsion');\n\t\t\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspac",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "callcheck.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script performs **Active Telephony Call Verification**. It validates agent session tokens, queries an external telephony REST API (`http://209.91.135.228/api/listactivecalls/`), and matches active caller numbers against OSVC Contact accounts for screen-pop automation.",
+      "imports": [],
+      "osvc_objects": [
+        "Account",
+        "Configuration"
+      ],
+      "external_calls": [
+        "REST cURL POST/GET: http://209.91.135.228/api/listactivecalls/"
+      ],
+      "urls": [
+        "http://209.91.135.228/api/listactivecalls/"
+      ],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Account::fetch($_POST['acctid'])",
+          "operation": "Fetch Account"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ACTIVECALL_API_URL)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_ACTIVECALL_API_KEY)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "http://209.91.135.228/api/listactivecalls/",
+          "details": "cURL POST/GET request"
+        }
+      ],
+      "flow_steps": [
+        {
+          "stage": "Internal API",
+          "action": "Fetch Account instance ($_POST['acctid'])"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ACTIVECALL_API_URL)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_ACTIVECALL_API_KEY)"
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET call -> http://209.91.135.228/api/listactivecalls/"
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "child_incident_create.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script automates **Child Incident Creation & Linking**. It instantiates new `RNCPHP\\Incident` records, copies parent incident parameters, establishes parent-child relationships, and commits new records to the database.",
+      "imports": [
+        "include/init.phph"
+      ],
+      "osvc_objects": [
+        "Banner",
+        "ConnectAPI",
+        "GroupAccount",
+        "Incident",
+        "NamedIDLabel",
+        "NamedIDOptList",
+        "RNObject",
+        "StatusWithType"
+      ],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Incident::fetch($incID)",
+          "operation": "Fetch Incident"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal API",
+          "action": "Fetch Incident instance ($incID)"
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "cityworksapicall.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script acts as the **CityWorks Integration Authenticator & Dispatcher**. It fetches CityWorks credentials (`CUSTOM_CFG_CITYWORKS_DEV_URL`, `USERNAME`, `PASSWORD`) from OSVC Configuration, performs an HTTP REST authentication cURL request to generate an access token, and triggers automated work order dispatch via `IncidentToCityWorksSR`.",
+      "imports": [
+        "include/init.phph"
+      ],
+      "osvc_objects": [
+        "Configuration",
+        "ConnectAPI"
+      ],
+      "external_calls": [
+        "cURL REST Client Invocation"
+      ],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_URL)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_USERNAME)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_CITYWORKS_DEV_PASSWORD)",
+          "operation": "Fetch Configuration"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [
+        {
+          "protocol": "REST / HTTP",
+          "method": "GET",
+          "endpoint": "Dynamic / Configured REST Endpoint",
+          "details": "cURL GET request via Configuration"
+        }
+      ],
+      "flow_steps": [
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_URL)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_USERNAME)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_CITYWORKS_DEV_PASSWORD)"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL GET HTTP Request"
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "closing_notes.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script performs **Incident Closing Notes Management**. It retrieves Incident records via Connect PHP API, instantiates `RNCPHP\\Note` objects, appends resolution notes, and updates incident statuses upon closure.",
+      "imports": [],
+      "osvc_objects": [
+        "Account",
+        "ConnectAPI",
+        "ConnectAPIErrorBase"
+      ],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Account::fetch((int)",
+          "operation": "Fetch Account"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal API",
+          "action": "Fetch Account instance ((int)"
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        }
+      ],
+      "has_html": false,
+      "has_js": true,
+      "js_behaviors": [
+        "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events."
+      ],
+      "html_content": "",
+      "js_content": "var theWorkspaceRecord;\n\tvar script = document.createElement('script');                \n\tscript.type = 'text/javascript';\n\tscript.async = true;\n\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\tscript.onload = function() {\n\t\t\t\n\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"LoggedInAccount\", \"1\")\n\t\t.then(function(extensionProvider)\n\t\t{\n\t\t\t\t\n\t\t    namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t    namedLogger.trace('Load CGS Logged In Account');\n\t\t\n\t\t    extensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    {\n\n\t    \t\ttheWorkspaceRecord = workspaceRecord;\n\t\t\t\t//List of fields to be prefetch\n\t\t\t\tworkspaceRecord.prefetchWorkspaceFields(['Incident.c$closing_notes','Incident.CO$ClosingNotesUpdatedByUser']);\n\t    \t\t\t\n\t\t\t\t//OOTB Workspace Event\n\t\t\t\tworkspaceRecord.addRecordSavingListener(dataSavingListenerForSR);\n\t                \n\t\t    });\n\t\t});\n\t};\t\n\tdocument.head.appendChild(script);\t\t\t\n\t\t\n\t//Function to call custom form validation on save operation of Incident\n\t//If custom form validation fails then cancel the save operation\t\t\n\tfunction dataSavingListenerForSR(parameter) {\t\t\n\t\tif (parameter.event.fieldObjects[\"Incident.c$closing_notes\"].value)\n\t\t{\n\t\t\tif(parameter.event.fieldObjects[\"Incident.c$closing_notes\"].value.length >= 10)\n\t\t\t{\n\t\t\t\ttheWorkspaceRecord.updateField('Incident.CO$ClosingNotesUpdatedByUser', \"<?php echo $agentName  ?>\");\n\t\t\t}\n\t\t\telse \n\t\t\t{\n\t\t\t\tparameter.getCurrentEvent().cancel();\n\t\t\t\talert(\"Please enter a longer closing note.\");\n\t\t\t}\n\t\t}\n\t}",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "duplicate_contacts.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script performs **Duplicate Contact Detection** for OSVC Agent Console. It parses incoming search parameters (`f_name`, `l_name`, `email`, `h_phone`, `m_phone`, `house_num`, `street_name`, `city`), validates the agent session via `AgentAuthenticator::authenticateSessionID()`, and executes 4 ROQL queries against `Contact` and `CO.PotentialDuplicate` custom object tables to return candidate duplicate contact matches for agent review.",
+      "imports": [],
+      "osvc_objects": [
+        "CO",
+        "ConnectAPIErrorBase",
+        "Contact",
+        "ROQL"
+      ],
+      "external_calls": [],
+      "urls": [
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
+        "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+        "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
+      ],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT ID, Name.First, Name.Last, Emails.EmailList.Address, Phones.RawNumber, Phones.PhoneType.LookupName AS PhoneType, CustomFields.CO.HouseNumber,CustomFields.CO.StreetName, CustomFields.CO.City FROM Contact WHERE",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT Distinct ID FROM Contact WHERE ID !=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT ID,IsDuplicate,Contact1,Contact2 FROM CO.PotentialDuplicate WHERE Contact1 =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT ID FROM CO.PotentialDuplicate WHERE IsDuplicate Is Null And (Contact1 =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Contact::fetch(intval($id)",
+          "operation": "Fetch Contact"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Contact::fetch(intval($pd)",
+          "operation": "Fetch Contact"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        },
+        {
+          "type": "Connect PHP Save",
+          "detail": "$pdr->save()",
+          "operation": "Commit changes to pdr"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT ID, Name.First, Name.Last, Emails.EmailList.Address, ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT Distinct ID FROM Contact WHERE ID !=..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT ID,IsDuplicate,Contact1,Contact2 FROM CO.PotentialDup..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT ID FROM CO.PotentialDuplicate WHERE IsDuplicate Is Nu..."
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Contact instance (intval($id)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Contact instance (intval($pd)"
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Commit record changes ($pdr->save())"
+        }
+      ],
+      "has_html": true,
+      "has_js": true,
+      "js_behaviors": [
+        "Initializes interactive DataTables grid formatting for thumbnail & search results display.",
+        "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+        "Attaches dynamic workspace field value change listeners to trigger real-time search and validation as fields are edited.",
+        "Fires custom workspace named events (`focusDuplicateTab` / `hideDuplicateTab`) to dynamically toggle console tab visibility.",
+        "Dynamically constructs HTML table rows and inserts clickable contact selection links into DOM container elements."
+      ],
+      "html_content": "<pre>\n\n﻿\n<!DOCTYPE html> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" ><!--[if lte IE 8]>\n<script src=\"html5.js\" type=\"text/javascript\"></script>\n<![endif]-->\n <head>\n        <script type=\"text/javascript\" src=\"//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n\n        <!-- Datatable library -->\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css\">  \n\t\t<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js\"></script>\n\n        <!-- FontAwesome for notification and datatable icons -->\n        <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.1.1/css/all.css\" integrity=\"sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ\" crossorigin=\"anonymous\">\n    </head>\n    <body>\n\n\t\t<div id=\"thumbnail_sr_sa_files\">\t\t\n\t\t<p style=\"color: red;font-size: 24px;width: 250px;margin: auto;/* margin-left: 40%; */\"> Duplicate Contacts found </p>\n\t\t\t<table id=\"thumbnail_id\">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>First Name</th>\n\t\t\t\t\t\t<th>Last Name</th>\n\t\t\t\t\t\t<th>Email</th>\n\t\t\t\t\t\t<th>Home #</th>\n\t\t\t\t\t\t<th>Mobile #</th>\n\t\t\t\t\t\t<th>House Num</th>\n\t\t\t\t\t\t<th>Street Name</th>\n\t\t\t\t\t\t<th>City</th>\n\t\t\t\t\t\t<th>Action</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody id=\"thumbnail_id_body\">\n\t\t\t\t</tbody>\n\t\t\t</table>\t\t\t\n\t\t</div>\n\n    </body>\n<script>\n\tvar duplicateContacts = ;\n\n\tif( !Array.isArray(duplicateContacts) && duplicateContacts != null)\n\t{\n\t\talert(\"Potential Duplicate Contact Detected\");\t\n\t\tvar table = document.getElementById(\"thumbnail_id\");\n\t\t\n\t\tfor (var key in duplicateContacts) {\n\t\t\tvar tableLength = table.length;\n\t\t\tvar row = table.getElementsByTagName('tbody')[0].insertRow(tableLength);\t\t\t\t\t\n\t\t\t\n\t\t\tvar cell1 = row.insertCell(0);\n\t\t\tvar cell2 = row.insertCell(1);\n\t\t\tvar cell3 = row.insertCell(2);\n\t\t\tvar cell4 = row.insertCell(3);\n\t\t\tvar cell5 = row.insertCell(4);\n\t\t\tvar cell6 = row.insertCell(5);\n\t\t\tvar cell7 = row.insertCell(6);\n\t\t\tvar cell8 = row.insertCell(7);\t\n\t\t\tvar cell9 = row.insertCell(8);\t\t\t\n\t\t\t//console.log(duplicateContacts[key]);\n\t\t\tcell1.innerHTML = duplicateContacts[key].First;\n\t\t\tcell2.innerHTML = duplicateContacts[key].Last;\n\t\t\tcell3.innerHTML = duplicateContacts[key].Address;\n\t\t\tcell4.innerHTML = duplicateContacts[key].HomeNum;\n\t\t\tcell5.innerHTML = duplicateContacts[key].MobileNum;\n\t\t\tcell6.innerHTML = duplicateContacts[key].HouseNumber;\n\t\t\tcell7.innerHTML = duplicateContacts[key].StreetName;\n\t\t\tcell8.innerHTML = duplicateContacts[key].City;\t\n\t\t\tcell9.innerHTML = \"<a href='#' onclick='openContact(\"+duplicateContacts[key].ID+\");' id='\"+duplicateContacts[key].ID+\"' >Select</a>\";\t\t\t\n\t\t}\n\t}\n\t$('#thumbnail_id').DataTable( {\n\t\t\"paging\":   false,\n\t\t\"ordering\": false,\n\t\t\"info\":     false,\n\t\t\"bFilter\": false,\n\t\t\"columnDefs\": [{\"className\": \"dt-center\", \"targets\": \"_all\"}]\n\t} );\n\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\n\t\n\n\t}\n\telse\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 12px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.5em !important;}.form-control {height: 30px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;    font-size: 12px !important;    font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\n\t\n\t\tvar wsRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\t\t\t\t\n\t\t        namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t        namedLogger.trace('Load CGS custom Form Extionsion');\n\t\t\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\twsRecord = workspaceRecord;\n\t\t\t\t\t//List of fields to be prefetch\n\t\t\t\t\twsRecord.prefetchWorkspaceFields(['Contact.Name.First','Contact.Name.Last','Contact.Email.Addr','Contact.PhHome','Contact.PhMobile','Contact.CO$HouseNumber','Contact.CO$StreetName','Contact.CO$City']);\n\t    \t\t\t\n\t\t\t\t\t//OOTB Workspace Event\n\t\t\t\t\t//workspaceRecord.addRecordSavingListener(dataSavingListenerForSR);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Name.First', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Name.Last', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Email.Addr', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.PhHome', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.PhMobile', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.CO$HouseNumber', fieldValueListener);wsRecord.addFieldValueListener('Contact.CO$StreetName', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.CO$City', fieldValueListener);\n\t\t\t\t\t\n\t\t\t\t\tif( !Array.isArray(duplicateContacts) && duplicateContacts != null)\n\t\t\t\t\t{\n\t\t\t\t\t\twsRecord.triggerNamedEvent(\"focusDuplicateTab\");\n\t\t\t\t\t}\n\t\t\t\t\telse\n\t\t\t\t\t{\n\t\t\t\t\t\twsRecord.triggerNamedEvent(\"hideDuplicateTab\");\n\t\t\t\t\t}\n\n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\n\t\t\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction fieldValueListener(eventParameter)\n\t\t{\n\t\t\tlet fName, lName, email, hPhone, mPhone, hNum, street, city;\n\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.Name.First\"].value != null)\n\t\t\t\tfName = eventParameter.event.fieldObjects[\"C",
+      "js_content": "var duplicateContacts = <?php echo json_encode($duplicate_contacts); ?>;\n\n\tif( !Array.isArray(duplicateContacts) && duplicateContacts != null)\n\t{\n\t\talert(\"Potential Duplicate Contact Detected\");\t\n\t\tvar table = document.getElementById(\"thumbnail_id\");\n\t\t\n\t\tfor (var key in duplicateContacts) {\n\t\t\tvar tableLength = table.length;\n\t\t\tvar row = table.getElementsByTagName('tbody')[0].insertRow(tableLength);\t\t\t\t\t\n\t\t\t\n\t\t\tvar cell1 = row.insertCell(0);\n\t\t\tvar cell2 = row.insertCell(1);\n\t\t\tvar cell3 = row.insertCell(2);\n\t\t\tvar cell4 = row.insertCell(3);\n\t\t\tvar cell5 = row.insertCell(4);\n\t\t\tvar cell6 = row.insertCell(5);\n\t\t\tvar cell7 = row.insertCell(6);\n\t\t\tvar cell8 = row.insertCell(7);\t\n\t\t\tvar cell9 = row.insertCell(8);\t\t\t\n\t\t\t//console.log(duplicateContacts[key]);\n\t\t\tcell1.innerHTML = duplicateContacts[key].First;\n\t\t\tcell2.innerHTML = duplicateContacts[key].Last;\n\t\t\tcell3.innerHTML = duplicateContacts[key].Address;\n\t\t\tcell4.innerHTML = duplicateContacts[key].HomeNum;\n\t\t\tcell5.innerHTML = duplicateContacts[key].MobileNum;\n\t\t\tcell6.innerHTML = duplicateContacts[key].HouseNumber;\n\t\t\tcell7.innerHTML = duplicateContacts[key].StreetName;\n\t\t\tcell8.innerHTML = duplicateContacts[key].City;\t\n\t\t\tcell9.innerHTML = \"<a href='#' onclick='openContact(\"+duplicateContacts[key].ID+\");' id='\"+duplicateContacts[key].ID+\"' >Select</a>\";\t\t\t\n\t\t}\n\t}\n\t$('#thumbnail_id').DataTable( {\n\t\t\"paging\":   false,\n\t\t\"ordering\": false,\n\t\t\"info\":     false,\n\t\t\"bFilter\": false,\n\t\t\"columnDefs\": [{\"className\": \"dt-center\", \"targets\": \"_all\"}]\n\t} );\n\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\n\t\n\n\t}\n\telse\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 12px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.5em !important;}.form-control {height: 30px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;    font-size: 12px !important;    font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\n\t\n\t\tvar wsRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\t\t\t\t\n\t\t        namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t        namedLogger.trace('Load CGS custom Form Extionsion');\n\t\t\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\twsRecord = workspaceRecord;\n\t\t\t\t\t//List of fields to be prefetch\n\t\t\t\t\twsRecord.prefetchWorkspaceFields(['Contact.Name.First','Contact.Name.Last','Contact.Email.Addr','Contact.PhHome','Contact.PhMobile','Contact.CO$HouseNumber','Contact.CO$StreetName','Contact.CO$City']);\n\t    \t\t\t\n\t\t\t\t\t//OOTB Workspace Event\n\t\t\t\t\t//workspaceRecord.addRecordSavingListener(dataSavingListenerForSR);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Name.First', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Name.Last', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.Email.Addr', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.PhHome', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.PhMobile', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.CO$HouseNumber', fieldValueListener);wsRecord.addFieldValueListener('Contact.CO$StreetName', fieldValueListener);\n\t\t\t\t\twsRecord.addFieldValueListener('Contact.CO$City', fieldValueListener);\n\t\t\t\t\t\n\t\t\t\t\tif( !Array.isArray(duplicateContacts) && duplicateContacts != null)\n\t\t\t\t\t{\n\t\t\t\t\t\twsRecord.triggerNamedEvent(\"focusDuplicateTab\");\n\t\t\t\t\t}\n\t\t\t\t\telse\n\t\t\t\t\t{\n\t\t\t\t\t\twsRecord.triggerNamedEvent(\"hideDuplicateTab\");\n\t\t\t\t\t}\n\n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\n\t\t\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction fieldValueListener(eventParameter)\n\t\t{\n\t\t\tlet fName, lName, email, hPhone, mPhone, hNum, street, city;\n\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.Name.First\"].value != null)\n\t\t\t\tfName = eventParameter.event.fieldObjects[\"Contact.Name.First\"].value;\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.Name.First\"].value != null)\n\t\t\t\tlName = eventParameter.event.fieldObjects[\"Contact.Name.Last\"].value;\t\t\t\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.Email.Addr\"].value != null)\n\t\t\t\temail = eventParameter.event.fieldObjects[\"Contact.Email.Addr\"].value;\t\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.PhHome\"].value != null)\n\t\t\t\thPhone = eventParameter.event.fieldObjects[\"Contact.PhHome\"].value;\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.PhMobile\"].value != null)\n\t\t\t\tmPhone = eventParameter.event.fieldObjects[\"Contact.PhMobile\"].value;\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.CO$HouseNumber\"].value != null)\n\t\t\t\thNum = eventParameter.event.fieldObjects[\"Contact.CO$HouseNumber\"].value;\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.CO$StreetName\"].value != null)\n\t\t\t\tstreet = eventParameter.event.fieldObjects[\"Contact.CO$StreetName\"].value;\n\t\t\tif(eventParameter.event.fieldObjects[\"Contact.CO$City\"].value != null)\n\t\t\t\tcity = eventParameter.event.fieldObjects[\"Contact.CO$City\"].value;\t\t\t\n\t\t\t\n\t\t\tvar d = new Date();\n\t\t\tvar timeMs = d.getTime();\n\t\t\tvar theUrl = window.location.href;\n\t\t\ttheUrl = theUrl.split(\"&f_name=\")[0]+\"&f_name=\"+fName+\"&l_name=\"+lName+\"&email=\"+email+\"&h_phone=\"+hPhone+\"&m_phone=\"+mPhone+\"&house_num=\"+hNum+\"&street_nam",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "duplicate_incidents.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script handles **Duplicate Incident Detection**. It validates agent session ID, parses support ticket parameters (`subject`, `contact_id`, `category`), and executes ROQL queries against `Incident` and `CO.PotentialDuplicate` tables to identify matching open or historical support tickets.",
+      "imports": [],
+      "osvc_objects": [
+        "ConnectAPIErrorBase",
+        "ROQL"
+      ],
+      "external_calls": [],
+      "urls": [
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
+        "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+        "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
+      ],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT radius_meters, duration_minutes, CS.AlternateCategory.id as alternate_category FROM Config.SrDuplication CS WHERE CS.Category.id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT ID, ReferenceNumber, CustomFields.c.incident_location, StatusWithType.Status.Name as Status, CreatedTime , PrimaryContact.contact.Name as ContactName FROM Incident WHERE CustomFields.c.duplicate_incident_flag IS NULL AND StatusWithType.Status.Name !=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT radius_meters, duration_minutes, CS.AlternateCategory..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT ID, ReferenceNumber, CustomFields.c.incident_location..."
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        }
+      ],
+      "has_html": true,
+      "has_js": true,
+      "js_behaviors": [
+        "Initializes interactive DataTables grid formatting for thumbnail & search results display.",
+        "Registers BUI Extension Loader hooks (`ORACLE_SERVICE_CLOUD.extension_loader`) and binds workspace record events.",
+        "Attaches dynamic workspace field value change listeners to trigger real-time search and validation as fields are edited.",
+        "Fires custom workspace named events (`focusDuplicateTab` / `hideDuplicateTab`) to dynamically toggle console tab visibility.",
+        "Dynamically constructs HTML table rows and inserts clickable contact selection links into DOM container elements."
+      ],
+      "html_content": "<pre>\n\n﻿\n<!DOCTYPE html> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" ><!--[if lte IE 8]>\n<script src=\"html5.js\" type=\"text/javascript\"></script>\n<![endif]-->\n <head>\n        <script type=\"text/javascript\" src=\"//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script>\n\n        <!-- Datatable library -->\n\t\t<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css\">  \n\t\t<script type=\"text/javascript\" charset=\"utf8\" src=\"https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js\"></script>\n\n        <!-- FontAwesome for notification and datatable icons -->\n        <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.1.1/css/all.css\" integrity=\"sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ\" crossorigin=\"anonymous\">\n    </head>\n    <body>\n\n\t\t<div id=\"thumbnail_sr_sa_files\">\t\t\n\t\t\t<table id=\"thumbnail_id\">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>Ref Num</th>\n\t\t\t\t\t\t<th>Contact</th>\n\t\t\t\t\t\t<th>Status</th>\n\t\t\t\t\t\t<th>Location</th>\n\t\t\t\t\t\t<th>Created Date</th>\n\t\t\t\t\t\t<th>Attach Duplicate Case</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody id=\"thumbnail_id_body\">\n\t\t\t\t</tbody>\n\t\t\t</table>\t\t\t\n\t\t</div>\n\n    </body>\n<script>\n\tvar duplicateIncidents = ;\n\tvar cat_id = ;\n\tvar x = ;\n\tvar y = ;\n\tvar ts = ;\n\t\t\n\n\tif(duplicateIncidents != null && duplicateIncidents.length > 0)\n\t{\n\t\tif(ts != null)\n\t\t\talert(\"Duplicate Incidents exist for the same category at the same location.\");\t\n\t\tvar table = document.getElementById(\"thumbnail_id\");\n\t\tduplicateIncidents.forEach(function(duplicateIncident){\n\t\t\t//create new row\n\t\t\tvar tableLength = table.length;\n\t\t\tvar row = table.getElementsByTagName('tbody')[0].insertRow(tableLength);\t\t\t\t\t\n\t\t\t\n\t\t\tvar cell1 = row.insertCell(0);\n\t\t\tvar cell2 = row.insertCell(1);\n\t\t\tvar cell3 = row.insertCell(2);\n\t\t\tvar cell4 = row.insertCell(3);\n\t\t\tvar cell5 = row.insertCell(4);\n\t\t\tvar cell6 = row.insertCell(5);\n\n\t\t\tcell1.innerHTML = \"<a href='#' onclick='openIncident(\"+duplicateIncident.ID+\")'>\"+duplicateIncident.ReferenceNumber+\"</a>\";\n\t\t\tcell2.innerHTML = duplicateIncident.ContactName;\n\t\t\tcell3.innerHTML = duplicateIncident.Status;\n\t\t\tcell4.innerHTML = duplicateIncident.incident_location;\n\t\t\tcell5.innerHTML = duplicateIncident.CreatedTime;\n\t\t\tcell6.innerHTML = \"<input type='checkbox' class ='incIDs' id='\"+duplicateIncident.ID+\"' />\";\n\t\t\t\n\t\t\t\n\t\t});\n\t}\n\t$('#thumbnail_id').DataTable( {\n\t\t\"paging\":   false,\n\t\t\"ordering\": false,\n\t\t\"info\":     false,\n\t\t\"bFilter\": false,\n\t\t\"columnDefs\": [{\"className\": \"dt-center\", \"targets\": \"_all\"}]\n\t} );\n\n\t//Binf click event on checkbox\n\t$('.incIDs').click(function() {\n\t\tvar checked = this.checked;\t\t\n\t\tif (checked) {\n\t\t\t$(\"input[type=checkbox]\").prop(\"checked\", false);//clear all other checkbox\n\t\t\tthis.checked = true; \n\t\t\tsetSR(this.id);\n\t\t}\n\t\telse {\n\t\t\tresetSR();\n\t\t}\n\t});\n\t\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 18px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.2em !important;}.form-control {height: 42px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;font-size: 18px !important;font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\t\t\n\t\t\n\t\tif(duplicateIncidents != null && duplicateIncidents.length > 0)\n\t\t{\n\t\t\ti.SetCustomFieldByName('c$duplicate_incident_flag', 1);\n\t\t}\n\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction ondataupdated(changed_object)\n\t\t{\n\t\t\tvar reload = false;\t\t\t\n\t\t\t\n\t\t\tif(cat_id != i.Category.split(\",\")[1])\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\tcat_id = i.Category.split(\",\")[1];\n\t\t\t}\n\t\t\tif(x != i.GetCustomFieldByName(\"c$x_coordinate_external\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\tx = i.GetCustomFieldByName(\"c$x_coordinate_external\");\n\t\t\t}\n\t\t\tif(y != i.GetCustomFieldByName(\"c$y_coordinate_external\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\ty = i.GetCustomFieldByName(\"c$y_coordinate_external\");\t\n\t\t\t}\t\t\t\n\t\t\t\n\t\t\tif(reload)\n\t\t\t{\n\t\t\t\ti.SetCustomFieldByName('c$duplicate_incident_flag', 0);//unset the flag\n\n\t\t\t\tvar d = new Date();\n\t\t\t\tvar timeMs = d.getTime();\n\t\t\t\tvar theUrl = window.location.href;\n\t\t\t\ttheUrl = theUrl.split(\"&x=\")[0]+\"&x=\"+x+\"&y=\"+y+\"&cat_id=\"+cat_id+\"&ts=\" + timeMs;\n\t\t\t\twindow.location.href = theUrl;\n\t\t\t}\t\t\t\n\t\t}\t\n\t\t\n\t\tfunction openSR(id)\n\t\t{\n\t\t\talert(\"Please use quick search to open the SR\");\n\t\t}\n\n\t}\n\telse\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 12px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.5em !important;}.form-control {height: 30px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;    font-size: 12px !important;    font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\n\t\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t\t\t\n\t\t        namedLogger = extensio",
+      "js_content": "var duplicateIncidents = <?php echo json_encode($duplicate_incidents); ?>;\n\tvar cat_id = <?php echo json_encode($cat_id); ?>;\n\tvar x = <?php echo json_encode($x); ?>;\n\tvar y = <?php echo json_encode($y); ?>;\n\tvar ts = <?php echo json_encode($ts); ?>;\n\t\t\n\n\tif(duplicateIncidents != null && duplicateIncidents.length > 0)\n\t{\n\t\tif(ts != null)\n\t\t\talert(\"Duplicate Incidents exist for the same category at the same location.\");\t\n\t\tvar table = document.getElementById(\"thumbnail_id\");\n\t\tduplicateIncidents.forEach(function(duplicateIncident){\n\t\t\t//create new row\n\t\t\tvar tableLength = table.length;\n\t\t\tvar row = table.getElementsByTagName('tbody')[0].insertRow(tableLength);\t\t\t\t\t\n\t\t\t\n\t\t\tvar cell1 = row.insertCell(0);\n\t\t\tvar cell2 = row.insertCell(1);\n\t\t\tvar cell3 = row.insertCell(2);\n\t\t\tvar cell4 = row.insertCell(3);\n\t\t\tvar cell5 = row.insertCell(4);\n\t\t\tvar cell6 = row.insertCell(5);\n\n\t\t\tcell1.innerHTML = \"<a href='#' onclick='openIncident(\"+duplicateIncident.ID+\")'>\"+duplicateIncident.ReferenceNumber+\"</a>\";\n\t\t\tcell2.innerHTML = duplicateIncident.ContactName;\n\t\t\tcell3.innerHTML = duplicateIncident.Status;\n\t\t\tcell4.innerHTML = duplicateIncident.incident_location;\n\t\t\tcell5.innerHTML = duplicateIncident.CreatedTime;\n\t\t\tcell6.innerHTML = \"<input type='checkbox' class ='incIDs' id='\"+duplicateIncident.ID+\"' />\";\n\t\t\t\n\t\t\t\n\t\t});\n\t}\n\t$('#thumbnail_id').DataTable( {\n\t\t\"paging\":   false,\n\t\t\"ordering\": false,\n\t\t\"info\":     false,\n\t\t\"bFilter\": false,\n\t\t\"columnDefs\": [{\"className\": \"dt-center\", \"targets\": \"_all\"}]\n\t} );\n\n\t//Binf click event on checkbox\n\t$('.incIDs').click(function() {\n\t\tvar checked = this.checked;\t\t\n\t\tif (checked) {\n\t\t\t$(\"input[type=checkbox]\").prop(\"checked\", false);//clear all other checkbox\n\t\t\tthis.checked = true; \n\t\t\tsetSR(this.id);\n\t\t}\n\t\telse {\n\t\t\tresetSR();\n\t\t}\n\t});\n\t\n\tvar i = window.external.Incident;\n\t//If opened through Destop Console then use Javascript Extension\n\tif(i !== undefined)\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 18px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.2em !important;}.form-control {height: 42px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;font-size: 18px !important;font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\t\t\n\t\t\n\t\tif(duplicateIncidents != null && duplicateIncidents.length > 0)\n\t\t{\n\t\t\ti.SetCustomFieldByName('c$duplicate_incident_flag', 1);\n\t\t}\n\n\t\t//Function to capture field change, if Category is changed then refesh the page by passing new category ID\n\t\tfunction ondataupdated(changed_object)\n\t\t{\n\t\t\tvar reload = false;\t\t\t\n\t\t\t\n\t\t\tif(cat_id != i.Category.split(\",\")[1])\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\tcat_id = i.Category.split(\",\")[1];\n\t\t\t}\n\t\t\tif(x != i.GetCustomFieldByName(\"c$x_coordinate_external\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\tx = i.GetCustomFieldByName(\"c$x_coordinate_external\");\n\t\t\t}\n\t\t\tif(y != i.GetCustomFieldByName(\"c$y_coordinate_external\"))\n\t\t\t{\n\t\t\t\treload = true;\n\t\t\t\ty = i.GetCustomFieldByName(\"c$y_coordinate_external\");\t\n\t\t\t}\t\t\t\n\t\t\t\n\t\t\tif(reload)\n\t\t\t{\n\t\t\t\ti.SetCustomFieldByName('c$duplicate_incident_flag', 0);//unset the flag\n\n\t\t\t\tvar d = new Date();\n\t\t\t\tvar timeMs = d.getTime();\n\t\t\t\tvar theUrl = window.location.href;\n\t\t\t\ttheUrl = theUrl.split(\"&x=\")[0]+\"&x=\"+x+\"&y=\"+y+\"&cat_id=\"+cat_id+\"&ts=\" + timeMs;\n\t\t\t\twindow.location.href = theUrl;\n\t\t\t}\t\t\t\n\t\t}\t\n\t\t\n\t\tfunction openSR(id)\n\t\t{\n\t\t\talert(\"Please use quick search to open the SR\");\n\t\t}\n\n\t}\n\telse\n\t{\n\t\tvar css = 'label {font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;display: block !important;font-size: 12px !important;font-weight: normal !important; margin-bottom: 0.25em !important;}.col-md-6 {margin-bottom: 0.5em !important;}.form-control {height: 30px !important;font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Arial, sans-serif !important;    font-size: 12px !important;    font-weight: normal !important;}',\n\t    head = document.head || document.getElementsByTagName('head')[0],\n\t    style = document.createElement('style');\n\t\thead.appendChild(style);\t\n\t\tstyle.type = 'text/css';\n\t\tstyle.appendChild(document.createTextNode(css));\n\t\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\n\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"customFormExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t\t\t\n\t\t        namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t        namedLogger.trace('Load CGS custom Form Extionsion');\n\t\t\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;\n\t\t\t\t\t//List of fields to be prefetch\n\t\t\t\t\tworkspaceRecord.prefetchWorkspaceFields(['Incident.CatId', 'Incident.c$x_coordinate_external', 'Incident.c$y_coordinate_external']);\n\t    \t\t\t\n\t\t\t\t\t//OOTB Workspace Event\n\t\t\t\t\t//workspaceRecord.addRecordSavingListener(dataSavingListenerForSR);\n\t\t\t\t\tworkspaceRecord.addFieldValueListener('Incident.CatId', fieldValueListener);\n\t\t\t\t\tworkspaceRecord.addFieldValueListener('Incident.c$x_coordinate_external', fieldValueListener);\n\t\t\t\t\tworkspaceRecord.addFieldValueListener('Incident.c$y_coordinate_external', fieldValueListener);\n\n\t                if(duplicateIncidents != null && duplicateIncidents.length > 0)\n\t                {\n\t\t\t\t\t\tworkspaceRecord.triggerNamedEvent(\"focusDuplicateTab\");\n\t                }\n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script)",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "eventclock.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script calculates **Incident SLA Clocks & Response Timers**. It calculates elapsed handling times, monitors response deadlines, and updates SLA milestone tracking fields.",
+      "imports": [],
+      "osvc_objects": [
+        "ConnectAPIErrorBase",
+        "ROQL"
+      ],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT CO.EventTimer FROM CO.EventTimer ORDER BY EventEndDate DESC LIMIT 1",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+          "operation": "Validate Agent Session"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT CO.EventTimer FROM CO.EventTimer ORDER BY EventEndDat..."
+        },
+        {
+          "stage": "Authentication",
+          "action": "Validate Agent Session ID"
+        }
+      ],
+      "has_html": false,
+      "has_js": true,
+      "js_behaviors": [
+        "Executes client-side UI manipulation and DOM event handling logic."
+      ],
+      "html_content": "",
+      "js_content": "alert('$eventID');\n\nvar EndDate = <?php echo json_encode($eventDateTime); ?>;\nvar addMlSeconds = 86400000;\nvar CurrentEndDate = new Date(EndDate);\nvar CurrentEndDateLongString = CurrentEndDate.toString();\nvar CurrentEndDateShortString = CurrentEndDateLongString.replace(\"GMT-0500 (Eastern Standard Time)\",\"\");\n\nvar CurrentEndDateTime = CurrentEndDate.getTime();\nvar EndDateTime = new Date(CurrentEndDateTime + addMlSeconds);\n\n\n// Set the date we're counting down to\nvar countDownDate = EndDateTime.getTime();\n\n\n// Update the count down every 1 second\nvar x = setInterval(function() {\n\n  // Get today's date and time\n  var now = new Date().getTime();\n    \n  // Find the distance between now and the count down date\n  var distance = countDownDate - now; \n  // Time calculations for days, hours, minutes and seconds\n  var days = Math.floor(distance / (1000 * 60 * 60 * 24));\n  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));\n  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));\n  var seconds = Math.floor((distance % (1000 * 60)) / 1000);\n  document.getElementById(\"title1\").innerHTML = \"Winter Event Countback Clock\";\n  document.getElementById(\"title2\").innerHTML = \"Time Remaining For Cleanup\";\n  // Output the result in an element with id=\"demo\"\n  document.getElementById(\"timer\").innerHTML =  hours + \"h \"\n  + minutes + \"m \" + seconds + \"s \";\n  document.getElementById(\"title3\").innerHTML = \"Event Ended On\";\n  document.getElementById(\"enddate\").innerHTML = CurrentEndDateShortString; \n  // If the count down is over, write some text \n  if (distance < 0) {\n    clearInterval(x);\n    document.getElementById(\"title1\").innerHTML = \"\";\n    document.getElementById(\"title2\").innerHTML = \"\";\n    document.getElementById(\"timer\").innerHTML = \"\";\n    document.getElementById(\"title3\").innerHTML = \"\";\n    document.getElementById(\"enddate\").innerHTML = \"\";\n  }\n}, 1000);",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "sms_integration 1.php",
+      "script_type": "Server-side Utility",
+      "summary": "This script handles **SMS Webhook Integration**. It receives XML POST payloads (`php://input`), authenticates integration agent credentials via `AgentAuthenticator::authenticateCredentials()`, parses customer response keywords (`YES` / `OUI`), updates Contact preferred language custom fields, and dispatches SMS subscription confirmations.",
+      "imports": [],
+      "osvc_objects": [
+        "Configuration",
+        "ConnectAPIErrorBase",
+        "NamedIDLabel",
+        "Note",
+        "NoteArray",
+        "RNObject",
+        "ROQL"
+      ],
+      "external_calls": [
+        "cURL REST Client Invocation"
+      ],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 1)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT Contact FROM Contact WHERE (Phones.PhoneList.Rawnumber =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT \".$lang.\" as data FROM Config.EmailSmsTemplate WHERE TemplateLabel =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_SMS_API_URL)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Configuration::fetch(CUSTOM_CFG_SMS_API_SHORTCODE)",
+          "operation": "Fetch Configuration"
+        },
+        {
+          "type": "Agent Authenticator",
+          "detail": "AgentAuthenticator::authenticateCredentials($username, $password)",
+          "operation": "Validate Agent Credentials"
+        }
+      ],
+      "external_soap_apis": [
+        {
+          "protocol": "XML Payload Ingestion",
+          "endpoint": "php://input",
+          "action": "Parse Incoming XML Payload"
+        }
+      ],
+      "external_rest_apis": [
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "Dynamic / Configured REST Endpoint",
+          "details": "cURL POST/GET request via Configuration"
+        }
+      ],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT Contact FROM Contact WHERE (Phones.PhoneList.Rawnumbe..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT \".$lang.\" as data FROM Config.EmailSmsTemplate WHERE ..."
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_SMS_API_URL)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Configuration instance (CUSTOM_CFG_SMS_API_SHORTCODE)"
+        },
+        {
+          "stage": "Authentication",
+          "action": "Authenticate Agent Credentials"
+        },
+        {
+          "stage": "Ingestion",
+          "action": "Receive & Parse XML POST Payload"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET HTTP Request"
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    }
+  ]
+}

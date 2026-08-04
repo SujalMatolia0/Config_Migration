@@ -1,0 +1,1094 @@
+{
+  "meta": {
+    "type": "workspace",
+    "name": "Contact test",
+    "osvc_object": [
+      "Contact"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.683358"
+  },
+  "data": {
+    "name": "Contact test",
+    "format": "workspace",
+    "type": "Contact",
+    "ui_type": "Contact",
+    "server_version": "Oracle Service Cloud 26A SP2 (Build 326 - 06/09/2026 22:12)\r\n CE Version: rnw-release-26-2-0-1-sp2 PL:",
+    "client_version": "26.2.0.326",
+    "is_multi_edit": false,
+    "row_count": 0,
+    "column_count": 0,
+    "is_tab_only_root": true,
+    "tab_set_info": {
+      "row": null,
+      "column": null,
+      "row_span": null,
+      "column_span": null,
+      "summary_panel_height": "120",
+      "summary_panel_alignment": "FirstTab",
+      "can_reorder_tabs": true,
+      "wrap_tabs": true,
+      "summary_tab_index": "0",
+      "threshold_height": "360"
+    },
+    "record_types": [
+      {
+        "id": "6",
+        "name": "Contact"
+      },
+      {
+        "id": "7",
+        "name": "Org"
+      },
+      {
+        "id": "1",
+        "name": "Incident"
+      },
+      {
+        "id": "5",
+        "name": "Opportunity"
+      },
+      {
+        "id": "8",
+        "name": "Task"
+      },
+      {
+        "id": "49",
+        "name": "Chat"
+      },
+      {
+        "id": "126",
+        "name": "Asset"
+      },
+      {
+        "id": "152",
+        "name": "Interaction"
+      }
+    ],
+    "quick_access_toolbar": [
+      "New",
+      "Save",
+      "SaveAndClose",
+      "Print",
+      "Bookmark"
+    ],
+    "ribbon_buttons": [
+      "Delete",
+      "Info",
+      "New",
+      "Print",
+      "Refresh",
+      "Save",
+      "SaveAndClose",
+      "SpellCheck"
+    ],
+    "ribbon_structure": [
+      {
+        "tab_name": "HOME_LBL",
+        "groups": [
+          {
+            "group_name": "SAVE_CMD",
+            "buttons": [
+              "Save",
+              "SaveAndClose"
+            ]
+          },
+          {
+            "group_name": "ACTIONS_LBL",
+            "buttons": [
+              "New",
+              "Refresh",
+              "Print",
+              "Delete",
+              "Separator"
+            ]
+          },
+          {
+            "group_name": "PROOFING_LBL",
+            "buttons": [
+              "SpellCheck"
+            ]
+          },
+          {
+            "group_name": "LINKS_AND_INFO_LBL",
+            "buttons": [
+              "EditorLinks",
+              "Separator",
+              "Info"
+            ]
+          }
+        ]
+      }
+    ],
+    "info_items": [
+      {
+        "object_id": "Contact",
+        "field_id": "CId"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Created"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "Updated"
+      },
+      {
+        "object_id": "Contact",
+        "field_id": "RuleState"
+      }
+    ],
+    "rules": [
+      {
+        "name": "Admin Fields",
+        "active": true,
+        "notes": "",
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Current",
+            "source_type": "Profile",
+            "operator": "LIST",
+            "value": "11;14;2",
+            "property": "IdList",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "Contact.Name.First",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.Last",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Email",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.OrgId",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.First",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "Required",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.Last",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "Required",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          }
+        ]
+      },
+      {
+        "name": "Admin Fields - Support Supervisors",
+        "active": true,
+        "notes": "",
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Current",
+            "source_type": "Profile",
+            "operator": "LIST",
+            "value": "33;7;15;37;16;44",
+            "property": "IdList",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "Contact.Name.First",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.Last",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Email",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "ReadOnly",
+            "value": "False",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.First",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "Required",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "Contact.Name.Last",
+            "object_type": "Field",
+            "object_id": null,
+            "operation": "Required",
+            "value": "True",
+            "value_operator": null,
+            "button_id": null,
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "RibbonButton",
+            "object_type": "RibbonButton",
+            "object_id": null,
+            "operation": "Hidden",
+            "value": "True",
+            "value_operator": null,
+            "button_id": "Delete",
+            "branch": "then"
+          }
+        ]
+      },
+      {
+        "name": "Hide Delete and New button",
+        "active": true,
+        "notes": "",
+        "triggers": [
+          "EditorLoaded"
+        ],
+        "conditions": [
+          {
+            "source": "Current",
+            "source_type": "Profile",
+            "operator": "LIST",
+            "value": "11;14;2",
+            "property": "IdList",
+            "logic_expr": "0"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Standard",
+            "object": "RibbonButton",
+            "object_type": "RibbonButton",
+            "object_id": null,
+            "operation": "Hidden",
+            "value": "True",
+            "value_operator": null,
+            "button_id": "Delete",
+            "branch": "then"
+          },
+          {
+            "type": "Standard",
+            "object": "RibbonButton",
+            "object_type": "RibbonButton",
+            "object_id": null,
+            "operation": "Hidden",
+            "value": "True",
+            "value_operator": null,
+            "button_id": "New",
+            "branch": "then"
+          }
+        ]
+      }
+    ],
+    "tabs": [
+      {
+        "text": "SUMMARY_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "SlaContainer",
+            "ac_id": null,
+            "id": "635895091781750034",
+            "row": 2,
+            "column": 1,
+            "execute_on_new": true,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null,
+            "can_use_standard_text": null,
+            "thread_orientation": null,
+            "commit_response_on_save": null,
+            "always_show_email_header": null,
+            "always_use_plain_text": null,
+            "can_add_bcc": null,
+            "can_add_cc": null,
+            "can_add_customer_entry": null,
+            "can_add_note": null,
+            "can_add_response": null,
+            "can_follow_incident_links": null,
+            "can_follow_links": null,
+            "can_search_kb": null,
+            "can_toggle_to_plain_text": null,
+            "default_thread_on_edit": null,
+            "default_to_plain_text": null,
+            "delay_report_execution": null,
+            "font": null,
+            "is_using_default_email_font": null,
+            "margin": null,
+            "padding": null,
+            "reassign_on_response": null,
+            "response_panel_coupled": null,
+            "send_response_default": null,
+            "show_row_count": null,
+            "thumbnails_enabled": null,
+            "thumbnails_threshold": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [
+          {
+            "object_id": "Contact",
+            "field_id": "Name.First",
+            "label": null,
+            "id": "635895726046601620",
+            "row": 0,
+            "column": 0,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": "OnNew:~any~;OnEdit:~any~",
+            "hidden_option": null,
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Name.Last",
+            "label": null,
+            "id": "635895091495033634",
+            "row": 0,
+            "column": 1,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": "OnNew:~any~;OnEdit:~any~",
+            "hidden_option": null,
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Email",
+            "label": null,
+            "id": "635894788725758969",
+            "row": 1,
+            "column": 0,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": "OnNew:~any~;OnEdit:~any~",
+            "hidden_option": null,
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "OrgId",
+            "label": "&Account",
+            "id": "635895091756028562",
+            "row": 1,
+            "column": 1,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": "8001",
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "C$IsRegistered",
+            "label": null,
+            "id": "638016163742478362",
+            "row": 2,
+            "column": 0,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": "OnNew:30,31,33,32,34,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19;OnEdit:30,31,33,32,34,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19",
+            "hidden_option": null,
+            "required_option": "",
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "Disabled",
+            "label": null,
+            "id": "638264989049973738",
+            "row": 3,
+            "column": 0,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": "OnNew:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19;OnEdit:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19",
+            "hidden_option": "OnNew:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19;OnEdit:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19",
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          },
+          {
+            "object_id": "Contact",
+            "field_id": "CId",
+            "label": null,
+            "id": "636994891298849477",
+            "row": 3,
+            "column": 1,
+            "default_phone_type": null,
+            "default_value": null,
+            "report_id": null,
+            "readonly_option": null,
+            "hidden_option": null,
+            "required_option": null,
+            "row_span": null,
+            "layout_label_alignment": null,
+            "required_for_solved": null,
+            "show_parent": null
+          }
+        ],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "INCIDENTS_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "IncidentView",
+            "ac_id": "100038",
+            "id": "635896547651733641",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": "0",
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null,
+            "can_use_standard_text": null,
+            "thread_orientation": null,
+            "commit_response_on_save": null,
+            "always_show_email_header": null,
+            "always_use_plain_text": null,
+            "can_add_bcc": null,
+            "can_add_cc": null,
+            "can_add_customer_entry": null,
+            "can_add_note": null,
+            "can_add_response": null,
+            "can_follow_incident_links": null,
+            "can_follow_links": null,
+            "can_search_kb": null,
+            "can_toggle_to_plain_text": null,
+            "default_thread_on_edit": null,
+            "default_to_plain_text": null,
+            "delay_report_execution": "True",
+            "font": null,
+            "is_using_default_email_font": null,
+            "margin": "0, 0, 0, 0",
+            "padding": "3, 2, 3, 0",
+            "reassign_on_response": null,
+            "response_panel_coupled": null,
+            "send_response_default": null,
+            "show_row_count": "True",
+            "thumbnails_enabled": null,
+            "thumbnails_threshold": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Accounts",
+        "id": "635875094347861166",
+        "relationship_items": [
+          {
+            "item_type": "Report",
+            "ac_id": "100015",
+            "id": "635875098203433228",
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": "0"
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "Surveys",
+        "id": "635896487352648042",
+        "relationship_items": [
+          {
+            "item_type": "SurveyHistoryView",
+            "ac_id": "10012",
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": true,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null,
+            "can_use_standard_text": null,
+            "thread_orientation": null,
+            "commit_response_on_save": null,
+            "always_show_email_header": null,
+            "always_use_plain_text": null,
+            "can_add_bcc": null,
+            "can_add_cc": null,
+            "can_add_customer_entry": null,
+            "can_add_note": null,
+            "can_add_response": null,
+            "can_follow_incident_links": null,
+            "can_follow_links": null,
+            "can_search_kb": null,
+            "can_toggle_to_plain_text": null,
+            "default_thread_on_edit": null,
+            "default_to_plain_text": null,
+            "delay_report_execution": "True",
+            "font": null,
+            "is_using_default_email_font": null,
+            "margin": null,
+            "padding": null,
+            "reassign_on_response": null,
+            "response_panel_coupled": null,
+            "send_response_default": null,
+            "show_row_count": null,
+            "thumbnails_enabled": null,
+            "thumbnails_threshold": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "AUDIT_LOG_LBL",
+        "id": null,
+        "relationship_items": [
+          {
+            "item_type": "ContactAuditLog",
+            "ac_id": "9050",
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "execute_on_new": false,
+            "show_read_transactions": false,
+            "default_channel": null,
+            "search_report_id": null,
+            "can_send_on_save": null,
+            "can_use_smart_assistant": null,
+            "default_channel_customer": null,
+            "default_thread_on_new": null,
+            "status_change_on_response": null,
+            "can_use_standard_text": null,
+            "thread_orientation": null,
+            "commit_response_on_save": null,
+            "always_show_email_header": null,
+            "always_use_plain_text": null,
+            "can_add_bcc": null,
+            "can_add_cc": null,
+            "can_add_customer_entry": null,
+            "can_add_note": null,
+            "can_add_response": null,
+            "can_follow_incident_links": null,
+            "can_follow_links": null,
+            "can_search_kb": null,
+            "can_toggle_to_plain_text": null,
+            "default_thread_on_edit": null,
+            "default_to_plain_text": null,
+            "delay_report_execution": null,
+            "font": null,
+            "is_using_default_email_font": null,
+            "margin": "0, 0, 0, 0",
+            "padding": "4, 2, 4, 0",
+            "reassign_on_response": null,
+            "response_panel_coupled": null,
+            "send_response_default": null,
+            "show_row_count": null,
+            "thumbnails_enabled": null,
+            "thumbnails_threshold": null
+          }
+        ],
+        "browsers": [],
+        "add_in_items": [],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      },
+      {
+        "text": "New Tab 1",
+        "id": "639203193641486596",
+        "relationship_items": [],
+        "browsers": [],
+        "add_in_items": [
+          {
+            "name": "ContactOrgLookupBUIAddin",
+            "file_id": "7",
+            "bui_extension": true,
+            "id": null,
+            "row": 0,
+            "column": 0,
+            "height": "42",
+            "width": "384",
+            "assembly": null
+          }
+        ],
+        "fields": [],
+        "menus": [],
+        "title_bars": [],
+        "spacers": [],
+        "nested_tabsets": []
+      }
+    ],
+    "fields": [],
+    "menus": [],
+    "title_bars": [],
+    "spacers": [],
+    "ribbon_links": [
+      {
+        "title": "Oracle Service Cloud",
+        "url": "http://cloud.oracle.com/service"
+      }
+    ],
+    "flag_visible": false,
+    "raw_unhandled_tags": [
+      {
+        "tag": "Property",
+        "raw_xml": "<Property xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">IdList</Property>"
+      },
+      {
+        "tag": "Property",
+        "raw_xml": "<Property xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">IdList</Property>"
+      },
+      {
+        "tag": "Property",
+        "raw_xml": "<Property xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">IdList</Property>"
+      }
+    ],
+    "known_ignored_attributes": {
+      "Workspace": [
+        "BrowserCompatibilityMode",
+        "SpellCheckAllowCancel",
+        "SpellCheckOnSave"
+      ],
+      "Table": [
+        "BackColor",
+        "ForeColor",
+        "Padding",
+        "AutoScroll"
+      ],
+      "TabSet": [
+        "Margin",
+        "TabDisplayStyle",
+        "TabIndex",
+        "ColumnSpan",
+        "RowSpan",
+        "SummaryPanelAlignment",
+        "SummaryPanelHeight",
+        "SummaryTab",
+        "ThresholdHeight",
+        "WrapTabs"
+      ],
+      "Tab": [
+        "TextColor"
+      ],
+      "TitleBar": [
+        "BackColor",
+        "Font",
+        "ForeColor",
+        "Margin",
+        "TextAlign",
+        "ColumnSpan",
+        "Height"
+      ],
+      "Spacer": [
+        "ColumnSpan",
+        "Id"
+      ],
+      "Field": [
+        "AcceptsReturn",
+        "BooleanRenderView",
+        "Height",
+        "LayoutLabelAlignment",
+        "Multiline",
+        "RequiredForSolved",
+        "RowSpan",
+        "ShowParent",
+        "SpellCheck",
+        "TabIndex",
+        "TrimTextWhitespace"
+      ],
+      "Browser": [
+        "ChildBrowsers",
+        "DelayPageLoad",
+        "SendUrlAsPostData",
+        "SetFixedHeight",
+        "TabIndex"
+      ],
+      "RelationshipItem": [
+        "AlwaysShowEmailHeader",
+        "AlwaysUsePlainText",
+        "CanAddBCC",
+        "CanAddCC",
+        "CanAddCustomerEntry",
+        "CanAddNote",
+        "CanAddResponse",
+        "CanFollowIncidentLinks",
+        "CanFollowLinks",
+        "CanSearchKb",
+        "CanToggleToPlainText",
+        "CommitResponseOnSave",
+        "ConfirmResponse",
+        "DefaultThreadOnEdit",
+        "DefaultToPlainText",
+        "DelayReportExecution",
+        "Font",
+        "IsUsingDefaultEmailFont",
+        "Margin",
+        "Padding",
+        "ReassignOnResponse",
+        "ResponsePanelCoupled",
+        "SendResponseDefault",
+        "ShowRowCount",
+        "ThreadOrientation",
+        "ThumbnailsEnabled",
+        "ThumbnailsThreshold"
+      ],
+      "Report": [
+        "FilterOnPrimaryKeyOnly",
+        "RefreshReportOnDataChange",
+        "ShowRowCount",
+        "TabIndex"
+      ]
+    },
+    "unknowns": {
+      "unknown_attrs": [
+        {
+          "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+          "attribute": "LayoutLabelAlignment",
+          "value": "Right"
+        },
+        {
+          "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+          "attribute": "LayoutLabelPosition",
+          "value": "Left"
+        },
+        {
+          "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+          "attribute": "ReadOnlyOption",
+          "value": "OnNew:~any~;OnEdit:~any~"
+        },
+        {
+          "location": "Tab: SUMMARY_LBL Field: Email",
+          "attribute": "DisableEmailIcon",
+          "value": "True"
+        },
+        {
+          "location": "Tab: Surveys RelationshipItem: SurveyHistoryView",
+          "attribute": "HideReportCommands",
+          "value": "True"
+        },
+        {
+          "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
+          "attribute": "Anchor",
+          "value": "Top, Left"
+        },
+        {
+          "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
+          "attribute": "AutoSize",
+          "value": "False"
+        }
+      ],
+      "unknown_children": [
+        {
+          "location": "Rule: Admin Fields",
+          "tag": "Triggers",
+          "attrs": {},
+          "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+        },
+        {
+          "location": "Rule: Admin Fields - Support Supervisors",
+          "tag": "Triggers",
+          "attrs": {},
+          "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+        },
+        {
+          "location": "Rule: Hide Delete and New button",
+          "tag": "Triggers",
+          "attrs": {},
+          "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+        }
+      ]
+    }
+  },
+  "relationships": [
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "100038",
+        "name": "Report 100038"
+      },
+      "via": "Tab 'INCIDENTS_LBL' → RelationshipItem AcId: 100038"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "0",
+        "name": "Report 0"
+      },
+      "via": "Tab 'INCIDENTS_LBL' → RelationshipItem SearchReportId: 0"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "100015",
+        "name": "Report 100015"
+      },
+      "via": "Tab 'Accounts' → RelationshipItem AcId: 100015"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "0",
+        "name": "Report 0"
+      },
+      "via": "Tab 'Accounts' → RelationshipItem SearchReportId: 0"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "10012",
+        "name": "Report 10012"
+      },
+      "via": "Tab 'Surveys' → RelationshipItem AcId: 10012"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "9050",
+        "name": "Report 9050"
+      },
+      "via": "Tab 'AUDIT_LOG_LBL' → RelationshipItem AcId: 9050"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "Report",
+        "id": "8001",
+        "name": "Report 8001"
+      },
+      "via": "Tab 'SUMMARY_LBL' → Field 'OrgId' → ReportId 8001"
+    },
+    {
+      "from": {
+        "type": "Workspace",
+        "name": "Contact test"
+      },
+      "to": {
+        "type": "ExternalEndpoint",
+        "name": "http://cloud.oracle.com/service"
+      },
+      "via": "Ribbon Link 'Oracle Service Cloud' → External Endpoint"
+    }
+  ],
+  "unknowns": {
+    "unknown_attrs": [
+      {
+        "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+        "attribute": "LayoutLabelAlignment",
+        "value": "Right"
+      },
+      {
+        "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+        "attribute": "LayoutLabelPosition",
+        "value": "Left"
+      },
+      {
+        "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
+        "attribute": "ReadOnlyOption",
+        "value": "OnNew:~any~;OnEdit:~any~"
+      },
+      {
+        "location": "Tab: SUMMARY_LBL Field: Email",
+        "attribute": "DisableEmailIcon",
+        "value": "True"
+      },
+      {
+        "location": "Tab: Surveys RelationshipItem: SurveyHistoryView",
+        "attribute": "HideReportCommands",
+        "value": "True"
+      },
+      {
+        "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
+        "attribute": "Anchor",
+        "value": "Top, Left"
+      },
+      {
+        "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
+        "attribute": "AutoSize",
+        "value": "False"
+      }
+    ],
+    "unknown_children": [
+      {
+        "location": "Rule: Admin Fields",
+        "tag": "Triggers",
+        "attrs": {},
+        "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+      },
+      {
+        "location": "Rule: Admin Fields - Support Supervisors",
+        "tag": "Triggers",
+        "attrs": {},
+        "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+      },
+      {
+        "location": "Rule: Hide Delete and New button",
+        "tag": "Triggers",
+        "attrs": {},
+        "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
+      }
+    ]
+  }
+}

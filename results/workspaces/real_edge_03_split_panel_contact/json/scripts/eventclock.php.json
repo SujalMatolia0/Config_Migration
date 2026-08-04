@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "type": "custom_script",
+    "name": "eventclock.php",
+    "osvc_object": [
+      "Other"
+    ],
+    "generatedAt": "2026-08-04T10:29:06.827342"
+  },
+  "data": {
+    "file_name": "eventclock.php",
+    "script_type": "Server-side Utility",
+    "summary": "This script calculates **Incident SLA Clocks & Response Timers**. It calculates elapsed handling times, monitors response deadlines, and updates SLA milestone tracking fields.",
+    "imports": [],
+    "osvc_objects": [
+      "ConnectAPIErrorBase",
+      "ROQL"
+    ],
+    "external_calls": [],
+    "urls": [],
+    "exposed_routes": [],
+    "risk_flags": [],
+    "internal_apis": [
+      {
+        "type": "ROQL Query",
+        "detail": "SELECT CO.EventTimer FROM CO.EventTimer ORDER BY EventEndDate DESC LIMIT 1",
+        "operation": "SELECT Query"
+      },
+      {
+        "type": "Agent Authenticator",
+        "detail": "AgentAuthenticator::authenticateSessionID($session_id)",
+        "operation": "Validate Agent Session"
+      }
+    ],
+    "external_soap_apis": [],
+    "external_rest_apis": [],
+    "flow_steps": [
+      {
+        "stage": "Internal DB",
+        "action": "Execute ROQL Query: SELECT CO.EventTimer FROM CO.EventTimer ORDER BY EventEndDat..."
+      },
+      {
+        "stage": "Authentication",
+        "action": "Validate Agent Session ID"
+      }
+    ],
+    "has_html": false,
+    "has_js": true,
+    "js_behaviors": [
+      "Executes client-side UI manipulation and DOM event handling logic."
+    ],
+    "html_content": "",
+    "js_content": "alert('$eventID');\n\nvar EndDate = <?php echo json_encode($eventDateTime); ?>;\nvar addMlSeconds = 86400000;\nvar CurrentEndDate = new Date(EndDate);\nvar CurrentEndDateLongString = CurrentEndDate.toString();\nvar CurrentEndDateShortString = CurrentEndDateLongString.replace(\"GMT-0500 (Eastern Standard Time)\",\"\");\n\nvar CurrentEndDateTime = CurrentEndDate.getTime();\nvar EndDateTime = new Date(CurrentEndDateTime + addMlSeconds);\n\n\n// Set the date we're counting down to\nvar countDownDate = EndDateTime.getTime();\n\n\n// Update the count down every 1 second\nvar x = setInterval(function() {\n\n  // Get today's date and time\n  var now = new Date().getTime();\n    \n  // Find the distance between now and the count down date\n  var distance = countDownDate - now; \n  // Time calculations for days, hours, minutes and seconds\n  var days = Math.floor(distance / (1000 * 60 * 60 * 24));\n  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));\n  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));\n  var seconds = Math.floor((distance % (1000 * 60)) / 1000);\n  document.getElementById(\"title1\").innerHTML = \"Winter Event Countback Clock\";\n  document.getElementById(\"title2\").innerHTML = \"Time Remaining For Cleanup\";\n  // Output the result in an element with id=\"demo\"\n  document.getElementById(\"timer\").innerHTML =  hours + \"h \"\n  + minutes + \"m \" + seconds + \"s \";\n  document.getElementById(\"title3\").innerHTML = \"Event Ended On\";\n  document.getElementById(\"enddate\").innerHTML = CurrentEndDateShortString; \n  // If the count down is over, write some text \n  if (distance < 0) {\n    clearInterval(x);\n    document.getElementById(\"title1\").innerHTML = \"\";\n    document.getElementById(\"title2\").innerHTML = \"\";\n    document.getElementById(\"timer\").innerHTML = \"\";\n    document.getElementById(\"title3\").innerHTML = \"\";\n    document.getElementById(\"enddate\").innerHTML = \"\";\n  }\n}, 1000);",
+    "unhandled_elements": [],
+    "unknowns": {
+      "unknown_attrs": [],
+      "unknown_children": []
+    }
+  }
+}

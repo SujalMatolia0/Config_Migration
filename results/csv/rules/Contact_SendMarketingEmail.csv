@@ -1,0 +1,2 @@
+﻿Object,Action Type,Rule Group,Rule Name,Status,Condition,Actions
+Contact,SendMarketingEmail,01-Initial State,Nick test,Enabled,If (Contacts > Email - Primary  equals  nprodan@chewy.com  OR  Contacts > Email - Primary  equals  nickprodan@yahoo.com),Send Marketing Email CVC PMR Mailer New Logo - Wording After +0 Hours Exactly
