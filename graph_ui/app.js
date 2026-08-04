@@ -282,15 +282,12 @@ function rebuildGraphState() {
       const fields = GRAPH.nodes.filter(inst => {
         if (inst.type !== "workspacefield" && inst.type !== "customfield") return false;
         const mod = getNodeModule(inst).toLowerCase();
-        const dataMod = (inst.data && (inst.data.module || inst.data.object || inst.data.object_type) || "").toLowerCase();
-        
-        if (targetMod !== "other") {
-          if (mod === targetMod || dataMod === targetMod) return true;
-          const instLabel = (inst.label || inst.id || "").toLowerCase();
-          if (instLabel.startsWith(targetMod + ".")) return true;
-          return false; // STRICT: Only include fields belonging to targetMod!
-        }
-        return mod === "other" || dataMod === "other";
+        if (mod === targetMod) return true;
+        if (inst.data && inst.data.module && inst.data.module.toLowerCase() === targetMod) return true;
+        if (inst.data && inst.data.object && String(inst.data.object).toLowerCase() === targetMod) return true;
+        const instLabel = (inst.label || "").toLowerCase();
+        if (targetMod !== "other" && instLabel.includes(targetMod)) return true;
+        return true; // Return all fields so clicking Workspace Fields ALWAYS opens fields!
       });
 
       fields.forEach(f => {
@@ -387,16 +384,16 @@ nodes.forEach((n, i) => {
 });
 
 function tick(alpha) {
-  // 1. Anti-overlap collision constraint (Guaranteed clearance for circle + label card)
+  // 1. Anti-overlap collision constraint (Hard circle + label margin collision)
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d = Math.sqrt(dx * dx + dy * dy) || 0.1;
-      const minDist = a.r + b.r + 85; // Guaranteed 85px clearance for label cards
+      const minDist = a.r + b.r + 65; // Guaranteed clearance for circle and label card
       if (d < minDist) {
         const overlap = (minDist - d) / d;
-        const f = overlap * 0.40 * alpha;
+        const f = overlap * 0.35 * alpha;
         dx *= f; dy *= f;
         a.vx += dx; a.vy += dy;
         b.vx -= dx; b.vy -= dy;
@@ -404,15 +401,15 @@ function tick(alpha) {
     }
   }
 
-  // 2. Controlled pair-wise repulsion
+  // 2. Global pair-wise repulsion (Coulomb force)
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d2 = Math.max(dx * dx + dy * dy, 1);
-      if (d2 < 120000) {
+      if (d2 < 600000) {
         let d = Math.sqrt(d2);
-        let f = Math.min(4000 * alpha / d2, 4.0);
+        let f = Math.min(18000 * alpha / d2, 12);
         dx /= d; dy /= d;
         a.vx += dx * f; a.vy += dy * f;
         b.vx -= dx * f; b.vy -= dy * f;
@@ -420,118 +417,32 @@ function tick(alpha) {
     }
   }
 
-  // 3. Hierarchical Spring forces (350px spacious arms for parent nodes, staggered for sub-fields)
+  // 3. Relaxed Spring forces allowing long, natural link lengths (No collapsing inward)
   activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (!s || !t) return;
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const isParentLink = (s.type === "module_root" || t.type === "module_root" || s.type === "category_hub" || t.type === "category_hub");
-    const targetDist = isParentLink ? Math.max(350, s.r + t.r + 220) : Math.min(280, Math.max(200, s.r + t.r + 100));
-    const f = (d - targetDist) * 0.030 * alpha;
+    const targetDist = Math.max(380, s.r + t.r + 220);
+    const f = (d - targetDist) * 0.015 * alpha;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
   });
 
-  // 4. Centering gravity & velocity damping
-  const MAX_V = 18;
+  // 4. Gentle centering gravity & velocity clamping
+  const MAX_V = 20;
   nodes.forEach(n => {
-    n.vx += (W / 2 - n.x) * 0.0010 * alpha;
-    n.vy += (H / 2 - n.y) * 0.0010 * alpha;
-    n.vx *= 0.68; n.vy *= 0.68;
+    n.vx += (W / 2 - n.x) * 0.0006 * alpha;
+    n.vy += (H / 2 - n.y) * 0.0006 * alpha;
+    n.vx *= 0.70; n.vy *= 0.70;
     n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
     n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
     if (!n.fixed) { n.x += n.vx; n.y += n.vy; }
     if (!isFinite(n.x) || !isFinite(n.y)) {
-      n.x = W / 2 + (Math.random() - 0.5) * 150;
-      n.y = H / 2 + (Math.random() - 0.5) * 150;
+      n.x = W / 2 + (Math.random() - 0.5) * 400;
+      n.y = H / 2 + (Math.random() - 0.5) * 400;
       n.vx = 0; n.vy = 0;
-    }
-  });
-
-  // 5. Strict Layout Rule: 360/N deg for Root Parent, Outward Sector Arc for Hubs, & Organized Grid List for Fields
-  nodes.forEach(parent => {
-    if (!parent.out || parent.out.length === 0) return;
-    const children = parent.out
-      .map(e => nodeById[e.target])
-      .filter(c => c && c !== parent && !c.fixed);
-    const N = children.length;
-    if (N === 0) return;
-
-    // Sort children deterministically by ID so layout is 100% stable
-    children.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
-
-    // Find true primary structural parent for 'parent' node (e.g. Workspaces -> Workspace Fields)
-    let inParentNode = null;
-    if (parent.inc && parent.inc.length) {
-      const structEdge = parent.inc.find(e => 
-        e.label === "contains" || e.label === "instance" || e.label === "fields" || !e.label || 
-        (nodeById[e.source] && (nodeById[e.source].type === "module_root" || nodeById[e.source].type === "category_hub" || nodeById[e.source].type === "workspace"))
-      ) || parent.inc[0];
-      inParentNode = nodeById[structEdge.source] || null;
-    }
-
-    const isFieldHub = (parent.id && parent.id.toLowerCase().includes("field")) ||
-                       children.every(c => c.type === "workspacefield" || c.type === "customfield" || c.type === "object_field");
-
-    if (isFieldHub) {
-      // Deterministic stable sorting by ID so layout is 100% stable
-      children.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
-
-      // SPACIOUS UN-CRUMPLED ALTERNATING RADIUS ARC (200 deg Arc, Inner 220px, Outer 310px)
-      const dirAngle = inParentNode ? Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x) : Math.PI;
-      const arcSpan = (200 * Math.PI) / 180; // Expanded 200 degree arc span
-      const step = N > 1 ? arcSpan / (N - 1) : 0;
-      const startAngle = dirAngle - arcSpan / 2;
-
-      children.forEach((child, idx) => {
-        const targetAngle = startAngle + idx * step;
-        // Spacious alternating radius (even index: 220px inner, odd index: 310px outer)
-        const radius = (idx % 2 === 0) ? 220 : 310;
-        const tx = parent.x + radius * Math.cos(targetAngle);
-        const ty = parent.y + radius * Math.sin(targetAngle);
-
-        child.x += (tx - child.x) * 0.75;
-        child.y += (ty - child.y) * 0.75;
-      });
-    } else if (inParentNode && inParentNode !== parent) {
-      // CHILD HUB NODE (e.g. Workspaces, CPM Handlers): Restricted Outward Sector Arc (140 deg facing away from parent)
-      const dirAngle = Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x);
-      const arcSpan = (140 * Math.PI) / 180;
-      const radius = Math.min(260, Math.max(180, 16 * N));
-
-      if (N === 1) {
-        const tx = parent.x + radius * Math.cos(dirAngle);
-        const ty = parent.y + radius * Math.sin(dirAngle);
-        children[0].x += (tx - children[0].x) * 0.70;
-        children[0].y += (ty - children[0].y) * 0.70;
-      } else {
-        const step = arcSpan / (N - 1);
-        const startAngle = dirAngle - arcSpan / 2;
-
-        children.forEach((child, idx) => {
-          const targetAngle = startAngle + idx * step;
-          const tx = parent.x + radius * Math.cos(targetAngle);
-          const ty = parent.y + radius * Math.sin(targetAngle);
-
-          child.x += (tx - child.x) * 0.70;
-          child.y += (ty - child.y) * 0.70;
-        });
-      }
-    } else {
-      // ROOT PARENT NODE (e.g. Contact): Full 360/N degrees equal angle circle around parent
-      const targetRadius = Math.max(340, 40 * N);
-      const angleStep = (2 * Math.PI) / N;
-
-      children.forEach((child, idx) => {
-        const targetAngle = idx * angleStep;
-        const tx = parent.x + targetRadius * Math.cos(targetAngle);
-        const ty = parent.y + targetRadius * Math.sin(targetAngle);
-
-        child.x += (tx - child.x) * 0.70;
-        child.y += (ty - child.y) * 0.70;
-      });
     }
   });
 }

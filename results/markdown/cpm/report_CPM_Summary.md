@@ -114,7 +114,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro_customerservice_2` interface (Create)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code creates a social user account when a new contact is created internally, using the contact's first name as the display name. The code includes a test harness to validate the functionality, creating a sample contact and testing the creation of a social user account, while also handling potential errors and cleaning up test objects.
+- **Key Logic Summary**: Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_create_internal`

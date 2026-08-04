@@ -197,7 +197,7 @@
       "config_vars": [],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code creates a social user account when a new contact is created internally, using the contact's first name as the display name. The code includes a test harness to validate the functionality, creating a sample contact and testing the creation of a social user account, while also handling potential errors and cleaning up test objects.",
+      "key_logic": "Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).",
       "urls": [],
       "imports": [],
       "osvc_objects": [
