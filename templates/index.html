@@ -409,6 +409,7 @@
 
           <div class="category-selector">
             <button class="category-btn active" data-cat="auto" onclick="selectCat(this)">SMART AUTO-DETECT</button>
+            <button class="category-btn" data-cat="rule" onclick="selectCat(this)">BUSINESS RULES</button>
             <button class="category-btn" data-cat="objects" onclick="selectCat(this)">OBJECTS</button>
             <button class="category-btn" data-cat="workspaces" onclick="selectCat(this)">WORKSPACES</button>
             <button class="category-btn" data-cat="reports" onclick="selectCat(this)">REPORTS</button>
@@ -440,6 +441,19 @@
               </div>
               <div class="accordion-body" id="bodyWorkspace">
                 <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading Workspaces...</div>
+              </div>
+            </div>
+
+            <div class="accordion-item" id="accRule">
+              <div class="accordion-header" onclick="toggleAccordion('accRule')">
+                <div class="accordion-title">
+                  <span class="accordion-icon" id="iconAccRule">+</span>
+                  <span>Business Rules &amp; Engine Logic</span>
+                </div>
+                <span class="badge badge-xml" id="badgeCountRule">Business Rules: 0</span>
+              </div>
+              <div class="accordion-body" id="bodyRule">
+                <div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px;">Loading Business Rules...</div>
               </div>
             </div>
 
@@ -667,6 +681,7 @@
 
         if (data.counts) {
           document.getElementById('badgeCountWorkspace').innerText = 'Workspaces: ' + (data.counts.workspace || 0);
+          document.getElementById('badgeCountRule').innerText = 'Business Rules: ' + (data.counts.rule || 0);
           document.getElementById('badgeCountReport').innerText = 'Reports: ' + (data.counts.report || 0);
           document.getElementById('badgeCountCpm').innerText = 'CPM: ' + (data.counts.cpm || 0);
           document.getElementById('badgeCountScripts').innerText = 'Custom Scripts: ' + (data.counts.scripts || 0);
@@ -676,6 +691,7 @@
 
         const files = data.files || [];
         const workspaces = files.filter(f => f.cat_code === 'workspace');
+        const rules = files.filter(f => f.cat_code === 'rule');
         const reports = files.filter(f => f.cat_code === 'report');
         const cpms = files.filter(f => f.cat_code === 'cpm');
         const scripts = files.filter(f => f.cat_code === 'scripts');
@@ -683,6 +699,7 @@
         const objects = files.filter(f => f.cat_code === 'objects');
 
         document.getElementById('bodyWorkspace').innerHTML = renderGroupedTableRows(workspaces);
+        document.getElementById('bodyRule').innerHTML = renderGroupedTableRows(rules);
         document.getElementById('bodyReport').innerHTML = renderGroupedTableRows(reports);
         document.getElementById('bodyCpm').innerHTML = renderGroupedTableRows(cpms);
         document.getElementById('bodyScripts').innerHTML = renderGroupedTableRows(scripts);
