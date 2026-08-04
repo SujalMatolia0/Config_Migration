@@ -390,10 +390,10 @@ function tick(alpha) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d = Math.sqrt(dx * dx + dy * dy) || 0.1;
-      const minDist = a.r + b.r + 65; // Guaranteed clearance for circle and label card
+      const minDist = a.r + b.r + 55; // Clean 55px clearance around circle & label text
       if (d < minDist) {
         const overlap = (minDist - d) / d;
-        const f = overlap * 0.35 * alpha;
+        const f = overlap * 0.40 * alpha;
         dx *= f; dy *= f;
         a.vx += dx; a.vy += dy;
         b.vx -= dx; b.vy -= dy;
@@ -407,9 +407,9 @@ function tick(alpha) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d2 = Math.max(dx * dx + dy * dy, 1);
-      if (d2 < 600000) {
+      if (d2 < 400000) {
         let d = Math.sqrt(d2);
-        let f = Math.min(18000 * alpha / d2, 12);
+        let f = Math.min(12000 * alpha / d2, 12);
         dx /= d; dy /= d;
         a.vx += dx * f; a.vy += dy * f;
         b.vx -= dx * f; b.vy -= dy * f;
@@ -417,14 +417,14 @@ function tick(alpha) {
     }
   }
 
-  // 3. Relaxed Spring forces allowing long, natural link lengths (No collapsing inward)
+  // 3. Compact Spring forces (Neat 180-220px arm lengths, no sprawling across screen)
   activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (!s || !t) return;
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const targetDist = Math.max(380, s.r + t.r + 220);
-    const f = (d - targetDist) * 0.015 * alpha;
+    const targetDist = Math.max(180, s.r + t.r + 110); // Compact, neat 180-220px arm length
+    const f = (d - targetDist) * 0.020 * alpha;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
@@ -433,46 +433,74 @@ function tick(alpha) {
   // 4. Gentle centering gravity & velocity clamping
   const MAX_V = 20;
   nodes.forEach(n => {
-    n.vx += (W / 2 - n.x) * 0.0006 * alpha;
-    n.vy += (H / 2 - n.y) * 0.0006 * alpha;
+    n.vx += (W / 2 - n.x) * 0.0008 * alpha;
+    n.vy += (H / 2 - n.y) * 0.0008 * alpha;
     n.vx *= 0.70; n.vy *= 0.70;
     n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
     n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
     if (!n.fixed) { n.x += n.vx; n.y += n.vy; }
     if (!isFinite(n.x) || !isFinite(n.y)) {
-      n.x = W / 2 + (Math.random() - 0.5) * 400;
-      n.y = H / 2 + (Math.random() - 0.5) * 400;
+      n.x = W / 2 + (Math.random() - 0.5) * 200;
+      n.y = H / 2 + (Math.random() - 0.5) * 200;
       n.vx = 0; n.vy = 0;
     }
   });
 
-  // 5. Equal Angle Radial Distribution Rule (N children => 360/N degrees angle between connecting arrows)
+  // 5. Compact Outward Sector Arc Fan Rule (120-140 deg outward wedge with compact 180px arms)
   nodes.forEach(parent => {
     if (!parent.out || parent.out.length === 0) return;
     const children = parent.out
       .map(e => nodeById[e.target])
       .filter(c => c && c !== parent && !c.fixed);
     const N = children.length;
-    if (N >= 2) {
-      const angleStep = (2 * Math.PI) / N; // Equal angle step: 360 / N degrees (e.g. 60 deg for 6 nodes)
-      // Sort children by current angle relative to parent center
-      children.sort((a, b) => {
-        const angA = Math.atan2(a.y - parent.y, a.x - parent.x);
-        const angB = Math.atan2(b.y - parent.y, b.x - parent.x);
-        return angA - angB;
-      });
+    if (N === 0) return;
 
-      const baseAngle = Math.atan2(children[0].y - parent.y, children[0].x - parent.x);
-      const targetRadius = Math.max(360, 50 * N);
+    const inParentLink = parent.inc && parent.inc.length ? nodeById[parent.inc[0].source] : null;
 
-      children.forEach((child, idx) => {
-        const targetAngle = baseAngle + idx * angleStep;
-        const tx = parent.x + targetRadius * Math.cos(targetAngle);
-        const ty = parent.y + targetRadius * Math.sin(targetAngle);
+    if (inParentLink && inParentLink !== parent) {
+      const dirAngle = Math.atan2(parent.y - inParentLink.y, parent.x - inParentLink.x);
+      const arcSpan = Math.min((120 * Math.PI) / 180, (25 * Math.PI / 180) * (N + 1));
+      const radius = Math.max(180, 30 * N); // Compact 180px fan radius
 
-        child.vx += (tx - child.x) * 0.12 * alpha;
-        child.vy += (ty - child.y) * 0.12 * alpha;
-      });
+      if (N === 1) {
+        const tx = parent.x + radius * Math.cos(dirAngle);
+        const ty = parent.y + radius * Math.sin(dirAngle);
+        children[0].vx += (tx - children[0].x) * 0.16 * alpha;
+        children[0].vy += (ty - children[0].y) * 0.16 * alpha;
+      } else {
+        const step = arcSpan / (N - 1);
+        const startAngle = dirAngle - arcSpan / 2;
+
+        children.forEach((child, idx) => {
+          const targetAngle = startAngle + idx * step;
+          const tx = parent.x + radius * Math.cos(targetAngle);
+          const ty = parent.y + radius * Math.sin(targetAngle);
+
+          child.vx += (tx - child.x) * 0.16 * alpha;
+          child.vy += (ty - child.y) * 0.16 * alpha;
+        });
+      }
+    } else {
+      if (N >= 2) {
+        const angleStep = (2 * Math.PI) / N;
+        children.sort((a, b) => {
+          const angA = Math.atan2(a.y - parent.y, a.x - parent.x);
+          const angB = Math.atan2(b.y - parent.y, b.x - parent.x);
+          return angA - angB;
+        });
+
+        const baseAngle = Math.atan2(children[0].y - parent.y, children[0].x - parent.x);
+        const targetRadius = Math.max(220, 35 * N); // Compact 220px root radius
+
+        children.forEach((child, idx) => {
+          const targetAngle = baseAngle + idx * angleStep;
+          const tx = parent.x + targetRadius * Math.cos(targetAngle);
+          const ty = parent.y + targetRadius * Math.sin(targetAngle);
+
+          child.vx += (tx - child.x) * 0.16 * alpha;
+          child.vy += (ty - child.y) * 0.16 * alpha;
+        });
+      }
     }
   });
 }
