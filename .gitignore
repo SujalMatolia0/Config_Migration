@@ -9,3 +9,8 @@ input/
 .idea/
 .vscode/
 *.zip
+
+# Ignore transient workspace analysis caches
+results/workspaces/
+results/json/
+results/unknowns.json
