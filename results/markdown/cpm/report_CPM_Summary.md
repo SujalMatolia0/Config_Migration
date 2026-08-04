@@ -36,7 +36,7 @@
 - **Operations Bitmask**: `Update (code: 2)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code primarily handles the registration of contacts in Siebel through a SOAP request, and it sends an exception email if any errors occur during the registration process. The code uses the Connect PHP API to interact with the Oracle Service Cloud and implements error handling mechanisms to catch and log any exceptions that may arise during the execution of the procedure.
+- **Key Logic Summary**: Parses email headers and subject lines for reference numbers and customer identifiers via regex. Queries external Siebel SOAP web services (`RegisterContact`). Instantiates and updates OSVC Connect API objects (`Configuration`, `Contact`, `MailMessage`, `MessageBase`, ...).
 - **SOAP Actions / Web Services**: `RegisterContact`
 - **Config Settings / Variables**: `CUSTOM_CFG_SIEBEL_PASSWORD`, `CUSTOM_CFG_SIEBEL_URL`, `CUSTOM_CFG_SIEBEL_USERNAME`, `CUSTOM_CFG_WEB_SERVICE_ERROR_EMAIL`
 
@@ -77,7 +77,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Create)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code is designed to handle the creation of new contacts, automatically setting the contact's login to their primary email address and creating a corresponding social user account. The code includes error handling and a test harness to validate its functionality, ensuring that the contact creation process is executed correctly and consistently.
+- **Key Logic Summary**: Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_create`
@@ -114,7 +114,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro_customerservice_2` interface (Create)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code creates a new social user account when a contact is created internally, using the contact's first name as the display name. The code includes a test harness to validate the functionality, creating a sample contact and testing the creation of a social user account, with error handling and cleanup to ensure data integrity.
+- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code creates a social user account when a new contact is created internally, using the contact's first name as the display name. The code includes a test harness to validate the functionality, creating a sample contact and testing the creation of a social user account, while also handling potential errors and cleaning up test objects.
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_create_internal`
@@ -151,7 +151,7 @@ graph TD
 - **Operations Bitmask**: `Update (code: 2)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Update)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code updates a contact's primary organization ID and login information when the contact's details are modified. The code checks for changes to the contact's email address and first name, and updates the corresponding fields in the contact's record, as well as any associated social user records.
+- **Key Logic Summary**: Executes ROQL queries against OSVC tables (`CO.ContactOrgJoin`, `Contact`). Instantiates and updates OSVC Connect API objects (`CO\ContactOrgJoin`, `Contact`, `Organization`, `PersonName`, ...).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_update`
@@ -190,7 +190,7 @@ graph TD
 - **Operations Bitmask**: `Update (code: 2)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro_customerservice_2` interface (Update)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code updates a contact's social user display name when the contact's first name is changed, and also sets the primary organization ID for a contact based on a custom field. The code includes error handling and a test harness to validate its functionality.
+- **Key Logic Summary**: Executes ROQL queries against OSVC tables (`CO.ContactOrgJoin`, `Contact`). Instantiates and updates OSVC Connect API objects (`CO\ContactOrgJoin`, `Contact`, `Organization`, `PersonName`, ...).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_update_internal`
@@ -229,7 +229,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Incident`
 - **Mapped Event**: `Incident` on `scriptpro` interface (Create)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code primarily handles the creation of incidents, applying business logic to update incident fields and send emails to relevant parties based on the incident source and custom field values. The code also constructs a customer-facing entry for the incident, including request type and other relevant details, and formats the text using HTML for display on the customer portal.
+- **Key Logic Summary**: Processes Techmail-originated incoming records. Parses email headers and subject lines for reference numbers and customer identifiers via regex. Executes ROQL queries against OSVC tables (`Incident`). Instantiates and updates OSVC Connect API objects (`Incident`, `MailMessage`, `MessageBase`, `NamedIDOptList`, ...).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `incident_create`
@@ -317,7 +317,7 @@ graph TD
 - **Operations Bitmask**: `Create, Update (code: 3)`
 - **Bound Classes**: `Incident`
 - **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code primarily handles incident routing for tech support emails, extracting customer numbers and organization IDs from email subjects and using them to retrieve relevant account information. The code also performs checks against Siebel for potential errors, such as support holds, and handles rejects accordingly, ensuring that incidents are properly routed and processed based on the extracted data.
+- **Key Logic Summary**: Processes Techmail-originated incoming records. Parses email headers and subject lines for reference numbers and customer identifiers via regex. Queries external Siebel SOAP web services (`GetAccounts`). Executes ROQL queries against OSVC tables (`Incident`, `Organization`). Instantiates and updates OSVC Connect API objects (`CO\ContactOrgJoin`, `Configuration`, `Contact`, `GroupAccount`, ...). Evaluates customer eligibility and dispatches rejection notification emails for unregistered or invalid accounts.
 - **SOAP Actions / Web Services**: `GetAccounts`
 - **Config Settings / Variables**: `CUSTOM_CFG_MAILBOX_ACCOUNT_MANAGEMENT`, `CUSTOM_CFG_MAILBOX_TECH_SUPPORT`, `CUSTOM_CFG_SIEBEL_PASSWORD`, `CUSTOM_CFG_SIEBEL_URL`, `CUSTOM_CFG_SIEBEL_USERNAME`
 

@@ -224,8 +224,10 @@ def build_graph(components, relationships, orphans, endpoints):
         for f in ws_fields:
             fname = f.get("field_id") or f.get("label") or f.get("name")
             if fname and str(fname).strip():
-                field_node_id = add_node("WorkspaceField", fname, {
+                field_label = f"{ws_mod}.{fname}" if not str(fname).startswith(f"{ws_mod}.") else fname
+                field_node_id = add_node("WorkspaceField", field_label, {
                     "name": fname,
+                    "label": field_label,
                     "object": ws_mod,
                     "module": ws_mod,
                     "object_type": ws_mod,

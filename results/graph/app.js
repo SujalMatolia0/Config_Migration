@@ -47,10 +47,10 @@ marked.setOptions({ renderer: _markedRenderer });
 const TYPE_COLORS = {
   module_root: "#2563EB",      // Royal Blue Entity Root
   category_hub: "#D97706",     // Warm Amber Category Hub
-  workspace: "#4F46E5",        // High-Contrast Vivid Indigo Blue Workspace File
+  workspace: "#9333EA",        // High-Contrast Deep Purple Workspace File
   report: "#059669",           // Emerald Green
   navigationset: "#D97706",    // Warm Amber
-  businessrule: "#EC4899",     // High-Contrast Vivid Magenta Pink Business Rule
+  businessrule: "#6D28D9",    // Dark Violet
   customscript: "#E11D48",    // Rose Red
   cpm: "#0D9488",             // Teal
   asynccpm: "#06B6D4",        // Cyan
@@ -282,12 +282,15 @@ function rebuildGraphState() {
       const fields = GRAPH.nodes.filter(inst => {
         if (inst.type !== "workspacefield" && inst.type !== "customfield") return false;
         const mod = getNodeModule(inst).toLowerCase();
-        if (mod === targetMod) return true;
-        if (inst.data && inst.data.module && inst.data.module.toLowerCase() === targetMod) return true;
-        if (inst.data && inst.data.object && String(inst.data.object).toLowerCase() === targetMod) return true;
-        const instLabel = (inst.label || "").toLowerCase();
-        if (targetMod !== "other" && instLabel.includes(targetMod)) return true;
-        return true; // Return all fields so clicking Workspace Fields ALWAYS opens fields!
+        const dataMod = (inst.data && (inst.data.module || inst.data.object || inst.data.object_type) || "").toLowerCase();
+        
+        if (targetMod !== "other") {
+          if (mod === targetMod || dataMod === targetMod) return true;
+          const instLabel = (inst.label || inst.id || "").toLowerCase();
+          if (instLabel.startsWith(targetMod + ".")) return true;
+          return false; // STRICT: Only include fields belonging to targetMod!
+        }
+        return mod === "other" || dataMod === "other";
       });
 
       fields.forEach(f => {
@@ -384,16 +387,16 @@ nodes.forEach((n, i) => {
 });
 
 function tick(alpha) {
-  // 1. Anti-overlap collision constraint (Hard circle + label margin collision)
+  // 1. Anti-overlap collision constraint (Guaranteed clearance for circle + label card)
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d = Math.sqrt(dx * dx + dy * dy) || 0.1;
-      const minDist = a.r + b.r + 65; // Guaranteed clearance for circle and label card
+      const minDist = a.r + b.r + 85; // Guaranteed 85px clearance for label cards
       if (d < minDist) {
         const overlap = (minDist - d) / d;
-        const f = overlap * 0.35 * alpha;
+        const f = overlap * 0.40 * alpha;
         dx *= f; dy *= f;
         a.vx += dx; a.vy += dy;
         b.vx -= dx; b.vy -= dy;
@@ -401,15 +404,15 @@ function tick(alpha) {
     }
   }
 
-  // 2. Global pair-wise repulsion (Coulomb force)
+  // 2. Controlled pair-wise repulsion
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       const a = nodes[i], b = nodes[j];
       let dx = a.x - b.x, dy = a.y - b.y;
       let d2 = Math.max(dx * dx + dy * dy, 1);
-      if (d2 < 600000) {
+      if (d2 < 120000) {
         let d = Math.sqrt(d2);
-        let f = Math.min(18000 * alpha / d2, 12);
+        let f = Math.min(4000 * alpha / d2, 4.0);
         dx /= d; dy /= d;
         a.vx += dx * f; a.vy += dy * f;
         b.vx -= dx * f; b.vy -= dy * f;
@@ -417,32 +420,118 @@ function tick(alpha) {
     }
   }
 
-  // 3. Relaxed Spring forces allowing long, natural link lengths (No collapsing inward)
+  // 3. Hierarchical Spring forces (350px spacious arms for parent nodes, staggered for sub-fields)
   activeEdges.forEach(e => {
     const s = nodeById[e.source], t = nodeById[e.target];
     if (!s || !t) return;
     let dx = t.x - s.x, dy = t.y - s.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
-    const targetDist = Math.max(380, s.r + t.r + 220);
-    const f = (d - targetDist) * 0.015 * alpha;
+    const isParentLink = (s.type === "module_root" || t.type === "module_root" || s.type === "category_hub" || t.type === "category_hub");
+    const targetDist = isParentLink ? Math.max(350, s.r + t.r + 220) : Math.min(280, Math.max(200, s.r + t.r + 100));
+    const f = (d - targetDist) * 0.030 * alpha;
     dx /= d; dy /= d;
     s.vx += dx * f; s.vy += dy * f;
     t.vx -= dx * f; t.vy -= dy * f;
   });
 
-  // 4. Gentle centering gravity & velocity clamping
-  const MAX_V = 20;
+  // 4. Centering gravity & velocity damping
+  const MAX_V = 18;
   nodes.forEach(n => {
-    n.vx += (W / 2 - n.x) * 0.0006 * alpha;
-    n.vy += (H / 2 - n.y) * 0.0006 * alpha;
-    n.vx *= 0.70; n.vy *= 0.70;
+    n.vx += (W / 2 - n.x) * 0.0010 * alpha;
+    n.vy += (H / 2 - n.y) * 0.0010 * alpha;
+    n.vx *= 0.68; n.vy *= 0.68;
     n.vx = Math.max(-MAX_V, Math.min(MAX_V, n.vx));
     n.vy = Math.max(-MAX_V, Math.min(MAX_V, n.vy));
     if (!n.fixed) { n.x += n.vx; n.y += n.vy; }
     if (!isFinite(n.x) || !isFinite(n.y)) {
-      n.x = W / 2 + (Math.random() - 0.5) * 400;
-      n.y = H / 2 + (Math.random() - 0.5) * 400;
+      n.x = W / 2 + (Math.random() - 0.5) * 150;
+      n.y = H / 2 + (Math.random() - 0.5) * 150;
       n.vx = 0; n.vy = 0;
+    }
+  });
+
+  // 5. Strict Layout Rule: 360/N deg for Root Parent, Outward Sector Arc for Hubs, & Organized Grid List for Fields
+  nodes.forEach(parent => {
+    if (!parent.out || parent.out.length === 0) return;
+    const children = parent.out
+      .map(e => nodeById[e.target])
+      .filter(c => c && c !== parent && !c.fixed);
+    const N = children.length;
+    if (N === 0) return;
+
+    // Sort children deterministically by ID so layout is 100% stable
+    children.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+
+    // Find true primary structural parent for 'parent' node (e.g. Workspaces -> Workspace Fields)
+    let inParentNode = null;
+    if (parent.inc && parent.inc.length) {
+      const structEdge = parent.inc.find(e => 
+        e.label === "contains" || e.label === "instance" || e.label === "fields" || !e.label || 
+        (nodeById[e.source] && (nodeById[e.source].type === "module_root" || nodeById[e.source].type === "category_hub" || nodeById[e.source].type === "workspace"))
+      ) || parent.inc[0];
+      inParentNode = nodeById[structEdge.source] || null;
+    }
+
+    const isFieldHub = (parent.id && parent.id.toLowerCase().includes("field")) ||
+                       children.every(c => c.type === "workspacefield" || c.type === "customfield" || c.type === "object_field");
+
+    if (isFieldHub) {
+      // Deterministic stable sorting by ID so layout is 100% stable
+      children.sort((a, b) => (a.id || "").localeCompare(b.id || ""));
+
+      // SPACIOUS UN-CRUMPLED ALTERNATING RADIUS ARC (200 deg Arc, Inner 220px, Outer 310px)
+      const dirAngle = inParentNode ? Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x) : Math.PI;
+      const arcSpan = (200 * Math.PI) / 180; // Expanded 200 degree arc span
+      const step = N > 1 ? arcSpan / (N - 1) : 0;
+      const startAngle = dirAngle - arcSpan / 2;
+
+      children.forEach((child, idx) => {
+        const targetAngle = startAngle + idx * step;
+        // Spacious alternating radius (even index: 220px inner, odd index: 310px outer)
+        const radius = (idx % 2 === 0) ? 220 : 310;
+        const tx = parent.x + radius * Math.cos(targetAngle);
+        const ty = parent.y + radius * Math.sin(targetAngle);
+
+        child.x += (tx - child.x) * 0.75;
+        child.y += (ty - child.y) * 0.75;
+      });
+    } else if (inParentNode && inParentNode !== parent) {
+      // CHILD HUB NODE (e.g. Workspaces, CPM Handlers): Restricted Outward Sector Arc (140 deg facing away from parent)
+      const dirAngle = Math.atan2(parent.y - inParentNode.y, parent.x - inParentNode.x);
+      const arcSpan = (140 * Math.PI) / 180;
+      const radius = Math.min(260, Math.max(180, 16 * N));
+
+      if (N === 1) {
+        const tx = parent.x + radius * Math.cos(dirAngle);
+        const ty = parent.y + radius * Math.sin(dirAngle);
+        children[0].x += (tx - children[0].x) * 0.70;
+        children[0].y += (ty - children[0].y) * 0.70;
+      } else {
+        const step = arcSpan / (N - 1);
+        const startAngle = dirAngle - arcSpan / 2;
+
+        children.forEach((child, idx) => {
+          const targetAngle = startAngle + idx * step;
+          const tx = parent.x + radius * Math.cos(targetAngle);
+          const ty = parent.y + radius * Math.sin(targetAngle);
+
+          child.x += (tx - child.x) * 0.70;
+          child.y += (ty - child.y) * 0.70;
+        });
+      }
+    } else {
+      // ROOT PARENT NODE (e.g. Contact): Full 360/N degrees equal angle circle around parent
+      const targetRadius = Math.max(340, 40 * N);
+      const angleStep = (2 * Math.PI) / N;
+
+      children.forEach((child, idx) => {
+        const targetAngle = idx * angleStep;
+        const tx = parent.x + targetRadius * Math.cos(targetAngle);
+        const ty = parent.y + targetRadius * Math.sin(targetAngle);
+
+        child.x += (tx - child.x) * 0.70;
+        child.y += (ty - child.y) * 0.70;
+      });
     }
   });
 }
@@ -569,44 +658,25 @@ function updateDOM() {
     g.appendChild(title);
     nodesG.appendChild(g);
 
-    let clickTimeout = null;
-
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-      }
-
-      clickTimeout = setTimeout(() => {
-        clickTimeout = null;
-        // SINGLE CLICK: highlight node and toggle branch expansion (do NOT open side inspector)
-        select(n, { openInspector: false });
-
-        if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace" || n.type === "businessrule") {
-          if (n.type === "module_root") {
-            expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
-          } else if (n.type === "category_hub") {
-            expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
-          } else if (n.type === "workspace") {
-            expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
-          } else if (n.type === "businessrule") {
-            expandedNodeIds.has(n.id) ? expandedNodeIds.delete(n.id) : expandedNodeIds.add(n.id);
-          }
-          rebuildGraphState();
-          updateDOM();
-          restartSimulation();
+      select(n, { openInspector: false });
+      if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
+        if (n.type === "module_root") {
+          expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
+        } else if (n.type === "category_hub") {
+          expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
+        } else if (n.type === "workspace") {
+          expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
         }
-      }, 220);
+        rebuildGraphState();
+        updateDOM();
+        restartSimulation();
+      }
     });
 
     g.addEventListener("dblclick", ev => {
       ev.stopPropagation();
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-      }
-      // DOUBLE CLICK: open the side inspector panel
       select(n, { openInspector: true });
     });
 
@@ -874,7 +944,7 @@ if (collapseAllBtn) {
 // ---------- Export SVG / PNG Handlers ----------
 function prepareExportableSvg(svgEl) {
   const clone = svgEl.cloneNode(true);
-  
+
   // 1. Ensure XML namespaces
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
@@ -1020,7 +1090,7 @@ if (exportPngBtn) {
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
       URL.revokeObjectURL(url);
-      
+
       const pngUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = pngUrl;
@@ -1548,64 +1618,12 @@ function renderHtmlPreviewsInContainer(container) {
 }
 
 function generateDynamicMermaidForNode(n) {
-  let code = "flowchart TD\n";
+  let code = "flowchart LR\n";
   const safeId = (id) => "N_" + String(id).replace(/[^a-zA-Z0-9_]/g, "_");
   const safeLabel = (lbl) => '"' + String(lbl || "").replace(/"/g, "'") + '"';
 
   const ntype = (n.type || "").toLowerCase();
   const data = n.data || {};
-  const targetObj = data.object || (n.label.includes("Contact") ? "Contact" : (n.label.includes("Incident") ? "Incident" : null));
-
-  if (ntype === "businessrule" || targetObj) {
-    const objName = targetObj || "Business Rules";
-    const totalRules = data.total_rules || (n.inc ? n.inc.length : 0);
-    const breakdown = data.action_type_breakdown || {};
-
-    code += `  classDef objNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;\n`;
-    code += `  classDef ruleNode fill:#7c3aed,stroke:#5b21b6,color:#fff,font-weight:bold;\n`;
-    code += `  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;\n`;
-    code += `  classDef actNode fill:#059669,stroke:#047857,color:#fff;\n\n`;
-
-    code += `  OBJ["OSVC Entity Object: ${objName}"]:::objNode\n`;
-    code += `  RULE_HUB["${objName} Business Rules Engine<br/>(${totalRules} Rules)"]:::ruleNode\n`;
-    code += `  OBJ -->|"Triggers Execution Set"| RULE_HUB\n\n`;
-
-    // Add Action Type Sub-Groups
-    code += `  subgraph Action_Types ["Action Type Sub-Groups (${objName})"]\n`;
-    for (const [atype, cnt] of Object.entries(breakdown)) {
-      const aId = safeId(`ACT_${atype}`);
-      code += `    ${aId}["${atype} (${cnt}x)"]:::actNode\n`;
-      code += `    RULE_HUB --> ${aId}\n`;
-    }
-    code += `  end\n\n`;
-
-    // Add connected CPM Handlers for this Object
-    if (n.out && n.out.length) {
-      code += `  subgraph CPM_Handlers ["Connected CPM Event Handlers"]\n`;
-      n.out.forEach(e => {
-        const tgt = nodeById[e.target];
-        if (tgt) {
-          const tId = safeId(tgt.id);
-          code += `    ${tId}["${tgt.label}"]:::cpmNode\n`;
-          code += `    RULE_HUB -->|"${e.label || 'Executes'}"| ${tId}\n`;
-        }
-      });
-      code += `  end\n`;
-    } else if (n.inc && n.inc.length) {
-      code += `  subgraph Connected_Nodes ["Connected System Nodes"]\n`;
-      n.inc.forEach(e => {
-        const src = nodeById[e.source];
-        if (src) {
-          const sId = safeId(src.id);
-          code += `    ${sId}["${src.label}"]\n`;
-          code += `    ${sId} --> RULE_HUB\n`;
-        }
-      });
-      code += `  end\n`;
-    }
-
-    return code;
-  }
 
   if (ntype === "cpm" || ntype === "asynccpm") {
     const name = n.label || data.name || n.id;
@@ -1682,7 +1700,7 @@ async function loadDocsAndDiagrams(node) {
   tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
   tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
 
-  const data = (typeof node.data === "function" ? node.data() : node.data) || {};
+  const mdPath = node.data && node.data.mdPath;
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
 
@@ -1694,102 +1712,52 @@ async function loadDocsAndDiagrams(node) {
   }
   currentFetchController = new AbortController();
 
-  let targetObj = data.object || (node.label && node.label.includes("Contact") ? "Contact" : (node.label && node.label.includes("Incident") ? "Incident" : "General"));
-  const lbl = (node.label || data.name || data.label || "").trim();
-  const cleanLbl = lbl.replace(/ /g, "_");
-  const ntype = (node.type || data.type || "").toLowerCase();
+  let mermaidCode = null;
 
-  // Construct prioritized candidate list for fetching markdown files
-  const candidates = [];
-  if (data.mdPath) candidates.push(data.mdPath);
-  if (node.mdPath && !candidates.includes(node.mdPath)) candidates.push(node.mdPath);
-
-  if (ntype === "businessrule") {
-    candidates.push(`../rules/report_Business_Rules_${targetObj}.md`);
-    candidates.push(`../rules/report_Business_Rules.md`);
-  } else if (ntype.includes("bui")) {
-    candidates.push(`../bui_addins/report_${cleanLbl}.md`);
-    candidates.push(`../bui_addins/report_BUI_Addins.md`);
-    candidates.push(`../scripts/report_${cleanLbl}.md`);
-  } else if (ntype.includes("script")) {
-    candidates.push(`../scripts/report_${cleanLbl}.md`);
-    candidates.push(`../scripts/report_Custom_Scripts.md`);
-    candidates.push(`../bui_addins/report_${cleanLbl}.md`);
-  } else if (ntype === "report") {
-    candidates.push(`../reports/report_${cleanLbl}.md`);
-  } else if (ntype === "cpm" || ntype === "cpmmappings") {
-    candidates.push(`../cpm/report_CPM_Summary.md`);
-  } else if (ntype === "workspace") {
-    candidates.push(`../workspaces/${cleanLbl}/report.md`);
-  }
-
-  // Global fallback list
-  candidates.push(`../rules/report_Business_Rules_${targetObj}.md`);
-  candidates.push(`../rules/report_Business_Rules.md`);
-  candidates.push(`../cpm/report_CPM_Summary.md`);
-
-  let fetchedOk = false;
-
-  for (const path of candidates) {
-    if (fetchedOk) break;
+  if (mdPath) {
     try {
-      const response = await fetch(path, { signal: currentFetchController.signal });
+      const response = await fetch(mdPath, { signal: currentFetchController.signal });
       if (response.ok) {
-        let mdText = await response.text();
-        if (!mdText || mdText.trim().length === 0) continue;
-
-        let parsedHtml = "";
-        if (typeof marked !== "undefined") {
-          try {
-            marked.setOptions({ gfm: true, breaks: true });
-            parsedHtml = marked.parse(mdText);
-          } catch (e) {
-            parsedHtml = `<pre style="white-space:pre-wrap;font-size:11px;">${esc(mdText)}</pre>`;
-          }
-        } else {
-          parsedHtml = `<pre style="white-space:pre-wrap;font-size:11px;">${esc(mdText)}</pre>`;
-        }
-
-        // Apply badges for Enabled / Disabled status and wrap tables in .table-wrapper
-        parsedHtml = parsedHtml
-          .replace(/\| Enabled \|/g, '| <span class="badge-status badge-enabled">Enabled</span> |')
-          .replace(/\| Disabled \|/g, '| <span class="badge-status badge-disabled">Disabled</span> |')
-          .replace(/<table/g, '<div class="table-wrapper"><table')
-          .replace(/<\/table>/g, '</table></div>');
-
-        tabDoc.innerHTML = parsedHtml;
+        const mdText = await response.text();
+        tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
         await renderMermaidBlocksInContainer(tabDoc);
         renderHtmlPreviewsInContainer(tabDoc);
-
-        const mermaidCode = generateDynamicMermaidForNode(node);
-        if (mermaidCode) {
-          await renderMermaidDiagram(tabDiagram, mermaidCode);
-          const fsBtn = document.createElement("button");
-          fsBtn.className = "tab-btn";
-          fsBtn.style.marginTop = "12px";
-          fsBtn.style.background = "var(--accent-primary)";
-          fsBtn.style.border = "1px solid var(--accent-primary)";
-          fsBtn.style.color = "#fff";
-          fsBtn.style.width = "100%";
-          fsBtn.style.fontWeight = "600";
-          fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
-          fsBtn.addEventListener("click", openFullscreenDiagram);
-          tabDiagram.appendChild(fsBtn);
-        }
-        fetchedOk = true;
-        break;
+        mermaidCode = extractMermaidCode(mdText, node);
       }
     } catch (err) {
       if (err.name === "AbortError") return;
+      console.warn("Fetch mdPath failed, generating fallback docs", err);
     }
   }
 
-  if (!fetchedOk) {
+  if (!tabDoc.innerHTML || tabDoc.innerHTML.includes("Loading documentation")) {
     tabDoc.innerHTML = `<div style="padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">
-      <h3>${esc(node.label || data.name || "Component")}</h3>
+      <h3>${esc(node.label)}</h3>
       <p><b>Component Type:</b> ${esc(TYPE_LABELS[node.type] || node.type)}</p>
-      <p><b>Associated Module:</b> ${esc(node.module || data.module || "General")}</p>
+      <p><b>Associated Module:</b> ${esc(node.module || "General")}</p>
+      <p><b>Inbound Connections:</b> ${node.inc ? node.inc.length : 0}</p>
+      <p><b>Outbound Connections:</b> ${node.out ? node.out.length : 0}</p>
+      ${node.isOrphan ? `<div style="color:#E11D48;font-weight:700;margin-top:8px;">ORPHAN WARNING: ${esc(node.orphanReason || "Unreferenced component")}</div>` : ""}
     </div>`;
+  }
+
+  if (!mermaidCode) {
+    mermaidCode = generateDynamicMermaidForNode(node);
+  }
+
+  if (mermaidCode) {
+    await renderMermaidDiagram(tabDiagram, mermaidCode);
+    const fsBtn = document.createElement("button");
+    fsBtn.className = "tab-btn";
+    fsBtn.style.marginTop = "12px";
+    fsBtn.style.background = "var(--accent-primary)";
+    fsBtn.style.border = "1px solid var(--accent-primary)";
+    fsBtn.style.color = "#fff";
+    fsBtn.style.width = "100%";
+    fsBtn.style.fontWeight = "600";
+    fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
+    fsBtn.addEventListener("click", openFullscreenDiagram);
+    tabDiagram.appendChild(fsBtn);
   }
 }
 
@@ -1822,10 +1790,6 @@ function select(n, options = {}) {
 
   const shouldOpen = options && options.openInspector;
   inspector.classList.toggle("open", !!shouldOpen && !!n);
-  if (options && options.focusReport) {
-    const rTabBtn = document.querySelector('.tab-btn[data-tab="report"]');
-    if (rTabBtn) rTabBtn.click();
-  }
   if (!n) return;
 
   // Build Details Tab
@@ -1879,20 +1843,6 @@ function select(n, options = {}) {
   if (d.risk_flags && d.risk_flags.length) {
     const riskText = d.risk_flags.map(r => (typeof r === "string" ? r : (r.type || r.detail || String(r)))).join("; ");
     facts.push(["Risks", riskText]);
-  }
-
-  if (n.type === "businessrule" || n.label.includes("Business Rules")) {
-    if (d.total_rules) facts.push(["Total Rules", d.total_rules]);
-    if (d.object) facts.push(["Target Object", d.object]);
-    if (d.action_type_breakdown) {
-      let atHtml = "<h3>Action Type Breakdown Sub-Groups</h3><table style='width:100%;font-size:11px;border-collapse:collapse;margin-top:6px;'>";
-      atHtml += "<tr style='background:var(--panel2);text-align:left;'><th>Action Type</th><th>Rule Count</th></tr>";
-      for (const [atype, cnt] of Object.entries(d.action_type_breakdown)) {
-        atHtml += `<tr><td style='padding:4px;border-bottom:1px solid var(--border-subtle);'><b>${esc(atype)}</b></td><td style='padding:4px;border-bottom:1px solid var(--border-subtle);'>${cnt}</td></tr>`;
-      }
-      atHtml += "</table>";
-      html += atHtml;
-    }
   }
 
   if (facts.length) {
