@@ -445,6 +445,36 @@ function tick(alpha) {
       n.vx = 0; n.vy = 0;
     }
   });
+
+  // 5. Equal Angle Radial Distribution Rule (N children => 360/N degrees angle between connecting arrows)
+  nodes.forEach(parent => {
+    if (!parent.out || parent.out.length === 0) return;
+    const children = parent.out
+      .map(e => nodeById[e.target])
+      .filter(c => c && c !== parent && !c.fixed);
+    const N = children.length;
+    if (N >= 2) {
+      const angleStep = (2 * Math.PI) / N; // Equal angle step: 360 / N degrees (e.g. 60 deg for 6 nodes)
+      // Sort children by current angle relative to parent center
+      children.sort((a, b) => {
+        const angA = Math.atan2(a.y - parent.y, a.x - parent.x);
+        const angB = Math.atan2(b.y - parent.y, b.x - parent.x);
+        return angA - angB;
+      });
+
+      const baseAngle = Math.atan2(children[0].y - parent.y, children[0].x - parent.x);
+      const targetRadius = Math.max(360, 50 * N);
+
+      children.forEach((child, idx) => {
+        const targetAngle = baseAngle + idx * angleStep;
+        const tx = parent.x + targetRadius * Math.cos(targetAngle);
+        const ty = parent.y + targetRadius * Math.sin(targetAngle);
+
+        child.vx += (tx - child.x) * 0.12 * alpha;
+        child.vy += (ty - child.y) * 0.12 * alpha;
+      });
+    }
+  });
 }
 
 // ---------- render ----------
