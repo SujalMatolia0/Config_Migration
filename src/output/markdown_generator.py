@@ -988,15 +988,17 @@ def generate_report_markdown(ws):
         lines.append("| Location | Element / Attribute | Raw Value / XML |")
         lines.append("|---|---|---|")
         for item in unk_attrs:
-            loc = item.get("location", "Workspace")
+            loc = (item.get("location") or "Workspace").replace("\r\n", " ").replace("\n", " ").replace("|", "&#124;")
             attr = f"Attribute: `{item.get('attribute')}`"
-            val = f"`\"{item.get('value')}\"`"
-            lines.append(f"| {loc} | {attr} | {val} |")
+            val_str = (item.get('value') or "").replace("\r\n", " ").replace("\n", " ").replace("|", "&#124;")
+            lines.append(f"| {loc} | {attr} | `{val_str}` |")
         for item in unk_children:
-            loc = item.get("location", "Workspace")
+            loc = (item.get("location") or "Workspace").replace("\r\n", " ").replace("\n", " ").replace("|", "&#124;")
             tag = f"Element: `<{item.get('tag')}>`"
-            raw = f"`{item.get('raw', '')}`"
-            lines.append(f"| {loc} | {tag} | {raw} |")
+            raw_val = (item.get('raw') or item.get('snippet') or "").replace("\r\n", " ").replace("\n", " ").replace("\r", " ").replace("|", "&#124;").strip()
+            if len(raw_val) > 150:
+                raw_val = raw_val[:147] + "..."
+            lines.append(f"| {loc} | {tag} | `{raw_val}` |")
 
     lines.append("")
 

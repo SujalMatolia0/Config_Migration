@@ -295,13 +295,13 @@ The following elements were found in this workspace XML but are not fully parsed
 
 | Location | Element / Attribute | Raw Value / XML |
 |---|---|---|
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelAlignment` | `"Right"` |
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelPosition` | `"Left"` |
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `ReadOnlyOption` | `"OnNew:~any~;OnEdit:~any~"` |
-| Tab: SUMMARY_LBL Field: Email | Attribute: `DisableEmailIcon` | `"True"` |
-| Tab: Surveys RelationshipItem: SurveyHistoryView | Attribute: `HideReportCommands` | `"True"` |
-| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `Anchor` | `"Top, Left"` |
-| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `AutoSize` | `"False"` |
+| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelAlignment` | `Right` |
+| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelPosition` | `Left` |
+| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `ReadOnlyOption` | `OnNew:~any~;OnEdit:~any~` |
+| Tab: SUMMARY_LBL Field: Email | Attribute: `DisableEmailIcon` | `True` |
+| Tab: Surveys RelationshipItem: SurveyHistoryView | Attribute: `HideReportCommands` | `True` |
+| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `Anchor` | `Top, Left` |
+| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `AutoSize` | `False` |
 | Rule: Admin Fields | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
 | Rule: Admin Fields - Support Supervisors | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
 | Rule: Hide Delete and New button | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |

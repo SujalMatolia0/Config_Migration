@@ -211,6 +211,4 @@ The following elements were found in this workspace XML but are not fully parsed
 
 | Location | Element / Attribute | Raw Value / XML |
 |---|---|---|
-| Rule: New Rule | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">
-                <Trigger Type="EditorLoaded"/>
-            </Triggers>` |
+| Rule: New Rule | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">                 <Trigger Type="EditorLoaded"/>             </Triggers>` |

@@ -473,9 +473,9 @@ def write_all_details(components, details_dir):
             })
             
         bui_copy = dict(bui)
-        bui_copy["mdPath"] = f"../scripts/report_{label}.md"
-        if not os.path.exists(os.path.join(os.path.dirname(details_dir), "scripts", f"report_{label}.md")):
-            bui_copy["mdPath"] = "../scripts/report_BUI_Addins.md"
+        bui_copy["mdPath"] = f"../bui_addins/report_{label}.md"
+        if not os.path.exists(os.path.join(os.path.dirname(details_dir), "bui_addins", f"report_{label}.md")):
+            bui_copy["mdPath"] = "../bui_addins/report_BUI_Addins.md"
 
         detail_data = {
             "id": node_id,
@@ -584,17 +584,17 @@ def build_graph_ui(master_json, output_dir):
         elif node_type == "buiaddin":
             safe = label.replace(" ", "_")
             candidates = [
-                f"../scripts/report_{safe}.md",
-                f"../scripts/report_{safe}BUIAddin.md",
-                "../scripts/report_BUI_Addins.md",
-                "../markdown/scripts/report_BUI_Addins.md",
+                f"../bui_addins/report_{safe}.md",
+                f"../bui_addins/report_{label}.md",
+                "../bui_addins/report_BUI_Addins.md",
+                "../markdown/bui_addins/report_BUI_Addins.md",
             ]
-            # Also scan scripts dir for a file that matches label
-            scripts_dir = os.path.join(output_dir, "..", "scripts")
-            if os.path.isdir(scripts_dir):
-                for fname in os.listdir(scripts_dir):
+            # Also scan bui_addins dir for a file that matches label
+            bui_dir = os.path.join(output_dir, "..", "bui_addins")
+            if os.path.isdir(bui_dir):
+                for fname in os.listdir(bui_dir):
                     if fname.endswith(".md") and label.lower().replace(" ", "") in fname.lower().replace("_", ""):
-                        candidates.insert(0, f"../scripts/{fname}")
+                        candidates.insert(0, f"../bui_addins/{fname}")
         return candidates[0] if candidates else None
 
     patched_nodes = []

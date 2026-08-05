@@ -691,7 +691,8 @@ function updateDOM() {
 
     g.addEventListener("click", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: false });
+      const isLeafNode = n.type !== "module_root" && n.type !== "category_hub";
+      select(n, { openInspector: isLeafNode });
       if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
         if (n.type === "module_root") {
           expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
@@ -1744,21 +1745,36 @@ async function loadDocsAndDiagrams(node) {
   currentFetchController = new AbortController();
 
   let mermaidCode = null;
+  let mdText = null;
 
   if (mdPath) {
-    try {
-      const response = await fetch(mdPath, { signal: currentFetchController.signal });
-      if (response.ok) {
-        const mdText = await response.text();
-        tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
-        await renderMermaidBlocksInContainer(tabDoc);
-        renderHtmlPreviewsInContainer(tabDoc);
-        mermaidCode = extractMermaidCode(mdText, node);
+    const candidateUrls = [
+      mdPath,
+      "/results/" + mdPath.replace(/^\.\.\//, ""),
+      "/results/markdown/" + mdPath.replace(/^\.\.\//, "")
+    ];
+
+    for (const url of candidateUrls) {
+      try {
+        const response = await fetch(url, { signal: currentFetchController.signal });
+        if (response.ok) {
+          const txt = await response.text();
+          if (txt && txt.trim()) {
+            mdText = txt;
+            break;
+          }
+        }
+      } catch (err) {
+        if (err.name === "AbortError") return;
       }
-    } catch (err) {
-      if (err.name === "AbortError") return;
-      console.warn("Fetch mdPath failed, generating fallback docs", err);
     }
+  }
+
+  if (mdText) {
+    tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
+    await renderMermaidBlocksInContainer(tabDoc);
+    renderHtmlPreviewsInContainer(tabDoc);
+    mermaidCode = extractMermaidCode(mdText, node);
   }
 
   if (!tabDoc.innerHTML || tabDoc.innerHTML.includes("Loading documentation")) {

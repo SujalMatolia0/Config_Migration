@@ -362,6 +362,6 @@ The following elements were found in this workspace XML but are not fully parsed
 
 | Location | Element / Attribute | Raw Value / XML |
 |---|---|---|
-| Tab: Incident Details RelationshipItem: RichIncidentThread | Attribute: `CanUseStandardText` | `"True"` |
+| Tab: Incident Details RelationshipItem: RichIncidentThread | Attribute: `CanUseStandardText` | `True` |
 | Rule: New Rule | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
 | Rule: Show Gmoney related product and categories | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |

@@ -335,10 +335,6 @@ The following elements were found in this workspace XML but are not fully parsed
 
 | Location | Element / Attribute | Raw Value / XML |
 |---|---|---|
-| Tab: Incident Details RelationshipItem: RichIncidentThread | Attribute: `CanUseStandardText` | `"True"` |
-| Rule: Hide Customer360 for Email Contacts | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">
-                <Trigger Type="EditorLoaded"/>
-            </Triggers>` |
-| Rule: Filter Products for Segment | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">
-                <Trigger Type="EditorLoaded"/>
-            </Triggers>` |
+| Tab: Incident Details RelationshipItem: RichIncidentThread | Attribute: `CanUseStandardText` | `True` |
+| Rule: Hide Customer360 for Email Contacts | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">                 <Trigger Type="EditorLoaded"/>             </Triggers>` |
+| Rule: Filter Products for Segment | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">                 <Trigger Type="EditorLoaded"/>             </Triggers>` |
