@@ -1,5 +1,5 @@
 {
-  "cpm_count": 8,
+  "cpm_count": 9,
   "items": [
     {
       "format": "cpm_mappings",
@@ -46,6 +46,12 @@
           "interface": "scriptpro",
           "operation": "Create",
           "procedure": "incident_create"
+        },
+        {
+          "object": "Incident",
+          "interface": "scriptpro",
+          "operation": "Update",
+          "procedure": "incident_back_in_stock_sync"
         }
       ],
       "suppress_flags": [
@@ -151,7 +157,7 @@
       "config_vars": [],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).",
+      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code primarily handles the creation of new contacts, setting the login to the first email address and creating a social user with a display name based on the contact's first name or email address. The code also includes a test harness to validate the functionality of the contact creation process, ensuring that the expected outcomes occur when a new contact is created.",
       "urls": [],
       "imports": [],
       "osvc_objects": [
@@ -318,6 +324,48 @@
         "apply",
         "setPrimaryOrgId",
         "updateContactOrgJoin"
+      ],
+      "constants_defined": [],
+      "log_files": [],
+      "message_templates": [],
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "format": "cpm_procedure",
+      "file_name": "ObjectProcedureincident_back_in_stock_sync.xml",
+      "id": "100099",
+      "display_name": "incident_back_in_stock_sync",
+      "name": "incident_back_in_stock_sync",
+      "version": "100400 [internal version stamp]",
+      "version_raw": "100400",
+      "operations_code": "1",
+      "operations_label": "Create",
+      "is_async": false,
+      "php_version": "5.6.0 (50600)",
+      "php_version_raw": "50600",
+      "bound_classes": [
+        "Incident"
+      ],
+      "php_content": "<?php\n/*\n* CPMObjectEventHandler: incident_back_in_stock_sync\n* Package: RN\n* Objects: Incident\n* Actions: Update\n* Version: 1.4\n*/\nuse \\RightNow\\Connect\\v1_4 as RNCPHP;\nuse \\RightNow\\CPM\\v1 as RNCPM;\n\nclass incident_back_in_stock_sync implements RNCPM\\ObjectEventHandler {\n    public static function apply($run_mode, $action, $obj, $n_cycles) {\n        if ($obj->Queue->Name == 'Back in Stock') {\n            $obj->CustomFields->c->oos_status = 'Notified';\n        }\n    }\n}\n",
+      "soap_actions": [],
+      "config_vars": [],
+      "custom_fields_read": [],
+      "custom_fields_written": [
+        "c$oos_status"
+      ],
+      "key_logic": "Executes static custom handler logic for `incident_back_in_stock_sync`.",
+      "urls": [],
+      "imports": [],
+      "osvc_objects": [],
+      "has_curl": false,
+      "risk_flags": [],
+      "flow_diagram": "graph TD\n  START[\"apply() called for incident_back_in_stock_sync\"]",
+      "extracted_functions": [
+        "apply"
       ],
       "constants_defined": [],
       "log_files": [],

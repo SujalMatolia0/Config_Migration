@@ -1,6 +1,6 @@
 # OSVC Configuration Master Index
 
-**Generated**: 2026-08-05 15:14:54  
+**Generated**: 2026-08-05 16:13:44  
 **Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  
 
 > [!NOTE]
@@ -73,6 +73,7 @@
 | `contact_create_internal` | `Contact` | `Create` | `Sync` | `ObjectProcedure::apply` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |
 | `contact_update` | `Contact` | `Update` | `Sync` | `ObjectProcedure::apply` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |
 | `contact_update_internal` | `Contact` | `Update` | `Sync` | `ObjectProcedure::apply` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |
+| `incident_back_in_stock_sync` | `Incident` | `Create` | `Sync` | `ObjectProcedure::apply` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |
 | `incident_create` | `Incident` | `Create` | `Sync` | `ObjectProcedure::apply` | [report_CPM_Summary.md](cpm/report_CPM_Summary.md) |
 
 ### CPM Routing Mappings
@@ -192,6 +193,8 @@ The following shared reports and resources are referenced across multiple worksp
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: incident_back_in_stock_sync** | `Linkage` | `CustomField: c$oos_status` | Cross-Component Mapping |
+| **CPM: incident_back_in_stock_sync** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$change_request_type` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$customer_email_address` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$customer_name` | Cross-Component Mapping |
@@ -235,6 +238,7 @@ The following shared reports and resources are referenced across multiple worksp
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_create_internal` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_update_internal` | Cross-Component Mapping |
+| **CPMMappings: Mappings.xml** | `Linkage` | `CPM: incident_back_in_stock_sync` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: incident_create` | Cross-Component Mapping |
 
 ### BUI Add-Ins & Extensions Linkages

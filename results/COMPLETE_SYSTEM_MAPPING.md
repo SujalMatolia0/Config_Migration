@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-05 15:14:55  
+**Generated**: 2026-08-05 16:13:44  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -12,7 +12,7 @@
 | Workspaces | 7 | Parsed & Mapped |
 | Analytics Reports | 18 | Parsed & Mapped |
 | Business Rules Sets | 1 (1207 Rules) | Parsed & Policy Mapped |
-| CPM Procedures & Handlers | 51 | Parsed & Event Mapped |
+| CPM Procedures & Handlers | 8 | Parsed & Event Mapped |
 | PHP Custom Scripts | 13 | Analyzed |
 | BUI Add-Ins | 2 | Archive Extracted |
 | Custom Objects & Entities | 6 | Schema Mapped |
@@ -90,7 +90,7 @@ flowchart LR
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Contact` | `object` | `0 in -> 131 out` | Primary OSVC Entity Module Schema Root |
+| `Contact` | `object` | `0 in -> 127 out` | Primary OSVC Entity Module Schema Root |
 | `Contact` | `workspace` | `2 in -> 13 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
 | `Contact test` | `workspace` | `3 in -> 15 out` | Bound Object: `Contact` | 0 fields, 6 tabs, 3 rules |
 | `New Workspace` | `workspace` | `1 in -> 12 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 0 rules |
@@ -160,9 +160,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
+    N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
     N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
-    N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
   end
 ```
 
@@ -198,10 +198,10 @@ flowchart LR
 | `https://js.arcgis.com/4.20/` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://js.arcgis.com/4.20/` |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://js.arcgis.com/4.20/esri/themes/light/main.css` |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://use.fontawesome.com/releases/v5.1.1/css/all.css` |
-| `Mappings.xml` | `cpmmappings` | `1 in -> 5 out` | OSVC Component ID: `cpmmappings:mappings.xml` |
+| `Mappings.xml` | `cpmmappings` | `1 in -> 6 out` | OSVC Component ID: `cpmmappings:mappings.xml` |
 | `SOAP: GetAccounts` | `externalendpoint` | `1 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: getaccounts` |
 
-### Entity Module: Incident (89 Mapped Components)
+### Entity Module: Incident (46 Mapped Components)
 
 #### Module Flowchart: Incident
 
@@ -224,55 +224,12 @@ flowchart LR
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Incident` | `object` | `0 in -> 75 out` | Primary OSVC Entity Module Schema Root |
+| `Incident` | `object` | `0 in -> 68 out` | Primary OSVC Entity Module Schema Root |
 | `Incident` | `workspace` | `1 in -> 34 out` | Bound Object: `Incident` | 0 fields, 8 tabs, 2 rules |
 | `real_edge_01_nested_tabset` | `workspace` | `1 in -> 32 out` | Bound Object: `Incident` | 0 fields, 7 tabs, 2 rules |
-| `dedup_rx_incidents_sync (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `gbl_con_region_assoc (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_b2b_entity_status_update (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_cancelOrderProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_customer_routing (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_genesys_conv_createUpdate (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_genesys_conv_SendAdminMsg (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_kyrios_shipper_request (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_notif_rx_pet_not_found_v2 (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_notif_rx_pickup_script (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_notif_rx_vet_see_pet (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_notif_vd_warn_48hr (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_notif_vd_warn_contact_vet (Rule Invoked)` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_om_status_update_retry (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_pro_sync_dispo_to_status (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_releaseOrderProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_resolveBlockProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_send_refax (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_send_rxs_to_clinic (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_sync_contact (Rule Invoked)` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_sync_rhapsody_task (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `inc_vet_diet_cancellation (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_back_in_stock_sync (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_back_in_stock_sync` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_create` | `cpm` | `3 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_get_order_number (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
-| `incident_Rx_cancel (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_Rx_cancel_v2 (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_rxm_transmission (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_set_parent_child (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `incident_verify_parent_close (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `IncidentFCR (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `object_detail_logging_inc (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `ocr_get_fax_number (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `petscription_link_auth_sync (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `post_askavet_chat_notification (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `rx_notification_3_day_reminder (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `rx_notification_7_day_reminder (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_autoresponse (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_csat_email (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_depricated_autorespond (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_esclation_email (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_post_reopen (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_reopen (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_router (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `vsp_inc_unassigned (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `address_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
 | `bluebox_greencart_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `bluebox_greencart_validation.php` | 0 functions |
 | `child_incident_create.php` | `customscript` | `2 in -> 1 out` | PHP Script: `child_incident_create.php` | 0 functions |
@@ -536,6 +493,7 @@ flowchart LR
 | `contact_create_internal` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
 | `contact_update` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
 | `contact_update_internal` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `7 in -> 0 out` |
+| `incident_back_in_stock_sync` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `4 in -> 0 out` |
 | `incident_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `3 in -> 0 out` |
 | `incident_routing` | **General / Unassigned** | `Create, Update` | Async Execution | `ObjectProcedure::apply` | `4 in -> 1 out` |
 
@@ -550,9 +508,9 @@ flowchart LR
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
@@ -619,6 +577,8 @@ flowchart LR
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: incident_back_in_stock_sync** | `Linkage` | `CustomField: c$oos_status` | Cross-Component Mapping |
+| **CPM: incident_back_in_stock_sync** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$change_request_type` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$customer_email_address` | Cross-Component Mapping |
 | **CPM: incident_create** | `Linkage` | `CustomField: c$customer_name` | Cross-Component Mapping |
@@ -662,6 +622,7 @@ flowchart LR
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_create_internal` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: contact_update_internal` | Cross-Component Mapping |
+| **CPMMappings: Mappings.xml** | `Linkage` | `CPM: incident_back_in_stock_sync` | Cross-Component Mapping |
 | **CPMMappings: Mappings.xml** | `Linkage` | `CPM: incident_create` | Cross-Component Mapping |
 
 ### BUI Add-Ins & Extensions Linkages

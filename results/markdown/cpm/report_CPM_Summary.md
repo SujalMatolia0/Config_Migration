@@ -1,8 +1,8 @@
 # CPM (Custom Process Model) Summary Report
 
-- **Total Procedures Analyzed**: 7
+- **Total Procedures Analyzed**: 8
 - **Objects Covered**: `Contact`, `Incident`
-- **Execution Breakdown**: 5 Synchronous, 2 Asynchronous
+- **Execution Breakdown**: 6 Synchronous, 2 Asynchronous
 - **Orphan Procedures**: 0 unmapped
 
 ---
@@ -16,6 +16,7 @@
 | `scriptpro_customerservice_2` | `Contact` | `Create` | `contact_create_internal` | Sync | Active | Yes |
 | `scriptpro_customerservice_2` | `Contact` | `Update` | `contact_update_internal` | Sync | Active | Yes |
 | `scriptpro` | `Incident` | `Create` | `incident_create` | Sync | Active | Yes |
+| `scriptpro` | `Incident` | `Update` | `incident_back_in_stock_sync` | Sync | Active | Yes |
 
 > **Note on Suppress Flag (`SuppressFlagMapping`)**: In OSVC CPM context, `SuppressFlagMapping` indicates whether recursive event handler execution is suppressed for this object/interface mapping when CPM operations make cascading updates to the same object type.
 
@@ -77,7 +78,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Create)
-- **Key Logic Summary**: Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).
+- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code primarily handles the creation of new contacts, setting the login to the first email address and creating a social user with a display name based on the contact's first name or email address. The code also includes a test harness to validate the functionality of the contact creation process, ensuring that the expected outcomes occur when a new contact is created.
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_create`
@@ -211,6 +212,41 @@ graph TD
   CALL_SET_ORG_1 --> CALL_UPD_COJ_2["self::updateContactOrgJoin()"]
   CALL_UPD_COJ_2 --> SAVE_3["Save Record"]
   SAVE_3 --> EXIT_4["Exit"]
+```
+
+</div>
+
+  </div>
+</details>
+
+<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
+  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #6366f1; color: #6366f1; margin-right: 8px;">Synchronous</span><b>Procedure: incident_back_in_stock_sync</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(ID: 100099 | Bound: Incident)</span></summary>
+  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
+
+### Procedure: `incident_back_in_stock_sync`
+
+- **ID**: `100099` | **Version**: `100400 [internal version stamp]` | **PHP Version**: `5.6.0 (50600)`
+- **Execution Mode**: `Synchronous`
+- **Operations Bitmask**: `Create (code: 1)`
+- **Bound Classes**: `Incident`
+- **Mapped Event**: `Incident` on `scriptpro` interface (Update)
+- **Key Logic Summary**: Executes static custom handler logic for `incident_back_in_stock_sync`.
+- **SOAP Actions**: None
+
+#### Custom Field Workspace Mappings for `incident_back_in_stock_sync`
+
+| CPM Custom Field | Access Mode | Target Workspace | Location / Tab | Grid Position | Field Label | Audit / Relationship Note |
+|---|---|---|---|---|---|---|
+| `c$oos_status` | **Write** | ***(Background Logic)*** | — | — | — | Operated purely via Connect API / CPM script logic |
+
+- **Extracted Functions**: `apply()`
+
+**Logic Flow Diagram**:
+<div align="center">
+
+```mermaid
+graph TD
+  START["apply() called for incident_back_in_stock_sync"]
 ```
 
 </div>
@@ -404,6 +440,7 @@ graph LR
     P_contact_create_internal["contact_create_internal (Sync)"]:::proc
     P_contact_update["contact_update (Sync)"]:::proc
     P_contact_update_internal["contact_update_internal (Sync)"]:::proc
+    P_incident_back_in_stock_sync["incident_back_in_stock_sync (Sync)"]:::proc
     P_incident_create["incident_create (Sync)"]:::proc
     P_incident_routing["incident_routing (Async)"]:::asyncProc
   end
@@ -418,12 +455,14 @@ graph LR
   M_MAP --> |"scriptpro_customerservice_2 / Contact / Create"| P_contact_create_internal
   M_MAP --> |"scriptpro_customerservice_2 / Contact / Update"| P_contact_update_internal
   M_MAP --> |"scriptpro / Incident / Create"| P_incident_create
+  M_MAP --> |"scriptpro / Incident / Update"| P_incident_back_in_stock_sync
   P_ContactAsync -.-> SOAP_RegisterContact
   P_ContactAsync -.-> |"Target Object"| O_Contact
   P_contact_create -.-> |"Target Object"| O_Contact
   P_contact_create_internal -.-> |"Target Object"| O_Contact
   P_contact_update -.-> |"Target Object"| O_Contact
   P_contact_update_internal -.-> |"Target Object"| O_Contact
+  P_incident_back_in_stock_sync -.-> |"Target Object"| O_Incident
   P_incident_create -.-> |"Target Object"| O_Incident
   P_incident_routing -.-> SOAP_GetAccounts
   P_incident_routing -.-> |"Target Object"| O_Incident

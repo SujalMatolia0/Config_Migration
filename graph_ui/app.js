@@ -253,7 +253,11 @@ function rebuildGraphState() {
         // Other component types (Reports, CPMs, BUI Add-Ins, Scripts, Rules)
         const moduleInstances = GRAPH.nodes.filter(inst => {
           const mod = getNodeModule(inst).toLowerCase();
-          return mod === n.module.toLowerCase() && inst.type === n.hubType;
+          const targetHubType = (n.hubType || "").toLowerCase();
+          const instType = (inst.type || "").toLowerCase();
+          const isMatchingType = instType === targetHubType || 
+            (targetHubType === "cpm" && (instType === "cpm" || instType === "asynccpm"));
+          return mod === n.module.toLowerCase() && isMatchingType;
         });
 
         moduleInstances.forEach(inst => {
