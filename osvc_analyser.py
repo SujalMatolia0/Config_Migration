@@ -817,7 +817,7 @@ def main():
 
         cpm_items = components.get("cpm", [])
         if cpm_items:
-            from src.output.markdown_generator import generate_cpm_report_markdown
+            from src.output.markdown_generator import generate_cpm_report_markdown, generate_single_object_cpm_markdown
             from src.output.json_writer import write_cpm_summary_json
             cpm_md_content = generate_cpm_report_markdown(cpm_items, orphans, components["workspaces"], use_ai_summary=args.use_ai_summary)
             cpm_md_path = os.path.join(cpm_dir, "report_CPM_Summary.md")
@@ -835,6 +835,20 @@ def main():
             os.makedirs(cpm_json_fmt_dir, exist_ok=True)
             write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"), use_ai_summary=args.use_ai_summary)
             print(f"CPM Summary JSON written -> {cpm_json_path}")
+
+            # Per-Object Standalone CPM Reports (Contact, Incident, etc.)
+            known_cpm_objs = ["Contact", "Incident"]
+            for c_obj in known_cpm_objs:
+                obj_cpm_md = generate_single_object_cpm_markdown(c_obj, cpm_items, orphans, components["workspaces"])
+                obj_cpm_md_path = os.path.join(cpm_dir, f"report_CPM_{c_obj}.md")
+                with open(obj_cpm_md_path, "w", encoding="utf-8") as f:
+                    f.write(obj_cpm_md)
+                with open(os.path.join(cpm_md_fmt_dir, f"report_CPM_{c_obj}.md"), "w", encoding="utf-8") as f:
+                    f.write(obj_cpm_md)
+                print(f"Single Object CPM report written -> {obj_cpm_md_path}")
+
+                obj_cpm_json_path = os.path.join(cpm_dir, f"report_CPM_{c_obj}.json")
+                write_cpm_summary_json([c for c in cpm_items if (c.get("object") or (c.get("bound_classes", [None])[0] if c.get("bound_classes") else None) or "").lower() == c_obj.lower()], orphans, components["workspaces"], obj_cpm_json_path)
 
         bui_items = sorted(components.get("buiAddins", []), key=lambda x: x.get("name", "").lower())
         if bui_items:

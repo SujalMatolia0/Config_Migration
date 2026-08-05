@@ -328,8 +328,8 @@ def map_relationships(components):
             br_node_name = f"{obj_name} Business Rules"
             for h in r.get("cpm_handlers_invoked", []):
                 relationships.append({
-                    "from": {"type": "BusinessRule", "name": br_node_name},
-                    "to":   {"type": "CPM", "name": h},
+                    "from": {"type": "BusinessRule", "name": br_node_name, "module": obj_name},
+                    "to":   {"type": "CPM", "name": h, "module": obj_name},
                     "via":  f"{obj_name} Business Rule triggers CPM Handler '{h}'"
                 })
 

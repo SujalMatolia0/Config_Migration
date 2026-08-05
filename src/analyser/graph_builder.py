@@ -296,7 +296,17 @@ def build_graph(components, relationships, orphans, endpoints):
 
     for cpm in components.get("cpm", []):
         cpm_data = dict(cpm)
-        cpm_data["mdPath"] = "../cpm/report_CPM_Summary.md"
+        bound_obj = cpm.get("object") or (cpm.get("bound_classes", [None])[0] if cpm.get("bound_classes") else None)
+        if not bound_obj or bound_obj == "Other":
+            c_name = (cpm.get("name") or cpm.get("file_name") or "").lower()
+            if "contact" in c_name: bound_obj = "Contact"
+            elif "incident" in c_name: bound_obj = "Incident"
+            else: bound_obj = "Other"
+        
+        cpm_data["module"] = bound_obj
+        cpm_data["object"] = bound_obj
+        cpm_data["mdPath"] = f"../cpm/report_CPM_{bound_obj}.md" if bound_obj in ("Contact", "Incident") else "../cpm/report_CPM_Summary.md"
+
         if cpm.get("format") in ("cpm_procedure", "cpm_php"):
             label = cpm.get("name") or cpm.get("display_name") or cpm.get("file_name")
             add_node("CPM", label, cpm_data)
@@ -331,9 +341,45 @@ def build_graph(components, relationships, orphans, endpoints):
 
         # Add fallback nodes for anything not yet in the graph
         if from_id not in node_ids:
-            add_node(from_type, from_name, {"_fallback": True, "_type_hint": from_type, "name": from_name})
+            f_mod = rel["from"].get("module")
+            if not f_mod or f_mod == "Other":
+                l_name = from_name.lower()
+                if l_name.startswith("inc_") or l_name.startswith("incident"): f_mod = "Incident"
+                elif l_name.startswith("cnt_") or l_name.startswith("contact"): f_mod = "Contact"
+                elif "incident" in l_name: f_mod = "Incident"
+                elif "contact" in l_name: f_mod = "Contact"
+                else: f_mod = "Other"
+
+            f_label = f"{from_name} (Rule Invoked)" if from_type.lower() == "cpm" else from_name
+            add_node(from_type, f_label, {
+                "_fallback": True,
+                "_type_hint": from_type,
+                "name": from_name,
+                "label": f_label,
+                "module": f_mod,
+                "object": f_mod,
+                "mdPath": f"../rules/report_Business_Rules_{f_mod}.md" if (from_type.lower() == "cpm" and f_mod in ("Contact", "Incident")) else f"../cpm/report_CPM_{f_mod}.md"
+            })
         if to_id not in node_ids:
-            add_node(to_type, to_target, {"_fallback": True, "_type_hint": to_type, "name": to_target})
+            t_mod = rel["to"].get("module")
+            if not t_mod or t_mod == "Other":
+                l_name = to_target.lower()
+                if l_name.startswith("inc_") or l_name.startswith("incident"): t_mod = "Incident"
+                elif l_name.startswith("cnt_") or l_name.startswith("contact"): t_mod = "Contact"
+                elif "incident" in l_name: t_mod = "Incident"
+                elif "contact" in l_name: t_mod = "Contact"
+                else: t_mod = "Other"
+
+            t_label = f"{to_target} (Rule Invoked)" if to_type.lower() == "cpm" else to_target
+            add_node(to_type, t_label, {
+                "_fallback": True,
+                "_type_hint": to_type,
+                "name": to_target,
+                "label": t_label,
+                "module": t_mod,
+                "object": t_mod,
+                "mdPath": f"../rules/report_Business_Rules_{t_mod}.md" if (to_type.lower() == "cpm" and t_mod in ("Contact", "Incident")) else f"../cpm/report_CPM_{t_mod}.md"
+            })
 
         # Deduplicate edges by (source, target, label) to avoid visual clutter
         edge_key = (from_id, to_id, rel["via"][:40])

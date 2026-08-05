@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-04 13:14:34  
+**Generated**: 2026-08-05 15:14:55  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -102,7 +102,6 @@ flowchart LR
 | `contact_update` | `cpm` | `5 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_update_internal` | `cpm` | `7 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `ContactAsync` | `asynccpm` | `3 in -> 1 out` | Trigger: `Update` | Async Execution | Entry: `ObjectProcedure::apply` |
-| `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
 | `callcheck.php` | `customscript` | `0 in -> 0 out` | PHP Script: `callcheck.php` | 0 functions |
 | `cityworksapicall.php` | `customscript` | `0 in -> 1 out` | PHP Script: `cityworksapicall.php` | 0 functions |
 | `duplicate_contacts.php` | `customscript` | `3 in -> 0 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
@@ -122,6 +121,7 @@ flowchart LR
 | `Contact.Title` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact Business Rules` | `businessrule` | `2 in -> 2 out` | OSVC Component ID: `businessrule:contact business rules` |
 | `http://209.91.135.228/api/listactivecalls/` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://209.91.135.228/api/listactivecalls/` |
+| `SOAP: RegisterContact` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: registercontact` |
 | `urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:registercontact via custom_cfg_siebel_url` |
 
 ### Entity Module: Contact test (7 Mapped Components)
@@ -150,25 +150,7 @@ flowchart LR
 | `Contact test.Name.Last` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact test.OrgId` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 
-### Entity Module: Dedup_rx_incidents_sync (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `dedup_rx_incidents_sync` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Gbl_con_region_assoc (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `gbl_con_region_assoc` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Gcb_flex (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `gcb_flex.php` | `customscript` | `3 in -> 0 out` | PHP Script: `gcb_flex.php` | 0 functions |
-
-### Entity Module: General / Unassigned (13 Mapped Components)
+### Entity Module: General / Unassigned (32 Mapped Components)
 
 #### Module Flowchart: General / Unassigned
 
@@ -178,9 +160,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
+    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
     N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
-    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
   end
 ```
 
@@ -188,7 +170,25 @@ flowchart LR
 | :--- | :--- | :---: | :--- |
 | `Other` | `object` | `0 in -> 0 out` | Primary OSVC Entity Module Schema Root |
 | `Unknown` | `object` | `0 in -> 2 out` | Primary OSVC Entity Module Schema Root |
+| `Report 0` | `report` | `10 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 100015` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 100038` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 10012` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 100407` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 125` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 8001` | `report` | `3 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 8010` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 8012` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 8014` | `report` | `4 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9011` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9016` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9018` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9029` | `report` | `4 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9041` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
+| `Report 9050` | `report` | `3 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
 | `../../AuthLibraryExtn/AuthLibraryExtn.js` | `customscript` | `2 in -> 0 out` | PHP Script: `../../AuthLibraryExtn/AuthLibraryExtn.js` | 0 functions |
+| `gcb_flex.php` | `customscript` | `3 in -> 0 out` | PHP Script: `gcb_flex.php` | 0 functions |
+| `include/init.phph` | `customscript` | `2 in -> 0 out` | PHP Script: `include/init.phph` | 0 functions |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:connect/v1.3/analyticsreportresults (report id 100407)` |
 | `http://cloud.oracle.com/service` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:http://cloud.oracle.com/service` |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` |
@@ -199,128 +199,9 @@ flowchart LR
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://js.arcgis.com/4.20/esri/themes/light/main.css` |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://use.fontawesome.com/releases/v5.1.1/css/all.css` |
 | `Mappings.xml` | `cpmmappings` | `1 in -> 5 out` | OSVC Component ID: `cpmmappings:mappings.xml` |
+| `SOAP: GetAccounts` | `externalendpoint` | `1 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: getaccounts` |
 
-### Entity Module: Inc_b2b_entity_status_update (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_b2b_entity_status_update` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_cancelorderprocessstart (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_cancelOrderProcessStart` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_customer_routing (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_customer_routing` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_genesys_conv_createupdate (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_genesys_conv_createUpdate` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_genesys_conv_sendadminmsg (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_genesys_conv_SendAdminMsg` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_kyrios_shipper_request (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_kyrios_shipper_request` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_notif_rx_pet_not_found_v2 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_notif_rx_pet_not_found_v2` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_notif_rx_pickup_script (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_notif_rx_pickup_script` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_notif_rx_vet_see_pet (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_notif_rx_vet_see_pet` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_notif_vd_warn_48hr (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_notif_vd_warn_48hr` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_notif_vd_warn_contact_vet (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_notif_vd_warn_contact_vet` | `cpm` | `3 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_om_status_update_retry (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_om_status_update_retry` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_pro_sync_dispo_to_status (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_pro_sync_dispo_to_status` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_releaseorderprocessstart (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_releaseOrderProcessStart` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_resolveblockprocessstart (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_resolveBlockProcessStart` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_send_refax (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_send_refax` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_send_rxs_to_clinic (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_send_rxs_to_clinic` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_sync_contact (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_sync_contact` | `cpm` | `3 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_sync_rhapsody_task (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_sync_rhapsody_task` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Inc_vet_diet_cancellation (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `inc_vet_diet_cancellation` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident (44 Mapped Components)
+### Entity Module: Incident (89 Mapped Components)
 
 #### Module Flowchart: Incident
 
@@ -346,7 +227,52 @@ flowchart LR
 | `Incident` | `object` | `0 in -> 75 out` | Primary OSVC Entity Module Schema Root |
 | `Incident` | `workspace` | `1 in -> 34 out` | Bound Object: `Incident` | 0 fields, 8 tabs, 2 rules |
 | `real_edge_01_nested_tabset` | `workspace` | `1 in -> 32 out` | Bound Object: `Incident` | 0 fields, 7 tabs, 2 rules |
+| `dedup_rx_incidents_sync (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `gbl_con_region_assoc (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_b2b_entity_status_update (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_cancelOrderProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_customer_routing (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_genesys_conv_createUpdate (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_genesys_conv_SendAdminMsg (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_kyrios_shipper_request (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_notif_rx_pet_not_found_v2 (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_notif_rx_pickup_script (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_notif_rx_vet_see_pet (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_notif_vd_warn_48hr (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_notif_vd_warn_contact_vet (Rule Invoked)` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_om_status_update_retry (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_pro_sync_dispo_to_status (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_releaseOrderProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_resolveBlockProcessStart (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_send_refax (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_send_rxs_to_clinic (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_sync_contact (Rule Invoked)` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_sync_rhapsody_task (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `inc_vet_diet_cancellation (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_back_in_stock_sync (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_create` | `cpm` | `3 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_get_order_number (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
+| `incident_Rx_cancel (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_Rx_cancel_v2 (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_rxm_transmission (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_set_parent_child (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `incident_verify_parent_close (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `IncidentFCR (Rule Invoked)` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `object_detail_logging_inc (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `ocr_get_fax_number (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `petscription_link_auth_sync (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `post_askavet_chat_notification (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `rx_notification_3_day_reminder (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `rx_notification_7_day_reminder (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_autoresponse (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_csat_email (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_depricated_autorespond (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_esclation_email (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_post_reopen (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_reopen (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_router (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `vsp_inc_unassigned (Rule Invoked)` | `cpm` | `0 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `address_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
 | `bluebox_greencart_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `bluebox_greencart_validation.php` | 0 functions |
 | `child_incident_create.php` | `customscript` | `2 in -> 1 out` | PHP Script: `child_incident_create.php` | 0 functions |
@@ -388,60 +314,6 @@ flowchart LR
 | `/cc/ajaxCustom/addSrToSiebel` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:/cc/ajaxcustom/addsrtosiebel` |
 | `Incident Business Rules` | `businessrule` | `1 in -> 44 out` | OSVC Component ID: `businessrule:incident business rules` |
 
-### Entity Module: Incident_back_in_stock_sync (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_back_in_stock_sync` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_get_order_number (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_get_order_number` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_rx_cancel (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_Rx_cancel` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_rx_cancel_v2 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_Rx_cancel_v2` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_rxm_transmission (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_rxm_transmission` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_set_parent_child (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_set_parent_child` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incident_verify_parent_close (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `incident_verify_parent_close` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Incidentfcr (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `IncidentFCR` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Include/init (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `include/init.phph` | `customscript` | `2 in -> 0 out` | PHP Script: `include/init.phph` | 0 functions |
-
 ### Entity Module: New workspace (6 Mapped Components)
 
 #### Module Flowchart: New workspace
@@ -466,18 +338,6 @@ flowchart LR
 | `New Workspace.Email` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `New Workspace.OrgId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `New Workspace.PhOffice` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-
-### Entity Module: Object_detail_logging_inc (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `object_detail_logging_inc` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Ocr_get_fax_number (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `ocr_get_fax_number` | `cpm` | `2 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 
 ### Entity Module: Organization (7 Mapped Components)
 
@@ -504,18 +364,6 @@ flowchart LR
 | `http://www.siebel.com/ws/fault` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://www.siebel.com/ws/fault` |
 | `http://www.siebel.com/xml/Account` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://www.siebel.com/xml/account` |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:getaccounts via custom_cfg_siebel_url` |
-
-### Entity Module: Petscription_link_auth_sync (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `petscription_link_auth_sync` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Post_askavet_chat_notification (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `post_askavet_chat_notification` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 
 ### Entity Module: Real_edge_01_nested_tabset (23 Mapped Components)
 
@@ -612,179 +460,11 @@ flowchart LR
 | `real_edge_03_split_panel_contact.PhOffice` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `real_edge_03_split_panel_contact.Title` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 
-### Entity Module: Report 0 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 0` | `report` | `10 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 100015 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 100015` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 100038 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 100038` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 10012 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 10012` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 100407 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 100407` | `report` | `1 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 125 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 125` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 8001 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 8001` | `report` | `3 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 8010 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 8010` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 8012 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 8012` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 8014 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 8014` | `report` | `4 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9011 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9011` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9016 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9016` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9018 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9018` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9029 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9029` | `report` | `4 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9041 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9041` | `report` | `2 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Report 9050 (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Report 9050` | `report` | `3 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
-
-### Entity Module: Rx_notification_3_day_reminder (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `rx_notification_3_day_reminder` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Rx_notification_7_day_reminder (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `rx_notification_7_day_reminder` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Soap: getaccounts (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `SOAP: GetAccounts` | `externalendpoint` | `1 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: getaccounts` |
-
-### Entity Module: Soap: registercontact (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `SOAP: RegisterContact` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: registercontact` |
-
 ### Entity Module: Test_Record (1 Mapped Components)
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
 | `Test_Record` | `object` | `0 in -> 0 out` | Primary OSVC Entity Module Schema Root |
-
-### Entity Module: Vsp_inc_autoresponse (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_autoresponse` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_csat_email (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_csat_email` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_depricated_autorespond (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_depricated_autorespond` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_esclation_email (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_esclation_email` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_post_reopen (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_post_reopen` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_reopen (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_reopen` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_router (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_router` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-
-### Entity Module: Vsp_inc_unassigned (1 Mapped Components)
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `vsp_inc_unassigned` | `cpm` | `1 in -> 0 out` | Trigger: `Event Handler` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 
 ## Workspaces & Field Mapping Matrix
 
@@ -870,13 +550,13 @@ flowchart LR
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/queryResults (Organizations)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `/cc/ajaxCustom/addSrToSiebel` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |

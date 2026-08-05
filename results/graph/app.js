@@ -52,8 +52,8 @@ const TYPE_COLORS = {
   navigationset: "#D97706",    // Warm Amber
   businessrule: "#6D28D9",    // Dark Violet
   customscript: "#E11D48",    // Rose Red
-  cpm: "#0D9488",             // Teal
-  asynccpm: "#06B6D4",        // Cyan
+  cpm: "#0D9488",             // Unified Teal Base Fill for CPM Handlers
+  asynccpm: "#0D9488",        // Unified Teal Base Fill (Highlighted via Pink Border Stroke)
   osvcobject: "#475569",      // Slate Gray
   externalendpoint: "#B45309",// Burnt Orange
   buiaddin: "#EA580C",        // Vivid Orange
@@ -635,8 +635,27 @@ function updateDOM() {
     c.setAttribute("fill", TYPE_COLORS[n.type] || DEFAULT_COLOR);
     c.setAttribute("filter", "url(#nodeShadow)");
 
-    const labelText = n.label.length > 28 ? n.label.slice(0, 26) + "..." : n.label;
-    const badgeW = Math.min(labelText.length * 7 + 16, 210);
+    // BORDER STROKE VARIANT HIGHLIGHTING (Unified Fill Color, Distinct Highlight Borders)
+    const isRuleInvoked = (n.data && (n.data.is_rule_invoked || n.data._fallback)) || (n.label && n.label.includes("(Rule Invoked)"));
+    if (isRuleInvoked) {
+      // Rule-Invoked CPMs: Gold/Amber Dashed Highlight Border
+      c.setAttribute("stroke", "#f59e0b");
+      c.setAttribute("stroke-width", "3.5");
+      c.setAttribute("stroke-dasharray", "4,2");
+    } else if (n.type === "asynccpm") {
+      // Async CPMs: Pink/Magenta Solid Highlight Border
+      c.setAttribute("stroke", "#ec4899");
+      c.setAttribute("stroke-width", "3.5");
+    } else if (n.type === "customfield") {
+      c.setAttribute("stroke", "#059669");
+      c.setAttribute("stroke-width", "2");
+    } else {
+      c.setAttribute("stroke", "rgba(255,255,255,0.4)");
+      c.setAttribute("stroke-width", "1.5");
+    }
+
+    const labelText = n.label.length > 32 ? n.label.slice(0, 30) + "..." : n.label;
+    const badgeW = Math.min(labelText.length * 7 + 16, 230);
     const badgeH = 19;
 
     const rect = document.createElementNS(NS, "rect");
@@ -646,6 +665,10 @@ function updateDOM() {
     rect.setAttribute("width", badgeW);
     rect.setAttribute("height", badgeH);
     rect.setAttribute("rx", "4");
+    if (isRuleInvoked) {
+      rect.setAttribute("stroke", "#f59e0b");
+      rect.setAttribute("stroke-width", "1.5");
+    }
 
     const t = document.createElementNS(NS, "text");
     t.setAttribute("dy", -n.r - 10);

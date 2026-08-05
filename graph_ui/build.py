@@ -565,10 +565,22 @@ def build_graph_ui(master_json, output_dir):
                     if fname.endswith(".md") and safe.lower() in fname.lower():
                         candidates.insert(0, f"../reports/{fname}")
         elif node_type in ("cpm", "asynccpm"):
-            candidates = [
-                "../cpm/report_CPM_Summary.md",
-                "../markdown/cpm/report_CPM_Summary.md",
-            ]
+            n_mod = node_data.get("module") or node_data.get("object")
+            if not n_mod or n_mod == "Other":
+                l_low = (label or "").lower()
+                if "contact" in l_low: n_mod = "Contact"
+                elif "incident" in l_low: n_mod = "Incident"
+            if n_mod in ("Contact", "Incident"):
+                candidates = [
+                    f"../cpm/report_CPM_{n_mod}.md",
+                    f"../markdown/cpm/report_CPM_{n_mod}.md",
+                    "../cpm/report_CPM_Summary.md"
+                ]
+            else:
+                candidates = [
+                    "../cpm/report_CPM_Summary.md",
+                    "../markdown/cpm/report_CPM_Summary.md",
+                ]
         elif node_type == "buiaddin":
             safe = label.replace(" ", "_")
             candidates = [

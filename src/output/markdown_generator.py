@@ -1757,6 +1757,65 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None, use_ai
     return "\n".join(lines)
 
 
+def generate_single_object_cpm_markdown(obj_name, cpm_items, orphans=None, workspaces=None):
+    """
+    Generates a dedicated standalone CPM Markdown report for a single OSVC Object (e.g. Contact or Incident).
+    Filters CPM procedures to ONLY include procedures bound to obj_name.
+    """
+    filtered_cpms = []
+    for c in cpm_items:
+        if c.get("format") == "cpm_mappings":
+            continue
+        c_obj = c.get("object") or (c.get("bound_classes", [None])[0] if c.get("bound_classes") else None)
+        if not c_obj or c_obj == "Other":
+            c_name = (c.get("name") or c.get("file_name") or "").lower()
+            if obj_name.lower() in c_name:
+                c_obj = obj_name
+        if str(c_obj).lower() == obj_name.lower():
+            filtered_cpms.append(c)
+
+    lines = []
+    lines.append(f"# OSVC Custom Process Model (CPM) Report — Object: {obj_name}")
+    lines.append("")
+    lines.append(f"_Source: Standalone Object Analysis — {len(filtered_cpms)} CPM Procedures bound to `{obj_name}`_")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> **Entity Focus**: Dedicated CPM event procedures and handler analysis for OSVC Object **`{obj_name}`**.")
+    lines.append("")
+
+    lines.append("## 1. Procedure Summary Table")
+    lines.append("")
+    lines.append("| Procedure Name | Interface | Event / Operation | Type | Entry Function |")
+    lines.append("| :--- | :--- | :--- | :--- | :--- |")
+    for c in filtered_cpms:
+        p_name = c.get("name") or c.get("file_name") or "Procedure"
+        iface = c.get("interface", "Public")
+        ops = c.get("operations_label", "Event")
+        exec_type = "Async" if c.get("is_async") else "Sync"
+        entry_fn = c.get("entry_function") or "process()"
+        lines.append(f"| `{p_name}` | `{iface}` | `{ops}` | `{exec_type}` | `{entry_fn}` |")
+    lines.append("")
+
+    lines.append("## 2. Detailed Procedure Breakdowns")
+    lines.append("")
+    for c in filtered_cpms:
+        p_name = c.get("name") or c.get("file_name") or "Procedure"
+        exec_type = "Async" if c.get("is_async") else "Sync"
+        lines.append(f"### Procedure: `{p_name}` ({exec_type})")
+        lines.append("")
+        lines.append(f"- **Target Object**: `{obj_name}`")
+        lines.append(f"- **Execution Mode**: `{exec_type}`")
+        lines.append(f"- **PHP Version**: `{c.get('php_version', '7.4')}`")
+        lines.append(f"- **Connect API Version**: `{c.get('connect_version', '1.3')}`")
+        lines.append(f"- **Custom Fields Read**: {', '.join(f'`{f}`' for f in c.get('custom_fields_read', [])) if c.get('custom_fields_read') else 'None'}")
+        lines.append(f"- **Custom Fields Written**: {', '.join(f'`{f}`' for f in c.get('custom_fields_written', [])) if c.get('custom_fields_written') else 'None'}")
+        lines.append(f"- **SOAP Actions**: {', '.join(f'`{s}`' for s in c.get('soap_actions', [])) if c.get('soap_actions') else 'None'}")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
 def generate_bui_addin_report_markdown(bui_addins, reports=None, workspaces=None):
     """
     Generates a Markdown summary report for parsed BUI Add-Ins.
