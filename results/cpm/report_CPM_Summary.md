@@ -78,7 +78,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Create)
-- **Key Logic Summary**: This Oracle Service Cloud CPM PHP custom procedure code primarily handles the creation of new contacts, setting the login to the first email address and creating a social user with a display name based on the contact's first name or email address. The code also includes a test harness to validate the functionality of the contact creation process, ensuring that the expected outcomes occur when a new contact is created.
+- **Key Logic Summary**: Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `contact_create`
@@ -230,7 +230,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Incident`
 - **Mapped Event**: `Incident` on `scriptpro` interface (Update)
-- **Key Logic Summary**: Executes static custom handler logic for `incident_back_in_stock_sync`.
+- **Key Logic Summary**: The primary business logic of this Oracle Service Cloud CPM PHP custom procedure is to update the "oos_status" custom field of an incident to "Notified" when the incident is updated and its queue is set to "Back in Stock". This synchronization ensures that incidents in the "Back in Stock" queue have their out-of-stock status updated accordingly, likely triggering further automated processes or notifications.
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `incident_back_in_stock_sync`

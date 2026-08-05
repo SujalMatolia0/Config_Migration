@@ -460,6 +460,7 @@ function tick(alpha) {
   nodes.forEach(parent => {
     if (!parent.out || parent.out.length === 0) return;
     const children = parent.out
+      .filter(e => !e.isCrossLink && (!e.label || e.label === "contains" || e.label === "instance" || e.label === "fields" || e.label === "field"))
       .map(e => nodeById[e.target])
       .filter(c => c && c !== parent && !c.fixed);
     const N = children.length;
@@ -511,8 +512,8 @@ function tick(alpha) {
           const tx = parent.x + radius * Math.cos(targetAngle);
           const ty = parent.y + radius * Math.sin(targetAngle);
 
-          child.x += (tx - child.x) * 0.75;
-          child.y += (ty - child.y) * 0.75;
+          child.x += (tx - child.x) * 0.95;
+          child.y += (ty - child.y) * 0.95;
         });
       } else if (inParentNode && inParentNode !== parent) {
         // CHILD HUB NODE: Restricted Outward Sector Arc (140 deg facing away from parent)
@@ -523,8 +524,8 @@ function tick(alpha) {
         if (N === 1) {
           const tx = parent.x + radius * Math.cos(dirAngle);
           const ty = parent.y + radius * Math.sin(dirAngle);
-          children[0].x += (tx - children[0].x) * 0.70;
-          children[0].y += (ty - children[0].y) * 0.70;
+          children[0].x += (tx - children[0].x) * 0.95;
+          children[0].y += (ty - children[0].y) * 0.95;
         } else {
           const step = arcSpan / (N - 1);
           const startAngle = dirAngle - arcSpan / 2;
@@ -534,8 +535,8 @@ function tick(alpha) {
             const tx = parent.x + radius * Math.cos(targetAngle);
             const ty = parent.y + radius * Math.sin(targetAngle);
 
-            child.x += (tx - child.x) * 0.70;
-            child.y += (ty - child.y) * 0.70;
+            child.x += (tx - child.x) * 0.95;
+            child.y += (ty - child.y) * 0.95;
           });
         }
       }
