@@ -133,13 +133,22 @@ function getModuleRoots() {
   });
   if (!modulesSet.size) modulesSet.add("Other");
 
-  return Array.from(modulesSet).sort().map(mod => ({
-    id: `module:${mod.toLowerCase()}`,
-    type: "module_root",
-    label: mod,
-    module: mod,
-    r: 32
-  }));
+  return Array.from(modulesSet).sort().map(mod => {
+    const cleanMod = mod.charAt(0).toUpperCase() + mod.slice(1);
+    return {
+      id: `module:${mod.toLowerCase()}`,
+      type: "module_root",
+      label: mod,
+      module: mod,
+      r: 32,
+      data: {
+        mdPath: `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`,
+        type: "ModuleRoot",
+        label: mod,
+        module: mod
+      }
+    };
+  });
 }
 
 let nodes = [];
@@ -186,13 +195,33 @@ function rebuildGraphState() {
           const hubId = `hub:${root.module.toLowerCase()}/${type}`;
           const hubLabel = TYPE_LABELS[type] || type;
 
+          const cleanMod = root.module.charAt(0).toUpperCase() + root.module.slice(1);
+          let hubMdPath = null;
+          if (type === "cpm") {
+            hubMdPath = `../cpm/report_CPM_${cleanMod}.md`;
+          } else if (type === "businessrule") {
+            hubMdPath = `../rules/report_Business_Rules_${cleanMod}.md`;
+          } else if (type === "customscript") {
+            hubMdPath = `../scripts/report_Custom_Scripts.md`;
+          } else if (type === "buiaddin") {
+            hubMdPath = `../bui_addins/report_BUI_Addins.md`;
+          } else {
+            hubMdPath = `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`;
+          }
+
           nextNodes.push({
             id: hubId,
             type: "category_hub",
             label: hubLabel,
             module: root.module,
             hubType: type,
-            r: 24
+            r: 24,
+            data: {
+              mdPath: hubMdPath,
+              type: "Category",
+              label: hubLabel,
+              module: root.module
+            }
           });
 
           nextEdges.push({
@@ -686,17 +715,74 @@ function updateDOM() {
     const title = document.createElementNS(NS, "title");
     title.textContent = TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") + ": " + n.label : n.label;
 
+    // Center Eye Icon badge inside the node circle
+    const eyeGroup = document.createElementNS(NS, "g");
+    eyeGroup.setAttribute("class", "node-eye-btn");
+    eyeGroup.setAttribute("transform", "translate(0, 0)");
+
+    const eyeRadius = Math.min(11, Math.max(8, n.r * 0.45));
+    const eyeBg = document.createElementNS(NS, "circle");
+    eyeBg.setAttribute("class", "eye-bg");
+    eyeBg.setAttribute("r", eyeRadius);
+
+    const eyeIcon = document.createElementNS(NS, "path");
+    eyeIcon.setAttribute("class", "eye-icon");
+    eyeIcon.setAttribute("d", "M -5,0 C -3,-3.2 3,-3.2 5,0 C 3,3.2 -3,3.2 -5,0 Z");
+
+    const eyePupil = document.createElementNS(NS, "circle");
+    eyePupil.setAttribute("class", "eye-pupil");
+    eyePupil.setAttribute("cx", "0");
+    eyePupil.setAttribute("cy", "0");
+    eyePupil.setAttribute("r", "1.8");
+
+    const eyeTitle = document.createElementNS(NS, "title");
+    eyeTitle.textContent = `Click to view documentation for ${n.label}`;
+
+    eyeGroup.appendChild(eyeBg);
+    eyeGroup.appendChild(eyeIcon);
+    eyeGroup.appendChild(eyePupil);
+    eyeGroup.appendChild(eyeTitle);
+
+    eyeGroup.addEventListener("click", ev => {
+      ev.stopPropagation();
+      select(n, { openInspector: true, openTab: "doc" });
+    });
+
     g.appendChild(c);
+    g.appendChild(eyeGroup);
     g.appendChild(rect);
     g.appendChild(t);
-    g.appendChild(title);
-    nodesG.appendChild(g);
 
-    g.addEventListener("click", ev => {
-      ev.stopPropagation();
-      const isLeafNode = n.type !== "module_root" && n.type !== "category_hub";
-      select(n, { openInspector: isLeafNode });
-      if (n.type === "module_root" || n.type === "category_hub" || n.type === "workspace") {
+    // Dedicated [+] / [-] branch expansion toggle badge on parent nodes
+    const isParentNode = n.type === "module_root" || n.type === "category_hub" || n.type === "workspace";
+    if (isParentNode) {
+      let isExpanded = false;
+      if (n.type === "module_root") isExpanded = expandedModules.has(n.id);
+      else if (n.type === "category_hub") isExpanded = expandedHubs.has(n.id);
+      else if (n.type === "workspace") isExpanded = expandedWorkspaces.has(n.id);
+
+      const toggleGroup = document.createElementNS(NS, "g");
+      toggleGroup.setAttribute("class", "node-toggle-badge");
+      const toggleX = Math.round(n.r * 0.70);
+      const toggleY = Math.round(n.r * 0.70);
+      toggleGroup.setAttribute("transform", `translate(${toggleX}, ${toggleY})`);
+
+      const toggleBg = document.createElementNS(NS, "circle");
+      toggleBg.setAttribute("r", "9");
+
+      const toggleTxt = document.createElementNS(NS, "text");
+      toggleTxt.setAttribute("dy", "1");
+      toggleTxt.textContent = isExpanded ? "−" : "+";
+
+      const toggleTitle = document.createElementNS(NS, "title");
+      toggleTitle.textContent = isExpanded ? `Collapse ${n.label} branch` : `Expand ${n.label} branch`;
+
+      toggleGroup.appendChild(toggleBg);
+      toggleGroup.appendChild(toggleTxt);
+      toggleGroup.appendChild(toggleTitle);
+
+      toggleGroup.addEventListener("click", ev => {
+        ev.stopPropagation();
         if (n.type === "module_root") {
           expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
         } else if (n.type === "category_hub") {
@@ -707,7 +793,17 @@ function updateDOM() {
         rebuildGraphState();
         updateDOM();
         restartSimulation();
-      }
+      });
+
+      g.appendChild(toggleGroup);
+    }
+
+    g.appendChild(title);
+    nodesG.appendChild(g);
+
+    g.addEventListener("click", ev => {
+      ev.stopPropagation();
+      select(n, { openInspector: true, openTab: "doc" });
     });
 
     g.addEventListener("dblclick", ev => {
@@ -1754,7 +1850,34 @@ async function loadDocsAndDiagrams(node) {
   tabDoc.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading documentation...</div>`;
   tabDiagram.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Loading architecture diagram...</div>`;
 
-  const mdPath = node.data && node.data.mdPath;
+  let mdPath = node.data && node.data.mdPath;
+  const nType = (node.type || "").toLowerCase();
+  const mod = node.module || (node.data && (node.data.module || node.data.object)) || "Contact";
+  const cleanMod = mod.charAt(0).toUpperCase() + mod.slice(1);
+
+  if (nType === "cpm" || nType === "asynccpm") {
+    const rawLabel = node.label || (node.data && node.data.name) || "Procedure";
+    const safeLabel = rawLabel.replace(/ /g, "_");
+    mdPath = `../cpm/report_CPM_${cleanMod}_${safeLabel}.md`;
+  } else if (!mdPath && node) {
+    if (node.type === "category_hub") {
+      const hType = node.hubType;
+      if (hType === "cpm") {
+        mdPath = `../cpm/report_CPM_${cleanMod}.md`;
+      } else if (hType === "businessrule") {
+        mdPath = `../rules/report_Business_Rules_${cleanMod}.md`;
+      } else if (hType === "customscript") {
+        mdPath = `../scripts/report_Custom_Scripts.md`;
+      } else if (hType === "buiaddin") {
+        mdPath = `../bui_addins/report_BUI_Addins.md`;
+      } else {
+        mdPath = `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`;
+      }
+    } else if (node.type === "module_root") {
+      mdPath = `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`;
+    }
+  }
+
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
 
@@ -1798,7 +1921,8 @@ async function loadDocsAndDiagrams(node) {
 
     for (const url of candidateUrls) {
       try {
-        const response = await fetch(url, { signal: currentFetchController.signal });
+        const fetchUrl = url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now();
+        const response = await fetch(fetchUrl, { signal: currentFetchController.signal });
         if (response.ok) {
           const txt = await response.text();
           if (txt && txt.trim() && !txt.trim().toLowerCase().startsWith("<!doctype html>")) {
@@ -1877,9 +2001,16 @@ function select(n, options = {}) {
     clearHighlights();
   }
 
-  const shouldOpen = options && options.openInspector;
+  const shouldOpen = options && options.openInspector !== undefined ? options.openInspector : true;
   inspector.classList.toggle("open", !!shouldOpen && !!n);
   if (!n) return;
+
+  if (options && options.openTab) {
+    const targetTabBtn = document.querySelector(`.tab-btn[data-tab="${options.openTab}"]`);
+    if (targetTabBtn) {
+      targetTabBtn.click();
+    }
+  }
 
   // Build Details Tab
   let html = `<h2>${esc(n.label)}</h2>

@@ -944,8 +944,8 @@
         if (data.output) logConsole(data.output);
         if (data.success) {
           logConsole('\n[SUCCESS] Analysis completed cleanly!');
-          logConsole('[GRAPH] Automatically generating Architect Graph...');
-          generateArchitectGraph();
+          logConsole('[GRAPH] Navigating directly to Interactive Dependency Graph Viewer...');
+          window.location.href = '/results/graph/index.html';
         }
         else logConsole('\n[FAILURE] Analysis failed: ' + (data.error || 'Check log output above'));
       } catch (err) {
@@ -954,18 +954,19 @@
     }
 
     async function generateArchitectGraph() {
-      logConsole('[GRAPH] Generating interactive Architect Graph visualization...');
+      logConsole('[GRAPH] Navigating to interactive Architect Graph visualization...');
       try {
         const res = await fetch('/api/generate-architect-report', { method: 'POST' });
         const data = await res.json();
         if (data.success && data.path) {
-          logConsole('[SUCCESS] Architect Graph created -> Navigating to viewer...');
+          logConsole('[SUCCESS] Graph ready -> Navigating to viewer...');
           window.location.href = data.path;
         } else {
-          logConsole('[FAILURE] Graph generation failed: ' + (data.error || 'Unknown error'));
+          window.location.href = '/results/graph/index.html';
         }
       } catch (err) {
-        logConsole('[ERROR] Graph generation exception: ' + err.message);
+        logConsole('[ERROR] Graph navigation exception: ' + err.message);
+        window.location.href = '/results/graph/index.html';
       }
     }
 

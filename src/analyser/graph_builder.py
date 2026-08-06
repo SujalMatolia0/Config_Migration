@@ -111,8 +111,17 @@ def make_lightweight_node_data(node_type, data):
         elif lower_type == "report":
             rep_name = (data.get("name") or "Report").replace(" ", "_")
             light["mdPath"] = f"../reports/report_{rep_name}.md"
-        elif lower_type in ["cpm", "cpmmappings"]:
-            light["mdPath"] = "../cpm/report_CPM_Summary.md"
+        elif lower_type in ["cpm", "asynccpm", "cpmmappings"]:
+            c_name = (data.get("name") or data.get("file_name") or "Procedure").replace(" ", "_")
+            c_obj = data.get("object") or (data.get("bound_classes", [None])[0] if data.get("bound_classes") else None) or "General"
+            if str(c_obj).lower() in ["contacts", "contact"]: c_obj = "Contact"
+            elif str(c_obj).lower() in ["incidents", "incident"]: c_obj = "Incident"
+            light["mdPath"] = f"../cpm/report_CPM_{c_obj}_{c_name}.md"
+        elif lower_type in ["object", "module_root"]:
+            obj_name = (data.get("name") or data.get("label") or data.get("id") or "Object").replace(" ", "_")
+            if obj_name.lower() in ["contacts", "contact"]: obj_name = "Contact"
+            elif obj_name.lower() in ["incidents", "incident"]: obj_name = "Incident"
+            light["mdPath"] = f"../COMPLETE_SYSTEM_MAPPING_{obj_name}.md"
         elif lower_type in ["buiaddin", "bui_addin"] and (data.get("name") or data.get("id")):
             bname = data.get("name") or data.get("id")
             light["mdPath"] = f"../bui_addins/report_{bname}.md"
@@ -303,9 +312,10 @@ def build_graph(components, relationships, orphans, endpoints):
             elif "incident" in c_name: bound_obj = "Incident"
             else: bound_obj = "Other"
         
+        safe_cname = "".join(x if x.isalnum() else "_" for x in (cpm.get("name") or cpm.get("display_name") or cpm.get("file_name") or "Procedure"))
         cpm_data["module"] = bound_obj
         cpm_data["object"] = bound_obj
-        cpm_data["mdPath"] = f"../cpm/report_CPM_{bound_obj}.md" if bound_obj in ("Contact", "Incident") else "../cpm/report_CPM_Summary.md"
+        cpm_data["mdPath"] = f"../cpm/report_CPM_{bound_obj}_{safe_cname}.md"
 
         if cpm.get("format") in ("cpm_procedure", "cpm_php"):
             label = cpm.get("name") or cpm.get("display_name") or cpm.get("file_name")

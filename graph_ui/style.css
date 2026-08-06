@@ -273,6 +273,77 @@ svg.panning {
   text-anchor: middle;
 }
 
+.node-eye-btn {
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.node:hover .node-eye-btn,
+.node.selected .node-eye-btn {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.node-eye-btn circle.eye-bg {
+  fill: #990026;
+  stroke: #FFFFFF;
+  stroke-width: 1.8px;
+  filter: drop-shadow(0 2px 5px rgba(153, 0, 38, 0.4));
+  transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease, r 0.2s ease;
+}
+
+.node-eye-btn:hover circle.eye-bg {
+  fill: #7A001E !important;
+  stroke: #FFFFFF !important;
+  r: 12px !important;
+  filter: drop-shadow(0 3px 8px rgba(122, 0, 30, 0.6)) !important;
+}
+
+.node-eye-btn path.eye-icon {
+  fill: none;
+  stroke: #FFFFFF;
+  stroke-width: 1.6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.node-eye-btn circle.eye-pupil {
+  fill: #FFFFFF;
+}
+
+.node-toggle-badge {
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.node-toggle-badge circle {
+  fill: #FFFFFF;
+  stroke: #990026;
+  stroke-width: 1.8px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.node-toggle-badge:hover circle {
+  fill: #990026;
+  stroke: #FFFFFF;
+}
+
+.node-toggle-badge text {
+  fill: #990026;
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: none;
+  font-family: 'Inter', -apple-system, sans-serif;
+  text-anchor: middle;
+}
+
+.node-toggle-badge:hover text {
+  fill: #FFFFFF;
+}
+
 .node:hover text,
 .node.selected text {
   font-weight: 700;

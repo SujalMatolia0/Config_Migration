@@ -1759,14 +1759,170 @@ def generate_cpm_report_markdown(cpm_list, orphans=None, workspaces=None, use_ai
     return "\n".join(lines)
 
 
+def build_procedure_accordion_block(p, mapped_procedures_map, workspace_field_refs, alias_workspace_map, cpm_orphan_names, use_ai_summary=True):
+    lines = []
+    p_name = p.get("name") or p.get("display_name") or "Procedure"
+    p_id = p.get("id", "—")
+    is_orphan = p_name.lower() in cpm_orphan_names
+    is_async = p.get("is_async")
+    exec_mode = "Asynchronous" if is_async else "Synchronous"
+    bound_str = ', '.join(p.get('bound_classes', [])) or 'None'
+
+    mode_badge = '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #ec4899; color: #ec4899; margin-right: 8px;">Asynchronous</span>' if is_async else '<span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #6366f1; color: #6366f1; margin-right: 8px;">Synchronous</span>'
+    orphan_badge = ' <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #f59e0b; color: #f59e0b; margin-left: 6px;">Orphan</span>' if is_orphan else ''
+
+    lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+    lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">{mode_badge}<b>Procedure: {p_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(ID: {p_id} | Bound: {bound_str})</span>{orphan_badge}</summary>')
+    lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+    lines.append("")
+    lines.append(f"### Procedure: `{p_name}`")
+    lines.append("")
+    lines.append(f"- **ID**: `{p_id}` | **Version**: `{p.get('version', '—')}` | **PHP Version**: `{p.get('php_version', '—')}`")
+    lines.append(f"- **Execution Mode**: `{exec_mode}`")
+    lines.append(f"- **Operations Bitmask**: `{p.get('operations_label')} (code: {p.get('operations_code')})`")
+    lines.append(f"- **Bound Classes**: {', '.join(f'`{b}`' for b in p.get('bound_classes', [])) or 'None'}")
+
+    m_entry = mapped_procedures_map.get(p_name.lower())
+    if m_entry:
+        lines.append(f"- **Mapped Event**: `{m_entry.get('object')}` on `{m_entry.get('interface')}` interface ({m_entry.get('operation')})")
+    else:
+        lines.append("- **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*")
+
+    if use_ai_summary:
+        lines.append(f"- **Key Logic Summary**: {p.get('key_logic', 'No key logic summary available.')}")
+
+    soaps = p.get("soap_actions", [])
+    if soaps:
+        lines.append(f"- **SOAP Actions / Web Services**: {', '.join(f'`{s}`' for s in soaps)}")
+    else:
+        lines.append("- **SOAP Actions**: None")
+
+    cvars = p.get("config_vars", [])
+    if cvars:
+        lines.append(f"- **Config Settings / Variables**: {', '.join(f'`{c}`' for c in cvars)}")
+
+    cf_read_raw = p.get("custom_fields_read", [])
+    cf_written_raw = p.get("custom_fields_written", [])
+
+    proc_cf_rows = []
+    all_proc_cfs = sorted(list(set(cf_read_raw + cf_written_raw)))
+    for cf in all_proc_cfs:
+        clean_cf = cf.replace("`", "").split(" ")[0].strip()
+        is_r = cf in cf_read_raw
+        is_w = cf in cf_written_raw
+        mode = "Read/Write" if (is_r and is_w) else ("Write" if is_w else "Read")
+
+        f_norm = clean_cf.lower()
+        ws_matches = workspace_field_refs.get(f_norm, [])
+        if not ws_matches:
+            alt_norm = f_norm.replace("c$", "")
+            for k, v in workspace_field_refs.items():
+                if k.replace("c$", "") == alt_norm:
+                    ws_matches = v
+                    break
+
+        if not ws_matches and f_norm in alias_workspace_map:
+            ws_matches = alias_workspace_map[f_norm]
+
+        if ws_matches:
+            for match in ws_matches:
+                proc_cf_rows.append({
+                    "field": clean_cf,
+                    "mode": mode,
+                    "workspace": match['workspace'],
+                    "location": match['location'],
+                    "pos": match['pos'],
+                    "label": match['label'],
+                    "note": match.get("note") or "Direct layout field match"
+                })
+        else:
+            proc_cf_rows.append({
+                "field": clean_cf,
+                "mode": mode,
+                "workspace": "*(Background Logic)*",
+                "location": "—",
+                "pos": "—",
+                "label": "—",
+                "note": "Operated purely via Connect API / CPM script logic"
+            })
+
+    lines.append("")
+    lines.append(f"#### Custom Field Workspace Mappings for `{p_name}`")
+    lines.append("")
+    if proc_cf_rows:
+        lines.append("| CPM Custom Field | Access Mode | Target Workspace | Location / Tab | Grid Position | Field Label | Audit / Relationship Note |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for r in proc_cf_rows:
+            lines.append(f"| `{r['field']}` | **{r['mode']}** | **{r['workspace']}** | {r['location']} | {r['pos']} | {r['label']} | {r['note']} |")
+    else:
+        lines.append("*No custom fields accessed by this procedure (operates via standard Connect API object properties).*")
+
+    lines.append("")
+
+    if p.get("extracted_functions"):
+        lines.append(f"- **Extracted Functions**: {', '.join(f'`{f}()`' for f in p.get('extracted_functions'))}")
+
+    if p.get("constants_defined"):
+        lines.append(f"- **Constants Defined**: {', '.join(f'`{c}`' for c in p.get('constants_defined'))}")
+
+    if p.get("log_files"):
+        lines.append(f"- **Log Files Accessed**: {', '.join(f'`{lf}`' for lf in p.get('log_files'))}")
+
+    if p.get("message_templates"):
+        lines.append(f"- **Message Templates**: {', '.join(f'`{m}`' for m in p.get('message_templates'))}")
+
+    if p.get("risk_flags"):
+        lines.append(f"- **Risk Flags**: {', '.join(str(rf) for rf in p.get('risk_flags'))}")
+
+    lines.append("")
+    lines.append("**Logic Flow Diagram**:")
+    lines.append('<div align="center">')
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef proc fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef asyncProc fill:#ec4899,stroke:#be185d,stroke-width:1px,color:#fff;")
+    lines.append("  classDef soap fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("  classDef obj fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
+    lines.append("  classDef field fill:#3b82f6,stroke:#1d4ed8,stroke-width:1px,color:#fff;")
+    lines.append("")
+    lines.append(f'  O_OBJ["OSVC Object: {bound_str}"]:::obj')
+    safe_p = "".join(c if c.isalnum() else "_" for c in p_name)
+    proc_cls = "asyncProc" if is_async else "proc"
+    lines.append(f'  P_{safe_p}["CPM Handler: {p_name}"]:::{proc_cls}')
+    lines.append(f'  O_OBJ -->|Triggers On {p.get("operations_label", "Event")}| P_{safe_p}')
+
+    for soap in p.get("soap_actions", []):
+        safe_s = "".join(c if c.isalnum() else "_" for c in str(soap))
+        lines.append(f'  S_{safe_s}["SOAP Action: {soap}"]:::soap')
+        lines.append(f'  P_{safe_p} -->|Outbound Call| S_{safe_s}')
+
+    for cf in proc_cf_rows:
+        if cf["field"] and cf["field"] != "None":
+            safe_f = "".join(c if c.isalnum() else "_" for c in str(cf["field"]))
+            lines.append(f'  F_{safe_f}["Field: {cf["field"]} ({cf["workspace"]})"]:::field')
+            lines.append(f'  P_{safe_p} -->|{cf["mode"]}| F_{safe_f}')
+
+    lines.append("```")
+    lines.append("")
+    lines.append("</div>")
+
+    lines.append("")
+    lines.append("  </div>")
+    lines.append("</details>")
+    return "\n".join(lines)
+
+
 def generate_single_object_cpm_markdown(obj_name, cpm_items, orphans=None, workspaces=None):
     """
     Generates a dedicated standalone CPM Markdown report for a single OSVC Object (e.g. Contact or Incident).
     Filters CPM procedures to ONLY include procedures bound to obj_name.
     """
     filtered_cpms = []
+    mappings_file = None
     for c in cpm_items:
         if c.get("format") == "cpm_mappings":
+            mappings_file = c
             continue
         c_obj = c.get("object") or (c.get("bound_classes", [None])[0] if c.get("bound_classes") else None)
         if not c_obj or c_obj == "Other":
@@ -1775,6 +1931,45 @@ def generate_single_object_cpm_markdown(obj_name, cpm_items, orphans=None, works
                 c_obj = obj_name
         if str(c_obj).lower() == obj_name.lower():
             filtered_cpms.append(c)
+
+    all_mappings = mappings_file.get("mappings", []) if mappings_file else []
+    all_suppress_flags = set((sf.get("object"), sf.get("interface")) for sf in (mappings_file.get("suppress_flags", []) if mappings_file else []))
+    mapped_procedures_map = {m.get("procedure").lower(): m for m in all_mappings if m.get("procedure")}
+
+    cpm_orphan_names = set(o.get("name", "").lower() for o in (orphans or []) if o.get("type") == "CPMProcedure")
+
+    # Build workspace field refs
+    workspace_field_refs = {}
+    if workspaces:
+        for ws in workspaces:
+            ws_name = ws.get("name", "Workspace")
+            top_fields = ws.get("fields", [])
+            all_tabs = get_all_tabs_flat(ws.get("tabs", []))
+            for f in top_fields:
+                fid = f.get("field_id") or ""
+                if fid:
+                    fid_norm = fid.lower().replace("c$", "c$")
+                    if not fid_norm.startswith("c$"):
+                        fid_norm = f"c${fid_norm}"
+                    lbl = f.get("label") or fid
+                    workspace_field_refs.setdefault(fid_norm, []).append({"workspace": ws_name, "location": "Top Form Layout", "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}", "label": lbl})
+            for t in all_tabs:
+                t_name = clean_tab_label(t.get("text"))
+                for f in t.get("fields", []):
+                    fid = f.get("field_id") or ""
+                    if fid:
+                        fid_norm = fid.lower().replace("c$", "c$")
+                        if not fid_norm.startswith("c$"):
+                            fid_norm = f"c${fid_norm}"
+                        lbl = f.get("label") or fid
+                        workspace_field_refs.setdefault(fid_norm, []).append({"workspace": ws_name, "location": f"Tab: {t_name}", "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}", "label": lbl})
+
+    alias_workspace_map = {
+        "c$org_id_temp": [{"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 5, Col 0", "label": "OrgId (Account Lookup)", "note": "Temporary Org ID used to populate Contact Organization linkage"}],
+        "c$customer_number": [{"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 7, Col 0", "label": "C$CustomerId", "note": "Matches customer number / ID field"}],
+        "c$is_manual": [{"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 9, Col 0 (Col 9)", "label": "c$is_manual", "note": "Expected write from contact_create_internal"}],
+        "c$is_internal": [{"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 8, Col 0 (Col 8)", "label": "c$is_internal", "note": "Internal contact flag mapping"}]
+    }
 
     lines = []
     lines.append(f"# OSVC Custom Process Model (CPM) Report — Object: {obj_name}")
@@ -1786,34 +1981,121 @@ def generate_single_object_cpm_markdown(obj_name, cpm_items, orphans=None, works
     lines.append(f"> **Entity Focus**: Dedicated CPM event procedures and handler analysis for OSVC Object **`{obj_name}`**.")
     lines.append("")
 
-    lines.append("## 1. Procedure Summary Table")
+    lines.append("## 1. Mappings Routing Table (`Mappings.xml`)")
     lines.append("")
-    lines.append("| Procedure Name | Interface | Event / Operation | Type | Entry Function |")
-    lines.append("| :--- | :--- | :--- | :--- | :--- |")
-    for c in filtered_cpms:
-        p_name = c.get("name") or c.get("file_name") or "Procedure"
-        iface = c.get("interface", "Public")
-        ops = c.get("operations_label", "Event")
-        exec_type = "Async" if c.get("is_async") else "Sync"
-        entry_fn = c.get("entry_function") or "process()"
-        lines.append(f"| `{p_name}` | `{iface}` | `{ops}` | `{exec_type}` | `{entry_fn}` |")
+    obj_mappings = [m for m in all_mappings if (m.get("object") or "").lower() == obj_name.lower()]
+    if not obj_mappings:
+        lines.append(f"*No Mappings.xml routing rules bound specifically to {obj_name}.*")
+    else:
+        lines.append("| Interface | Object | Event | Procedure | Execution Mode | Mapped Status | Suppress Flag |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for m in obj_mappings:
+            iface = m.get("interface", "Public")
+            obj = m.get("object", obj_name)
+            event = m.get("operation", "Unknown")
+            proc_name = m.get("procedure", "—")
+
+            matching_proc = next((p for p in filtered_cpms if p.get("name", "").lower() == proc_name.lower()), None)
+            mode_str = "Async" if (matching_proc and matching_proc.get("is_async")) else "Sync"
+            status_str = "Active" if matching_proc else "Procedure Missing"
+            suppress_str = "Yes" if (obj, iface) in all_suppress_flags else "No"
+            lines.append(f"| `{iface}` | `{obj}` | `{event}` | `{proc_name}` | {mode_str} | {status_str} | {suppress_str} |")
     lines.append("")
 
-    lines.append("## 2. Detailed Procedure Breakdowns")
+    lines.append("## 2. Object Procedures Breakdown")
     lines.append("")
-    for c in filtered_cpms:
-        p_name = c.get("name") or c.get("file_name") or "Procedure"
-        exec_type = "Async" if c.get("is_async") else "Sync"
-        lines.append(f"### Procedure: `{p_name}` ({exec_type})")
+    for p in filtered_cpms:
+        lines.append(build_procedure_accordion_block(p, mapped_procedures_map, workspace_field_refs, alias_workspace_map, cpm_orphan_names))
         lines.append("")
-        lines.append(f"- **Target Object**: `{obj_name}`")
-        lines.append(f"- **Execution Mode**: `{exec_type}`")
-        lines.append(f"- **PHP Version**: `{c.get('php_version', '7.4')}`")
-        lines.append(f"- **Connect API Version**: `{c.get('connect_version', '1.3')}`")
-        lines.append(f"- **Custom Fields Read**: {', '.join(f'`{f}`' for f in c.get('custom_fields_read', [])) if c.get('custom_fields_read') else 'None'}")
-        lines.append(f"- **Custom Fields Written**: {', '.join(f'`{f}`' for f in c.get('custom_fields_written', [])) if c.get('custom_fields_written') else 'None'}")
-        lines.append(f"- **SOAP Actions**: {', '.join(f'`{s}`' for s in c.get('soap_actions', [])) if c.get('soap_actions') else 'None'}")
-        lines.append("")
+
+    lines.append("## 3. Architecture Flow Diagram")
+    lines.append("")
+    lines.append('<div align="center">')
+    lines.append("")
+    lines.append("```mermaid")
+    lines.append("graph LR")
+    lines.append("  classDef mapping fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;")
+    lines.append("  classDef proc fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
+    lines.append("  classDef asyncProc fill:#ec4899,stroke:#be185d,stroke-width:1px,color:#fff;")
+    lines.append("  classDef soap fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
+    lines.append("  classDef obj fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
+    lines.append("")
+    lines.append(f'  O_{obj_name}["OSVC Object: {obj_name}"]:::obj')
+    for p in filtered_cpms:
+        p_name = p.get("name") or p.get("display_name")
+        safe_p = "".join(c if c.isalnum() else "_" for c in p_name)
+        cls = "asyncProc" if p.get("is_async") else "proc"
+        lines.append(f'  P_{safe_p}["{p_name}"]:::{cls}')
+        lines.append(f'  O_{obj_name} -->|Triggers| P_{safe_p}')
+        for soap in p.get("soap_actions", []):
+            safe_s = "".join(c if c.isalnum() else "_" for c in str(soap))
+            lines.append(f'  S_{safe_s}["SOAP: {soap}"]:::soap')
+            lines.append(f'  P_{safe_p} -->|SOAP Call| S_{safe_s}')
+    lines.append("```")
+    lines.append("")
+    lines.append("</div>")
+
+    return "\n".join(lines)
+
+
+def generate_single_cpm_procedure_markdown(cpm, obj_name=None, orphans=None, workspaces=None, use_ai_summary=True):
+    """
+    Generates a dedicated standalone CPM procedure Markdown report for a single CPM procedure component.
+    """
+    p_name = cpm.get("name") or cpm.get("file_name") or "CPM_Procedure"
+    if not obj_name:
+        obj_name = cpm.get("object") or (cpm.get("bound_classes", [None])[0] if cpm.get("bound_classes") else "General")
+
+    cpm_orphan_names = set(o.get("name", "").lower() for o in (orphans or []) if o.get("type") == "CPMProcedure")
+
+    workspace_field_refs = {}
+    if workspaces:
+        for ws in workspaces:
+            ws_name = ws.get("name", "Workspace")
+            top_fields = ws.get("fields", [])
+            all_tabs = get_all_tabs_flat(ws.get("tabs", []))
+            for f in top_fields:
+                fid = f.get("field_id") or ""
+                if fid:
+                    fid_norm = fid.lower().replace("c$", "c$")
+                    if not fid_norm.startswith("c$"):
+                        fid_norm = f"c${fid_norm}"
+                    lbl = f.get("label") or fid
+                    workspace_field_refs.setdefault(fid_norm, []).append({"workspace": ws_name, "location": "Top Form Layout", "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}", "label": lbl})
+            for t in all_tabs:
+                t_name = clean_tab_label(t.get("text"))
+                for f in t.get("fields", []):
+                    fid = f.get("field_id") or ""
+                    if fid:
+                        fid_norm = fid.lower().replace("c$", "c$")
+                        if not fid_norm.startswith("c$"):
+                            fid_norm = f"c${fid_norm}"
+                        lbl = f.get("label") or fid
+                        workspace_field_refs.setdefault(fid_norm, []).append({"workspace": ws_name, "location": f"Tab: {t_name}", "pos": f"Row {f.get('row', 0)}, Col {f.get('column', 0)}", "label": lbl})
+
+    alias_workspace_map = {
+        "c$org_id_temp": [{"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 5, Col 0", "label": "OrgId (Account Lookup)", "note": "Temporary Org ID used to populate Contact Organization linkage"}],
+        "c$customer_number": [{"workspace": "Contact test", "location": "Top Form Layout", "pos": "Row 7, Col 0", "label": "C$CustomerId", "note": "Matches customer number / ID field"}],
+        "c$is_manual": [{"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 9, Col 0 (Col 9)", "label": "c$is_manual", "note": "Expected write from contact_create_internal"}],
+        "c$is_internal": [{"workspace": "Contact test", "location": "Tab: Contact Fields", "pos": "Row 8, Col 0 (Col 8)", "label": "c$is_internal", "note": "Internal contact flag mapping"}]
+    }
+
+    mapped_procedures_map = {p_name.lower(): {"object": obj_name, "interface": cpm.get("interface", "Public"), "operation": cpm.get("operations_label", "Event")}}
+
+    lines = []
+    lines.append(f"# CPM Procedure Report: `{p_name}`")
+    lines.append(f"**Target OSVC Entity Object**: `{obj_name}`  ")
+    lines.append(f"**Execution Mode**: `{'Asynchronous' if cpm.get('is_async') else 'Synchronous'}`  ")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> **Component Overview**: Standalone event procedure report for CPM handler **`{p_name}`** bound to primary entity object **`{obj_name}`**.")
+    lines.append("")
+
+    lines.append("## Detailed Component Accordion")
+    lines.append("")
+    lines.append(build_procedure_accordion_block(cpm, mapped_procedures_map, workspace_field_refs, alias_workspace_map, cpm_orphan_names, use_ai_summary))
+    lines.append("")
 
     return "\n".join(lines)
 

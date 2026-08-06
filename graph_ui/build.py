@@ -543,78 +543,95 @@ def build_graph_ui(master_json, output_dir):
     # the right markdown report when a node is clicked.
     # Paths are relative to output_dir (i.e. results/graph/).
     # ------------------------------------------------------------------
-    def _resolve_md(node_type, label):
+    def _resolve_md(node_type, label, node_data=None):
         """Return a relative path from output_dir to the best-matching .md file."""
+        node_data = node_data or {}
+        existing_md = node_data.get("mdPath")
+        if existing_md:
+            existing_path = os.path.normpath(os.path.join(output_dir, existing_md))
+            if os.path.isfile(existing_path):
+                return existing_md
+
         candidates = []
+        safe_label = label.replace(" ", "_")
         if node_type == "workspace":
             candidates = [
                 f"../workspaces/{label}/report.md",
                 f"../markdown/workspaces/{label}/report.md",
             ]
         elif node_type == "report":
-            # Try both naming conventions produced by the analyser
-            safe = label.replace(" ", "_")
             candidates = [
-                f"../reports/report_{safe}.md",
-                f"../markdown/reports/report_{safe}.md",
+                f"../reports/report_{safe_label}.md",
+                f"../markdown/reports/report_{safe_label}.md",
             ]
-            # Also try files in results/reports/ that contain the label
             reports_dir = os.path.join(output_dir, "..", "reports")
             if os.path.isdir(reports_dir):
                 for fname in os.listdir(reports_dir):
-                    if fname.endswith(".md") and safe.lower() in fname.lower():
+                    if fname.endswith(".md") and safe_label.lower() in fname.lower():
                         candidates.insert(0, f"../reports/{fname}")
-        elif node_type in ("cpm", "asynccpm"):
+        elif node_type in ("cpm", "asynccpm", "cpmmappings"):
             n_mod = node_data.get("module") or node_data.get("object")
             if not n_mod or n_mod == "Other":
                 l_low = (label or "").lower()
                 if "contact" in l_low: n_mod = "Contact"
                 elif "incident" in l_low: n_mod = "Incident"
-            if n_mod in ("Contact", "Incident"):
-                candidates = [
-                    f"../cpm/report_CPM_{n_mod}.md",
-                    f"../markdown/cpm/report_CPM_{n_mod}.md",
-                    "../cpm/report_CPM_Summary.md"
-                ]
-            else:
-                candidates = [
-                    "../cpm/report_CPM_Summary.md",
-                    "../markdown/cpm/report_CPM_Summary.md",
-                ]
-        elif node_type in ("customscript", "custom_script", "script"):
-            safe = label.replace(" ", "_")
+                else: n_mod = "General"
             candidates = [
-                f"../scripts/report_{safe}.md",
+                f"../cpm/report_CPM_{n_mod}_{safe_label}.md",
+                f"../cpm/report_CPM_{safe_label}.md",
+                f"../cpm/report_CPM_{n_mod}.md",
+                "../cpm/report_CPM_Summary.md"
+            ]
+            cpm_dir = os.path.join(output_dir, "..", "cpm")
+            if os.path.isdir(cpm_dir):
+                for fname in os.listdir(cpm_dir):
+                    if fname.endswith(".md") and fname.lower() == f"report_cpm_{n_mod.lower()}_{safe_label.lower()}.md":
+                        candidates.insert(0, f"../cpm/{fname}")
+        elif node_type in ("object", "module_root"):
+            safe_obj = safe_label
+            if safe_obj.lower() in ["contacts", "contact"]: safe_obj = "Contact"
+            elif safe_obj.lower() in ["incidents", "incident"]: safe_obj = "Incident"
+            candidates = [
+                f"../COMPLETE_SYSTEM_MAPPING_{safe_obj}.md",
+                f"../rules/report_Business_Rules_{safe_obj}.md",
+                f"../cpm/report_CPM_{safe_obj}.md",
+                "../COMPLETE_SYSTEM_MAPPING.md"
+            ]
+        elif node_type in ("customscript", "custom_script", "script"):
+            candidates = [
+                f"../scripts/report_{safe_label}.md",
                 f"../scripts/report_{label}.md",
                 "../scripts/report_Custom_Scripts.md",
-                "../markdown/scripts/report_Custom_Scripts.md",
             ]
             scripts_dir = os.path.join(output_dir, "..", "scripts")
             if os.path.isdir(scripts_dir):
                 for fname in os.listdir(scripts_dir):
-                    if fname.endswith(".md") and safe.lower() in fname.lower():
+                    if fname.endswith(".md") and safe_label.lower() in fname.lower():
                         candidates.insert(0, f"../scripts/{fname}")
         elif node_type == "buiaddin":
-            safe = label.replace(" ", "_")
             candidates = [
-                f"../bui_addins/report_{safe}.md",
+                f"../bui_addins/report_{safe_label}.md",
                 f"../bui_addins/report_{label}.md",
                 "../bui_addins/report_BUI_Addins.md",
-                "../markdown/bui_addins/report_BUI_Addins.md",
             ]
-            # Also scan bui_addins dir for a file that matches label
             bui_dir = os.path.join(output_dir, "..", "bui_addins")
             if os.path.isdir(bui_dir):
                 for fname in os.listdir(bui_dir):
                     if fname.endswith(".md") and label.lower().replace(" ", "") in fname.lower().replace("_", ""):
                         candidates.insert(0, f"../bui_addins/{fname}")
+
+        for cand in candidates:
+            cand_path = os.path.normpath(os.path.join(output_dir, cand))
+            if os.path.isfile(cand_path):
+                return cand
+
         return candidates[0] if candidates else None
 
     patched_nodes = []
     for node in graph_data.get("nodes", []):
         node = dict(node)
         node_data = dict(node.get("data") or {})
-        md = _resolve_md(node.get("type", ""), node.get("label", ""))
+        md = _resolve_md(node.get("type", ""), node.get("label", ""), node_data)
         if md:
             node_data["mdPath"] = md
         node["data"] = node_data

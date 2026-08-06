@@ -817,7 +817,8 @@ def main():
 
         cpm_items = components.get("cpm", [])
         if cpm_items:
-            from src.output.markdown_generator import generate_cpm_report_markdown, generate_single_object_cpm_markdown
+            from src.output.master_report_generator import canonical_module_name
+            from src.output.markdown_generator import generate_cpm_report_markdown, generate_single_object_cpm_markdown, generate_single_cpm_procedure_markdown
             from src.output.json_writer import write_cpm_summary_json
             cpm_md_content = generate_cpm_report_markdown(cpm_items, orphans, components["workspaces"], use_ai_summary=args.use_ai_summary)
             cpm_md_path = os.path.join(cpm_dir, "report_CPM_Summary.md")
@@ -836,7 +837,7 @@ def main():
             write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"), use_ai_summary=args.use_ai_summary)
             print(f"CPM Summary JSON written -> {cpm_json_path}")
 
-            # Per-Object Standalone CPM Reports (Contact, Incident, etc.)
+            # Per-Object Standalone CPM Summary Reports (Contact, Incident, etc.)
             known_cpm_objs = ["Contact", "Incident"]
             for c_obj in known_cpm_objs:
                 obj_cpm_md = generate_single_object_cpm_markdown(c_obj, cpm_items, orphans, components["workspaces"])
@@ -849,6 +850,24 @@ def main():
 
                 obj_cpm_json_path = os.path.join(cpm_dir, f"report_CPM_{c_obj}.json")
                 write_cpm_summary_json([c for c in cpm_items if (c.get("object") or (c.get("bound_classes", [None])[0] if c.get("bound_classes") else None) or "").lower() == c_obj.lower()], orphans, components["workspaces"], obj_cpm_json_path)
+
+            # Individual Standalone CPM Procedure Reports per procedure component
+            for c in cpm_items:
+                if c.get("format") == "cpm_mappings":
+                    continue
+                cname = c.get("name") or c.get("file_name") or "Procedure"
+                cobj = canonical_module_name(c.get("object") or (c.get("bound_classes", [None])[0] if c.get("bound_classes") else None) or "General")
+                safe_cname = "".join(x if x.isalnum() else "_" for x in cname)
+                
+                single_cpm_md = generate_single_cpm_procedure_markdown(c, cobj, orphans, components.get("workspaces", []), use_ai_summary=args.use_ai_summary)
+                
+                single_cpm_filename = f"report_CPM_{cobj}_{safe_cname}.md"
+                single_cpm_path = os.path.join(cpm_dir, single_cpm_filename)
+                with open(single_cpm_path, "w", encoding="utf-8") as f:
+                    f.write(single_cpm_md)
+                with open(os.path.join(cpm_md_fmt_dir, single_cpm_filename), "w", encoding="utf-8") as f:
+                    f.write(single_cpm_md)
+                print(f"Single CPM Procedure report written -> {single_cpm_path}")
 
         bui_items = sorted(components.get("buiAddins", []), key=lambda x: x.get("name", "").lower())
         if bui_items:

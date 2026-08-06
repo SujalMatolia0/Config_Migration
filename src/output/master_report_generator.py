@@ -496,4 +496,263 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
         f.write("\n".join(lines))
         
     print(f"Master System Mapping written -> {report_path}")
+
+    # Generate Per-Object Master Architecture Reports (e.g. COMPLETE_SYSTEM_MAPPING_Contact.md)
+    for obj_name in sorted(grouped_modules.keys()):
+        if obj_name and obj_name != "General / Unassigned":
+            generate_single_object_master_report(obj_name, results_dir, master_data, components, orphans, endpoints, relationships, use_ai_summary)
+
+    return report_path
+
+
+def generate_single_object_master_report(obj_name, results_dir, master_data, components=None, orphans=None, endpoints=None, relationships=None, use_ai_summary=True):
+    """
+    Generates a dedicated master architecture mapping report for a specific OSVC object entity (e.g., COMPLETE_SYSTEM_MAPPING_Contact.md).
+    Filters all workspaces, reports, CPMs, business rules, scripts, BUI add-ins, orphans, and linkages to only include those belonging to obj_name.
+    """
+    clean_obj = "".join(c if c.isalnum() else "_" for c in str(obj_name))
+    report_filename = f"COMPLETE_SYSTEM_MAPPING_{clean_obj}.md"
+    report_path = os.path.join(results_dir, report_filename)
+    
+    meta = master_data.get("metadata", {}) or master_data.get("meta", {})
+    all_nodes = master_data.get("graph", {}).get("nodes", [])
+    all_edges = master_data.get("graph", {}).get("edges", [])
+
+    nodes = [
+        n for n in all_nodes
+        if canonical_module_name(n.get("module") or n.get("data", {}).get("module") or n.get("data", {}).get("object") or n.get("label")) == obj_name
+    ]
+
+    node_id_set = set(n.get("id") for n in nodes)
+    edges = [
+        e for e in all_edges
+        if e.get("source") in node_id_set or e.get("target") in node_id_set
+    ]
+
+    degree_map = {}
+    node_by_id = {}
+    for n in nodes:
+        node_by_id[n.get("id")] = n
+        n["inc"] = []
+        n["out"] = []
+
+    for e in edges:
+        s, t = e.get("source"), e.get("target")
+        degree_map.setdefault(s, {"in": 0, "out": 0})["out"] += 1
+        degree_map.setdefault(t, {"in": 0, "out": 0})["in"] += 1
+        if s in node_by_id: node_by_id[s]["out"].append(e)
+        if t in node_by_id: node_by_id[t]["inc"].append(e)
+
+    all_orphans = [
+        o for o in (orphans or master_data.get("orphans", []))
+        if canonical_module_name(o.get("object") or o.get("module")) == obj_name
+    ]
+
+    all_endpoints = []
+    for ep in (endpoints or master_data.get("endpoints", [])):
+        src = str(ep.get("source_file") or "").lower()
+        ctx = str(ep.get("context") or "").lower()
+        if obj_name.lower() in src or obj_name.lower() in ctx:
+            all_endpoints.append(ep)
+
+    if not all_endpoints and components:
+        for cs in components.get("customScripts", []):
+            cs_mod = canonical_module_name(cs.get("module") or cs.get("object"))
+            if cs_mod == obj_name:
+                for url in cs.get("endpoints", []):
+                    all_endpoints.append({
+                        "url": url,
+                        "source_file": f"customscript:{cs.get('file_name', 'script.php')}",
+                        "context": f"cURL / HTTP REST Request in {cs.get('file_name')}"
+                    })
+        for bui in components.get("buiAddins", []):
+            bui_mod = canonical_module_name(bui.get("module") or bui.get("object_type"))
+            if bui_mod == obj_name:
+                for call in bui.get("api_calls", []):
+                    all_endpoints.append({
+                        "url": str(call),
+                        "source_file": f"buiaddin:{bui.get('name', 'BUIAddin')}",
+                        "context": f"BUI Extension API Integration in {bui.get('name')}"
+                    })
+
+    lines = []
+    lines.append(f"# {obj_name} Master System Architecture & Component Mapping")
+    lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
+    lines.append(f"**Target OSVC Entity Object**: `{obj_name}`  ")
+    lines.append(f"**Source Data Path**: `{meta.get('source_path', 'input')}`  ")
+    lines.append("")
+
+    num_ws = len([n for n in nodes if n.get("type") == "workspace"])
+    num_rep = len([n for n in nodes if n.get("type") == "report"])
+    num_cpm = len([n for n in nodes if n.get("type") in ["cpm", "asynccpm"]])
+    num_scr = len([n for n in nodes if n.get("type") == "customscript"])
+    num_bui = len([n for n in nodes if n.get("type") == "buiaddin"])
+
+    obj_ws_items = [ws for ws in (components.get("workspaces", []) if components else []) if canonical_module_name(ws.get("object_type") or ws.get("module")) == obj_name]
+    obj_br_items = [br for br in (components.get("businessRules", []) if components else []) if canonical_module_name(br.get("object") or br.get("module")) == obj_name]
+    total_br_rules = sum(b.get("total_rules", len(b.get("rules", []))) for b in obj_br_items)
+
+    lines.append(f"## Executive {obj_name} Summary & Risk Overview")
+    lines.append("")
+    lines.append("> [!NOTE]")
+    lines.append(f"> **{obj_name} Mapping Overview**: Structured inventory of all parsed Oracle Service Cloud workspaces, analytics reports, CPM procedures, business rules, custom scripts, and external REST/SOAP integration endpoints associated with the `{obj_name}` entity.")
+    lines.append("")
+
+    lines.append("| Component Category | Total Discovered Count | Status |")
+    lines.append("| :--- | :---: | :--- |")
+    lines.append(f"| {obj_name} Workspaces | {num_ws} | Parsed & Mapped |")
+    lines.append(f"| {obj_name} Analytics Reports | {num_rep} | Parsed & Mapped |")
+    lines.append(f"| {obj_name} Business Rules Sets | {len(obj_br_items)} ({total_br_rules} Rules) | Parsed & Policy Mapped |")
+    lines.append(f"| {obj_name} CPM Procedures & Handlers | {num_cpm} | Parsed & Event Mapped |")
+    lines.append(f"| {obj_name} Custom Scripts | {num_scr} | Analyzed |")
+    lines.append(f"| {obj_name} BUI Add-Ins | {num_bui} | Archive Extracted |")
+    lines.append(f"| {obj_name} External Integration Endpoints | {len(all_endpoints)} | Endpoint Extracted |")
+    lines.append(f"| {obj_name} Orphaned Components | {len(all_orphans)} | Audit Flagged |")
+    lines.append("")
+
+    if all_orphans:
+        lines.append("> [!WARNING]")
+        lines.append(f"> **{len(all_orphans)} Orphaned Component(s) Flagged for {obj_name}**: Custom scripts or components exist for `{obj_name}` with zero active workspace or CPM bindings.")
+        lines.append("")
+    if all_endpoints:
+        lines.append("> [!IMPORTANT]")
+        lines.append(f"> **{len(all_endpoints)} External HTTP Integration Endpoints Detected for {obj_name}**: Outbound web calls to external REST/SOAP servers require security verification.")
+        lines.append("")
+
+    lines.append("> [!TIP]")
+    lines.append(f"> **Optimization Recommendation**: Audit `{obj_name}` orphaned scripts and verify outbound integration endpoints for TLS compliance.")
+    lines.append("")
+
+    lines.append(f"## Audit-Critical Orphaned Components for {obj_name}")
+    lines.append("")
+    if all_orphans:
+        lines.append("| Component Name / ID | Type | Associated Object | Linkage Count | Audit Risk Flag & Reason |")
+        lines.append("| :--- | :--- | :--- | :---: | :--- |")
+        for o in all_orphans:
+            oname = o.get("name") or o.get("id") or o.get("file_name") or "Unnamed"
+            otype = o.get("type") or "Component"
+            oobj = canonical_module_name(o.get("object") or o.get("module") or "General")
+            oreason = o.get("reason") or "Zero active inbound/outbound references detected"
+            deg = degree_map.get(o.get("id", ""), {"in": 0, "out": 0})
+            link_str = f"{deg['in']} in, {deg['out']} out"
+            lines.append(f"| `{oname}` | `{otype}` | **{oobj}** | `{link_str}` | `{oreason}` |")
+    else:
+        lines.append(f"*No orphaned components detected for {obj_name}. All components are actively referenced.*")
+    lines.append("")
+
+    lines.append(f"## Consolidated Entity Module Inventory for {obj_name}")
+    lines.append("")
+    lines.append(f"### Entity Module: {obj_name} ({len(nodes)} Mapped Components)")
+    lines.append("")
+
+    if len(nodes) > 1:
+        lines.append(generate_mermaid_for_module(obj_name, nodes, degree_map))
+        lines.append("")
+
+    lines.append("| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |")
+    lines.append("| :--- | :--- | :---: | :--- |")
+    type_order = {"object": 0, "module_root": 0, "workspace": 1, "report": 2, "cpm": 3, "asynccpm": 3, "customscript": 4, "buiaddin": 5, "workspacefield": 6, "customfield": 7}
+    sorted_nodes = sorted(nodes, key=lambda x: (type_order.get((x.get("type") or "").lower(), 99), str(x.get("label")).lower()))
+    for n in sorted_nodes:
+        nid = n.get("id", "")
+        ntype = n.get("type", "")
+        nlabel = n.get("label", "")
+        deg = degree_map.get(nid, {"in": 0, "out": 0})
+        dep_str = f"`{deg['in']} in -> {deg['out']} out`"
+        details = build_details_summary(n, use_ai_summary=use_ai_summary)
+        lines.append(f"| `{nlabel}` | `{ntype}` | {dep_str} | {details} |")
+    lines.append("")
+
+    lines.append(f"## Workspaces & Field Mapping Matrix for {obj_name}")
+    lines.append("")
+    if obj_ws_items:
+        for ws in sorted(obj_ws_items, key=lambda x: x.get("name", "")):
+            wname = ws.get("name") or "Workspace"
+            wobj = canonical_module_name(ws.get("object_type") or ws.get("module"))
+            fields = ws.get("fields", [])
+            tabs = len(ws.get("tabs", []))
+            rules = len(ws.get("rules", []))
+
+            lines.append(f"### Workspace: {wname}")
+            lines.append(f"- **Primary Object Binding**: **{wobj}**")
+            lines.append(f"- **Layout Summary**: {len(fields)} fields rendered across {tabs} tabsets ({rules} rules)")
+            lines.append("")
+            if fields:
+                lines.append("| Field Name / ID | Data Type | Custom Field (c$) | Parent Tab | Dependencies |")
+                lines.append("| :--- | :--- | :---: | :--- | :---: |")
+                for f in fields:
+                    fid = f.get("field_id") or f.get("label") or f.get("name") or "Unnamed"
+                    ftype = f.get("type") or "Standard"
+                    is_c = "Yes (c$)" if "c$" in str(fid).lower() else "No"
+                    tab_name = f.get("tab") or "Main Tab"
+                    f_node_id = f"workspacefield:{str(fid).lower()}"
+                    f_deg = degree_map.get(f_node_id, {"in": 0, "out": 0})
+                    f_link = f"`{f_deg['in']} in -> {f_deg['out']} out`"
+                    lines.append(f"| `{fid}` | `{ftype}` | {is_c} | {tab_name} | {f_link} |")
+            lines.append("")
+    else:
+        lines.append(f"*No Workspaces detected for {obj_name}.*")
+    lines.append("")
+
+    lines.append(f"## CPM Event Handlers & Procedures Matrix for {obj_name}")
+    lines.append("")
+    obj_cpm_items = [c for c in (components.get("cpm", []) if components else []) if canonical_module_name(c.get("object_type") or c.get("module") or c.get("object")) == obj_name]
+    if obj_cpm_items:
+        lines.append("| CPM Handler / XML | Object Binding | Event Trigger | Execution Mode | Entry Point Method | Dependencies |")
+        lines.append("| :--- | :--- | :--- | :--- | :--- | :---: |")
+        for c in obj_cpm_items:
+            name = c.get("name") or c.get("file_name") or "Unnamed"
+            obj = canonical_module_name(c.get("object_type") or c.get("module"))
+            evt = c.get("operations_label") or c.get("script_type") or "Event Handler"
+            is_a = "Async Execution" if c.get("is_async") else "Synchronous Execution"
+            entry = c.get("entry_point") or "ObjectProcedure::apply"
+            c_id = f"cpm:{str(name).lower()}"
+            c_deg = degree_map.get(c_id, {"in": 0, "out": 0})
+            c_link = f"`{c_deg['in']} in -> {c_deg['out']} out`"
+            lines.append(f"| `{name}` | **{obj}** | `{evt}` | {is_a} | `{entry}` | {c_link} |")
+    else:
+        lines.append(f"*No CPM Procedures detected for {obj_name}.*")
+    lines.append("")
+
+    lines.append(f"## System Component Linkages for {obj_name}")
+    lines.append("")
+    rel_list = relationships if relationships else []
+    if rel_list:
+        seen = set()
+        obj_rel_items = []
+        for r in rel_list:
+            src_obj = r.get("source") or r.get("from") or {}
+            tgt_obj = r.get("target") or r.get("to") or {}
+            src_str = format_component_ref(src_obj)
+            tgt_str = format_component_ref(tgt_obj)
+            if "Report 0" in tgt_str or "Report 0" in src_str:
+                continue
+
+            if obj_name.lower() in src_str.lower() or obj_name.lower() in tgt_str.lower():
+                rtype_str = format_rel_type(r)
+                ctx = r.get("context") or r.get("details") or "Cross-Component Mapping"
+                key = (src_str, rtype_str, tgt_str, ctx)
+                if key not in seen:
+                    seen.add(key)
+                    obj_rel_items.append({"source": src_str, "type": rtype_str, "target": tgt_str, "context": ctx})
+
+        if obj_rel_items:
+            lines.append("| Source Component | Linkage Type | Target Component | Details / Context |")
+            lines.append("| :--- | :--- | :--- | :--- |")
+            for item in sorted(obj_rel_items, key=lambda x: (x["source"], x["target"])):
+                lines.append(f"| **{item['source']}** | `{item['type']}` | `{item['target']}` | {item['context']} |")
+            lines.append("")
+        else:
+            lines.append(f"*No active linkages detected for {obj_name}.*")
+            lines.append("")
+
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+    fmt_dir = os.path.join(results_dir, "markdown")
+    if os.path.exists(fmt_dir):
+        with open(os.path.join(fmt_dir, report_filename), "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+
+    print(f"Single Object Master System Mapping written -> {report_path}")
     return report_path
