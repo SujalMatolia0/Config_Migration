@@ -581,6 +581,19 @@ def build_graph_ui(master_json, output_dir):
                     "../cpm/report_CPM_Summary.md",
                     "../markdown/cpm/report_CPM_Summary.md",
                 ]
+        elif node_type in ("customscript", "custom_script", "script"):
+            safe = label.replace(" ", "_")
+            candidates = [
+                f"../scripts/report_{safe}.md",
+                f"../scripts/report_{label}.md",
+                "../scripts/report_Custom_Scripts.md",
+                "../markdown/scripts/report_Custom_Scripts.md",
+            ]
+            scripts_dir = os.path.join(output_dir, "..", "scripts")
+            if os.path.isdir(scripts_dir):
+                for fname in os.listdir(scripts_dir):
+                    if fname.endswith(".md") and safe.lower() in fname.lower():
+                        candidates.insert(0, f"../scripts/{fname}")
         elif node_type == "buiaddin":
             safe = label.replace(" ", "_")
             candidates = [

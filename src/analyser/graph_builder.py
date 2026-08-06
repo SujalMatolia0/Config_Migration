@@ -117,7 +117,7 @@ def make_lightweight_node_data(node_type, data):
             bname = data.get("name") or data.get("id")
             light["mdPath"] = f"../bui_addins/report_{bname}.md"
         elif lower_type in ["customscript", "custom_script", "script"] and (data.get("file_name") or data.get("name")):
-            sname = data.get("file_name") or data.get("name")
+            sname = (data.get("file_name") or data.get("name")).replace(" ", "_")
             light["mdPath"] = f"../scripts/report_{sname}.md"
 
     # Counts of nested objects for summary UI
@@ -289,10 +289,10 @@ def build_graph(components, relationships, orphans, endpoints):
         })
 
     for script in components.get("customScripts", []):
-        s_name = script.get("file_name", "script.php")
+        s_name = script.get("file_name", "script.php").replace(" ", "_")
         s_data = dict(script)
         s_data["mdPath"] = f"../scripts/report_{s_name}.md"
-        add_node("CustomScript", s_name, s_data)
+        add_node("CustomScript", script.get("file_name", "script.php"), s_data)
 
     for cpm in components.get("cpm", []):
         cpm_data = dict(cpm)

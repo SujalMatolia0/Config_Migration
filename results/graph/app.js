@@ -177,6 +177,8 @@ function rebuildGraphState() {
           const mod = getNodeModule(n).toLowerCase();
           if (mod !== root.module.toLowerCase()) return false;
           if (type === "workspace") return n.type === "workspace";
+          if (type === "buiaddin") return n.type === "buiaddin" || n.type === "bui_addin" || n.type === "bui";
+          if (type === "cpm") return n.type === "cpm" || n.type === "asynccpm";
           return n.type === type;
         });
 
@@ -256,7 +258,8 @@ function rebuildGraphState() {
           const targetHubType = (n.hubType || "").toLowerCase();
           const instType = (inst.type || "").toLowerCase();
           const isMatchingType = instType === targetHubType || 
-            (targetHubType === "cpm" && (instType === "cpm" || instType === "asynccpm"));
+            (targetHubType === "cpm" && (instType === "cpm" || instType === "asynccpm")) ||
+            (targetHubType === "buiaddin" && (instType === "buiaddin" || instType === "bui_addin" || instType === "bui"));
           return mod === n.module.toLowerCase() && isMatchingType;
         });
 
@@ -709,7 +712,7 @@ function updateDOM() {
 
     g.addEventListener("dblclick", ev => {
       ev.stopPropagation();
-      select(n, { openInspector: true });
+      select(n, { openInspector: true, openTab: "doc" });
     });
 
     g.addEventListener("mouseenter", ev => {
@@ -871,8 +874,16 @@ function rebuildFilters() {
   });
 
   if (!filtersInitialized) {
-    Object.keys(objectCounts).forEach(o => activeObjects.add(o));
-    Object.keys(componentTypeCounts).forEach(t => activeComponentTypes.add(t));
+    (GRAPH.nodes || []).forEach(n => {
+      if (n.type && n.type !== "module_root" && n.type !== "category_hub") {
+        activeComponentTypes.add(n.type.toLowerCase());
+      }
+    });
+
+    const sortedObjectNames = Object.keys(objectCounts).sort();
+    if (sortedObjectNames.length > 0) {
+      activeObjects.add(sortedObjectNames[0]);
+    }
     filtersInitialized = true;
   }
 
@@ -1748,10 +1759,30 @@ async function loadDocsAndDiagrams(node) {
   let mdText = null;
 
   if (mdPath) {
+    const cleanPath = mdPath.replace(/^\.\.\//, "");
+    const fileName = cleanPath.split("/").pop();
+    const cleanFileName = fileName.replace(/ /g, "_");
+    const spaceFileName = fileName.replace(/_/g, " ");
+
     const candidateUrls = [
       mdPath,
-      "/results/" + mdPath.replace(/^\.\.\//, ""),
-      "/results/markdown/" + mdPath.replace(/^\.\.\//, "")
+      "/results/" + cleanPath,
+      "/results/" + cleanPath.replace(/ /g, "_"),
+      "/results/markdown/" + cleanPath,
+      "/results/markdown/" + cleanPath.replace(/ /g, "_"),
+      "/results/bui_addins/" + fileName,
+      "/results/bui_addins/" + cleanFileName,
+      "/results/reports/" + fileName,
+      "/results/reports/" + cleanFileName,
+      "/results/workspaces/" + fileName,
+      "/results/workspaces/" + cleanFileName,
+      "/results/cpm/" + fileName,
+      "/results/cpm/" + cleanFileName,
+      "/results/rules/" + fileName,
+      "/results/rules/" + cleanFileName,
+      "/results/scripts/" + fileName,
+      "/results/scripts/" + cleanFileName,
+      "/results/scripts/" + spaceFileName
     ];
 
     for (const url of candidateUrls) {
@@ -1759,7 +1790,7 @@ async function loadDocsAndDiagrams(node) {
         const response = await fetch(url, { signal: currentFetchController.signal });
         if (response.ok) {
           const txt = await response.text();
-          if (txt && txt.trim()) {
+          if (txt && txt.trim() && !txt.trim().toLowerCase().startsWith("<!doctype html>")) {
             mdText = txt;
             break;
           }
@@ -1844,6 +1875,8 @@ function select(n, options = {}) {
     <span class="type-chip" style="background:${TYPE_COLORS[n.type] || DEFAULT_COLOR}">
     ${esc(TYPE_LABELS[n.type] ? TYPE_LABELS[n.type].replace(/s$/, "") : n.type)}</span>`;
 
+
+
   if (n.isOrphan) html += `<div class="orphan-flag">ORPHAN: ${esc(n.orphanReason || "unreferenced")}</div>`;
 
   html += `<div class="kv"><b>${n.inc.length}</b> inbound | <b>${n.out.length}</b> outbound link(s)</div>`;
@@ -1904,6 +1937,16 @@ function select(n, options = {}) {
       if (target) select(target, { openInspector: true });
     });
   });
+
+
+
+  if (options && options.openTab === "doc") {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
+    if (docBtn) docBtn.classList.add("active");
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    if (tabDoc) tabDoc.classList.add("active");
+  }
 
   // Async fetch markdown documentation and compile Mermaid
   loadDocsAndDiagrams(n);

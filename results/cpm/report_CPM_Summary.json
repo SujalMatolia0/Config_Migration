@@ -357,7 +357,7 @@
       "custom_fields_written": [
         "c$oos_status"
       ],
-      "key_logic": "The primary business logic of this Oracle Service Cloud CPM PHP custom procedure is to update the \"oos_status\" custom field of an incident to 'Notified' when the incident is updated and its queue is set to 'Back in Stock'. This synchronization ensures that incidents in the 'Back in Stock' queue have their out-of-stock status updated accordingly, likely triggering further automated processes or notifications.",
+      "key_logic": "Executes static custom handler logic for `incident_back_in_stock_sync`.",
       "urls": [],
       "imports": [],
       "osvc_objects": [],

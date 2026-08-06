@@ -230,7 +230,7 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Incident`
 - **Mapped Event**: `Incident` on `scriptpro` interface (Update)
-- **Key Logic Summary**: The primary business logic of this Oracle Service Cloud CPM PHP custom procedure is to update the "oos_status" custom field of an incident to 'Notified' when the incident is updated and its queue is set to 'Back in Stock'. This synchronization ensures that incidents in the 'Back in Stock' queue have their out-of-stock status updated accordingly, likely triggering further automated processes or notifications.
+- **Key Logic Summary**: Executes static custom handler logic for `incident_back_in_stock_sync`.
 - **SOAP Actions**: None
 
 #### Custom Field Workspace Mappings for `incident_back_in_stock_sync`
