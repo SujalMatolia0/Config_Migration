@@ -547,7 +547,29 @@ def analyze_php_content(php_code, proc_name="CPM Procedure"):
     if re.search(r'\$(?:password|passwd|pwd|secret|key|api_key|token|auth)\s*=\s*["\']([^"\'\$]+)["\']', php_code, re.IGNORECASE):
         risk_flags.append("Potential credentials in variable assignments")
 
-    # 9. Diagrams and static metadata
+    # 9. Internal Connect PHP / CRUD API Operations
+    internal_crud_ops = []
+    fetch_matches = set(re.findall(r'RNCPHP\\([a-zA-Z0-9_]+)::fetch\s*\(', php_code))
+    for obj_cls in sorted(fetch_matches):
+        if obj_cls not in ("v1_1", "v1_3", "v1_4", "ConnectAPIError"):
+            internal_crud_ops.append(f"RNCPHP\\{obj_cls}::fetch() [Read/Fetch]")
+
+    if "->save(" in php_code or "->save (" in php_code:
+        internal_crud_ops.append("ConnectAPI Object ->save() [Create/Update]")
+
+    if "ConnectAPI::commit" in php_code:
+        internal_crud_ops.append("RNCPHP\\ConnectAPI::commit() [Transaction Commit]")
+
+    if "->destroy(" in php_code or "->destroy (" in php_code:
+        internal_crud_ops.append("ConnectAPI Object ->destroy() [Delete/Purge]")
+
+    if "ROQL::query" in php_code or "ROQL::queryObject" in php_code:
+        internal_crud_ops.append("RNCPHP\\ROQL::query() [ROQL Database Query]")
+
+    if cf_written_formatted:
+        internal_crud_ops.append(f"Custom Field Mutations ({', '.join(cf_written_formatted[:4])})")
+
+    # 10. Diagrams and static metadata
     diag_meta = generate_cpm_diagrams_and_metadata(php_code, proc_name)
 
     return {
@@ -561,6 +583,7 @@ def analyze_php_content(php_code, proc_name="CPM Procedure"):
         "osvc_objects": filtered_osvc_objects,
         "has_curl": has_curl,
         "risk_flags": risk_flags,
+        "internal_crud_ops": internal_crud_ops,
         "flow_diagram": diag_meta["flow_diagram"],
         "extracted_functions": diag_meta["extracted_functions"],
         "constants_defined": diag_meta["constants_defined"],
@@ -603,6 +626,20 @@ def parse_cpm_object_procedure(file_path):
     # Perform static analysis on PHP code
     analysis = analyze_php_content(php_content, proc_name)
 
+    # Build explicit, object-specific Internal CRUD Operations list (Which Operation on Which Object)
+    internal_crud_ops = list(analysis.get("internal_crud_ops", []))
+    if bound_classes:
+        for b_cls in bound_classes:
+            op_name = operations_label if operations_label and operations_label != "—" else "Execute"
+            primary_op = f"RNCPHP\\{b_cls} {op_name} Operation ($obj->save())"
+            if not any(b_cls in op for op in internal_crud_ops):
+                internal_crud_ops.insert(0, primary_op)
+
+    if not internal_crud_ops:
+        primary_cls = bound_classes[0] if bound_classes else "Entity"
+        op_lbl = operations_label if operations_label and operations_label != "—" else "Handler"
+        internal_crud_ops.append(f"RNCPHP\\{primary_cls} {op_lbl} Operation")
+
     # Capture unhandled elements in CPM XML using capture_unknown_recursive
     from src.parsers.utils import capture_unknown_recursive
     from src.parsers.known_tags_registry import KNOWN_CPM_ALL_TAGS, KNOWN_CPM_ALL_ATTRS
@@ -639,6 +676,7 @@ def parse_cpm_object_procedure(file_path):
         "osvc_objects": analysis["osvc_objects"],
         "has_curl": analysis["has_curl"],
         "risk_flags": analysis["risk_flags"],
+        "internal_crud_ops": internal_crud_ops,
         "flow_diagram": analysis["flow_diagram"],
         "extracted_functions": analysis["extracted_functions"],
         "constants_defined": analysis["constants_defined"],

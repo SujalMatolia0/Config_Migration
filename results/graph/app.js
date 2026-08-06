@@ -6,6 +6,8 @@
 // Initialize Mermaid with neutral theme matching the light dashboard
 mermaid.initialize({
   startOnLoad: false,
+  maxTextSize: 1000000,
+  maxEdges: 5000,
   theme: 'neutral',
   securityLevel: 'loose',
   flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
@@ -238,119 +240,32 @@ function rebuildGraphState() {
   // 4. Add Tier 3 Component Instances if Category Hub is expanded
   nextNodes.forEach(n => {
     if (n.type === "category_hub" && expandedHubs.has(n.id)) {
-      if (n.hubType === "workspace") {
-        // 1. Add Workspace file instances under this module
-        const moduleWorkspaces = GRAPH.nodes.filter(inst => {
-          const mod = getNodeModule(inst).toLowerCase();
-          return mod === n.module.toLowerCase() && inst.type === "workspace";
-        });
-
-        moduleWorkspaces.forEach(inst => {
-          const r = Math.min(30, 22 + (inst.degree || 0) * 1.5);
-          if (!nextNodes.some(m => m.id === inst.id)) {
-            nextNodes.push({ ...inst, r: r });
-          }
-
-          nextEdges.push({
-            id: `edge-${n.id}-to-${inst.id}`,
-            source: n.id,
-            target: inst.id,
-            label: ""
-          });
-        });
-
-        // 2. ALSO add 1 "Workspace Fields" hub node connected directly to the Workspaces hub!
-        const fieldsHubId = `hub:${n.module.toLowerCase()}/workspacefield`;
-        const hasFields = GRAPH.nodes.some(inst => inst.type === "workspacefield" || inst.type === "customfield");
-
-        if (hasFields && !nextNodes.some(m => m.id === fieldsHubId)) {
-          nextNodes.push({
-            id: fieldsHubId,
-            type: "category_hub",
-            label: "Workspace Fields",
-            module: n.module,
-            hubType: "workspacefield",
-            r: 22
-          });
-
-          nextEdges.push({
-            id: `edge-${n.id}-to-${fieldsHubId}`,
-            source: n.id,
-            target: fieldsHubId,
-            label: "fields"
-          });
-        }
-      } else {
-        // Other component types (Reports, CPMs, BUI Add-Ins, Scripts, Rules)
-        const moduleInstances = GRAPH.nodes.filter(inst => {
-          const mod = getNodeModule(inst).toLowerCase();
-          const targetHubType = (n.hubType || "").toLowerCase();
-          const instType = (inst.type || "").toLowerCase();
-          const isMatchingType = instType === targetHubType || 
-            (targetHubType === "cpm" && (instType === "cpm" || instType === "asynccpm")) ||
-            (targetHubType === "buiaddin" && (instType === "buiaddin" || instType === "bui_addin" || instType === "bui"));
-          return mod === n.module.toLowerCase() && isMatchingType;
-        });
-
-        moduleInstances.forEach(inst => {
-          const baseR = inst.type === "object" ? 22 : 14;
-          const r = Math.min(30, baseR + (inst.degree || 0) * 1.5);
-          if (!nextNodes.some(m => m.id === inst.id)) {
-            nextNodes.push({ ...inst, r: r });
-          }
-
-          nextEdges.push({
-            id: `edge-${n.id}-to-${inst.id}`,
-            source: n.id,
-            target: inst.id,
-            label: ""
-          });
-        });
-      }
-    }
-  });
-
-  // 4b. Second pass for category hubs added dynamically (such as Workspace Fields under Workspaces)
-  const extraNodesToAdd = [];
-  nextNodes.forEach(n => {
-    if (n.type === "category_hub" && n.hubType === "workspacefield" && expandedHubs.has(n.id)) {
-      const targetMod = (n.module || "").toLowerCase();
-      const fields = GRAPH.nodes.filter(inst => {
-        if (inst.type !== "workspacefield" && inst.type !== "customfield") return false;
-        
+      const moduleInstances = GRAPH.nodes.filter(inst => {
         const mod = getNodeModule(inst).toLowerCase();
-        const dataMod = (inst.data && (inst.data.module || inst.data.object || inst.data.object_type) || "").toLowerCase();
-        const instLabel = (inst.label || inst.id || "").toLowerCase();
-        const instId = (inst.id || "").toLowerCase();
-
-        if (targetMod !== "other") {
-          if (mod === targetMod || dataMod === targetMod) return true;
-          if (instId.includes(":" + targetMod + ".") || instId.includes(":" + targetMod + ":") || instId.startsWith("workspacefield:" + targetMod)) return true;
-          if (instLabel.startsWith(targetMod + ".")) return true;
-          return false; // STRICT: Do NOT return fields belonging to other modules!
-        }
-        return mod === "other" || dataMod === "other";
+        const targetHubType = (n.hubType || "").toLowerCase();
+        const instType = (inst.type || "").toLowerCase();
+        const isMatchingType = instType === targetHubType || 
+          (targetHubType === "cpm" && (instType === "cpm" || instType === "asynccpm")) ||
+          (targetHubType === "buiaddin" && (instType === "buiaddin" || instType === "bui_addin" || instType === "bui"));
+        return mod === n.module.toLowerCase() && isMatchingType;
       });
 
-      fields.forEach(f => {
-        let fieldType = f.type || "workspacefield";
-        const fLabel = (f.label || f.id || "").toLowerCase();
-        if (fLabel.includes("c$") || fLabel.includes("custom") || fieldType === "customfield" || (f.data && f.data.is_custom)) {
-          fieldType = "customfield";
+      moduleInstances.forEach(inst => {
+        const baseR = inst.type === "object" ? 22 : 14;
+        const r = Math.min(30, baseR + (inst.degree || 0) * 1.5);
+        if (!nextNodes.some(m => m.id === inst.id)) {
+          nextNodes.push({ ...inst, r: r });
         }
-        if (!nextNodes.some(m => m.id === f.id) && !extraNodesToAdd.some(m => m.id === f.id)) {
-          extraNodesToAdd.push({ ...f, type: fieldType, r: 14 });
-        }
+
         nextEdges.push({
-          id: `edge-${n.id}-to-${f.id}`,
+          id: `edge-${n.id}-to-${inst.id}`,
           source: n.id,
-          target: f.id,
-          label: "field"
+          target: inst.id,
+          label: ""
         });
       });
     }
   });
-  nextNodes.push(...extraNodesToAdd);
 
   // 6. Connect cross-component dependency edges if both endpoints are visible
   const visibleNodeIds = new Set(nextNodes.map(n => n.id));
@@ -371,8 +286,6 @@ function rebuildGraphState() {
       let parentNode = null;
       if (n.id.startsWith("hub:")) {
         parentNode = nextNodes.find(m => m.id === `module:${n.module.toLowerCase()}`);
-      } else if (n.type === "workspacefield" || n.type === "customfield") {
-        parentNode = nextNodes.find(m => m.type === "workspace" && (m.module || m.label || "").toLowerCase() === (n.module || "").toLowerCase());
       } else if (n.type !== "module_root") {
         parentNode = nextNodes.find(m => m.id === `hub:${(n.module || 'other').toLowerCase()}/${n.type}`);
       }
@@ -754,12 +667,11 @@ function updateDOM() {
     g.appendChild(t);
 
     // Dedicated [+] / [-] branch expansion toggle badge on parent nodes
-    const isParentNode = n.type === "module_root" || n.type === "category_hub" || n.type === "workspace";
+    const isParentNode = n.type === "module_root" || n.type === "category_hub";
     if (isParentNode) {
       let isExpanded = false;
       if (n.type === "module_root") isExpanded = expandedModules.has(n.id);
       else if (n.type === "category_hub") isExpanded = expandedHubs.has(n.id);
-      else if (n.type === "workspace") isExpanded = expandedWorkspaces.has(n.id);
 
       const toggleGroup = document.createElementNS(NS, "g");
       toggleGroup.setAttribute("class", "node-toggle-badge");
@@ -787,8 +699,6 @@ function updateDOM() {
           expandedModules.has(n.id) ? expandedModules.delete(n.id) : expandedModules.add(n.id);
         } else if (n.type === "category_hub") {
           expandedHubs.has(n.id) ? expandedHubs.delete(n.id) : expandedHubs.add(n.id);
-        } else if (n.type === "workspace") {
-          expandedWorkspaces.has(n.id) ? expandedWorkspaces.delete(n.id) : expandedWorkspaces.add(n.id);
         }
         rebuildGraphState();
         updateDOM();
@@ -1603,12 +1513,59 @@ function extractMermaidCode(markdown, node) {
   return blocks[blocks.length - 1] || blocks[0];
 }
 
+function attachDiagramLegendOverlay(container, isModal = false) {
+  if (!container || container.querySelector(".diagram-vertical-legend")) return;
+
+  const legend = document.createElement("div");
+  legend.className = "diagram-vertical-legend";
+  const topPos = isModal ? "70px" : "10px";
+  const rightPos = isModal ? "24px" : "10px";
+
+  legend.style.cssText = `
+    position: absolute;
+    top: ${topPos};
+    right: ${rightPos};
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(153, 0, 38, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    font-size: 11px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    pointer-events: auto;
+    max-width: 165px;
+  `;
+
+  legend.innerHTML = `
+    <div style="font-weight: 800; color: #990026; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px;">COLOR MAP LEGEND</div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#2563eb;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Rule States</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#7c3aed;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Functions &amp; Rules</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#059669;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Set Field</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">State Transition</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#d97706;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Execute CPM</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#ec4899;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Call Function</span></div>
+    <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#64748b;display:inline-block;flex-shrink:0;"></span><span style="color:#1e293b;font-weight:600;">Other Actions</span></div>
+  `;
+
+  if (getComputedStyle(container).position === "static") {
+    container.style.position = "relative";
+  }
+  container.appendChild(legend);
+}
+
 async function renderMermaidDiagram(container, mermaidCode) {
   try {
     container.innerHTML = `<div style="color:var(--text-muted); font-size:12px; padding:10px;">Generating diagram...</div>`;
     const uniqueId = `mermaid-svg-${++mermaidCount}`;
     const { svg } = await mermaid.render(uniqueId, mermaidCode);
-    container.innerHTML = `<div class="mermaid">${svg}</div>`;
+    container.innerHTML = `<div class="mermaid" style="position:relative;">${svg}</div>`;
+    attachDiagramLegendOverlay(container.querySelector(".mermaid"));
   } catch (err) {
     console.error("Mermaid Render Error:", err);
     container.innerHTML = `<div style="color:#DC2626; padding: 12px; font-size: 12px; border:1px solid rgba(220,38,38,0.2); border-radius:6px; background:#FFF5F5;">
@@ -1776,16 +1733,40 @@ function generateDynamicMermaidForNode(n) {
   const data = n.data || {};
 
   if (ntype === "cpm" || ntype === "asynccpm") {
+    if (data && data.flow_diagram) {
+      return data.flow_diagram;
+    }
     const name = n.label || data.name || n.id;
     const obj = data.object_type || n.module || "Object";
     const evt = data.operations_label || data.script_type || "Event Trigger";
     const isAsync = data.is_async || ntype === "asynccpm" ? "Async Execution Queue" : "Synchronous Event Handler";
     const entry = data.entry_point || "ObjectProcedure::apply";
 
+    code += `  classDef crudNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;\n`;
+    code += `  classDef soapNode fill:#10b981,stroke:#047857,color:#fff;\n\n`;
+
     code += `  subgraph CPM_Proc ["CPM Procedure: ${name}"]\n`;
     code += `    EVT["Trigger Event: ${evt}"] -->|Fires on| OBJ["Entity Object: ${obj}"]\n`;
     code += `    OBJ -->|Executes| PROC["${isAsync}<br/>(Entry: ${entry})"]\n`;
     code += `  end\n\n`;
+
+    const crudOps = data.internal_crud_ops || [];
+    if (crudOps.length) {
+      crudOps.forEach((cop, idx) => {
+        const cId = `CRUD_${idx}`;
+        code += `  ${cId}["CRUD API: ${String(cop).replace(/"/g, "'")}"]:::crudNode\n`;
+        code += `  PROC -->|Executes CRUD| ${cId}\n`;
+      });
+    }
+
+    const soaps = data.soap_actions || [];
+    if (soaps.length) {
+      soaps.forEach((soap, idx) => {
+        const sId = `SOAP_${idx}`;
+        code += `  ${sId}["SOAP Action: ${String(soap).replace(/"/g, "'")}"]:::soapNode\n`;
+        code += `  PROC -->|Outbound Call| ${sId}\n`;
+      });
+    }
 
     let hasLinks = false;
     if (n.inc && n.inc.length) {
@@ -1809,6 +1790,53 @@ function generateDynamicMermaidForNode(n) {
         }
       });
     }
+
+    return code;
+  }
+
+  if (ntype === "businessrule") {
+    const mod = n.module || (data && data.module) || "Incident";
+    code = "flowchart LR\n";
+    code += `  classDef stateNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;\n`;
+    code += `  classDef funcNode fill:#7c3aed,stroke:#5b21b6,color:#fff,font-weight:bold;\n`;
+    code += `  classDef actNode fill:#059669,stroke:#047857,color:#fff;\n`;
+    code += `  classDef actTrans fill:#3b82f6,stroke:#1d4ed8,color:#fff;\n`;
+    code += `  classDef actCpm fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;\n\n`;
+
+    code += `  subgraph Legend ["Color Map Legend"]\n`;
+    code += `    direction TB\n`;
+    code += `    LEG_ST["Blue: Rule States"]:::stateNode\n`;
+    code += `    LEG_FN["Purple: Functions & Rules"]:::funcNode\n`;
+    code += `    LEG_SET["Green: Set Field"]:::actNode\n`;
+    code += `    LEG_TR["Sky Blue: State Trans"]:::actTrans\n`;
+    code += `    LEG_CPM["Orange: Execute CPM"]:::actCpm\n`;
+    code += `    LEG_ST --- LEG_FN\n`;
+    code += `    LEG_FN --- LEG_SET\n`;
+    code += `    LEG_SET --- LEG_TR\n`;
+    code += `    LEG_TR --- LEG_CPM\n`;
+    code += `  end\n\n`;
+
+    code += `  subgraph Tier1 ["1. States (Start)"]\n`;
+    code += `    ST_INIT["State: Initial State"]:::stateNode\n`;
+    code += `    ST_OBJ["State: ${mod} Rules"]:::stateNode\n`;
+    code += `  end\n\n`;
+
+    code += `  subgraph Tier2 ["2. Functions & Rules"]\n`;
+    code += `    FN_ROUTE["Rule/Func: Auto-Route & Assignment"]:::funcNode\n`;
+    code += `    FN_FIELD["Rule/Func: Field Validation & Defaults"]:::funcNode\n`;
+    code += `  end\n\n`;
+
+    code += `  subgraph Tier3 ["3. Related Action Types"]\n`;
+    code += `    ACT_SET["Action: SetField (Status / Queue)"]:::actNode\n`;
+    code += `    ACT_TRANS["Action: TransitionState"]:::actTrans\n`;
+    code += `    ACT_CPM["Action: Execute CPM Handler"]:::actCpm\n`;
+    code += `  end\n\n`;
+
+    code += `  ST_INIT -->|"contains"| FN_ROUTE\n`;
+    code += `  ST_OBJ -->|"contains"| FN_FIELD\n`;
+    code += `  FN_ROUTE -->|"action (SetField)"| ACT_SET\n`;
+    code += `  FN_ROUTE -->|"action (TransitionState)"| ACT_TRANS\n`;
+    code += `  FN_FIELD -->|"action (CPMCall)"| ACT_CPM\n`;
 
     return code;
   }
@@ -1936,10 +1964,45 @@ async function loadDocsAndDiagrams(node) {
     }
   }
 
+function attachAccordionToggleBar(container) {
+  if (!container || container.querySelector(".accordion-toggle-bar")) return;
+  const detailsEls = container.querySelectorAll("details");
+  if (!detailsEls || !detailsEls.length) return;
+
+  const bar = document.createElement("div");
+  bar.className = "accordion-toggle-bar";
+  bar.style.cssText = `
+    display: flex;
+    gap: 10px;
+    margin: 0 0 16px 0;
+    padding: 10px 14px;
+    background: var(--panel2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    align-items: center;
+  `;
+
+  bar.innerHTML = `
+    <span style="font-weight: 700; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>
+    <button class="btn-expand-all" style="background: var(--accent-primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">[+] Expand All Accordions</button>
+    <button class="btn-collapse-all" style="background: var(--text-muted); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">[&minus;] Collapse All Accordions</button>
+  `;
+
+  bar.querySelector(".btn-expand-all").addEventListener("click", () => {
+    container.querySelectorAll("details").forEach(d => d.open = true);
+  });
+  bar.querySelector(".btn-collapse-all").addEventListener("click", () => {
+    container.querySelectorAll("details").forEach(d => d.open = false);
+  });
+
+  container.insertBefore(bar, container.firstChild);
+}
+
   if (mdText) {
     tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
     await renderMermaidBlocksInContainer(tabDoc);
     renderHtmlPreviewsInContainer(tabDoc);
+    attachAccordionToggleBar(tabDoc);
     mermaidCode = extractMermaidCode(mdText, node);
   }
 
@@ -2183,6 +2246,9 @@ function openFullscreenDiagram() {
   const clone = sourceSvg.cloneNode(true);
   clone.style.transition = "transform 0.05s ease-out";
   modalViewport.appendChild(clone);
+
+  // Attach non-intrusive floating vertical legend overlay
+  attachDiagramLegendOverlay(diagramModal, true);
 
   // Center and scale to 1.1x initial size
   modalView = { x: 0, y: 0, k: 1.1 };

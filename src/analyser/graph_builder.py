@@ -226,33 +226,7 @@ def build_graph(components, relationships, orphans, endpoints):
     for ws in components.get("workspaces", []):
         ws_data = dict(ws)
         ws_data["mdPath"] = f"../workspaces/{ws['name'].replace(' ', '_')}/report.md"
-        ws_node_id = add_node("Workspace", ws["name"], ws_data)
-        ws_mod = ws.get("module") or ws.get("object_type") or ws["name"]
-
-        ws_fields = _get_workspace_fields(ws)
-        for f in ws_fields:
-            fname = f.get("field_id") or f.get("label") or f.get("name")
-            if fname and str(fname).strip():
-                field_label = f"{ws_mod}.{fname}" if not str(fname).startswith(f"{ws_mod}.") else fname
-                field_node_id = add_node("WorkspaceField", field_label, {
-                    "name": fname,
-                    "label": field_label,
-                    "object": ws_mod,
-                    "module": ws_mod,
-                    "object_type": ws_mod,
-                    "workspace": ws["name"],
-                    "field_id": fname,
-                    "data": f
-                })
-                edge_key = (ws_node_id, field_node_id, "field")
-                if edge_key not in seen_edges:
-                    seen_edges.add(edge_key)
-                    edges.append({
-                        "id": f"edge-ws-field-{len(edges)}",
-                        "source": ws_node_id,
-                        "target": field_node_id,
-                        "label": "field"
-                    })
+        add_node("Workspace", ws["name"], ws_data)
 
     for rep in components.get("reports", []):
         rep_label = rep.get("name") or f"Report {normalise_id(rep.get('id'))}"

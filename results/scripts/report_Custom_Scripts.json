@@ -12,14 +12,14 @@
         "ROQL"
       ],
       "external_calls": [
-        "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "REST cURL POST/GET: https://js.arcgis.com/4.20/",
         "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css",
-        "REST cURL POST/GET: https://js.arcgis.com/4.20/"
+        "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       ],
       "urls": [
-        "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "https://js.arcgis.com/4.20/",
         "https://js.arcgis.com/4.20/esri/themes/light/main.css",
-        "https://js.arcgis.com/4.20/"
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       ],
       "exposed_routes": [],
       "risk_flags": [
@@ -80,7 +80,7 @@
         {
           "protocol": "REST / HTTP",
           "method": "POST/GET",
-          "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+          "endpoint": "https://js.arcgis.com/4.20/",
           "details": "cURL POST/GET request"
         },
         {
@@ -92,7 +92,7 @@
         {
           "protocol": "REST / HTTP",
           "method": "POST/GET",
-          "endpoint": "https://js.arcgis.com/4.20/",
+          "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
           "details": "cURL POST/GET request"
         }
       ],
@@ -135,7 +135,7 @@
         },
         {
           "stage": "External REST",
-          "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+          "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
         },
         {
           "stage": "External REST",
@@ -143,7 +143,7 @@
         },
         {
           "stage": "External REST",
-          "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
+          "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
         }
       ],
       "has_html": true,
@@ -466,8 +466,8 @@
       ],
       "external_calls": [],
       "urls": [
-        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
       ],
       "exposed_routes": [],
@@ -578,8 +578,8 @@
       ],
       "external_calls": [],
       "urls": [
-        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
       ],
       "exposed_routes": [],

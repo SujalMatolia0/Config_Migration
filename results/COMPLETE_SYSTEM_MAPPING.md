@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-06 14:05:45  
+**Generated**: 2026-08-06 18:13:38  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -68,7 +68,7 @@
 
 ## Consolidated Entity Module Inventory
 
-### Entity Module: Contact (33 Mapped Components)
+### Entity Module: Contact (24 Mapped Components)
 
 #### Module Flowchart: Contact
 
@@ -77,25 +77,21 @@ flowchart LR
   subgraph MOD_Contact ["Module: Contact"]
     N_workspace_contact_test["Contact test (workspace)"]
     N_workspace_contact["Contact (workspace)"]
-    N_workspacefield_contact_title["Contact.Title (workspacefield)"]
-    N_workspacefield_contact_name_first["Contact.Name.First (workspacefield)"]
-    N_workspacefield_contact_name_last["Contact.Name.Last (workspacefield)"]
-    N_workspacefield_contact_addr["Contact.Addr (workspacefield)"]
-    N_workspace_contact -->|"field"| N_workspacefield_contact_title
-    N_workspace_contact -->|"field"| N_workspacefield_contact_name_first
-    N_workspace_contact -->|"field"| N_workspacefield_contact_name_last
-    N_workspace_contact -->|"field"| N_workspacefield_contact_addr
+    N_workspace_new_workspace["New Workspace (workspace)"]
+    N_workspace_real_edge_02_new_workspace_patterns["real_edge_02_new_workspace_patterns (workspace)"]
+    N_workspace_real_edge_03_split_panel_contact["real_edge_03_split_panel_contact (workspace)"]
+    N_report_contacts["Contacts (report)"]
   end
 ```
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Contact` | `object` | `0 in -> 127 out` | Primary OSVC Entity Module Schema Root |
-| `Contact` | `workspace` | `2 in -> 13 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
-| `Contact test` | `workspace` | `3 in -> 15 out` | Bound Object: `Contact` | 0 fields, 6 tabs, 3 rules |
-| `New Workspace` | `workspace` | `1 in -> 12 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 0 rules |
-| `real_edge_02_new_workspace_patterns` | `workspace` | `1 in -> 12 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 1 rules |
-| `real_edge_03_split_panel_contact` | `workspace` | `3 in -> 13 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
+| `Contact` | `object` | `0 in -> 49 out` | Primary OSVC Entity Module Schema Root |
+| `Contact` | `workspace` | `2 in -> 4 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
+| `Contact test` | `workspace` | `3 in -> 8 out` | Bound Object: `Contact` | 0 fields, 6 tabs, 3 rules |
+| `New Workspace` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 0 rules |
+| `real_edge_02_new_workspace_patterns` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 1 rules |
+| `real_edge_03_split_panel_contact` | `workspace` | `3 in -> 4 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
 | `Contacts` | `report` | `3 in -> 0 out` | Report AC_ID: `100008` | 13 columns, 0 tables joined |
 | `contact_create` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_create_internal` | `cpm` | `5 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
@@ -107,48 +103,13 @@ flowchart LR
 | `duplicate_contacts.php` | `customscript` | `3 in -> 0 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
 | `sms_integration 1.php` | `customscript` | `0 in -> 0 out` | PHP Script: `sms_integration 1.php` | 0 functions |
 | `ContactOrgLookupBUIAddin` | `buiaddin` | `4 in -> 12 out` | BUI Extension: `ContactOrgLookupBUIAddin` | Entry: `init.html` | Reads: 10, Writes: 4 |
-| `Contact.Addr` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.C$CustomerId` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `Contact.C$Gender` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `Contact.CtypeId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.Email` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact.first_name` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact.last_name` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.Name.First` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.Name.Last` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact.OrgId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.PhOffice` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.Title` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact Business Rules` | `businessrule` | `2 in -> 2 out` | OSVC Component ID: `businessrule:contact business rules` |
 | `http://209.91.135.228/api/listactivecalls/` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://209.91.135.228/api/listactivecalls/` |
 | `SOAP: RegisterContact` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: registercontact` |
 | `urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:registercontact via custom_cfg_siebel_url` |
-
-### Entity Module: Contact test (7 Mapped Components)
-
-#### Module Flowchart: Contact test
-
-```mermaid
-flowchart LR
-  subgraph MOD_Contact_test ["Module: Contact test"]
-    N_workspacefield_contact_test_name_first["Contact test.Name.First (workspacefield)"]
-    N_workspacefield_contact_test_name_last["Contact test.Name.Last (workspacefield)"]
-    N_workspacefield_contact_test_email["Contact test.Email (workspacefield)"]
-    N_workspacefield_contact_test_orgid["Contact test.OrgId (workspacefield)"]
-    N_workspacefield_contact_test_c_isregistered["Contact test.C$IsRegistered (workspacefield)"]
-    N_workspacefield_contact_test_disabled["Contact test.Disabled (workspacefield)"]
-  end
-```
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `Contact test.C$IsRegistered` | `workspacefield` | `4 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `Contact test.CId` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact test.Disabled` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact test.Email` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact test.Name.First` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact test.Name.Last` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact test.OrgId` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 
 ### Entity Module: General / Unassigned (32 Mapped Components)
 
@@ -160,9 +121,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
-    N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
-    N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
+    N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
+    N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
   end
 ```
 
@@ -201,7 +162,7 @@ flowchart LR
 | `Mappings.xml` | `cpmmappings` | `1 in -> 6 out` | OSVC Component ID: `cpmmappings:mappings.xml` |
 | `SOAP: GetAccounts` | `externalendpoint` | `1 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: getaccounts` |
 
-### Entity Module: Incident (46 Mapped Components)
+### Entity Module: Incident (24 Mapped Components)
 
 #### Module Flowchart: Incident
 
@@ -209,24 +170,19 @@ flowchart LR
 flowchart LR
   subgraph MOD_Incident ["Module: Incident"]
     N_workspace_incident["Incident (workspace)"]
-    N_workspacefield_incident_prodid["Incident.ProdId (workspacefield)"]
-    N_workspacefield_incident_cid["Incident.CId (workspacefield)"]
-    N_workspacefield_incident_status_id["Incident.Status.Id (workspacefield)"]
-    N_workspacefield_incident_subject["Incident.Subject (workspacefield)"]
-    N_workspacefield_incident_chanid["Incident.ChanId (workspacefield)"]
-    N_workspace_incident -->|"field"| N_workspacefield_incident_prodid
-    N_workspace_incident -->|"field"| N_workspacefield_incident_cid
-    N_workspace_incident -->|"field"| N_workspacefield_incident_status_id
-    N_workspace_incident -->|"field"| N_workspacefield_incident_subject
-    N_workspace_incident -->|"field"| N_workspacefield_incident_chanid
+    N_workspace_real_edge_01_nested_tabset["real_edge_01_nested_tabset (workspace)"]
+    N_businessrule_incident_business_rules["Incident Business Rules (businessrule)"]
+    N_customscript_address_validation_php["address_validation.php (customscript)"]
+    N_customscript_bluebox_greencart_validation_php["bluebox_greencart_validation.php (customscript)"]
+    N_customscript_child_incident_create_php["child_incident_create.php (customscript)"]
   end
 ```
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Incident` | `object` | `0 in -> 68 out` | Primary OSVC Entity Module Schema Root |
-| `Incident` | `workspace` | `1 in -> 34 out` | Bound Object: `Incident` | 0 fields, 8 tabs, 2 rules |
-| `real_edge_01_nested_tabset` | `workspace` | `1 in -> 32 out` | Bound Object: `Incident` | 0 fields, 7 tabs, 2 rules |
+| `Incident` | `object` | `0 in -> 23 out` | Primary OSVC Entity Module Schema Root |
+| `Incident` | `workspace` | `1 in -> 10 out` | Bound Object: `Incident` | 0 fields, 8 tabs, 2 rules |
+| `real_edge_01_nested_tabset` | `workspace` | `1 in -> 9 out` | Bound Object: `Incident` | 0 fields, 7 tabs, 2 rules |
 | `incident_back_in_stock_sync` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_create` | `cpm` | `3 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
@@ -237,64 +193,17 @@ flowchart LR
 | `duplicate_incidents.php` | `customscript` | `1 in -> 0 out` | PHP Script: `duplicate_incidents.php` | 0 functions |
 | `eventclock.php` | `customscript` | `0 in -> 0 out` | PHP Script: `eventclock.php` | 0 functions |
 | `SendToSiebelBUIAddin` | `buiaddin` | `1 in -> 5 out` | BUI Extension: `SendToSiebelBUIAddin` | Entry: `init.html` | Reads: 3, Writes: 1 |
-| `Incident.Addr` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Assigned` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.C$Gender` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c$org_id_temp` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c$org_label_temp` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c$siebel_sr_number` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c_id` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.CatId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.ChanId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.CId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
+| `Incident.CId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.CO$Org` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.Created` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Email` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.IId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.InterfaceId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.LangId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Login` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.MailboxId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.MaMailType` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.MaOptIn` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Name.First` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Name.Last` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.PhOffice` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.ProdId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.QueueId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.RefNo` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.SlaiId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Source` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.State` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Status.Id` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.Subject` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
+| `Incident.source` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `/cc/ajaxCustom/addSrToSiebel` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:/cc/ajaxcustom/addsrtosiebel` |
 | `Incident Business Rules` | `businessrule` | `1 in -> 44 out` | OSVC Component ID: `businessrule:incident business rules` |
-
-### Entity Module: New workspace (6 Mapped Components)
-
-#### Module Flowchart: New workspace
-
-```mermaid
-flowchart LR
-  subgraph MOD_New_workspace ["Module: New workspace"]
-    N_workspacefield_new_workspace_c_accountnumber["New Workspace.C$AccountNumber (workspacefield)"]
-    N_workspacefield_new_workspace_phoffice["New Workspace.PhOffice (workspacefield)"]
-    N_workspacefield_new_workspace_orgid["New Workspace.OrgId (workspacefield)"]
-    N_workspacefield_new_workspace_addr["New Workspace.Addr (workspacefield)"]
-    N_workspacefield_new_workspace_c_gender["New Workspace.C$Gender (workspacefield)"]
-    N_workspacefield_new_workspace_email["New Workspace.Email (workspacefield)"]
-  end
-```
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `New Workspace.Addr` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `New Workspace.C$AccountNumber` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `New Workspace.C$Gender` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `New Workspace.Email` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `New Workspace.OrgId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `New Workspace.PhOffice` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 
 ### Entity Module: Organization (7 Mapped Components)
 
@@ -321,101 +230,6 @@ flowchart LR
 | `http://www.siebel.com/ws/fault` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://www.siebel.com/ws/fault` |
 | `http://www.siebel.com/xml/Account` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://www.siebel.com/xml/account` |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:getaccounts via custom_cfg_siebel_url` |
-
-### Entity Module: Real_edge_01_nested_tabset (23 Mapped Components)
-
-#### Module Flowchart: Real_edge_01_nested_tabset
-
-```mermaid
-flowchart LR
-  subgraph MOD_Real_edge_01_nested_tabset ["Module: Real_edge_01_nested_tabset"]
-    N_workspacefield_real_edge_01_nested_tabset_prodid["real_edge_01_nested_tabset.ProdId (workspacefield)"]
-    N_workspacefield_real_edge_01_nested_tabset_cid["real_edge_01_nested_tabset.CId (workspacefield)"]
-    N_workspacefield_real_edge_01_nested_tabset_status_id["real_edge_01_nested_tabset.Status.Id (workspacefield)"]
-    N_workspacefield_real_edge_01_nested_tabset_subject["real_edge_01_nested_tabset.Subject (workspacefield)"]
-    N_workspacefield_real_edge_01_nested_tabset_chanid["real_edge_01_nested_tabset.ChanId (workspacefield)"]
-    N_workspacefield_real_edge_01_nested_tabset_catid["real_edge_01_nested_tabset.CatId (workspacefield)"]
-  end
-```
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `real_edge_01_nested_tabset.Addr` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Assigned` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.C$Gender` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.CatId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.ChanId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.CId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Email` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.InterfaceId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.LangId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Login` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.MailboxId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.MaMailType` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.MaOptIn` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Name.First` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Name.Last` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.PhOffice` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.ProdId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.QueueId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.SlaiId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Source` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.State` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Status.Id` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_01_nested_tabset.Subject` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-
-### Entity Module: Real_edge_02_new_workspace_patterns (6 Mapped Components)
-
-#### Module Flowchart: Real_edge_02_new_workspace_patterns
-
-```mermaid
-flowchart LR
-  subgraph MOD_Real_edge_02_new_workspace_patterns ["Module: Real_edge_02_new_workspace_patterns"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_c_accountnumber["real_edge_02_new_workspace_patterns.C$AccountNumber (workspacefield)"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_phoffice["real_edge_02_new_workspace_patterns.PhOffice (workspacefield)"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_orgid["real_edge_02_new_workspace_patterns.OrgId (workspacefield)"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_addr["real_edge_02_new_workspace_patterns.Addr (workspacefield)"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_c_gender["real_edge_02_new_workspace_patterns.C$Gender (workspacefield)"]
-    N_workspacefield_real_edge_02_new_workspace_patterns_email["real_edge_02_new_workspace_patterns.Email (workspacefield)"]
-  end
-```
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `real_edge_02_new_workspace_patterns.Addr` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_02_new_workspace_patterns.C$AccountNumber` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `real_edge_02_new_workspace_patterns.C$Gender` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `real_edge_02_new_workspace_patterns.Email` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_02_new_workspace_patterns.OrgId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_02_new_workspace_patterns.PhOffice` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-
-### Entity Module: Real_edge_03_split_panel_contact (9 Mapped Components)
-
-#### Module Flowchart: Real_edge_03_split_panel_contact
-
-```mermaid
-flowchart LR
-  subgraph MOD_Real_edge_03_split_panel_contact ["Module: Real_edge_03_split_panel_contact"]
-    N_workspacefield_real_edge_03_split_panel_contact_title["real_edge_03_split_panel_contact.Title (workspacefield)"]
-    N_workspacefield_real_edge_03_split_panel_contact_name_first["real_edge_03_split_panel_contact.Name.First (workspacefield)"]
-    N_workspacefield_real_edge_03_split_panel_contact_name_last["real_edge_03_split_panel_contact.Name.Last (workspacefield)"]
-    N_workspacefield_real_edge_03_split_panel_contact_addr["real_edge_03_split_panel_contact.Addr (workspacefield)"]
-    N_workspacefield_real_edge_03_split_panel_contact_phoffice["real_edge_03_split_panel_contact.PhOffice (workspacefield)"]
-    N_workspacefield_real_edge_03_split_panel_contact_c_customerid["real_edge_03_split_panel_contact.C$CustomerId (workspacefield)"]
-  end
-```
-
-| Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
-| :--- | :--- | :---: | :--- |
-| `real_edge_03_split_panel_contact.Addr` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.C$CustomerId` | `workspacefield` | `4 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.C$Gender` | `workspacefield` | `4 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.CtypeId` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.Email` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.Name.First` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.Name.Last` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.PhOffice` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `real_edge_03_split_panel_contact.Title` | `workspacefield` | `4 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 
 ### Entity Module: Test_Record (1 Mapped Components)
 
@@ -508,12 +322,12 @@ flowchart LR
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/queryResults (Organizations)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |

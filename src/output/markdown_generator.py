@@ -1797,6 +1797,14 @@ def build_procedure_accordion_block(p, mapped_procedures_map, workspace_field_re
     else:
         lines.append("- **SOAP Actions**: None")
 
+    crud_ops = p.get("internal_crud_ops", [])
+    if not crud_ops and bound_str and bound_str != "None":
+        crud_ops = [f"RNCPHP\\{bound_str} {p.get('operations_label', 'Handler')} Operation ($obj->save())"]
+    if crud_ops:
+        lines.append(f"- **Internal CRUD / Connect PHP API Operations**: {', '.join(f'`{c}`' for c in crud_ops)}")
+    else:
+        lines.append(f"- **Internal CRUD / Connect PHP API Operations**: `RNCPHP\\Entity Object Operation`")
+
     cvars = p.get("config_vars", [])
     if cvars:
         lines.append(f"- **Config Settings / Variables**: {', '.join(f'`{c}`' for c in cvars)}")
@@ -1879,30 +1887,17 @@ def build_procedure_accordion_block(p, mapped_procedures_map, workspace_field_re
     lines.append('<div align="center">')
     lines.append("")
     lines.append("```mermaid")
-    lines.append("graph LR")
-    lines.append("  classDef proc fill:#a855f7,stroke:#7e22ce,stroke-width:1px,color:#fff;")
-    lines.append("  classDef asyncProc fill:#ec4899,stroke:#be185d,stroke-width:1px,color:#fff;")
-    lines.append("  classDef soap fill:#10b981,stroke:#047857,stroke-width:1px,color:#fff;")
-    lines.append("  classDef obj fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;")
-    lines.append("  classDef field fill:#3b82f6,stroke:#1d4ed8,stroke-width:1px,color:#fff;")
-    lines.append("")
-    lines.append(f'  O_OBJ["OSVC Object: {bound_str}"]:::obj')
-    safe_p = "".join(c if c.isalnum() else "_" for c in p_name)
-    proc_cls = "asyncProc" if is_async else "proc"
-    lines.append(f'  P_{safe_p}["CPM Handler: {p_name}"]:::{proc_cls}')
-    lines.append(f'  O_OBJ -->|Triggers On {p.get("operations_label", "Event")}| P_{safe_p}')
-
-    for soap in p.get("soap_actions", []):
-        safe_s = "".join(c if c.isalnum() else "_" for c in str(soap))
-        lines.append(f'  S_{safe_s}["SOAP Action: {soap}"]:::soap')
-        lines.append(f'  P_{safe_p} -->|Outbound Call| S_{safe_s}')
-
-    for cf in proc_cf_rows:
-        if cf["field"] and cf["field"] != "None":
-            safe_f = "".join(c if c.isalnum() else "_" for c in str(cf["field"]))
-            lines.append(f'  F_{safe_f}["Field: {cf["field"]} ({cf["workspace"]})"]:::field')
-            lines.append(f'  P_{safe_p} -->|{cf["mode"]}| F_{safe_f}')
-
+    if p.get("flow_diagram"):
+        lines.append(p["flow_diagram"])
+    else:
+        lines.append("graph TD")
+        lines.append(f'  START["apply() called for {p_name}"]')
+        safe_p = "".join(c if c.isalnum() else "_" for c in p_name)
+        for idx_c, crud_op in enumerate(p.get("internal_crud_ops", []), start=1):
+            lines.append(f'  START --> CRUD_{idx_c}["{crud_op}"]')
+        for soap in p.get("soap_actions", []):
+            lines.append(f'  START --> SOAP_{soap}["SOAP Action: {soap}"]')
+        lines.append('  START --> END["Exit"]')
     lines.append("```")
     lines.append("")
     lines.append("</div>")
@@ -2778,6 +2773,136 @@ def clean_cell(text):
     cleaned = str(text).replace("\r\n", "<br>").replace("\n", "<br>").replace("\r", "<br>").replace("|", "\\|")
     return cleaned.strip()
 
+def build_business_rules_multi_stage_flowchart(rules, obj_name=None):
+    """
+    Generates a 3-tier Mermaid flowchart for Business Rules with per-rule action nodes
+    and a clean Color Map Legend on the LEFT SIDE of States:
+    - Far Left: Color Map Legend (positioned to the left of States via invisible layout link)
+    - Tier 1: States (at start)
+    - Tier 2: Functions & Rules (mapped from parent state)
+    - Tier 3: Related Action Types (dedicated per function/rule for clear linear tracing)
+    """
+    flow_lines = []
+    flow_lines.append("```mermaid")
+    flow_lines.append("graph LR")
+    flow_lines.append("  classDef stateNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;")
+    flow_lines.append("  classDef funcNode fill:#7c3aed,stroke:#5b21b6,color:#fff,font-weight:bold;")
+    flow_lines.append("  classDef actSetField fill:#059669,stroke:#047857,color:#fff;")
+    flow_lines.append("  classDef actStateTrans fill:#3b82f6,stroke:#1d4ed8,color:#fff;")
+    flow_lines.append("  classDef actCpm fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
+    flow_lines.append("  classDef actFunc fill:#ec4899,stroke:#be185d,color:#fff;")
+    flow_lines.append("  classDef actOther fill:#64748b,stroke:#334155,color:#fff;")
+
+    # Color Map Legend Subgraph on the LEFT SIDE (no lines between items)
+    flow_lines.append('  subgraph Legend ["Color Map Legend"]')
+    flow_lines.append('    LEG_ST["Blue: Rule States"]:::stateNode')
+    flow_lines.append('    LEG_FN["Purple: Functions & Rules"]:::funcNode')
+    flow_lines.append('    LEG_SET["Green: Set Field"]:::actSetField')
+    flow_lines.append('    LEG_TR["Sky Blue: State Trans"]:::actStateTrans')
+    flow_lines.append('    LEG_CPM["Orange: Execute CPM"]:::actCpm')
+    flow_lines.append('    LEG_FUNC["Pink: Call Function"]:::actFunc')
+    flow_lines.append('    LEG_OTH["Slate: Other Actions"]:::actOther')
+    flow_lines.append('  end')
+    flow_lines.append("")
+
+    state_nodes = set()
+    func_nodes = set()
+    action_nodes = set()
+
+    state_to_func_edges = set()
+    func_to_action_edges = set()
+    first_state_id = None
+
+    for idx, r in enumerate(rules[:25], start=1):
+        gname = r.get("group_name") or r.get("group_type") or "Initial State"
+        s_id = "ST_" + re.sub(r"\W+", "_", gname)
+        if first_state_id is None:
+            first_state_id = s_id
+        state_nodes.add((s_id, gname))
+
+        r_name = r.get("name") or f"Rule_{idx}"
+        f_id = "FN_" + re.sub(r"\W+", "_", f"{gname}_{r_name}")
+        func_nodes.add((f_id, r_name, gname))
+
+        state_to_func_edges.add((s_id, f_id))
+
+        act_map = r.get("actions_by_type", {})
+        actions_raw = r.get("actions_raw", [])
+
+        if act_map:
+            for atype, act_list in act_map.items():
+                if not act_list: continue
+                first_act = act_list[0].replace("Then >", "").replace("Else >", "").strip()
+                if len(first_act) > 26: first_act = first_act[:23] + "..."
+                cnt_str = f" ({len(act_list)}x)" if len(act_list) > 1 else ""
+                alabel = f"{atype}: {first_act}{cnt_str}" if first_act else f"Action: {atype}"
+                
+                a_id = "ACT_" + re.sub(r"\W+", "_", f"{f_id}_{atype}")
+                action_nodes.add((a_id, alabel, atype))
+                func_to_action_edges.add((f_id, a_id))
+        elif actions_raw:
+            seen_types = Counter()
+            for sa in actions_raw:
+                sa_clean = sa.replace("Then >", "").replace("Else >", "").strip()
+                if not sa_clean: continue
+                atype = "Other"
+                if "Set Field" in sa_clean: atype = "SetField"
+                elif "Transition State" in sa_clean: atype = "TransitionState"
+                elif "Execute Object Event Handler" in sa_clean: atype = "CPMCall"
+                elif "Call Function" in sa_clean: atype = "FunctionCall"
+                seen_types[atype] += 1
+
+            for atype, count in seen_types.items():
+                cnt_str = f" ({count}x)" if count > 1 else ""
+                alabel = f"Action: {atype}{cnt_str}"
+                a_id = "ACT_" + re.sub(r"\W+", "_", f"{f_id}_{atype}")
+                action_nodes.add((a_id, alabel, atype))
+                func_to_action_edges.add((f_id, a_id))
+
+    # Tier 1: States (at start)
+    flow_lines.append('  subgraph Tier1_States ["1. States (Start)"]')
+    for s_id, s_name in sorted(state_nodes):
+        clean_sname = clean_cell(s_name).replace('"', "'")
+        flow_lines.append(f'    {s_id}["State: {clean_sname}"]:::stateNode')
+    flow_lines.append("  end")
+    flow_lines.append("")
+
+    # Tier 2: Functions & Rules
+    flow_lines.append('  subgraph Tier2_Functions ["2. Functions & Rules"]')
+    for f_id, f_name, s_name in sorted(func_nodes):
+        clean_fname = clean_cell(f_name).replace('"', "'")
+        flow_lines.append(f'    {f_id}["Rule/Func: {clean_fname}"]:::funcNode')
+    flow_lines.append("  end")
+    flow_lines.append("")
+
+    # Tier 3: Action Types
+    flow_lines.append('  subgraph Tier3_Actions ["3. Related Action Types"]')
+    for a_id, a_label, a_type in sorted(action_nodes):
+        style_cls = "actOther"
+        if a_type == "SetField": style_cls = "actSetField"
+        elif "TransitionState" in a_type: style_cls = "actStateTrans"
+        elif a_type == "CPMCall": style_cls = "actCpm"
+        elif a_type == "FunctionCall": style_cls = "actFunc"
+        clean_label = clean_cell(a_label).replace('"', "'")
+        flow_lines.append(f'    {a_id}["{clean_label}"]:::{style_cls}')
+    flow_lines.append("  end")
+    flow_lines.append("")
+
+    # Invisible layout constraint to force Legend onto the LEFT side of Tier1_States
+    if first_state_id:
+        flow_lines.append(f'  LEG_ST ~~~ {first_state_id}')
+
+    # Connections: State -> Function
+    for s_id, f_id in sorted(state_to_func_edges):
+        flow_lines.append(f'  {s_id} -->|"contains"| {f_id}')
+
+    # Connections: Function -> Action
+    for f_id, a_id in sorted(func_to_action_edges):
+        flow_lines.append(f'  {f_id} -->|"action"| {a_id}')
+
+    flow_lines.append("```")
+    return "\n".join(flow_lines)
+
 def generate_business_rules_report_markdown(rule_sets):
     """
     Generates a highly structured, Object-first OSVC Business Rules Report.
@@ -2949,26 +3074,22 @@ def generate_business_rules_report_markdown(rule_sets):
         lines.append(f"| **{clean_cell(obj_name)}** | {len(obj_rules)} | {obj_en} | {obj_dis} | {clean_cell(top_actions)} | {csv_link} |")
     lines.append("")
 
-    # ── 2. System Architecture Flowcharts ───────────────────────────────────
-    lines.append("## 2. Object Level System Architecture Flowchart")
-    lines.append("The diagram below illustrates incident and contact object lifecycle flow and CPM event handler triggers:")
+    # ── 2. System Architecture Flowcharts (Active Rules Only) ────────────────
+    active_all_rules = [r for r in all_rules if r.get("active", True)]
+    lines.append("## 2. Business Rules System Architecture Flowchart")
+    lines.append("The multi-tier architecture diagram below displays all Active Business Rule States at start, mapped to contained Functions & Rules, and their executed Action Types (with Color Coding Map Legend on the side):")
     lines.append("")
-    lines.append("```mermaid")
-    lines.append("graph TD")
-    lines.append("  classDef objNode fill:#2563eb,stroke:#1d4ed8,color:#fff,font-weight:bold;")
-    lines.append("  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
-    lines.append("  classDef actNode fill:#059669,stroke:#047857,color:#fff;")
-    for obj_name, obj_rules in rules_by_object.items():
-        node_id = f"OBJ_{obj_name}"
-        lines.append(f"  {node_id}[\"Object: {obj_name} ({len(obj_rules)} Rules)\"]:::objNode")
-    for (from_g, cpm_h), cnt in cpm_calls.most_common(8):
-        c_node = cpm_h.replace("-", "_").replace(" ", "_")
-        lines.append(f"  OBJ_Incident -->|\"Executes ({cnt}x)\"| {c_node}[\"{cpm_h}\"]:::cpmNode")
-    lines.append("```")
+    lines.append(build_business_rules_multi_stage_flowchart(active_all_rules))
     lines.append("")
 
     # ── 3. Object Accordions with Sub-Groups by Action Type ────────────────
     lines.append("## 3. Business Rules Breakdown by Object & Action Type")
+    lines.append("")
+    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 10px; align-items: center;">')
+    lines.append('  <span style="font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[+] Expand All Accordions</button>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background:#64748b; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[&minus;] Collapse All Accordions</button>')
+    lines.append('</div>')
     lines.append("")
 
     action_order = [
@@ -2978,8 +3099,12 @@ def generate_business_rules_report_markdown(rule_sets):
     ]
 
     for obj_name, obj_rules in sorted(rules_by_object.items(), key=lambda x: len(x[1]), reverse=True):
+        active_obj_rules = [r for r in obj_rules if r.get("active", True)]
+        if not active_obj_rules:
+            continue
+
         lines.append(f"<details open>")
-        lines.append(f"  <summary style=\"font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;\">Object: {obj_name} ({len(obj_rules)} Rules)</summary>")
+        lines.append(f"  <summary style=\"font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;\">Object: {obj_name} ({len(active_obj_rules)} Active Rules)</summary>")
         lines.append("")
 
         # Sub-field flowchart for this object
@@ -2999,9 +3124,9 @@ def generate_business_rules_report_markdown(rule_sets):
             lines.append("```")
             lines.append("")
 
-        # Group rules by Action Type
+        # Group active rules by Action Type
         rules_by_action = defaultdict(list)
-        for r in obj_rules:
+        for r in active_obj_rules:
             act_map = r.get("actions_by_type", {})
             if not act_map:
                 rules_by_action["Other"].append(r)
@@ -3015,7 +3140,7 @@ def generate_business_rules_report_markdown(rule_sets):
                 continue
 
             lines.append(f"  <details open>")
-            lines.append(f"    <summary style=\"font-weight: 600; font-size: 15px; cursor: pointer;\">Action Type: {atype} ({len(a_rules)} Rules)</summary>")
+            lines.append(f"    <summary style=\"font-weight: 600; font-size: 15px; cursor: pointer;\">Action Type: {atype} ({len(a_rules)} Active Rules)</summary>")
             lines.append("")
             lines.append(f"Export CSV: `{obj_name}_{atype}.csv`")
             lines.append("")
@@ -3024,11 +3149,10 @@ def generate_business_rules_report_markdown(rule_sets):
             for r in a_rules:
                 gname = r.get("group_name") or "General"
                 rname = r.get("name") or "Rule"
-                st_str = "Enabled" if r.get("active", True) else "Disabled"
                 cond_str = clean_cell(r.get("condition_raw") or "If ()")
                 act_list = r.get("actions_by_type", {}).get(atype, r.get("actions_raw", []))
                 act_str = clean_cell(" | ".join(act_list))
-                lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | {st_str} | {cond_str} | {act_str} |")
+                lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | Active | {cond_str} | {act_str} |")
             lines.append("")
             lines.append("  </details>")
             lines.append("")
@@ -3047,16 +3171,15 @@ def generate_business_rules_report_markdown(rule_sets):
         lines.append(f"| **{atype}** | {cnt} | {pct:.1f}% |")
     lines.append("")
 
-    # ── 5. Disabled Rules Cleanup ───────────────────────────────────────────
-    lines.append("## 5. Disabled Rules Cleanup Review")
+    # ── 5. Disabled & Inactive Business Rules ──────────────────────────────
+    lines.append("## 5. Disabled & Inactive Business Rules")
     lines.append("")
-    lines.append("<details>")
-    lines.append(f"  <summary style=\"font-weight: 600; font-size: 16px; cursor: pointer;\">Review Disabled Rules ({len(disabled_rules)} Rules)</summary>")
+    lines.append("The following business rules are currently **disabled or inactive** in the OSVC configuration. They are removed from active workflow diagrams and tables above:")
     lines.append("")
-    lines.append("| Object | Rule Group | Rule Name | Description |")
-    lines.append("|---|---|---|---|")
+    lines.append("| OSVC Object | Rule Group | Rule Name | Description | Status |")
+    lines.append("|---|---|---|---|---|")
     for obj_name, gname, rname, desc in disabled_rules:
-        lines.append(f"| {clean_cell(obj_name)} | {clean_cell(gname)} | {clean_cell(rname)} | {clean_cell(desc)} |")
+        lines.append(f"| {clean_cell(obj_name)} | {clean_cell(gname)} | {clean_cell(rname)} | {clean_cell(desc)} | Inactive |")
     lines.append("")
     lines.append("</details>")
     lines.append("")
@@ -3066,18 +3189,21 @@ def generate_business_rules_report_markdown(rule_sets):
 def generate_single_object_business_rules_markdown(obj_name, obj_rules):
     """
     Generates a dedicated standalone Business Rules Markdown report for a single OSVC Object.
+    Active rules are presented in active flowcharts and tables; disabled rules are isolated at the end.
     """
     lines = []
     total_rules = len(obj_rules)
-    enabled_count = sum(1 for r in obj_rules if r.get("active", True))
-    disabled_count = total_rules - enabled_count
+    active_rules = [r for r in obj_rules if r.get("active", True)]
+    disabled_rules = [r for r in obj_rules if not r.get("active", True)]
+    enabled_count = len(active_rules)
+    disabled_count = len(disabled_rules)
 
     action_counts = Counter()
     cpm_calls = Counter()
     state_transitions = Counter()
     rules_by_action = defaultdict(list)
 
-    for r in obj_rules:
+    for r in active_rules:
         gname = r.get("group_name") or "General"
         for st in r.get("state_transitions", []):
             state_transitions[(gname, st)] += 1
@@ -3099,7 +3225,7 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
     lines.append("")
 
     lines.append("> [!NOTE]")
-    lines.append(f"> **Entity Focus**: Dedicated report for OSVC Object **`{obj_name}`**. Contains action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.")
+    lines.append(f"> **Entity Focus**: Dedicated report for OSVC Object **`{obj_name}`**. Contains active action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.")
     lines.append("")
 
     # 1. Summary Matrix
@@ -3109,32 +3235,27 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
     lines.append("|---|---|")
     lines.append(f"| Target Object | **{clean_cell(obj_name)}** |")
     lines.append(f"| Total Rules | {total_rules} |")
-    lines.append(f"| Enabled Rules | {enabled_count} |")
+    lines.append(f"| Active Rules | {enabled_count} |")
     lines.append(f"| Disabled Rules | {disabled_count} |")
     lines.append(f"| Action Breakdown | {clean_cell(', '.join([f'{a}: {c}' for a, c in action_counts.most_common()]))} |")
     lines.append(f"| CSV Exports | `results/csv/rules/{obj_name}_*.csv` |")
     lines.append("")
 
-    # 2. Sub-Field Lifecycle Flowchart
-    if state_transitions or cpm_calls:
-        lines.append(f"## 2. {obj_name} Sub-Field Lifecycle Flowchart")
-        lines.append("")
-        lines.append("```mermaid")
-        lines.append("graph LR")
-        lines.append("  classDef stNode fill:#3b82f6,stroke:#1d4ed8,color:#fff;")
-        lines.append("  classDef cpmNode fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;")
-        for (from_g, st_target), cnt in state_transitions.most_common(8):
-            f_n = from_g.replace("-", "_").replace(" ", "_")
-            t_n = st_target.replace("-", "_").replace(" ", "_")
-            lines.append(f"  {f_n}[\"{from_g}\"] -->|\"{cnt} transitions\"| {t_n}[\"{st_target}\"]:::stNode")
-        for cpm_h, cnt in cpm_calls.most_common(8):
-            c_n = cpm_h.replace("-", "_").replace(" ", "_")
-            lines.append(f"  OBJ_{obj_name}[\"{obj_name}\"] -->|\"CPM Call ({cnt}x)\"| {c_n}[\"{cpm_h}\"]:::cpmNode")
-        lines.append("```")
-        lines.append("")
+    # 2. Business Rules Architecture Flowchart (Active Rules Only)
+    lines.append(f"## 2. {obj_name} Business Rules Architecture Flowchart")
+    lines.append(f"The multi-stage architecture flowchart below displays all Active States defined for **`{obj_name}`** at start, mapped to Functions & Rules, and their executed Action Types (with Color Coding Map Legend on the side):")
+    lines.append("")
+    lines.append(build_business_rules_multi_stage_flowchart(active_rules, obj_name))
+    lines.append("")
 
-    # 3. Action Type Sub-Accordions
+    # 3. Action Type Sub-Accordions (Active Rules Only)
     lines.append(f"## 3. Business Rules Breakdown by Action Type")
+    lines.append("")
+    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 10px; align-items: center;">')
+    lines.append('  <span style="font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[+] Expand All Accordions</button>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background:#64748b; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[&minus;] Collapse All Accordions</button>')
+    lines.append('</div>')
     lines.append("")
 
     action_order = [
@@ -3149,7 +3270,7 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
             continue
 
         lines.append(f"<details open>")
-        lines.append(f"  <summary style=\"font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;\">Action Type: {atype} ({len(a_rules)} Rules)</summary>")
+        lines.append(f"  <summary style=\"font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;\">Action Type: {atype} ({len(a_rules)} Active Rules)</summary>")
         lines.append("")
         lines.append(f"Export CSV: `{obj_name}_{atype}.csv`")
         lines.append("")
@@ -3158,13 +3279,32 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
         for r in a_rules:
             gname = r.get("group_name") or "General"
             rname = r.get("name") or "Rule"
-            st_str = "Enabled" if r.get("active", True) else "Disabled"
             cond_str = clean_cell(r.get("condition_raw") or "If ()")
             act_list = (r.get("actions_by_type") or {}).get(atype, r.get("actions_raw", []))
             act_str = clean_cell(" | ".join(act_list))
-            lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | {st_str} | {cond_str} | {act_str} |")
+            lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | Active | {cond_str} | {act_str} |")
         lines.append("")
         lines.append("</details>")
+        lines.append("")
+
+    # 4. Disabled & Inactive Business Rules at bottom
+    lines.append("## 4. Disabled & Inactive Business Rules")
+    lines.append("")
+    if disabled_rules:
+        lines.append(f"The following **{len(disabled_rules)} business rules** for object **`{obj_name}`** are currently **disabled or inactive**. They are removed from the active workflow diagrams and tables above:")
+        lines.append("")
+        lines.append("| Rule Group | Rule Name | Status | Condition | Action Text |")
+        lines.append("|---|---|---|---|---|")
+        for r in disabled_rules:
+            gname = r.get("group_name") or "General"
+            rname = r.get("name") or "Rule"
+            cond_str = clean_cell(r.get("condition_raw") or "If ()")
+            act_list = r.get("actions_raw", [])
+            act_str = clean_cell(" | ".join(act_list))
+            lines.append(f"| {clean_cell(gname)} | {clean_cell(rname)} | Inactive | {cond_str} | {act_str} |")
+        lines.append("")
+    else:
+        lines.append(f"No disabled or inactive business rules detected for object **`{obj_name}`**.")
         lines.append("")
 
     return "\n".join(lines)

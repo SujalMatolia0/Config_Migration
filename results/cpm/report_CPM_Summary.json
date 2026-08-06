@@ -101,7 +101,7 @@
       ],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "Parses email headers and subject lines for reference numbers and customer identifiers via regex. Queries external Siebel SOAP web services (`RegisterContact`). Instantiates and updates OSVC Connect API objects (`Configuration`, `Contact`, `MailMessage`, `MessageBase`, ...).",
+      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code primarily handles the registration of contacts in Siebel through a SOAP request, and it logs and handles any errors that occur during this process. The code uses the Connect PHP API to interact with the Oracle Service Cloud and implements an object event handler to update contacts, sending a SOAP request to Siebel to register the contact and handling any exceptions or errors that may arise.",
       "urls": [
         "http://www.siebel.com/ws/fault"
       ],
@@ -116,6 +116,12 @@
       ],
       "has_curl": true,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Configuration::fetch() [Read/Fetch]",
+        "RNCPHP\\Contact::fetch() [Read/Fetch]",
+        "RNCPHP\\MessageBase::fetch() [Read/Fetch]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for ContactAsync\"]\n  START --> CALL_1[\"self::sendSiebelExceptionEmail()\"]\n  CALL_1 --> CALL_2[\"self::setRegisterinSiebel()\"]\n  CALL_2 --> SAVE_4[\"Save Record\"]\n  CALL_2 -.->|Exception| ERR_EX_3[\"Catch ConnectAPIError\"]\n  ERR_EX_3 --> SAVE_4\n  SAVE_4 --> EXIT_5[\"Exit\"]",
       "extracted_functions": [
         "apply",
@@ -157,7 +163,7 @@
       "config_vars": [],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).",
+      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code is designed to handle the creation of new contacts, setting the contact's login to their primary email address and creating a social user account with a display name based on the contact's first name or email address. The code includes error handling and a test harness to validate the functionality of the contact creation process.",
       "urls": [],
       "imports": [],
       "osvc_objects": [
@@ -169,6 +175,11 @@
       ],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Contact Create Operation ($obj->save())",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for contact_create\"]\n  START --> SAVE_1[\"Save Record\"]\n  START -.->|Exception| ERR_EX_2[\"Catch ConnectAPIError\"]\n  ERR_EX_2 --> SAVE_1\n  SAVE_1 --> EXIT_3[\"Exit\"]",
       "extracted_functions": [
         "apply"
@@ -215,6 +226,11 @@
       ],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Contact Create Operation ($obj->save())",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for contact_create_internal\"]\n  START --> SAVE_1[\"Save Record\"]\n  START -.->|Exception| ERR_EX_2[\"Catch ConnectAPIError\"]\n  ERR_EX_2 --> SAVE_1\n  SAVE_1 --> EXIT_3[\"Exit\"]",
       "extracted_functions": [
         "apply"
@@ -266,6 +282,14 @@
       ],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Contact Update Operation ($obj->save())",
+        "RNCPHP\\Organization::fetch() [Read/Fetch]",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]",
+        "RNCPHP\\ROQL::query() [ROQL Database Query]",
+        "Custom Field Mutations (c$org_id_temp)"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for contact_update\"]\n  START --> CALL_SET_ORG_1[\"self::setPrimaryOrgId() - ROQL Query Contact org_id_temp and CO.ContactOrgJoin\"]\n  CALL_SET_ORG_1 --> CALL_UPD_COJ_2[\"self::updateContactOrgJoin()\"]\n  CALL_UPD_COJ_2 --> SAVE_3[\"Save Record\"]\n  SAVE_3 --> EXIT_4[\"Exit\"]",
       "extracted_functions": [
         "apply",
@@ -319,6 +343,13 @@
       ],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Contact Update Operation ($obj->save())",
+        "RNCPHP\\Organization::fetch() [Read/Fetch]",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]",
+        "RNCPHP\\ROQL::query() [ROQL Database Query]"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for contact_update_internal\"]\n  START --> CALL_SET_ORG_1[\"self::setPrimaryOrgId() - ROQL Query Contact org_id_temp and CO.ContactOrgJoin\"]\n  CALL_SET_ORG_1 --> CALL_UPD_COJ_2[\"self::updateContactOrgJoin()\"]\n  CALL_UPD_COJ_2 --> SAVE_3[\"Save Record\"]\n  SAVE_3 --> EXIT_4[\"Exit\"]",
       "extracted_functions": [
         "apply",
@@ -363,6 +394,10 @@
       "osvc_objects": [],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Incident Create Operation ($obj->save())",
+        "Custom Field Mutations (c$oos_status)"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for incident_back_in_stock_sync\"]",
       "extracted_functions": [
         "apply"
@@ -434,6 +469,15 @@
       ],
       "has_curl": false,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Incident::fetch() [Read/Fetch]",
+        "RNCPHP\\MessageBase::fetch() [Read/Fetch]",
+        "RNCPHP\\ServiceMailBox::fetch() [Read/Fetch]",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]",
+        "RNCPHP\\ROQL::query() [ROQL Database Query]",
+        "Custom Field Mutations (c$token)"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for incident_create\"]\n  START --> SRC_DECISION_1{\"Check Entry Source\"}\n  SRC_DECISION_1 -->|Techmail Source| PROC_TECHMAIL_2[\"Parse Mail Header and Subject - ROQL Lookup Org by Customer or Ref Number\"]\n  PROC_TECHMAIL_2 --> SAVE_T_3[\"Save Record\"]\n  SAVE_T_3 --> EXIT_T_4[\"Exit\"]\n  SRC_DECISION_1 -->|AAQ or Portal Source| PROC_AAQ_5[\"ROQL Lookup Org ID from Incident\"]\n  PROC_AAQ_5 --> REQ_DECISION_6{\"Fork on request_type\"}\n  REQ_DECISION_6 -->|CSC_USER_MANAGEMENT| BRANCH_7[\"Process CSC User Management Logic\"]\n  BRANCH_7 --> CALL_EMAIL_8[\"self::sendEmail()\"]\n  CALL_EMAIL_8 --> SAVE_B_9[\"Save Record\"]\n  SAVE_B_9 --> EXIT_B_10[\"Exit\"]\n  REQ_DECISION_6 -->|VPN_REQUEST| BRANCH_11[\"Process VPN Request Logic\"]\n  BRANCH_11 --> CALL_EMAIL_12[\"self::sendEmail()\"]\n  CALL_EMAIL_12 --> SAVE_B_13[\"Save Record\"]\n  SAVE_B_13 --> EXIT_B_14[\"Exit\"]\n  REQ_DECISION_6 -->|EQUIPMENT_RELOCATION| BRANCH_15[\"Process Equipment Relocation Logic\"]\n  BRANCH_15 --> CALL_EMAIL_16[\"self::sendEmail()\"]\n  CALL_EMAIL_16 --> SAVE_B_17[\"Save Record\"]\n  SAVE_B_17 --> EXIT_B_18[\"Exit\"]\n  REQ_DECISION_6 -->|VIAL_CONVERSION| BRANCH_19[\"Process Vial Conversion Process Logic\"]\n  BRANCH_19 --> CALL_EMAIL_20[\"self::sendEmail()\"]\n  CALL_EMAIL_20 --> SAVE_B_21[\"Save Record\"]\n  SAVE_B_21 --> EXIT_B_22[\"Exit\"]\n  REQ_DECISION_6 -->|CASSETTE_TESTING| BRANCH_23[\"Process Cassette Testing Support Logic\"]\n  BRANCH_23 --> CALL_EMAIL_24[\"self::sendEmail()\"]\n  CALL_EMAIL_24 --> SAVE_B_25[\"Save Record\"]\n  SAVE_B_25 --> EXIT_B_26[\"Exit\"]\n  REQ_DECISION_6 -->|INTERFACE_EVALUATION| BRANCH_27[\"Process Interface Evaluation Logic\"]\n  BRANCH_27 --> CALL_EMAIL_28[\"self::sendEmail()\"]\n  CALL_EMAIL_28 --> SAVE_B_29[\"Save Record\"]\n  SAVE_B_29 --> EXIT_B_30[\"Exit\"]\n  REQ_DECISION_6 -->|Default Fallback| SAVE_GEN_31[\"Save Record\"]\n  SAVE_GEN_31 --> EXIT_GEN_32[\"Exit\"]\n  SRC_DECISION_1 -->|Other Direct Source| DEFAULT_33[\"Save Record\"]\n  DEFAULT_33 --> EXIT_DEF_34[\"Exit\"]",
       "extracted_functions": [
         "apply",
@@ -538,6 +582,18 @@
       ],
       "has_curl": true,
       "risk_flags": [],
+      "internal_crud_ops": [
+        "RNCPHP\\Configuration::fetch() [Read/Fetch]",
+        "RNCPHP\\Contact::fetch() [Read/Fetch]",
+        "RNCPHP\\Incident::fetch() [Read/Fetch]",
+        "RNCPHP\\MessageBase::fetch() [Read/Fetch]",
+        "RNCPHP\\Organization::fetch() [Read/Fetch]",
+        "RNCPHP\\ServiceMailBox::fetch() [Read/Fetch]",
+        "ConnectAPI Object ->save() [Create/Update]",
+        "ConnectAPI Object ->destroy() [Delete/Purge]",
+        "RNCPHP\\ROQL::query() [ROQL Database Query]",
+        "Custom Field Mutations (c$customer_number, c$force_update, c$incident_routing_outcome, c$is_admin)"
+      ],
       "flow_diagram": "graph TD\n  START[\"apply() called for incident_routing\"]\n  START --> SRC_DECISION_1{\"Check Entry Source\"}\n  SRC_DECISION_1 -->|Techmail Source| PROC_TECHMAIL_2[\"Parse Mail Header and Subject - ROQL Lookup Org by Customer or Ref Number\"]\n  PROC_TECHMAIL_2 --> GET_ACC_3[\"self::getAccounts()\"]\n  GET_ACC_3 -.->|Error or Invalid| REJ_ERR_4[\"self::handleRejects() Rejection Path\"]\n  REJ_ERR_4 --> EXIT_REJ_5[\"Exit\"]\n  GET_ACC_3 -->|Valid Account| CREATE_ORG_6[\"self::createUpdateOrg() - self::createContactOrgJoin() - self::updateContact()\"]\n  CREATE_ORG_6 --> ROUTE_QUEUE_7[\"Route Queue by System Type - PMS WF SA HMS TPMS\"]\n  ROUTE_QUEUE_7 --> SAVE_T_8[\"Save Record\"]\n  SAVE_T_8 --> EXIT_T_9[\"Exit\"]\n  SRC_DECISION_1 -->|AAQ or Portal Source| PROC_AAQ_10[\"ROQL Lookup Org ID from Incident\"]\n  PROC_AAQ_10 --> GET_ACC_AAQ_11[\"self::getAccounts()\"]\n  GET_ACC_AAQ_11 -.->|Error| REJ_AAQ_12[\"self::handleRejects()\"]\n  REJ_AAQ_12 --> EXIT_REJ_A_13[\"Exit\"]\n  GET_ACC_AAQ_11 -->|Valid| ROUTE_AAQ_14[\"Route Queue by Incident or Change Type\"]\n  ROUTE_AAQ_14 --> SAVE_A_15[\"Save Record\"]\n  SAVE_A_15 --> EXIT_A_16[\"Exit\"]\n  SRC_DECISION_1 -->|Other Direct Source| DEFAULT_17[\"Save Record\"]\n  DEFAULT_17 --> EXIT_DEF_18[\"Exit\"]",
       "extracted_functions": [
         "apply",
