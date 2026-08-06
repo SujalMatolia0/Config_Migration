@@ -769,10 +769,10 @@ function applyView() {
 }
 function fit() {
   if (!nodes.length) return;
-  const validNodes = nodes.filter(n => isFinite(n.x) && isFinite(n.y));
-  if (!validNodes.length) return;
+  const visibleNodes = nodes.filter(n => nodeVisible(n) && isFinite(n.x) && isFinite(n.y));
+  if (!visibleNodes.length) return;
 
-  const xs = validNodes.map(n => n.x), ys = validNodes.map(n => n.y);
+  const xs = visibleNodes.map(n => n.x), ys = visibleNodes.map(n => n.y);
   const minX = Math.min(...xs), maxX = Math.max(...xs);
   const minY = Math.min(...ys), maxY = Math.max(...ys);
 
@@ -780,12 +780,22 @@ function fit() {
   const bw = rect.width || svg.clientWidth || 1000;
   const bh = rect.height || svg.clientHeight || 700;
 
-  const dx = Math.max(maxX - minX, 300);
-  const dy = Math.max(maxY - minY, 300);
+  const dx = Math.max(maxX - minX, 240);
+  const dy = Math.max(maxY - minY, 240);
 
-  const kw = bw / (dx + 160);
-  const kh = bh / (dy + 160);
-  view.k = Math.max(0.60, Math.min(kw, kh, 1.25));
+  const kw = (bw - 160) / dx;
+  const kh = (bh - 160) / dy;
+
+  let targetK = Math.min(kw, kh);
+  if (visibleNodes.length <= 3) {
+    targetK = Math.min(targetK, 1.15);
+  } else if (visibleNodes.length <= 10) {
+    targetK = Math.min(targetK, 0.95);
+  } else {
+    targetK = Math.min(targetK, 0.85);
+  }
+
+  view.k = Math.max(0.45, Math.min(targetK, 1.25));
   view.x = bw / 2 - view.k * (minX + maxX) / 2;
   view.y = bh / 2 - view.k * (minY + maxY) / 2;
   applyView();
@@ -1364,6 +1374,7 @@ function applyFilters() {
       edgeEls[i].style.display = (vis[e.source] && vis[e.target]) ? "" : "none";
     }
   });
+  fit();
 }
 
 // ---------- Node Highlighting Logic ----------
