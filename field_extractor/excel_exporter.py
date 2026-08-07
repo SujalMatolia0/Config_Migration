@@ -8,19 +8,19 @@ from openpyxl.utils import get_column_letter
 # Styling helpers
 # ---------------------------------------------------------------------------
 
-HEADER_FILL   = PatternFill("solid", fgColor="1F3864")   # dark navy
-ALT_ROW_FILL  = PatternFill("solid", fgColor="EBF0FA")   # light blue-grey
-HEADER_FONT   = Font(name="Calibri", bold=True, color="FFFFFF", size=11)
-BODY_FONT     = Font(name="Calibri", size=10)
-THIN_BORDER   = Border(
-    left=Side(style="thin", color="B0B8CC"),
-    right=Side(style="thin", color="B0B8CC"),
-    top=Side(style="thin", color="B0B8CC"),
-    bottom=Side(style="thin", color="B0B8CC"),
+HEADER_FILL  = PatternFill("solid", fgColor="2E75B6")   # professional blue
+ALT_ROW_FILL = PatternFill("solid", fgColor="DEEAF1")   # light blue-grey
+HEADER_FONT  = Font(name="Calibri", bold=True, color="FFFFFF", size=11)
+BODY_FONT    = Font(name="Calibri", size=10)
+THIN_BORDER  = Border(
+    left=Side(style="thin", color="9DC3E6"),
+    right=Side(style="thin", color="9DC3E6"),
+    top=Side(style="thin", color="9DC3E6"),
+    bottom=Side(style="thin", color="9DC3E6"),
 )
 
 def _style_sheet(ws, headers):
-    """Apply header style and column widths to a worksheet."""
+    """Apply header style, freeze the top row, and add auto-filter to a worksheet."""
     for col_idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col_idx, value=header)
         cell.font = HEADER_FONT
@@ -28,12 +28,19 @@ def _style_sheet(ws, headers):
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = THIN_BORDER
 
-    ws.row_dimensions[1].height = 30
+    # Keep header visible when scrolling
+    ws.freeze_panes = "A2"
 
-    # Auto-fit column widths (capped at 45)
+    # Add filter dropdowns on all header columns
+    last_col = get_column_letter(len(headers))
+    ws.auto_filter.ref = f"A1:{last_col}1"
+
+    ws.row_dimensions[1].height = 34
+
+    # Auto-fit column widths (capped at 50)
     for col_idx, header in enumerate(headers, start=1):
         col_letter = get_column_letter(col_idx)
-        ws.column_dimensions[col_letter].width = min(max(len(header) + 4, 14), 45)
+        ws.column_dimensions[col_letter].width = min(max(len(header) + 4, 14), 50)
 
 def _write_rows(ws, rows, headers, start_row=2):
     """Write data rows with alternating row color."""
