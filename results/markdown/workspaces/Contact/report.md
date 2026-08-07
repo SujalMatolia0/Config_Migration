@@ -79,6 +79,21 @@ Below is the detailed content breakdown of each tab:
 
 
 <details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
+  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>Contact Org Lookup Extension</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(1 Controls)</span></summary>
+  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
+
+### Tab: `Contact Org Lookup Extension`
+
+> **Single Component Tab**
+
+- **Control Type:** BUI Extension (`ContactOrgLookupBUIAddin`)
+  - **File ID:** `7`
+
+  </div>
+</details>
+
+
+<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
   <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>Customer360</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(1 Controls)</span></summary>
   <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
 
@@ -187,6 +202,7 @@ Standard actions: Appointment, Copy, Delete, Info, New, Print, Refresh, Save, Sa
 - The **Customer360** tab embeds an internal **custom PHP script**: `gcb_flex.php` (`/cgi-bin/gcb.cfg/php/custom/gcb_flex.php`) — passes URL params: `mobile`. Errors are suppressed.
 - `C$` prefix fields are **custom fields** added on top of the standard schema.
 - The workspace defines **1 active business rules** triggered by editor loading events, enforcing profile-based field locking and toolbar UI visibility.
+- The workspace includes an **external BUI Extension plugin dependency**: `ContactOrgLookupBUIAddin` (FileId: `7`).
 
 ---
 
@@ -211,10 +227,11 @@ graph LR
     Tab_0["Tab: Contact Report Summary"]:::tab
     Tab_1["Tab: Incidents"]:::tab
     Tab_2["Tab: Address Validation"]:::tab
-    Tab_3["Tab: Customer360"]:::tab
-    Tab_4["Tab: Attachments"]:::tab
-    Tab_5["Tab: Notes"]:::tab
-    Tab_6["Tab: Audit"]:::tab
+    Tab_3["Tab: Contact Org Lookup Extension"]:::tab
+    Tab_4["Tab: Customer360"]:::tab
+    Tab_5["Tab: Attachments"]:::tab
+    Tab_6["Tab: Notes"]:::tab
+    Tab_7["Tab: Audit"]:::tab
   end
 
   subgraph Rules_Layer["Business Rules"]
@@ -224,13 +241,14 @@ graph LR
   subgraph Objects_Layer["Related Objects"]
     Obj_0_IncidentView["Related Object: Incident"]:::object
     Obj_1_IncidentView["Related Object: Incident"]:::object
-    Obj_4_FileAttachments["Related Object: File Attachment"]:::object
-    Obj_5_ContactNotes["Related Object: Note"]:::object
-    Obj_6_ContactAuditLog["Related Object: Audit Log"]:::object
+    Obj_5_FileAttachments["Related Object: File Attachment"]:::object
+    Obj_6_ContactNotes["Related Object: Note"]:::object
+    Obj_7_ContactAuditLog["Related Object: Audit Log"]:::object
   end
 
   subgraph Addins_Layer["BUI Extensions"]
     B_636908689046358799["Custom Script: address_validation.php"]:::addin
+    AddIn_3_0["Add-In: ContactOrgLookupBUIAddin"]:::addin
     B_636908689046358732["Custom Script: gcb_flex.php"]:::addin
   end
 
@@ -247,18 +265,20 @@ graph LR
   WS_Contact --> Tab_4
   WS_Contact --> Tab_5
   WS_Contact --> Tab_6
+  WS_Contact --> Tab_7
   WS_Contact --> |"Trig: Editor loads"| Rule_0
   Tab_0 --> |"Related Object"| Obj_0_IncidentView
   Tab_1 --> |"Related Object"| Obj_1_IncidentView
   Tab_2 --> |"Custom Script"| B_636908689046358799
-  Tab_3 --> |"Custom Script"| B_636908689046358732
-  Tab_4 --> |"Related Object"| Obj_4_FileAttachments
-  Tab_5 --> |"Related Object"| Obj_5_ContactNotes
-  Tab_6 --> |"Related Object"| Obj_6_ContactAuditLog
+  Tab_3 --> |"Add-In Plugin"| AddIn_3_0
+  Tab_4 --> |"Custom Script"| B_636908689046358732
+  Tab_5 --> |"Related Object"| Obj_5_FileAttachments
+  Tab_6 --> |"Related Object"| Obj_6_ContactNotes
+  Tab_7 --> |"Related Object"| Obj_7_ContactAuditLog
   Obj_0_IncidentView --> |"Primary Report (AcId)"| R_100008
   Obj_0_IncidentView --> |"Secondary Report (SearchId)"| R_100008
   Obj_1_IncidentView --> |"Primary Report (AcId)"| R_9029
-  Obj_6_ContactAuditLog --> |"Primary Report (AcId)"| R_9050
+  Obj_7_ContactAuditLog --> |"Primary Report (AcId)"| R_9050
 ```
 
 ---

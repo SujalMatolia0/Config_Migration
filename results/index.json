@@ -14,7 +14,7 @@
     {
       "name": "Contact",
       "slug": "Contact",
-      "tabsCount": 7,
+      "tabsCount": 8,
       "fieldsCount": 9,
       "rulesCount": 1,
       "reportMarkdownPath": "workspaces/Contact/report.md",

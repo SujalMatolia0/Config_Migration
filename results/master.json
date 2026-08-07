@@ -4,7 +4,7 @@
     "serverVersion": "Oracle Service Cloud Unknown",
     "totalComponents": 37,
     "useAiSummary": true,
-    "generatedAt": "2026-08-07T13:48:18.682711"
+    "generatedAt": "2026-08-07T13:49:53.469789"
   },
   "objects": {
     "Contact": {
@@ -20,7 +20,7 @@
           {
             "name": "Contact",
             "file": "json/workspaces/Contact.json",
-            "summary": "9 fields, 7 tabs, 1 rules"
+            "summary": "9 fields, 8 tabs, 1 rules"
           },
           {
             "name": "New Workspace",
@@ -243,29 +243,29 @@
         "type": "cpm",
         "name": "contact_update_internal",
         "objects": [
-          "Organization",
-          "Contact"
+          "Contact",
+          "Organization"
         ],
-        "reason": "Component references multiple objects: Organization, Contact"
+        "reason": "Component references multiple objects: Contact, Organization"
       },
       {
         "type": "cpm",
         "name": "incident_routing",
         "objects": [
-          "Incident",
+          "Contact",
           "Organization",
-          "Contact"
+          "Incident"
         ],
-        "reason": "Component references multiple objects: Incident, Organization, Contact"
+        "reason": "Component references multiple objects: Contact, Organization, Incident"
       },
       {
         "type": "BUIAddin",
         "name": "ContactOrgLookupBUIAddin",
         "objects": [
-          "Incident",
-          "Contact"
+          "Contact",
+          "Incident"
         ],
-        "reason": "Component references multiple objects: Incident, Contact"
+        "reason": "Component references multiple objects: Contact, Incident"
       }
     ]
   },
@@ -359,11 +359,6 @@
       "risk": "External API Call"
     },
     {
-      "url": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
-      "referencedBy": [],
-      "risk": "External API Call"
-    },
-    {
       "url": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
       "referencedBy": [],
       "risk": "External API Call"
@@ -374,12 +369,12 @@
       "risk": "External API Call"
     },
     {
-      "url": "http://209.91.135.228/api/listactivecalls/",
+      "url": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
       "referencedBy": [],
       "risk": "External API Call"
     },
     {
-      "url": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+      "url": "http://209.91.135.228/api/listactivecalls/",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -390,6 +385,11 @@
     },
     {
       "url": "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+      "referencedBy": [],
+      "risk": "External API Call"
+    },
+    {
+      "url": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -524,6 +524,7 @@
           "module": "Contact",
           "mdPath": "../workspaces/Contact/report.md",
           "tabs": [
+            null,
             null,
             null,
             null,
@@ -2872,26 +2873,6 @@
         }
       },
       {
-        "id": "externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
-        "type": "externalendpoint",
-        "label": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "name": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
-          "type": "CustomScript",
-          "id": null,
-          "object_type": null,
-          "script_type": null,
-          "php_version": null,
-          "is_async": null,
-          "operations_label": null,
-          "entry_point": null,
-          "module": "Other",
-          "detailsPath": "details/externalendpoint_https___ajax.googleapis.com_ajax_libs_jquery_3.4.1_jquery.min.js.json"
-        }
-      },
-      {
         "id": "externalendpoint:https://js.arcgis.com/4.20/esri/themes/light/main.css",
         "type": "externalendpoint",
         "label": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
@@ -2932,6 +2913,26 @@
         }
       },
       {
+        "id": "externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "type": "externalendpoint",
+        "label": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+          "type": "CustomScript",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Other",
+          "detailsPath": "details/externalendpoint_https___ajax.googleapis.com_ajax_libs_jquery_3.4.1_jquery.min.js.json"
+        }
+      },
+      {
         "id": "externalendpoint:http://209.91.135.228/api/listactivecalls/",
         "type": "externalendpoint",
         "label": "http://209.91.135.228/api/listactivecalls/",
@@ -2949,26 +2950,6 @@
           "entry_point": null,
           "module": "Contact",
           "detailsPath": "details/externalendpoint_http___209.91.135.228_api_listactivecalls_.json"
-        }
-      },
-      {
-        "id": "externalendpoint:https://use.fontawesome.com/releases/v5.1.1/css/all.css",
-        "type": "externalendpoint",
-        "label": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "name": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
-          "type": "CustomScript",
-          "id": null,
-          "object_type": null,
-          "script_type": null,
-          "php_version": null,
-          "is_async": null,
-          "operations_label": null,
-          "entry_point": null,
-          "module": "Other",
-          "detailsPath": "details/externalendpoint_https___use.fontawesome.com_releases_v5.1.1_css_all.css.json"
         }
       },
       {
@@ -3009,6 +2990,26 @@
           "entry_point": null,
           "module": "Other",
           "detailsPath": "details/externalendpoint_https___cdn.datatables.net_1.10.20_js_jquery.datatables.js.json"
+        }
+      },
+      {
+        "id": "externalendpoint:https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+        "type": "externalendpoint",
+        "label": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+          "type": "CustomScript",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Other",
+          "detailsPath": "details/externalendpoint_https___use.fontawesome.com_releases_v5.1.1_css_all.css.json"
         }
       },
       {

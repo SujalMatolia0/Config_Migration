@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-07 13:48:18  
+**Generated**: 2026-08-07 13:49:53  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -61,7 +61,7 @@ flowchart LR
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
 | `Contact` | `object` | `0 in -> 54 out` | Primary OSVC Entity Module Schema Root |
-| `Contact` | `workspace` | `2 in -> 7 out` | Bound Object: `Contact` | 9 fields, 7 tabs, 1 rules |
+| `Contact` | `workspace` | `2 in -> 7 out` | Bound Object: `Contact` | 9 fields, 8 tabs, 1 rules |
 | `Contact test` | `workspace` | `3 in -> 8 out` | Bound Object: `Contact` | 0 fields, 6 tabs, 3 rules |
 | `New Workspace` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 0 rules |
 | `real_edge_02_new_workspace_patterns` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 1 rules |
@@ -97,9 +97,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
-    N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
+    N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
   end
 ```
 
@@ -216,7 +216,7 @@ flowchart LR
 
 ### Workspace: Contact
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 9 form fields used across 7 tabsets (1 rules)
+- **Layout Summary**: 9 form fields used across 8 tabsets (1 rules)
 
 | Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
 | :--- | :---: | :--- | :---: |
@@ -380,13 +380,13 @@ flowchart LR
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/queryResults (Organizations)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `/cc/ajaxCustom/addSrToSiebel` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
