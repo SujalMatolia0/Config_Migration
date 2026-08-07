@@ -23,6 +23,7 @@ from excel_exporter import (
     write_objects_excel,
     write_combined_excel,
 )
+from osvc_rest_fetcher import fetch_standard_objects_via_rest
 
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
@@ -63,6 +64,149 @@ def load_sample():
                 pass
 
     return _process_xml_files(ws_files, obj_files)
+
+@app.route("/api/fetch_rest_schemas", methods=["POST"])
+def fetch_rest_schemas():
+    """
+    STRICT READ-ONLY: Fetches standard object schemas directly from OSVC Connect REST API
+    using HTTP GET requests ONLY.
+    """
+    data = request.json or {}
+    host = data.get("host", "").strip()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    include_custom = bool(data.get("include_custom", False))
+
+    if not host or not username or not password:
+        return jsonify({
+            "success": False,
+            "error": "Host URL, Username, and Password are required."
+        }), 400
+
+    try:
+        fetched_objects = fetch_standard_objects_via_rest(
+            host=host,
+            username=username,
+            password=password,
+            include_custom=include_custom
+        )
+
+        if not fetched_objects:
+            return jsonify({
+                "success": False,
+                "error": "No standard object schemas could be extracted from the specified OSVC instance."
+            }), 404
+
+        # Combine with any previously loaded workspaces
+        existing_ws = RESULTS_CACHE.get("workspaces") or []
+
+        # If no workspaces uploaded yet, try loading sample workspaces for combined preview
+        if not existing_ws:
+            sample_dir = os.path.join(CURRENT_DIR, "sample_inputs")
+            if os.path.exists(sample_dir):
+                for f in os.listdir(sample_dir):
+                    if f.endswith(".xml") and "Workspace" in f:
+                        try:
+                            existing_ws.append(parse_workspace_xml(os.path.join(sample_dir, f)))
+                        except Exception:
+                            pass
+
+        out_dir = os.path.join(CURRENT_DIR, "results")
+        os.makedirs(out_dir, exist_ok=True)
+
+        ws_xlsx_path = os.path.join(out_dir, "workspaces.xlsx")
+        obj_xlsx_path = os.path.join(out_dir, "objects.xlsx")
+        comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
+
+        write_workspaces_excel(existing_ws, fetched_objects, ws_xlsx_path)
+        write_objects_excel(fetched_objects, obj_xlsx_path)
+        write_combined_excel(existing_ws, fetched_objects, comb_xlsx_path)
+
+        RESULTS_CACHE["workspaces"] = existing_ws
+        RESULTS_CACHE["objects_map"] = fetched_objects
+        RESULTS_CACHE["output_dir"] = out_dir
+
+        # Build JSON preview
+        preview_objects = []
+        for o_name, o_data in fetched_objects.items():
+            disp_name = o_data.get("object_name", o_name)
+            rows = []
+            for of in o_data.get("fields", []):
+                rows.append({
+                    "field_key": _obj_field_key(of),
+                    "field_label": of.get("field_label", ""),
+                    "data_type": of.get("data_type", ""),
+                    "field_type": _field_type_from_obj(of),
+                    "is_nullable": "Yes" if of.get("is_nullable") else "No",
+                    "is_lookup": "Yes" if of.get("is_lookup") else "No",
+                    "is_readonly": "Yes" if of.get("is_readonly") else "No",
+                    "max_length": of.get("max_length", "-"),
+                    "description": of.get("description", "")
+                })
+            preview_objects.append({
+                "object_name": disp_name,
+                "field_count": len(rows),
+                "rows": rows
+            })
+
+        preview_workspaces = []
+        preview_combined = []
+        for ws_data in existing_ws:
+            bound_obj = ws_data.get("bound_object", "Contact")
+            enriched = _enrich_workspace_fields(ws_data.get("fields", []), fetched_objects, bound_obj)
+            rows = []
+            for item in enriched:
+                rows.append({
+                    "bound_object": item["bound_object"],
+                    "target_object": item["target_object"],
+                    "object_field_name": item["obj_field_key"],
+                    "field_label": item["field_label"],
+                    "location_tab": item["location_tab"],
+                    "workspace_tab": item["location_tab"],
+                    "required": item["required_fmt"],
+                    "readonly": item["readonly_fmt"],
+                    "data_type": item["data_type"],
+                    "field_type": item["field_type"],
+                    "is_nullable": item["is_nullable"],
+                    "is_lookup": item["is_lookup"],
+                    "max_length": item["max_length"],
+                    "in_layout": "Yes"
+                })
+            preview_workspaces.append({
+                "workspace_name": ws_data["workspace_name"],
+                "bound_object": bound_obj,
+                "field_count": len(rows),
+                "rows": rows
+            })
+            preview_combined.append({
+                "workspace_name": ws_data["workspace_name"],
+                "bound_object": bound_obj,
+                "field_count": len(rows),
+                "rows": rows
+            })
+
+        summary = {
+            "workspace_count": len(existing_ws),
+            "object_count": len(fetched_objects),
+            "total_workspace_fields": sum(len(w.get("fields", [])) for w in existing_ws),
+            "total_object_fields": sum(len(o.get("fields", [])) for o in fetched_objects.values()),
+            "skipped_files": 0
+        }
+        RESULTS_CACHE["summary"] = summary
+
+        return jsonify({
+            "success": True,
+            "summary": summary,
+            "workspaces": preview_workspaces,
+            "objects": preview_objects,
+            "combined": preview_combined
+        })
+
+    except Exception as err:
+        return jsonify({
+            "success": False,
+            "error": f"REST API Connection error: {str(err)}"
+        }), 500
 
 @app.route("/api/extract", methods=["POST"])
 def extract_files():

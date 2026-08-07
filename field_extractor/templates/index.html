@@ -581,6 +581,45 @@
             </div>
         </div>
 
+        <!-- OSVC Live REST API Fetcher (Strict HTTP GET Only) -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(19,27,46,0.95), rgba(27,38,64,0.95)); border: 1px solid rgba(59, 130, 246, 0.3);">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                    </svg>
+                    Fetch Standard Objects via Live OSVC REST API (Strict HTTP GET Only)
+                </div>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.4);">READ-ONLY GET GUARANTEE</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr; gap: 12px; align-items: end;">
+                <div>
+                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">OSVC Host / URL</label>
+                    <input type="text" id="rest-host" placeholder="e.g. gcb.custhelp.com" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Username</label>
+                    <input type="text" id="rest-user" placeholder="API Username" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                </div>
+                <div>
+                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Password</label>
+                    <input type="password" id="rest-pass" placeholder="API Password" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="fetchLiveRESTSchemas()" style="width: 100%; justify-content: center; height: 36px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
+                        Fetch via GET
+                    </button>
+                </div>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                Safety Note: Connects strictly via <code>GET /services/rest/connect/v1.4/metadata-catalog</code>. No POST or mutating API calls are made.
+            </p>
+        </div>
+
         <!-- Summary Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -714,6 +753,44 @@
                 }
             } catch (err) {
                 alert('Failed to load sample data.');
+            }
+        }
+
+        async function fetchLiveRESTSchemas() {
+            const host = document.getElementById('rest-host').value.trim();
+            const username = document.getElementById('rest-user').value.trim();
+            const password = document.getElementById('rest-pass').value.trim();
+
+            if (!host || !username || !password) {
+                alert('Please enter your OSVC Host URL, Username, and Password.');
+                return;
+            }
+
+            const btn = event.target;
+            const origText = btn.innerHTML;
+            btn.innerHTML = 'Connecting (GET)...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/fetch_rest_schemas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ host, username, password, include_custom: false })
+                });
+                const data = await res.json();
+                btn.innerHTML = origText;
+                btn.disabled = false;
+
+                if (data.success) {
+                    renderExtractedData(data);
+                    alert(`Successfully extracted standard fields for ${data.summary.object_count} standard objects via HTTP GET!`);
+                } else {
+                    alert('REST API Error: ' + data.error);
+                }
+            } catch (err) {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+                alert('Failed to connect to OSVC instance.');
             }
         }
 
