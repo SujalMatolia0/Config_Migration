@@ -1,6 +1,6 @@
 # OSVC Business Rules Report — Object: Incident
 
-_Source: Standalone Analysis — 1066 Business Rules for Object `Incident`_
+_Source: Object Analysis — 1066 Business Rules for Object `Incident`_
 
 > [!NOTE]
 > **Entity Focus**: Dedicated report for OSVC Object **`Incident`**. Contains active action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.
@@ -215,10 +215,9 @@ graph LR
 
 ## 3. Business Rules Breakdown by Action Type
 
-<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 10px; align-items: center;">
-  <span style="font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>
-  <button onclick="document.querySelectorAll('details').forEach(d=>d.open=true)" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[+] Expand All Accordions</button>
-  <button onclick="document.querySelectorAll('details').forEach(d=>d.open=false)" style="background:#64748b; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[&minus;] Collapse All Accordions</button>
+<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 8px; align-items: center;">
+  <button onclick="document.querySelectorAll('details').forEach(d=>d.open=true)" style="background: linear-gradient(180deg, #2563eb, #1d4ed8); color: #ffffff; border: 1px solid #1e40af; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">+ Expand</button>
+  <button onclick="document.querySelectorAll('details').forEach(d=>d.open=false)" style="background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">&minus; Collapse</button>
 </div>
 
 <details open>

@@ -67,10 +67,13 @@ def write_master_json(components, relationships, orphans, endpoints, output_file
         for k in ["workspaces", "reports", "cpm", "buiAddins", "customScripts", "navigationSets", "businessRules", "customObjects", "objectRelationships"]
     )
 
+    has_ai = bool(use_ai_summary)
+
     meta = {
         "exportedAt": datetime.now().strftime("%Y-%m-%d"),
         "serverVersion": (meta_info or {}).get("serverVersion", "Oracle Service Cloud 26A SP2"),
         "totalComponents": total_comps,
+        "useAiSummary": has_ai,
         "generatedAt": datetime.now().isoformat()
     }
 

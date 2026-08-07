@@ -110,9 +110,13 @@ def format_cpm_version(ver):
 EXCLUDE_CF = {"c", "CO", "save", "fetch", "destroy", "CustomFields", "Organization", "Contact", "Incident", "SocialUser"}
 
 def get_groq_api_key():
-    key = os.environ.get("GROQ_API_KEY")
-    if key and key.strip() and key.strip() != "gsk_your_groq_api_key_here":
-        return key.strip()
+    return get_ai_api_key()
+
+def get_ai_api_key():
+    for k_var in ("GEMINI_API_KEY", "GEMINI_KEY", "GROQ_API_KEY", "AI_API_KEY"):
+        key = os.environ.get(k_var)
+        if key and key.strip() and not key.strip().startswith("gsk_your_") and not key.strip().startswith("AIzaSy_your_"):
+            return key.strip()
 
     search_paths = [
         os.path.join(os.getcwd(), ".env"),
@@ -124,15 +128,16 @@ def get_groq_api_key():
                 with open(env_path, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
-                        if line.startswith("GROQ_API_KEY=") or line.startswith("GROQ_API_KEY ="):
-                            val = line.split("=", 1)[1].strip().strip('"').strip("'")
-                            if val and val != "gsk_your_groq_api_key_here":
-                                return val
+                        for k_prefix in ("GEMINI_API_KEY=", "GEMINI_KEY=", "GROQ_API_KEY=", "AI_API_KEY="):
+                            if line.startswith(k_prefix):
+                                val = line.split("=", 1)[1].strip().strip('"').strip("'")
+                                if val and not val.startswith("gsk_your_") and not val.startswith("AIzaSy_your_"):
+                                    return val
             except Exception:
                 pass
     return None
 
-def generate_groq_summary(php_code, model="llama-3.3-70b-versatile"):
+def generate_groq_summary(php_code, model="llama-3.1-8b-instant"):
     api_key = get_groq_api_key()
     if not api_key:
         return None
@@ -147,7 +152,7 @@ def generate_groq_summary(php_code, model="llama-3.3-70b-versatile"):
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-    code_sample = php_code[:6000]
+    code_sample = php_code[:2500]
     prompt = (
         "Analyze this Oracle Service Cloud CPM PHP custom procedure code. "
         "Summarize its primary business logic and operations in 2 concise sentences. "
@@ -176,13 +181,14 @@ def generate_groq_summary(php_code, model="llama-3.3-70b-versatile"):
         print(f"[Warning] Groq API call failed: {e}. Falling back to rule-based summary.")
     return None
 
-def extract_key_logic(php_code, soap_actions=None):
+def extract_key_logic(php_code, soap_actions=None, use_ai_summary=False):
     if not php_code:
         return "No PHP content provided."
 
-    groq_summary = generate_groq_summary(php_code)
-    if groq_summary:
-        return groq_summary
+    if use_ai_summary:
+        groq_summary = generate_groq_summary(php_code)
+        if groq_summary:
+            return groq_summary
 
     summaries = []
 
@@ -449,7 +455,7 @@ def generate_cpm_diagrams_and_metadata(php_code, proc_name):
         "message_templates": message_templates
     }
 
-def analyze_php_content(php_code, proc_name="CPM Procedure"):
+def analyze_php_content(php_code, proc_name="CPM Procedure", use_ai_summary=False):
     if not php_code:
         return {
             "soap_actions": [],
@@ -526,7 +532,7 @@ def analyze_php_content(php_code, proc_name="CPM Procedure"):
     cf_read_formatted = [f"c${f}" for f in cf_read_only]
 
     # 4. Key Logic Summary
-    key_logic = extract_key_logic(php_code, soap_actions)
+    key_logic = extract_key_logic(php_code, soap_actions, use_ai_summary=use_ai_summary)
 
     # 5. External URLs
     urls = sorted(list(set(re.findall(r'["\'](https?://[a-zA-Z0-9_\-\.\/\?&\=\+\%]+)["\']', php_code))))

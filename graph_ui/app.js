@@ -1908,9 +1908,18 @@ async function loadDocsAndDiagrams(node) {
 
   const docBtn = document.querySelector('.tab-btn[data-tab="doc"]');
   const diagBtn = document.querySelector('.tab-btn[data-tab="diagram"]');
+  const aiTabBtn = document.getElementById("aiTabBtn");
+  const meta = window.GRAPH_META || {};
 
   if (docBtn) docBtn.style.display = "inline-block";
   if (diagBtn) diagBtn.style.display = "inline-block";
+  if (aiTabBtn) {
+    if (meta && meta.useAiSummary === true) {
+      aiTabBtn.style.display = "inline-block";
+    } else {
+      aiTabBtn.style.display = "none";
+    }
+  }
 
   if (currentFetchController) {
     currentFetchController.abort();
@@ -1973,19 +1982,14 @@ function attachAccordionToggleBar(container) {
   bar.className = "accordion-toggle-bar";
   bar.style.cssText = `
     display: flex;
-    gap: 10px;
-    margin: 0 0 16px 0;
-    padding: 10px 14px;
-    background: var(--panel2);
-    border: 1px solid var(--border-subtle);
-    border-radius: 8px;
+    gap: 8px;
+    margin: 0 0 14px 0;
     align-items: center;
   `;
 
   bar.innerHTML = `
-    <span style="font-weight: 700; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>
-    <button class="btn-expand-all" style="background: var(--accent-primary); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">[+] Expand All Accordions</button>
-    <button class="btn-collapse-all" style="background: var(--text-muted); color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.06);">[&minus;] Collapse All Accordions</button>
+    <button class="btn-expand-all" style="background: linear-gradient(180deg, #2563eb, #1d4ed8); color: #ffffff; border: 1px solid #1e40af; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;">+ Expand</button>
+    <button class="btn-collapse-all" style="background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;">&minus; Collapse</button>
   `;
 
   bar.querySelector(".btn-expand-all").addEventListener("click", () => {
@@ -2034,6 +2038,159 @@ function attachAccordionToggleBar(container) {
     fsBtn.textContent = "View Fullscreen (Zoom + Pan)";
     fsBtn.addEventListener("click", openFullscreenDiagram);
     tabDiagram.appendChild(fsBtn);
+  }
+
+  // Populate AI Assist Tab if enabled
+  renderAiAssistTab(node, mdText);
+}
+
+function renderAiAssistTab(node, mdText) {
+  const tabAi = document.getElementById("tab-ai");
+  if (!tabAi) return;
+
+  const configKey = (window.GRAPH_META && (window.GRAPH_META.apiKey || window.GRAPH_META.api_key)) || "";
+  const savedKey = localStorage.getItem("gemini_api_key") || configKey || "";
+  const isFromConfig = !!configKey && savedKey === configKey;
+
+  tabAi.innerHTML = `
+    <div style="padding: 14px; font-size: 13px;">
+      <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px; color: var(--accent-primary, #a855f7); display: flex; align-items: center; gap: 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;min-width:18px;max-width:18px;max-height:18px;display:inline-block;"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>
+        AI Assist (Gemini & LLM Summary)
+      </div>
+      <div style="color: var(--text-muted); font-size: 12px; margin-bottom: 14px; line-height: 1.4;">
+        Generate an intelligent executive summary for <b>${esc(node.label || node.id)}</b> using your API Key based on the component's markdown documentation.
+      </div>
+
+      <div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+        <label style="display: block; font-weight: 700; font-size: 11px; margin-bottom: 6px; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">API KEY (CONFIG / GEMINI / GROQ):</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="password" id="geminiApiKeyInput" value="${esc(savedKey)}" placeholder="AIzaSy... or gsk_..." style="flex: 1; padding: 6px 10px; font-size: 12px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--panel); color: var(--text-main);" />
+          <button id="saveApiKeyBtn" style="padding: 6px 12px; font-size: 11px; font-weight: 700; background: var(--accent-primary); color: #fff; border: none; border-radius: 6px; cursor: pointer;">Save Key</button>
+        </div>
+        <div id="keyStatusMsg" style="font-size: 11px; color: #10b981; margin-top: 6px; display: ${savedKey ? 'block' : 'none'};">
+          ${isFromConfig ? 'Loaded automatically from config (.env)' : 'Saved in browser storage'}
+        </div>
+      </div>
+
+      <button id="generateAiSummaryBtn" style="width: 100%; padding: 10px 14px; font-size: 12px; font-weight: 700; background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); transition: opacity 0.15s;">
+        <span>Generate AI Summary</span>
+      </button>
+
+      <div id="aiOutputArea" style="margin-top: 16px;"></div>
+    </div>
+  `;
+
+  const saveBtn = document.getElementById("saveApiKeyBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const keyVal = (document.getElementById("geminiApiKeyInput").value || "").trim();
+      if (keyVal) {
+        localStorage.setItem("gemini_api_key", keyVal);
+        const msg = document.getElementById("keyStatusMsg");
+        if (msg) {
+          msg.style.display = "block";
+          msg.textContent = "Saved in browser storage";
+        }
+      }
+    });
+  }
+
+  const genBtn = document.getElementById("generateAiSummaryBtn");
+  if (genBtn) {
+    genBtn.addEventListener("click", async () => {
+      const keyInput = document.getElementById("geminiApiKeyInput");
+      const keyVal = (keyInput ? keyInput.value.trim() : "") || localStorage.getItem("gemini_api_key") || configKey;
+      const outputArea = document.getElementById("aiOutputArea");
+      if (!keyVal) {
+        if (outputArea) {
+          outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">Please enter and save your API Key first.</div>`;
+        }
+        return;
+      }
+
+      if (outputArea) {
+        outputArea.innerHTML = `<div style="padding: 12px; color: var(--text-muted); font-size: 12px; font-weight: 600;">Analyzing component documentation with AI...</div>`;
+      }
+
+      try {
+        const slicedDoc = (mdText || "No detailed markdown content available.").slice(0, 2500);
+        const promptText = `Provide a concise, 2 to 3 sentence executive AI summary for the following Oracle Service Cloud component documentation. Highlight main purpose, execution flow, and any risk flags:\n\nComponent: ${node.label || node.id}\nDocumentation:\n${slicedDoc}`;
+
+        let generatedMd = null;
+
+        if (keyVal.startsWith("gsk_")) {
+          // Call Groq API endpoint with high token limit model (llama-3.1-8b-instant)
+          let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${keyVal}`
+            },
+            body: JSON.stringify({
+              model: "llama-3.1-8b-instant",
+              messages: [{ role: "user", content: promptText }]
+            })
+          });
+          let resData = await res.json();
+
+          // Fallback if llama-3.1-8b-instant returns rate limit
+          if (resData.error && resData.error.code === "rate_limit_exceeded") {
+            res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${keyVal}`
+              },
+              body: JSON.stringify({
+                model: "mixtral-8x7b-32768",
+                messages: [{ role: "user", content: promptText }]
+              })
+            });
+            resData = await res.json();
+          }
+
+          if (resData.error) {
+            if (outputArea) {
+              const errDetails = resData.error.message || "Rate limit reached";
+              outputArea.innerHTML = `<div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #b91c1c; border-radius: 6px; font-size: 12px; line-height: 1.4;">
+                <b>Groq API Rate Limit:</b> ${esc(errDetails)}<br/><br/>
+                <i>Tip: Enter a Google Gemini API Key (starts with <b>AIzaSy</b>) in the input box above for higher token capacity.</i>
+              </div>`;
+            }
+            return;
+          }
+          generatedMd = resData.choices && resData.choices[0] && resData.choices[0].message && resData.choices[0].message.content;
+        } else {
+          // Call Gemini API endpoint
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(keyVal)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }]
+            })
+          });
+          const resData = await res.json();
+          if (resData.error) {
+            if (outputArea) {
+              outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">Gemini API Error: ${esc(resData.error.message || "Failed to generate summary")}</div>`;
+            }
+            return;
+          }
+          generatedMd = resData.candidates && resData.candidates[0] && resData.candidates[0].content && resData.candidates[0].content.parts[0] && resData.candidates[0].content.parts[0].text;
+        }
+
+        if (generatedMd && outputArea) {
+          outputArea.innerHTML = `<div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.5;" class="ai-summary-content">` + (typeof marked !== "undefined" ? marked.parse(generatedMd) : `<pre style="white-space:pre-wrap;">${esc(generatedMd)}</pre>`) + `</div>`;
+        } else if (outputArea) {
+          outputArea.innerHTML = `<div style="padding: 10px; color: var(--text-muted); font-size: 12px;">No summary response received from API.</div>`;
+        }
+      } catch (err) {
+        if (outputArea) {
+          outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">Error connecting to API: ${esc(err.message)}</div>`;
+        }
+      }
+    });
   }
 }
 

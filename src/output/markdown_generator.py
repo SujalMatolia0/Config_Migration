@@ -1772,38 +1772,38 @@ def build_procedure_accordion_block(p, mapped_procedures_map, workspace_field_re
     orphan_badge = ' <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #f59e0b; color: #f59e0b; margin-left: 6px;">Orphan</span>' if is_orphan else ''
 
     lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
-    lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">{mode_badge}<b>Procedure: {p_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(ID: {p_id} | Bound: {bound_str})</span>{orphan_badge}</summary>')
+    lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">{mode_badge}<b>Procedure: {p_name}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Id: {p_id} | ClassName: {bound_str})</span>{orphan_badge}</summary>')
     lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
     lines.append("")
     lines.append(f"### Procedure: `{p_name}`")
     lines.append("")
-    lines.append(f"- **ID**: `{p_id}` | **Version**: `{p.get('version', '—')}` | **PHP Version**: `{p.get('php_version', '—')}`")
+    lines.append(f"- **Procedure Name**: `{p_name}` (Id: `{p_id}`, Version: `{p.get('version', '—')}`, PhpVersion: `{p.get('php_version', '—')}`) ")
     lines.append(f"- **Execution Mode**: `{exec_mode}`")
-    lines.append(f"- **Operations Bitmask**: `{p.get('operations_label')} (code: {p.get('operations_code')})`")
-    lines.append(f"- **Bound Classes**: {', '.join(f'`{b}`' for b in p.get('bound_classes', [])) or 'None'}")
+    lines.append(f"- **Event Operations**: `{p.get('operations_label')} (Code: {p.get('operations_code')})`")
+    lines.append(f"- **Object Class**: {', '.join(f'`{b}`' for b in p.get('bound_classes', [])) or 'None'}")
 
     m_entry = mapped_procedures_map.get(p_name.lower())
     if m_entry:
-        lines.append(f"- **Mapped Event**: `{m_entry.get('object')}` on `{m_entry.get('interface')}` interface ({m_entry.get('operation')})")
+        lines.append(f"- **XML Mapping (`Mappings.xml`)**: Interface `{m_entry.get('interface')}` | Object `{m_entry.get('object')}` | Operation `{m_entry.get('operation')}`")
     else:
-        lines.append("- **Mapped Event**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*")
+        lines.append("- **XML Mapping (`Mappings.xml`)**: *Unmapped (Orphan Procedure — not found in Mappings.xml)*")
 
     if use_ai_summary:
         lines.append(f"- **Key Logic Summary**: {p.get('key_logic', 'No key logic summary available.')}")
 
     soaps = p.get("soap_actions", [])
     if soaps:
-        lines.append(f"- **SOAP Actions / Web Services**: {', '.join(f'`{s}`' for s in soaps)}")
+        lines.append(f"- **SOAP Web Services**: {', '.join(f'`{s}`' for s in soaps)}")
     else:
-        lines.append("- **SOAP Actions**: None")
+        lines.append("- **SOAP Web Services**: None")
 
     crud_ops = p.get("internal_crud_ops", [])
     if not crud_ops and bound_str and bound_str != "None":
         crud_ops = [f"RNCPHP\\{bound_str} {p.get('operations_label', 'Handler')} Operation ($obj->save())"]
     if crud_ops:
-        lines.append(f"- **Internal CRUD / Connect PHP API Operations**: {', '.join(f'`{c}`' for c in crud_ops)}")
+        lines.append(f"- **PHP CRUD Operations**: {', '.join(f'`{c}`' for c in crud_ops)}")
     else:
-        lines.append(f"- **Internal CRUD / Connect PHP API Operations**: `RNCPHP\\Entity Object Operation`")
+        lines.append(f"- **PHP CRUD Operations**: `RNCPHP\\Entity Object Operation`")
 
     cvars = p.get("config_vars", [])
     if cvars:
@@ -1969,11 +1969,11 @@ def generate_single_object_cpm_markdown(obj_name, cpm_items, orphans=None, works
     lines = []
     lines.append(f"# OSVC Custom Process Model (CPM) Report — Object: {obj_name}")
     lines.append("")
-    lines.append(f"_Source: Standalone Object Analysis — {len(filtered_cpms)} CPM Procedures bound to `{obj_name}`_")
+    lines.append(f"_Source: Object Analysis — {len(filtered_cpms)} CPM Procedures linked to `{obj_name}`_")
     lines.append("")
 
     lines.append("> [!NOTE]")
-    lines.append(f"> **Entity Focus**: Dedicated CPM event procedures and handler analysis for OSVC Object **`{obj_name}`**.")
+    lines.append(f"> **Entity Focus**: Analysis of CPM event procedures linked to Object **`{obj_name}`**.")
     lines.append("")
 
     lines.append("## 1. Mappings Routing Table (`Mappings.xml`)")
@@ -2084,7 +2084,7 @@ def generate_single_cpm_procedure_markdown(cpm, obj_name=None, orphans=None, wor
     lines.append("")
 
     lines.append("> [!NOTE]")
-    lines.append(f"> **Component Overview**: Standalone event procedure report for CPM handler **`{p_name}`** bound to primary entity object **`{obj_name}`**.")
+    lines.append(f"> **Component Overview**: Detailed analysis for CPM handler **`{p_name}`** linked to object **`{obj_name}`**.")
     lines.append("")
 
     lines.append("## Detailed Component Accordion")
@@ -3085,10 +3085,9 @@ def generate_business_rules_report_markdown(rule_sets):
     # ── 3. Object Accordions with Sub-Groups by Action Type ────────────────
     lines.append("## 3. Business Rules Breakdown by Object & Action Type")
     lines.append("")
-    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 10px; align-items: center;">')
-    lines.append('  <span style="font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>')
-    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[+] Expand All Accordions</button>')
-    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background:#64748b; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[&minus;] Collapse All Accordions</button>')
+    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 8px; align-items: center;">')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background: linear-gradient(180deg, #2563eb, #1d4ed8); color: #ffffff; border: 1px solid #1e40af; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">+ Expand</button>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">&minus; Collapse</button>')
     lines.append('</div>')
     lines.append("")
 
@@ -3221,7 +3220,7 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
 
     lines.append(f"# OSVC Business Rules Report — Object: {obj_name}")
     lines.append("")
-    lines.append(f"_Source: Standalone Analysis — {total_rules} Business Rules for Object `{obj_name}`_")
+    lines.append(f"_Source: Object Analysis — {total_rules} Business Rules for Object `{obj_name}`_")
     lines.append("")
 
     lines.append("> [!NOTE]")
@@ -3251,10 +3250,9 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
     # 3. Action Type Sub-Accordions (Active Rules Only)
     lines.append(f"## 3. Business Rules Breakdown by Action Type")
     lines.append("")
-    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 10px; align-items: center;">')
-    lines.append('  <span style="font-weight: 700; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ACCORDION CONTROLS:</span>')
-    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background:#2563eb; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[+] Expand All Accordions</button>')
-    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background:#64748b; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">[&minus;] Collapse All Accordions</button>')
+    lines.append('<div class="accordion-toggle-bar" style="margin: 10px 0 16px 0; display: flex; gap: 8px; align-items: center;">')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=true)" style="background: linear-gradient(180deg, #2563eb, #1d4ed8); color: #ffffff; border: 1px solid #1e40af; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">+ Expand</button>')
+    lines.append('  <button onclick="document.querySelectorAll(\'details\').forEach(d=>d.open=false)" style="background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">&minus; Collapse</button>')
     lines.append('</div>')
     lines.append("")
 

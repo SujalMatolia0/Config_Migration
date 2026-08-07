@@ -101,7 +101,7 @@
       ],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code primarily handles the registration of contacts in Siebel through a SOAP request, and it logs and handles any errors that occur during this process. The code uses the Connect PHP API to interact with the Oracle Service Cloud and implements an object event handler to update contacts, sending a SOAP request to Siebel to register the contact and handling any exceptions or errors that may arise.",
+      "key_logic": "Parses email headers and subject lines for reference numbers and customer identifiers via regex. Queries external Siebel SOAP web services (`RegisterContact`). Instantiates and updates OSVC Connect API objects (`Configuration`, `Contact`, `MailMessage`, `MessageBase`, ...).",
       "urls": [
         "http://www.siebel.com/ws/fault"
       ],
@@ -163,7 +163,7 @@
       "config_vars": [],
       "custom_fields_read": [],
       "custom_fields_written": [],
-      "key_logic": "This Oracle Service Cloud CPM PHP custom procedure code is designed to handle the creation of new contacts, setting the contact's login to their primary email address and creating a social user account with a display name based on the contact's first name or email address. The code includes error handling and a test harness to validate the functionality of the contact creation process.",
+      "key_logic": "Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).",
       "urls": [],
       "imports": [],
       "osvc_objects": [

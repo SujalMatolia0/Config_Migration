@@ -10,8 +10,8 @@
   "external_calls": [],
   "urls": [
     "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
-    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
-    "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
+    "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"
   ],
   "exposed_routes": [],
   "risk_flags": [],

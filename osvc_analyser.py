@@ -751,10 +751,10 @@ def main():
 
                 ws_master_data = write_master_json(
                     ws_components, ws_relationships, ws_orphans,
-                    ws_endpoints, os.path.join(ws_out_dir, "master.json"), ws_meta
+                    ws_endpoints, os.path.join(ws_out_dir, "master.json"), ws_meta, use_ai_summary=args.use_ai_summary
                 )
                 ws_json_fmt_dir = os.path.join(json_dir, "workspaces", ws_slug)
-                write_master_json(ws_components, ws_relationships, ws_orphans, ws_endpoints, os.path.join(ws_json_fmt_dir, "master.json"), ws_meta)
+                write_master_json(ws_components, ws_relationships, ws_orphans, ws_endpoints, os.path.join(ws_json_fmt_dir, "master.json"), ws_meta, use_ai_summary=args.use_ai_summary)
                 print("  master.json written")
 
                 ws_graph_path = build_graph_ui(ws_master_data, os.path.join(ws_out_dir, "graph"))
