@@ -620,6 +620,30 @@
             </p>
         </div>
 
+        <!-- Live Execution Logs Console -->
+        <div class="card" style="background: #0D1322; border: 1px solid var(--border-color);">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                    Live Extraction Console & Logs
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="fetchLogs()" style="padding: 4px 10px; font-size: 0.75rem;">
+                        Refresh Logs
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearLogsUI()" style="padding: 4px 10px; font-size: 0.75rem;">
+                        Clear Logs
+                    </button>
+                </div>
+            </div>
+            <div id="log-console" style="background: #060911; border: 1px solid #1A243B; border-radius: var(--radius-sm); padding: 14px; height: 160px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #A7F3D0; line-height: 1.6;">
+                <div style="color: var(--text-muted);">[Ready] Awaiting user action or REST API connection request...</div>
+            </div>
+        </div>
+
         <!-- Summary Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
@@ -741,6 +765,37 @@
                 list.appendChild(item);
             });
         }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                if (data.logs) {
+                    const consoleEl = document.getElementById('log-console');
+                    if (data.logs.length === 0) {
+                        consoleEl.innerHTML = '<div style="color: var(--text-muted);">[Ready] Console cleared.</div>';
+                    } else {
+                        consoleEl.innerHTML = data.logs.map(line => {
+                            let color = '#A7F3D0'; // info green
+                            if (line.includes('[ERROR]') || line.includes('[TRACEBACK]')) color = '#FCA5A5'; // red
+                            if (line.includes('[WARNING]') || line.includes('[WARN]')) color = '#FDE047'; // yellow
+                            if (line.includes('[SUCCESS]') || line.includes('[COMPLETED]')) color = '#93C5FD'; // blue
+                            return `<div style="color: ${color};">${line}</div>`;
+                        }).join('');
+                        consoleEl.scrollTop = consoleEl.scrollHeight;
+                    }
+                }
+            } catch (err) {}
+        }
+
+        async function clearLogsUI() {
+            try {
+                await fetch('/api/logs/clear', { method: 'POST' });
+                document.getElementById('log-console').innerHTML = '<div style="color: var(--text-muted);">[Ready] Log history cleared.</div>';
+            } catch (err) {}
+        }
+
+        let logInterval = setInterval(fetchLogs, 2000);
 
         async function loadSampleData() {
             try {

@@ -3,6 +3,8 @@ import sys
 import tempfile
 import zipfile
 import io
+import traceback
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 
@@ -33,18 +35,37 @@ RESULTS_CACHE = {
     "workspaces": [],
     "objects_map": {},
     "output_dir": None,
-    "summary": {}
+    "summary": {},
+    "logs": []
 }
+
+def add_log(msg, level="INFO"):
+    t_str = datetime.now().strftime("%H:%M:%S")
+    entry = f"[{t_str}] [{level}] {msg}"
+    print(entry)
+    RESULTS_CACHE["logs"].append(entry)
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+@app.route("/api/logs", methods=["GET"])
+def get_logs():
+    return jsonify({"logs": RESULTS_CACHE["logs"]})
+
+@app.route("/api/logs/clear", methods=["POST"])
+def clear_logs():
+    RESULTS_CACHE["logs"] = []
+    add_log("Log history cleared.", "INFO")
+    return jsonify({"success": True})
+
 @app.route("/api/load_sample", methods=["POST"])
 def load_sample():
     """Loads sample input files from field_extractor/sample_inputs."""
+    add_log("Loading sample input files...", "INFO")
     sample_dir = os.path.join(CURRENT_DIR, "sample_inputs")
     if not os.path.exists(sample_dir):
+        add_log("Sample inputs directory not found.", "ERROR")
         return jsonify({"success": False, "error": "Sample inputs directory not found."}), 404
 
     ws_files = []
@@ -52,7 +73,6 @@ def load_sample():
     for f in os.listdir(sample_dir):
         if f.endswith(".xml") and not f.startswith("."):
             full_path = os.path.join(sample_dir, f)
-            # Inspect file content to classify
             try:
                 with open(full_path, "r", encoding="utf-8", errors="ignore") as file_handle:
                     content = file_handle.read(2048)
@@ -63,6 +83,7 @@ def load_sample():
             except Exception:
                 pass
 
+    add_log(f"Found {len(ws_files)} workspace XML(s) and {len(obj_files)} object XML(s) in sample_inputs", "INFO")
     return _process_xml_files(ws_files, obj_files)
 
 @app.route("/api/fetch_rest_schemas", methods=["POST"])
@@ -77,7 +98,10 @@ def fetch_rest_schemas():
     password = data.get("password", "").strip()
     include_custom = bool(data.get("include_custom", False))
 
+    add_log("Received REST extraction request (STRICT HTTP GET ONLY)", "INFO")
+
     if not host or not username or not password:
+        add_log("Missing required credentials (host/username/password)", "ERROR")
         return jsonify({
             "success": False,
             "error": "Host URL, Username, and Password are required."
@@ -88,19 +112,18 @@ def fetch_rest_schemas():
             host=host,
             username=username,
             password=password,
-            include_custom=include_custom
+            include_custom=include_custom,
+            log_cb=add_log
         )
 
         if not fetched_objects:
+            add_log("No standard object schemas returned from REST API.", "WARNING")
             return jsonify({
                 "success": False,
                 "error": "No standard object schemas could be extracted from the specified OSVC instance."
             }), 404
 
-        # Combine with any previously loaded workspaces
         existing_ws = RESULTS_CACHE.get("workspaces") or []
-
-        # If no workspaces uploaded yet, try loading sample workspaces for combined preview
         if not existing_ws:
             sample_dir = os.path.join(CURRENT_DIR, "sample_inputs")
             if os.path.exists(sample_dir):
@@ -125,6 +148,8 @@ def fetch_rest_schemas():
         RESULTS_CACHE["workspaces"] = existing_ws
         RESULTS_CACHE["objects_map"] = fetched_objects
         RESULTS_CACHE["output_dir"] = out_dir
+
+        add_log(f"Generated Excel workbooks in: {out_dir}", "SUCCESS")
 
         # Build JSON preview
         preview_objects = []
@@ -203,9 +228,13 @@ def fetch_rest_schemas():
         })
 
     except Exception as err:
+        tb = traceback.format_exc()
+        add_log(f"REST API Connection error: {str(err)}", "ERROR")
+        add_log(tb, "TRACEBACK")
         return jsonify({
             "success": False,
-            "error": f"REST API Connection error: {str(err)}"
+            "error": f"REST API Connection error: {str(err)}",
+            "traceback": tb
         }), 500
 
 @app.route("/api/extract", methods=["POST"])
@@ -235,6 +264,7 @@ def extract_files():
             f.save(dest)
             obj_temp_paths.append(dest)
 
+    add_log(f"Uploaded {len(ws_temp_paths)} workspace file(s) and {len(obj_temp_paths)} object file(s)", "INFO")
     return _process_xml_files(ws_temp_paths, obj_temp_paths)
 
 
@@ -247,8 +277,9 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
             obj_name = o_data.get("object_name", "")
             if obj_name:
                 parsed_objects[obj_name.lower()] = o_data
-        except Exception:
-            pass
+                add_log(f"Parsed Object XML: {obj_name} ({len(o_data.get('fields', []))} fields)", "INFO")
+        except Exception as e:
+            add_log(f"Skipped non-valid Object XML: {os.path.basename(o_path)}", "WARNING")
 
     parsed_workspaces = []
     skipped_count = 0
@@ -256,16 +287,18 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
         try:
             w_data = parse_workspace_xml(w_path)
             parsed_workspaces.append(w_data)
-        except Exception:
+            add_log(f"Parsed Workspace XML: {w_data['workspace_name']} ({len(w_data.get('fields', []))} fields)", "INFO")
+        except Exception as e:
             skipped_count += 1
+            add_log(f"Skipped non-valid Workspace XML: {os.path.basename(w_path)}", "WARNING")
 
     if not parsed_workspaces and not parsed_objects:
+        add_log("No valid Workspace or Object XML files parsed.", "ERROR")
         return jsonify({
             "success": False,
             "error": "Failed to parse any valid Workspace or Object XML files."
         }), 400
 
-    # Output directory for Excel files
     out_dir = os.path.join(CURRENT_DIR, "results")
     os.makedirs(out_dir, exist_ok=True)
 
@@ -277,10 +310,11 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     write_objects_excel(parsed_objects, obj_xlsx_path)
     write_combined_excel(parsed_workspaces, parsed_objects, comb_xlsx_path)
 
-    # Store in global cache for downloads
     RESULTS_CACHE["workspaces"] = parsed_workspaces
     RESULTS_CACHE["objects_map"] = parsed_objects
     RESULTS_CACHE["output_dir"] = out_dir
+
+    add_log("Generated Excel files: workspaces.xlsx, objects.xlsx, combined.xlsx", "SUCCESS")
 
     # Build JSON preview payload for the UI
     preview_workspaces = []
@@ -407,6 +441,7 @@ def download_file(filename):
 
 
 def run_server(port=5050, debug=False):
+    add_log(f"Field Extractor Web UI Server running on port {port}", "INFO")
     print("==========================================================================")
     print(f"       OSVC FIELD EXTRACTOR WEB UI SERVER RUNNING ON PORT {port}")
     print(f"       Open browser to: http://localhost:{port}")

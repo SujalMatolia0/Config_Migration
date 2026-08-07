@@ -42,7 +42,7 @@ def fetch_metadata_catalog_get_only(catalog_url, session, auth):
     resp.raise_for_status()
     return resp.json()
 
-def _resolve_property_field(field_name, field_info, session, auth, parent_prefix="", depth=0):
+def _resolve_property_field(field_name, field_info, session, auth, log_cb=print, parent_prefix="", depth=0):
     """
     Recursively inspects a schema property definition and resolves $ref links via HTTP GET.
     Returns a list of extracted field metadata dicts.
@@ -81,12 +81,13 @@ def _resolve_property_field(field_name, field_info, session, auth, parent_prefix
                     for c_name, c_info in child_props.items():
                         if c_name != "customFields":
                             sub_fields.extend(
-                                _resolve_property_field(c_name, c_info, session, auth, parent_prefix=full_name, depth=depth+1)
+                                _resolve_property_field(c_name, c_info, session, auth, log_cb=log_cb, parent_prefix=full_name, depth=depth+1)
                             )
                     if sub_fields:
                         return sub_fields
                 field_type = f"_lookup:{ref_name}"
         except Exception as err:
+            log_cb(f"[WARN] Unable to resolve $ref schema for field '{full_name}': {err}")
             field_type = f"lookup:unresolved"
 
     is_custom = field_name.startswith("c$") or "customFields" in full_name
@@ -113,7 +114,7 @@ def _resolve_property_field(field_name, field_info, session, auth, parent_prefix
     return [field_dict]
 
 
-def fetch_standard_objects_via_rest(host, username, password, selected_objects=None, include_custom=False):
+def fetch_standard_objects_via_rest(host, username, password, selected_objects=None, include_custom=False, log_cb=print):
     """
     STRICT READ-ONLY API FETCHER:
     Connects to the OSVC Connect REST API via HTTP GET requests only.
@@ -125,12 +126,19 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
     session = requests.Session()
     auth = HTTPBasicAuth(username, password)
 
-    print(f"[STRICT GET ONLY] Connecting to OSVC Metadata Catalog: {catalog_url}")
-    catalog_data = fetch_metadata_catalog_get_only(catalog_url, session, auth)
+    log_cb(f"[STRICT GET ONLY] Connecting to OSVC Metadata Catalog: {catalog_url}")
+
+    try:
+        catalog_data = fetch_metadata_catalog_get_only(catalog_url, session, auth)
+    except Exception as err:
+        log_cb(f"[ERROR] Failed to fetch metadata catalog: {err}")
+        raise
 
     items = catalog_data.get("items", []) or catalog_data.get("objects", [])
     if not items and isinstance(catalog_data, list):
         items = catalog_data
+
+    log_cb(f"[SUCCESS] Metadata catalog returned {len(items)} items/objects")
 
     objects_map = {}
     processed_count = 0
@@ -163,12 +171,12 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
             schema_url = f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog/{obj_name}"
 
         try:
-            print(f"[STRICT GET ONLY] Fetching schema for: {obj_name}")
+            log_cb(f"[STRICT GET ONLY] Fetching schema for object: {obj_name}")
             schema_data = fetch_schema_get_only(schema_url, session, auth)
 
             singular = schema_data.get("definitions", {}).get("singularResource", {})
             if singular.get("isMenu") is True:
-                print(f"[INFO] Skipping menu object: {obj_name}")
+                log_cb(f"[INFO] Skipping menu-only object: {obj_name}")
                 continue
 
             properties = singular.get("properties", {})
@@ -178,7 +186,7 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
                 if f_name == "customFields" and not include_custom:
                     continue
 
-                fields_resolved = _resolve_property_field(f_name, f_info, session, auth)
+                fields_resolved = _resolve_property_field(f_name, f_info, session, auth, log_cb=log_cb)
                 extracted_fields.extend(fields_resolved)
 
             if extracted_fields:
@@ -187,12 +195,10 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
                     "fields": extracted_fields
                 }
                 processed_count += 1
-                print(f"[SUCCESS] Extracted {len(extracted_fields)} standard fields for {obj_name}")
+                log_cb(f"[SUCCESS] Extracted {len(extracted_fields)} standard fields for '{obj_name}'")
 
         except Exception as err:
-            print(f"[WARNING] Failed to fetch schema for {obj_name}: {err}")
+            log_cb(f"[WARNING] Failed to fetch schema for object '{obj_name}': {err}")
 
-    print(f"==========================================================================")
-    print(f"[COMPLETED] Extracted {processed_count} standard object schemas via HTTP GET.")
-    print(f"==========================================================================")
+    log_cb(f"[COMPLETED] Extracted {processed_count} standard object schemas via HTTP GET.")
     return objects_map
