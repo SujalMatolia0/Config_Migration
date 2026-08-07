@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSVC Field Extractor Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0B0F19;
+            --bg-surface: #131B2E;
+            --bg-card: #1B2640;
+            --bg-card-hover: #223050;
+            --border-color: #2D3D66;
+            --accent-primary: #3B82F6;
+            --accent-glow: rgba(59, 130, 246, 0.35);
+            --accent-cyan: #06B6D4;
+            --accent-green: #10B981;
+            --accent-purple: #8B5CF6;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --text-muted: #6B7280;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        header {
+            background: rgba(19, 27, 46, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #FFFFFF, #93C5FD);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-badge {
+            font-size: 0.75rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), #2563EB);
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-sample {
+            background: rgba(139, 92, 246, 0.15);
+            color: #C4B5FD;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-sample:hover {
+            background: rgba(139, 92, 246, 0.25);
+            border-color: #8B5CF6;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .grid-dual {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-dual {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 32px 20px;
+            text-align: center;
+            background: rgba(11, 15, 25, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .dropzone:hover, .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .dropzone input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .dropzone-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .dropzone:hover .dropzone-icon {
+            color: var(--accent-primary);
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .process-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px 32px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-val {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .results-section {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tabs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #FFFFFF;
+            background: var(--accent-primary);
+        }
+
+        .search-box {
+            position: relative;
+            width: 260px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px 8px 36px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(11, 15, 25, 0.5);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .sub-tab-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .sub-tab-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .sub-tab-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent-primary);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(45, 61, 102, 0.4);
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(27, 38, 64, 0.4);
+        }
+
+        tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-custom {
+            background: rgba(139, 92, 246, 0.2);
+            color: #C4B5FD;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .badge-system {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93C5FD;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .badge-yes {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6EE7B7;
+        }
+
+        .badge-no {
+            background: rgba(107, 114, 128, 0.2);
+            color: #9CA3AF;
+        }
+
+        .empty-state {
+            padding: 64px 24px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: var(--border-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="brand-title">OSVC Field Extractor</span>
+                    <span class="brand-badge">EXCEL ENGINE</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-sample" onclick="loadSampleData()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Load Sample Input
+            </button>
+            <button class="btn btn-primary" onclick="processUploadedFiles()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Extract Fields
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="grid-dual">
+            <!-- Workspace XML Upload -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        Workspace XML Files
+                    </div>
+                    <span id="ws-count-badge" class="badge badge-system">0 Files</span>
+                </div>
+                <div class="dropzone" id="ws-dropzone">
+                    <input type="file" id="ws-file-input" multiple accept=".xml">
+                    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <p style="font-weight: 600; color: var(--text-primary);">Drop Workspace XML files here</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Select one or multiple layout export XMLs</p>
+                </div>
+                <div class="file-list" id="ws-file-list"></div>
+            </div>
+
+            <!-- Object XML Upload -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        </svg>
+                        Object Schema XML Files
+                    </div>
+                    <span id="obj-count-badge" class="badge badge-custom">0 Files</span>
+                </div>
+                <div class="dropzone" id="obj-dropzone">
+                    <input type="file" id="obj-file-input" multiple accept=".xml">
+                    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    <p style="font-weight: 600; color: var(--text-primary);">Drop Object XML files here</p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Select standard or custom entity schema XMLs</p>
+                </div>
+                <div class="file-list" id="obj-file-list"></div>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Workspaces Parsed</span>
+                <span class="stat-val" id="stat-ws-count">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Object Schemas</span>
+                <span class="stat-val" id="stat-obj-count">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Layout Fields</span>
+                <span class="stat-val" id="stat-ws-fields">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Schema Fields</span>
+                <span class="stat-val" id="stat-obj-fields">0</span>
+            </div>
+        </div>
+
+        <!-- Download Toolbar (Visible after processing) -->
+        <div class="process-bar" id="download-bar" style="display: none;">
+            <div>
+                <h4 style="font-size: 1rem; font-weight: 700;">Generated Excel Reports Ready</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Workspaces, Objects, and Combined multi-tab workbooks</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <a href="/api/download/workspaces.xlsx" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    workspaces.xlsx
+                </a>
+                <a href="/api/download/objects.xlsx" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    objects.xlsx
+                </a>
+                <a href="/api/download/combined.xlsx" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    combined.xlsx
+                </a>
+                <a href="/api/download/all_reports.zip" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Download ZIP
+                </a>
+            </div>
+        </div>
+
+        <!-- Live Interactive Table Preview -->
+        <div class="results-section">
+            <div class="tabs-header">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="switchMainTab('workspaces')">Workspaces Preview</button>
+                    <button class="tab-btn" onclick="switchMainTab('objects')">Objects Preview</button>
+                </div>
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="table-search" placeholder="Filter fields..." onkeyup="filterTable()">
+                </div>
+            </div>
+
+            <!-- Sub Tabs for Workspace/Object selection -->
+            <div class="sub-tabs" id="sub-tabs-bar"></div>
+
+            <!-- Data Table View -->
+            <div class="table-container">
+                <table id="data-table">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body">
+                        <tr>
+                            <td colspan="12">
+                                <div class="empty-state">
+                                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                                    </svg>
+                                    <p style="font-weight: 600;">No Field Data Loaded</p>
+                                    <p style="font-size: 0.85rem; margin-top: 4px;">Upload XML files or click 'Load Sample Input' to view field mappings.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        OSVC Field Extractor Studio &bull; Config Accelerator Module
+    </footer>
+
+    <script>
+        let extractedData = null;
+        let activeMainTab = 'workspaces';
+        let activeSubTabIdx = 0;
+
+        const wsFileInput = document.getElementById('ws-file-input');
+        const objFileInput = document.getElementById('obj-file-input');
+
+        wsFileInput.addEventListener('change', () => updateFileList('ws'));
+        objFileInput.addEventListener('change', () => updateFileList('obj'));
+
+        function updateFileList(type) {
+            const input = document.getElementById(`${type}-file-input`);
+            const list = document.getElementById(`${type}-file-list`);
+            const badge = document.getElementById(`${type}-count-badge`);
+
+            list.innerHTML = '';
+            const files = Array.from(input.files);
+            badge.innerText = `${files.length} Files`;
+
+            files.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.innerHTML = `<span>${f.name}</span><span style="color: var(--text-muted);">${(f.size / 1024).toFixed(1)} KB</span>`;
+                list.appendChild(item);
+            });
+        }
+
+        async function loadSampleData() {
+            try {
+                const res = await fetch('/api/load_sample', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    renderExtractedData(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Failed to load sample data.');
+            }
+        }
+
+        async function processUploadedFiles() {
+            const wsFiles = wsFileInput.files;
+            const objFiles = objFileInput.files;
+
+            if (wsFiles.length === 0 && objFiles.length === 0) {
+                alert('Please select at least one Workspace XML or Object XML file.');
+                return;
+            }
+
+            const formData = new FormData();
+            Array.from(wsFiles).forEach(f => formData.append('workspace_files', f));
+            Array.from(objFiles).forEach(f => formData.append('object_files', f));
+
+            try {
+                const res = await fetch('/api/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    renderExtractedData(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Failed to process uploaded files.');
+            }
+        }
+
+        function renderExtractedData(data) {
+            extractedData = data;
+            document.getElementById('stat-ws-count').innerText = data.summary.workspace_count;
+            document.getElementById('stat-obj-count').innerText = data.summary.object_count;
+            document.getElementById('stat-ws-fields').innerText = data.summary.total_workspace_fields;
+            document.getElementById('stat-obj-fields').innerText = data.summary.total_object_fields;
+
+            document.getElementById('download-bar').style.display = 'flex';
+            activeSubTabIdx = 0;
+            renderSubTabs();
+            renderTable();
+        }
+
+        function switchMainTab(tab) {
+            activeMainTab = tab;
+            activeSubTabIdx = 0;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderSubTabs();
+            renderTable();
+        }
+
+        function renderSubTabs() {
+            const container = document.getElementById('sub-tabs-bar');
+            container.innerHTML = '';
+            if (!extractedData) return;
+
+            const list = activeMainTab === 'workspaces' ? extractedData.workspaces : extractedData.objects;
+            list.forEach((item, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `sub-tab-btn ${idx === activeSubTabIdx ? 'active' : ''}`;
+                const name = activeMainTab === 'workspaces' ? item.workspace_name : item.object_name;
+                btn.innerText = `${name} (${item.field_count})`;
+                btn.onclick = () => {
+                    activeSubTabIdx = idx;
+                    document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderTable();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderTable() {
+            const head = document.getElementById('table-head');
+            const body = document.getElementById('table-body');
+            head.innerHTML = '';
+            body.innerHTML = '';
+
+            if (!extractedData) return;
+
+            const list = activeMainTab === 'workspaces' ? extractedData.workspaces : extractedData.objects;
+            if (!list || list.length === 0 || !list[activeSubTabIdx]) {
+                body.innerHTML = '<tr><td colspan="12" class="empty-state">No items available</td></tr>';
+                return;
+            }
+
+            const current = list[activeSubTabIdx];
+            const rows = current.rows;
+
+            if (activeMainTab === 'workspaces') {
+                head.innerHTML = `
+                    <tr>
+                        <th>Bound Object</th>
+                        <th>Target Object</th>
+                        <th>Object Field Name</th>
+                        <th>Field Label</th>
+                        <th>Location / Tab</th>
+                        <th>Required</th>
+                        <th>Read Only</th>
+                        <th>Data Type</th>
+                        <th>Field Type</th>
+                        <th>Is Nullable</th>
+                        <th>Is Lookup</th>
+                        <th>Max Length</th>
+                    </tr>
+                `;
+                rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const isCustom = r.field_type.includes('Custom');
+                    tr.innerHTML = `
+                        <td><strong>${r.bound_object}</strong></td>
+                        <td>${r.target_object}</td>
+                        <td><code>${r.object_field_name}</code></td>
+                        <td>${r.field_label}</td>
+                        <td>${r.location_tab}</td>
+                        <td>${r.required}</td>
+                        <td>${r.readonly}</td>
+                        <td>${r.data_type}</td>
+                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
+                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
+                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td>${r.max_length}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+            } else {
+                head.innerHTML = `
+                    <tr>
+                        <th>Field Key (Package$Name)</th>
+                        <th>Field Label</th>
+                        <th>Data Type</th>
+                        <th>Field Type</th>
+                        <th>Is Nullable</th>
+                        <th>Is Lookup</th>
+                        <th>Is Read Only</th>
+                        <th>Max Length</th>
+                        <th>Description</th>
+                    </tr>
+                `;
+                rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const isCustom = r.field_type.includes('Custom');
+                    tr.innerHTML = `
+                        <td><code>${r.field_key}</code></td>
+                        <td>${r.field_label}</td>
+                        <td>${r.data_type}</td>
+                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
+                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
+                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td><span class="badge ${r.is_readonly === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly}</span></td>
+                        <td>${r.max_length}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+        }
+
+        function filterTable() {
+            const query = document.getElementById('table-search').value.toLowerCase();
+            const trs = document.querySelectorAll('#table-body tr');
+            trs.forEach(tr => {
+                const text = tr.innerText.toLowerCase();
+                tr.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
