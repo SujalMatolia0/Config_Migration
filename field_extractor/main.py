@@ -3,7 +3,7 @@ import sys
 import argparse
 from workspace_parser import parse_workspace_xml
 from object_parser import parse_object_xml
-from csv_exporter import generate_csv_reports
+from csv_exporter import generate_workspace_csvs, generate_object_csv
 
 def main():
     parser = argparse.ArgumentParser(description="Standalone OSVC Field Extractor & CSV Generator")
@@ -33,17 +33,7 @@ def main():
         print(f"[ERROR] Object path not found: {object_path}")
         sys.exit(1)
 
-    # 1. Collect all Workspace XML file paths
-    ws_files = []
-    if os.path.isdir(workspace_path):
-        for root_dir, _, files in os.walk(workspace_path):
-            for f in sorted(files):
-                if f.endswith(".xml"):
-                    ws_files.append(os.path.join(root_dir, f))
-    else:
-        ws_files.append(workspace_path)
-
-    # 2. Parse all Object XML schemas into a shared map
+    # 1. Parse all Object XML schemas into a shared map
     obj_files = []
     if os.path.isdir(object_path):
         for root_dir, _, files in os.walk(object_path):
@@ -61,53 +51,61 @@ def main():
             if obj_n:
                 objects_map[obj_n.lower()] = o_data
         except Exception:
-            # Skip XML files that are not valid Object schema XMLs
             pass
 
     total_schema_fields = sum(len(d.get("fields", [])) for d in objects_map.values())
     print(f"[SUCCESS] Loaded {len(objects_map)} Object schema definition(s) -> {total_schema_fields} total schema fields.")
+
+    # 2. Write a SINGLE shared object_fields.csv at the root output level
+    os.makedirs(output_dir, exist_ok=True)
+    obj_csv_path = os.path.join(output_dir, "object_fields.csv")
+    generate_object_csv(objects_map, obj_csv_path)
+    print(f"[SUCCESS] Object Schema CSV -> {obj_csv_path} ({total_schema_fields} rows)")
     print("--------------------------------------------------------------------------")
 
-    # 3. Process each Workspace file separately -> own subfolder of CSVs
-    parsed_workspaces = []
+    # 3. Collect all Workspace XML file paths
+    ws_files = []
+    if os.path.isdir(workspace_path):
+        for root_dir, _, files in os.walk(workspace_path):
+            for f in sorted(files):
+                if f.endswith(".xml"):
+                    ws_files.append(os.path.join(root_dir, f))
+    else:
+        ws_files.append(workspace_path)
+
+    # 4. Parse each workspace, write its 2 CSVs into workspaces/<workspace_name>/
+    workspaces_dir = os.path.join(output_dir, "workspaces")
+    os.makedirs(workspaces_dir, exist_ok=True)
+
+    processed = 0
     skipped = 0
     for w_file in ws_files:
         try:
             ws_data = parse_workspace_xml(w_file)
-            parsed_workspaces.append(ws_data)
         except Exception:
-            # Skip XML files that are not valid Workspace XMLs
             skipped += 1
+            continue
 
-    if not parsed_workspaces:
-        print("[ERROR] No valid Workspace XML files found. Exiting.")
-        sys.exit(1)
-
-    print(f"[SUCCESS] Found {len(parsed_workspaces)} valid Workspace(s) to process.")
-    if skipped > 0:
-        print(f"[WARNING] Skipped {skipped} non-Workspace XML file(s).")
-    print("--------------------------------------------------------------------------")
-
-    all_results = []
-    for ws_data in parsed_workspaces:
         ws_name = ws_data["workspace_name"]
+        ws_out_dir = os.path.join(workspaces_dir, ws_name)
+        os.makedirs(ws_out_dir, exist_ok=True)
 
-        # Each workspace gets its own output subfolder
-        ws_output_dir = os.path.join(output_dir, ws_name)
-        os.makedirs(ws_output_dir, exist_ok=True)
-
-        result = generate_csv_reports(ws_data, objects_map, ws_output_dir)
-        all_results.append((ws_name, result))
+        result = generate_workspace_csvs(ws_data, objects_map, ws_out_dir)
+        processed += 1
 
         print(f"Workspace: {ws_name}")
-        print(f"  workspace_fields.csv  -> {result['total_workspace_fields']} rows")
-        print(f"  object_fields.csv     -> {result['total_object_fields']} rows")
-        print(f"  combined_...csv       -> {result['total_workspace_fields']} rows")
-        print(f"  Output folder         -> {ws_output_dir}")
+        print(f"  workspace_fields.csv              -> {result['total_workspace_fields']} rows")
+        print(f"  combined_workspace_object_fields.csv -> {result['total_workspace_fields']} rows")
+        print(f"  Output -> {ws_out_dir}")
         print("")
 
+    if skipped > 0:
+        print(f"[WARNING] Skipped {skipped} non-Workspace XML file(s).")
+
     print("==========================================================================")
-    print(f"Completed. {len(all_results)} workspace(s) exported to: {output_dir}")
+    print(f"Completed. {processed} workspace(s) processed.")
+    print(f"  Object CSV  -> {obj_csv_path}")
+    print(f"  Workspaces  -> {workspaces_dir}/")
     print("==========================================================================")
 
 if __name__ == "__main__":
