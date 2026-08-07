@@ -17,7 +17,7 @@ def normalize_field_name(name):
     clean = re.sub(r'^(?:CO\.)', '', clean, flags=re.IGNORECASE)
     return clean.strip().lower()
 
-def generate_csv_reports(workspace_data, object_data, output_dir):
+def generate_csv_reports(workspace_data, object_data_or_map, output_dir):
     """
     Generates 3 CSV export files based on Workspace XML layout and Object XML schemas:
     1. workspace_fields.csv (Workspace layout fields enriched with Object XML metadata)
@@ -27,35 +27,62 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     ws_fields = workspace_data.get("fields", [])
-    obj_fields = object_data.get("fields", [])
     ws_name = workspace_data.get("workspace_name", "Workspace")
-    obj_name = object_data.get("object_name", "Object")
+    bound_object = workspace_data.get("bound_object", "Contact")
 
-    # Index object fields by normalized field name and label for instant lookup
-    obj_by_name = {}
-    for of in obj_fields:
-        norm_n = normalize_field_name(of.get("field_name"))
-        norm_l = normalize_field_name(of.get("field_label"))
-        if norm_n:
-            obj_by_name[norm_n] = of
-        if norm_l and norm_l not in obj_by_name:
-            obj_by_name[norm_l] = of
+    # Build objects map (Key: normalized object name -> Object Schema Dict)
+    objects_map = {}
+    all_obj_fields = []
+
+    if isinstance(object_data_or_map, dict) and "fields" not in object_data_or_map:
+        # Dictionary of object schemas keyed by object name
+        for o_name, o_data in object_data_or_map.items():
+            norm_key = o_name.lower()
+            objects_map[norm_key] = o_data
+            all_obj_fields.extend(o_data.get("fields", []))
+    else:
+        # Single object schema dictionary
+        o_name = object_data_or_map.get("object_name", bound_object)
+        objects_map[o_name.lower()] = object_data_or_map
+        all_obj_fields = object_data_or_map.get("fields", [])
+
+    # Index object fields by object name AND field name/label for precision matching
+    obj_fields_indexed = {}
+    for oname, odata in objects_map.items():
+        obj_by_name = {}
+        for of in odata.get("fields", []):
+            norm_n = normalize_field_name(of.get("field_name"))
+            norm_l = normalize_field_name(of.get("field_label"))
+            if norm_n:
+                obj_by_name[norm_n] = of
+            if norm_l and norm_l not in obj_by_name:
+                obj_by_name[norm_l] = of
+        obj_fields_indexed[oname] = obj_by_name
 
     # Track which object fields were matched to workspace layout
-    matched_object_names = set()
+    matched_object_fields = set()
 
-    # Enrich workspace fields with Object XML data
+    # Enrich workspace fields with matching Object XML schema data
     enriched_ws_fields = []
     for wf in ws_fields:
+        target_obj = wf.get("target_object") or bound_object
+        target_obj_key = target_obj.lower()
+        
         f_code = wf.get("field_code", "")
         f_label = wf.get("field_label", "")
         norm_code = normalize_field_name(f_code)
         norm_label = normalize_field_name(f_label)
 
-        matched_of = obj_by_name.get(norm_code) or obj_by_name.get(norm_label)
+        # Retrieve target object's field index
+        target_index = obj_fields_indexed.get(target_obj_key, {})
+        if not target_index and len(obj_fields_indexed) == 1:
+            # Fallback to the single available object schema if target schema not explicitly named
+            target_index = list(obj_fields_indexed.values())[0]
+
+        matched_of = target_index.get(norm_code) or target_index.get(norm_label)
         
         if matched_of:
-            matched_object_names.add(matched_of.get("field_name"))
+            matched_object_fields.add((matched_of.get("object_name", target_obj), matched_of.get("field_name")))
             data_type = matched_of.get("data_type", "Text")
             is_system = matched_of.get("is_system_field", False)
             is_nullable = matched_of.get("is_nullable", True)
@@ -73,6 +100,7 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
 
         enriched_item = dict(wf)
         enriched_item.update({
+            "target_object": target_obj,
             "object_field_id": obj_field_id,
             "data_type": data_type,
             "is_system_field": "Yes" if is_system else "No",
@@ -86,7 +114,7 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
     # 1. Output workspace_fields.csv (Workspace Layout Base)
     ws_csv_path = os.path.join(output_dir, "workspace_fields.csv")
     ws_headers = [
-        "Workspace Name", "Bound Object", "Field Code", "Field Label",
+        "Workspace Name", "Bound Object", "Target Object", "Field Code", "Field Label",
         "Location / Tab", "Row Index", "Column Index", "Required Option",
         "Read Only Option", "Object Field ID", "Data Type", "Is System Field",
         "Is Nullable", "Is Lookup", "Max Length"
@@ -96,11 +124,11 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
         writer.writerow(ws_headers)
         for item in enriched_ws_fields:
             writer.writerow([
-                item["workspace_name"], item["bound_object"], item["field_code"],
-                item["field_label"], item["location_tab"], item["row"], item["column"],
-                item["required_option"], item["readonly_option"], item["object_field_id"],
-                item["data_type"], item["is_system_field"], item["is_nullable"],
-                item["is_lookup"], item["max_length"]
+                item["workspace_name"], item["bound_object"], item["target_object"],
+                item["field_code"], item["field_label"], item["location_tab"],
+                item["row"], item["column"], item["required_option"], item["readonly_option"],
+                item["object_field_id"], item["data_type"], item["is_system_field"],
+                item["is_nullable"], item["is_lookup"], item["max_length"]
             ])
 
     # 2. Output object_fields.csv (Object Schema Base)
@@ -113,8 +141,8 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
     with open(obj_csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(obj_headers)
-        for of in obj_fields:
-            is_used = "Yes" if of.get("field_name") in matched_object_names else "No"
+        for of in all_obj_fields:
+            is_used = "Yes" if (of["object_name"], of["field_name"]) in matched_object_fields else "No"
             writer.writerow([
                 of["object_name"], of["package_name"], of["field_id"], of["field_name"],
                 of["field_label"], of["data_type"], "Yes" if of["is_system_field"] else "No",
@@ -126,7 +154,7 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
     # 3. Output combined_workspace_object_fields.csv (Workspace Base Priority)
     combined_csv_path = os.path.join(output_dir, "combined_workspace_object_fields.csv")
     combined_headers = [
-        "Workspace Name", "Object Name", "Field Code / Name", "Field Label",
+        "Workspace Name", "Bound Object", "Target Object", "Field Code / Name", "Field Label",
         "Workspace Tab Location", "Grid Position (Row, Col)", "Required Option",
         "Read Only Option", "Object Field ID", "Data Type", "Is System Field",
         "Is Nullable", "Is Lookup", "Max Length", "In Workspace Layout"
@@ -139,11 +167,12 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
         for item in enriched_ws_fields:
             grid_pos = f"Row {item['row']}, Col {item['column']}"
             writer.writerow([
-                item["workspace_name"], item["bound_object"], item["field_code"],
-                item["field_label"], item["location_tab"], grid_pos,
-                item["required_option"], item["readonly_option"], item["object_field_id"],
-                item["data_type"], item["is_system_field"], item["is_nullable"],
-                item["is_lookup"], item["max_length"], "Yes (Layout Used)"
+                item["workspace_name"], item["bound_object"], item["target_object"],
+                item["field_code"], item["field_label"], item["location_tab"],
+                grid_pos, item["required_option"], item["readonly_option"],
+                item["object_field_id"], item["data_type"], item["is_system_field"],
+                item["is_nullable"], item["is_lookup"], item["max_length"],
+                "Yes (Layout Used)"
             ])
 
     return {
@@ -151,5 +180,5 @@ def generate_csv_reports(workspace_data, object_data, output_dir):
         "object_fields_csv": obj_csv_path,
         "combined_csv": combined_csv_path,
         "total_workspace_fields": len(enriched_ws_fields),
-        "total_object_fields": len(obj_fields)
+        "total_object_fields": len(all_obj_fields)
     }

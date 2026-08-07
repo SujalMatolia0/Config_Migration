@@ -1,0 +1,99 @@
+Workspace Name,Bound Object,Target Object,Field Code,Field Label,Location / Tab,Row Index,Column Index,Required Option,Read Only Option,Object Field ID,Data Type,Is System Field,Is Nullable,Is Lookup,Max Length
+Contact test,Contact,Contact,Contact.Name.First,First,SUMMARY_LBL,0,0,No,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,Yes,—
+Contact test,Contact,Contact,Contact.Name.Last,Last,SUMMARY_LBL,0,1,No,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,Yes,—
+Contact test,Contact,Contact,Contact.Email,Email,SUMMARY_LBL,1,0,No,OnNew:~any~;OnEdit:~any~,10002,Text,No,Yes,No,255
+Contact test,Contact,Contact,Contact.OrgId,&Account,SUMMARY_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Contact test,Contact,Contact,Contact.C$IsRegistered,C$IsRegistered,SUMMARY_LBL,2,0,,"OnNew:30,31,33,32,34,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19;OnEdit:30,31,33,32,34,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19",—,Standard Data Field,Yes,Yes,No,—
+Contact test,Contact,Contact,Contact.Disabled,Disabled,SUMMARY_LBL,3,0,No,"OnNew:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19;OnEdit:30,40,31,33,32,34,41,11,14,6,21,10,8,28,9,35,36,39,4,24,7,15,27,37,13,22,23,16,19",—,Standard Data Field,Yes,Yes,No,—
+Contact test,Contact,Contact,Contact.CId,CId,SUMMARY_LBL,3,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.ProdId,ProdId,SUMMARY_LBL,1,1,OnNew:~any~;OnEdit:~any~,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.CId,CId,SUMMARY_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.Status.Id,Id,SUMMARY_LBL,1,3,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.Subject,Subject,SUMMARY_LBL,2,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.ChanId,ChanId,SUMMARY_LBL,2,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.CatId,CatId,SUMMARY_LBL,2,3,OnNew:~any~;OnEdit:~any~,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.Assigned,Assigned,SUMMARY_LBL,3,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.PhOffice,&Mobile Phone,SUMMARY_LBL,3,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.QueueId,QueueId,SUMMARY_LBL,3,3,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.C$Gender,C$Gender,SUMMARY_LBL,4,2,OnNew:~any~;OnEdit:~any~,,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Name.First,First,CONTACTS_LBL,1,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Name.Last,Last,CONTACTS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Email,Email,CONTACTS_LBL,2,0,No,No,10002,Text,No,Yes,No,255
+real_edge_01_nested_tabset,Incident,Contact,Contact.Addr,Addr,CONTACTS_LBL,2,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.PhOffice,PhOffice,CONTACTS_LBL,3,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Login,Login,CONTACTS_LBL,0,0,,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.MaOptIn,MaOptIn,CONTACTS_LBL,0,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.State,State,CONTACTS_LBL,0,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.MaMailType,MaMailType,CONTACTS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Source,Source,CONTACTS_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Login,Login,CONTACT_FIELDS_LBL,0,0,,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.MaOptIn,MaOptIn,CONTACT_FIELDS_LBL,0,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.State,State,CONTACT_FIELDS_LBL,0,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.MaMailType,MaMailType,CONTACT_FIELDS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Contact,Contact.Source,Source,CONTACT_FIELDS_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.MailboxId,MailboxId,Other Info,1,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.InterfaceId,InterfaceId,Other Info,1,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.SlaiId,SlaiId,Other Info,1,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.Source,Source,Other Info,2,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_01_nested_tabset,Incident,Incident,Incident.LangId,LangId,Other Info,2,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Contact,Contact,Contact,Contact.Title,Title,Top Form Layout,2,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Contact,Contact,Contact,Contact.Name.First,First,Top Form Layout,3,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Contact,Contact,Contact,Contact.Name.Last,Last,Top Form Layout,4,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Contact,Contact,Contact,Contact.Addr,Addr,Top Form Layout,5,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Contact,Contact,Contact,Contact.PhOffice,&Mobile Phone,Top Form Layout,6,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Contact,Contact,Contact,Contact.C$CustomerId,C$CustomerId,Top Form Layout,7,0,,,—,Standard Data Field,Yes,Yes,Yes,—
+Contact,Contact,Contact,Contact.Email,Email,Top Form Layout,8,0,No,No,10002,Text,No,Yes,No,255
+Contact,Contact,Contact,Contact.CtypeId,CtypeId,Top Form Layout,9,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Contact,Contact,Contact,Contact.C$Gender,C$Gender,Top Form Layout,10,0,,,—,Standard Data Field,Yes,Yes,No,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.C$AccountNumber,C$AccountNumber,Summary,0,0,,,—,Standard Data Field,Yes,Yes,No,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.PhOffice,PhOffice,Summary,1,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.OrgId,OrgId,Summary,3,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.Addr,Addr,Summary,4,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.C$Gender,C$Gender,Summary,5,0,,,—,Standard Data Field,Yes,Yes,No,—
+real_edge_02_new_workspace_patterns,Contact,Contact,Contact.Email,Email,Summary,6,0,No,No,10002,Text,No,Yes,No,255
+Incident,Incident,Incident,Incident.ProdId,ProdId,SUMMARY_LBL,1,1,OnNew:~any~;OnEdit:~any~,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.CId,CId,SUMMARY_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.Status.Id,Id,SUMMARY_LBL,1,3,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.Subject,Subject,SUMMARY_LBL,2,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Incident,Incident.ChanId,ChanId,SUMMARY_LBL,2,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.CatId,CatId,SUMMARY_LBL,2,3,OnNew:~any~;OnEdit:~any~,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.RefNo,RefNo,SUMMARY_LBL,3,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Incident,Incident.Assigned,Assigned,SUMMARY_LBL,3,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.PhOffice,&Mobile Phone,SUMMARY_LBL,3,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Incident,Incident.QueueId,QueueId,SUMMARY_LBL,3,3,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Contact,Contact.C$Gender,C$Gender,SUMMARY_LBL,4,2,OnNew:~any~;OnEdit:~any~,,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.Name.First,First,CONTACTS_LBL,1,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Contact,Contact.Name.Last,Last,CONTACTS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Contact,Contact.Email,Email,CONTACTS_LBL,2,0,No,No,10002,Text,No,Yes,No,255
+Incident,Incident,Contact,Contact.Addr,Addr,CONTACTS_LBL,2,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.PhOffice,PhOffice,CONTACTS_LBL,3,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.Login,Login,CONTACTS_LBL,0,0,,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.MaOptIn,MaOptIn,CONTACTS_LBL,0,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.State,State,CONTACTS_LBL,0,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.MaMailType,MaMailType,CONTACTS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.Source,Source,CONTACTS_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.Login,Login,CONTACT_FIELDS_LBL,0,0,,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.MaOptIn,MaOptIn,CONTACT_FIELDS_LBL,0,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.State,State,CONTACT_FIELDS_LBL,0,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.MaMailType,MaMailType,CONTACT_FIELDS_LBL,1,1,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Contact,Contact.Source,Source,CONTACT_FIELDS_LBL,1,2,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Incident,Incident.MailboxId,MailboxId,Other Info,1,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.InterfaceId,InterfaceId,Other Info,1,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.SlaiId,SlaiId,Other Info,1,2,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+Incident,Incident,Incident,Incident.Source,Source,Other Info,2,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+Incident,Incident,Incident,Incident.LangId,LangId,Other Info,2,1,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.Title,Title,Top Form Layout,2,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.Name.First,First,Top Form Layout,3,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.Name.Last,Last,Top Form Layout,4,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.Addr,Addr,Top Form Layout,5,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.PhOffice,&Mobile Phone,Top Form Layout,6,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.C$CustomerId,C$CustomerId,Top Form Layout,7,0,,,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.Email,Email,Top Form Layout,8,0,No,No,10002,Text,No,Yes,No,255
+real_edge_03_split_panel_contact,Contact,Contact,Contact.CtypeId,CtypeId,Top Form Layout,9,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+real_edge_03_split_panel_contact,Contact,Contact,Contact.C$Gender,C$Gender,Top Form Layout,10,0,,,—,Standard Data Field,Yes,Yes,No,—
+New Workspace,Contact,Contact,Contact.C$AccountNumber,C$AccountNumber,Summary,0,0,,,—,Standard Data Field,Yes,Yes,No,—
+New Workspace,Contact,Contact,Contact.PhOffice,PhOffice,Summary,1,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+New Workspace,Contact,Contact,Contact.OrgId,OrgId,Summary,3,0,No,No,—,Standard Data Field,Yes,Yes,Yes,—
+New Workspace,Contact,Contact,Contact.Addr,Addr,Summary,4,0,No,No,—,Standard Data Field,Yes,Yes,No,—
+New Workspace,Contact,Contact,Contact.C$Gender,C$Gender,Summary,5,0,,,—,Standard Data Field,Yes,Yes,No,—
+New Workspace,Contact,Contact,Contact.Email,Email,Summary,6,0,No,No,10002,Text,No,Yes,No,255

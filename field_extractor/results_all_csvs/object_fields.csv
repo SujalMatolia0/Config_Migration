@@ -1,0 +1,22 @@
+Object Name,Package Name,Field ID,Field Name,Field Label,Data Type,Is System Field,Is Nullable,Is Lookup,Is Read Only,Max Length,Description,Is Used In Workspace
+Contact,OracleServiceCloud,10001,phoneNumber,phoneNumber,Text,No,Yes,No,No,255,,No
+Contact,OracleServiceCloud,10002,email,email,Text,No,Yes,No,No,255,,Yes
+Test_Record,CO,10003,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10004,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10005,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10012,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10013,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10014,,,Text,No,Yes,No,No,—,,No
+Test_Record,CO,10003,ID,ID,Integer,Yes,No,No,No,—,System Field,No
+Test_Record,CO,10004,CreatedByAccount,Created By,Menu,Yes,Yes,No,Yes,—,System Field,No
+Test_Record,CO,10005,UpdatedByAccount,Updated By,Menu,Yes,Yes,No,Yes,—,System Field,No
+Test_Record,CO,10006,CreatedTime,Date Created,Date Time,Yes,Yes,No,Yes,—,System Field,No
+Test_Record,CO,10007,FileAttachments,File Attachments,Files,Yes,Yes,No,No,—,File Attachments for the object,No
+Test_Record,CO,10008,Labels,Labels,Labels,Yes,No,No,No,—,System Field,No
+Test_Record,CO,10009,UpdatedTime,Date Last Updated,Date Time,Yes,Yes,No,Yes,—,System Field,No
+Test_Record,CO,10010,Notes,Notes,Notes,Yes,Yes,No,No,—,Notes for the object,No
+Test_Record,CO,10011,Descriptions,Descriptions,Description,Yes,Yes,No,No,—,System Field,No
+Test_Record,CO,10012,test_record_field,Test Record Profile,Text,No,Yes,No,No,30,this is for testing,No
+Test_Record,CO,10013,TestInteger,Answer,Integer,No,Yes,No,No,—,,No
+Test_Record,CO,10014,TestMenu,TestMenu,Menu,No,Yes,No,No,—,,No
+Test_Record,CO,10015,Testyesno,Testyesno,Yes/No,No,Yes,No,No,—,,No

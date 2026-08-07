@@ -1,19 +1,19 @@
-Workspace Name,Bound Object,Field Code,Field Label,Location / Tab,Row Index,Column Index,Required Option,Read Only Option,Object Field ID,Data Type,Is System Field,Is Nullable,Is Lookup,Max Length
-Contact_Workspace,Contact,Contact.Name.First,First,Customer Details,0,0,Yes,No,1,Text,Yes,No,No,80
-Contact_Workspace,Contact,Contact.Name.Last,Last,Customer Details,0,1,Yes,No,2,Text,Yes,No,No,80
-Contact_Workspace,Contact,Contact.Title,Title,Customer Details,1,0,No,No,3,Text,Yes,Yes,No,40
-Contact_Workspace,Contact,Contact.Email,Email,Customer Details,1,1,Yes,No,4,Text,Yes,No,No,255
-Contact_Workspace,Contact,Contact.PhOffice,Office Phone,Customer Details,2,0,No,No,5,Phone,Yes,Yes,No,40
-Contact_Workspace,Contact,Contact.PhMobile,Mobile Phone,Customer Details,2,1,No,No,6,Phone,Yes,Yes,No,40
-Contact_Workspace,Contact,Contact.CId,CId,Customer Details,3,0,No,Yes,7,Integer,Yes,No,Yes,—
-Contact_Workspace,Contact,Contact.Created,Created,Customer Details,3,1,No,Yes,8,Date Time,Yes,No,No,—
-Contact_Workspace,Contact,Contact.Updated,Updated,Customer Details,4,0,No,Yes,9,Date Time,Yes,No,No,—
-Contact_Workspace,Contact,Contact.Disabled,Disabled,Customer Details,4,1,No,No,10,Yes/No,Yes,No,No,—
-Contact_Workspace,Contact,Contact.CtypeId,CtypeId,Customer Details,5,0,No,No,11,Menu,Yes,Yes,Yes,—
-Contact_Workspace,Contact,Contact.OrgId,OrgId,Customer Details,5,1,No,No,12,Integer,Yes,Yes,Yes,—
-Contact_Workspace,Contact,Contact.CustomFields.c$org_id_temp,c$org_id_temp,Customer Details,6,0,No,No,13,Integer,No,Yes,No,—
-Contact_Workspace,Contact,Contact.CustomFields.c$vip_status,c$vip_status,Customer Details,6,1,No,No,14,Text,No,Yes,No,40
-Contact_Workspace,Contact,Contact.CustomFields.c$loyalty_tier,c$loyalty_tier,Customer Details,7,0,No,No,15,Menu,No,Yes,No,—
-Contact_Workspace,Contact,Contact.CustomFields.c$customer_number,c$customer_number,Customer Details,7,1,No,No,16,Text,No,Yes,No,50
-Contact_Workspace,Contact,Contact.CustomFields.c$is_internal,c$is_internal,Customer Details,8,0,No,No,17,Yes/No,No,Yes,No,—
-Contact_Workspace,Contact,Contact.CustomFields.c$is_manual,c$is_manual,Customer Details,8,1,No,No,18,Yes/No,No,Yes,No,—
+Workspace Name,Bound Object,Target Object,Field Code,Field Label,Location / Tab,Row Index,Column Index,Required Option,Read Only Option,Object Field ID,Data Type,Is System Field,Is Nullable,Is Lookup,Max Length
+Contact_Workspace,Contact,Contact,Contact.Name.First,First,Customer Details,0,0,Yes,No,1,Text,Yes,No,No,80
+Contact_Workspace,Contact,Contact,Contact.Name.Last,Last,Customer Details,0,1,Yes,No,2,Text,Yes,No,No,80
+Contact_Workspace,Contact,Contact,Contact.Title,Title,Customer Details,1,0,No,No,3,Text,Yes,Yes,No,40
+Contact_Workspace,Contact,Contact,Contact.Email,Email,Customer Details,1,1,Yes,No,4,Text,Yes,No,No,255
+Contact_Workspace,Contact,Contact,Contact.PhOffice,Office Phone,Customer Details,2,0,No,No,5,Phone,Yes,Yes,No,40
+Contact_Workspace,Contact,Contact,Contact.PhMobile,Mobile Phone,Customer Details,2,1,No,No,6,Phone,Yes,Yes,No,40
+Contact_Workspace,Contact,Contact,Contact.CId,CId,Customer Details,3,0,No,Yes,7,Integer,Yes,No,Yes,—
+Contact_Workspace,Contact,Contact,Contact.Created,Created,Customer Details,3,1,No,Yes,8,Date Time,Yes,No,No,—
+Contact_Workspace,Contact,Contact,Contact.Updated,Updated,Customer Details,4,0,No,Yes,9,Date Time,Yes,No,No,—
+Contact_Workspace,Contact,Contact,Contact.Disabled,Disabled,Customer Details,4,1,No,No,10,Yes/No,Yes,No,No,—
+Contact_Workspace,Contact,Contact,Contact.CtypeId,CtypeId,Customer Details,5,0,No,No,11,Menu,Yes,Yes,Yes,—
+Contact_Workspace,Contact,Contact,Contact.OrgId,OrgId,Customer Details,5,1,No,No,12,Integer,Yes,Yes,Yes,—
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$org_id_temp,c$org_id_temp,Customer Details,6,0,No,No,13,Integer,No,Yes,No,—
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$vip_status,c$vip_status,Customer Details,6,1,No,No,14,Text,No,Yes,No,40
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$loyalty_tier,c$loyalty_tier,Customer Details,7,0,No,No,15,Menu,No,Yes,No,—
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$customer_number,c$customer_number,Customer Details,7,1,No,No,16,Text,No,Yes,No,50
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$is_internal,c$is_internal,Customer Details,8,0,No,No,17,Yes/No,No,Yes,No,—
+Contact_Workspace,Contact,Contact,Contact.CustomFields.c$is_manual,c$is_manual,Customer Details,8,1,No,No,18,Yes/No,No,Yes,No,—
