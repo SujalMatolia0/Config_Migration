@@ -44,11 +44,38 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
 # Global store for current session outputs
 RESULTS_CACHE = {
     "workspaces": [],
-    "objects_map": {},
+    "standard_objects_map": {},
+    "custom_objects_map": {},
+    "combined_objects_map": {},
     "output_dir": None,
     "summary": {},
     "logs": []
 }
+
+def merge_objects_maps(standard_map, custom_map):
+    """
+    Merges standard objects map (from REST API) and custom objects map (from XMLs).
+    Allows dual-lookup enrichment for workspace fields.
+    """
+    merged = {}
+    for obj_key, obj_data in (standard_map or {}).items():
+        merged[obj_key] = {
+            "object_name": obj_data.get("object_name", obj_key),
+            "fields": list(obj_data.get("fields", []))
+        }
+    for obj_key, obj_data in (custom_map or {}).items():
+        if obj_key in merged:
+            existing_fields = merged[obj_key]["fields"]
+            existing_keys = {f.get("field_name", "").lower() for f in existing_fields}
+            for cf in obj_data.get("fields", []):
+                if cf.get("field_name", "").lower() not in existing_keys:
+                    existing_fields.append(cf)
+        else:
+            merged[obj_key] = {
+                "object_name": obj_data.get("object_name", obj_key),
+                "fields": list(obj_data.get("fields", []))
+            }
+    return merged
 
 def add_log(msg, level="INFO"):
     t_str = datetime.now().strftime("%H:%M:%S")
@@ -165,15 +192,36 @@ def fetch_rest_schemas():
         write_objects_excel(fetched_objects, obj_xlsx_path)
         write_combined_excel(existing_ws, fetched_objects, comb_xlsx_path)
 
+        RESULTS_CACHE["standard_objects_map"] = fetched_objects
+        custom_map = RESULTS_CACHE.get("custom_objects_map") or {}
+        combined_map = merge_objects_maps(fetched_objects, custom_map)
+        RESULTS_CACHE["combined_objects_map"] = combined_map
+
+        out_dir = os.path.join(CURRENT_DIR, "results")
+        os.makedirs(out_dir, exist_ok=True)
+
+        std_xlsx_path = os.path.join(out_dir, "standard_objects.xlsx")
+        cst_xlsx_path = os.path.join(out_dir, "custom_objects.xlsx")
+        ws_xlsx_path  = os.path.join(out_dir, "workspaces.xlsx")
+        obj_xlsx_path = os.path.join(out_dir, "objects.xlsx")
+        comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
+
+        write_objects_excel(fetched_objects, std_xlsx_path)
+        if custom_map:
+            write_objects_excel(custom_map, cst_xlsx_path)
+        write_objects_excel(combined_map, obj_xlsx_path)
+
+        write_workspaces_excel(existing_ws, combined_map, ws_xlsx_path)
+        write_combined_excel(existing_ws, combined_map, comb_xlsx_path)
+
         RESULTS_CACHE["workspaces"] = existing_ws
-        RESULTS_CACHE["objects_map"] = fetched_objects
         RESULTS_CACHE["output_dir"] = out_dir
 
-        add_log(f"Generated Excel workbooks in: {out_dir}", "SUCCESS")
+        add_log(f"Generated Excel workbooks in: {out_dir} (standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx)", "SUCCESS")
 
         # Build JSON preview
         preview_objects = []
-        for o_name, o_data in fetched_objects.items():
+        for o_name, o_data in combined_map.items():
             disp_name = o_data.get("object_name", o_name)
             rows = []
             for of in o_data.get("fields", []):
@@ -198,7 +246,7 @@ def fetch_rest_schemas():
         preview_combined = []
         for ws_data in existing_ws:
             bound_obj = ws_data.get("bound_object", "Contact")
-            enriched = _enrich_workspace_fields(ws_data.get("fields", []), fetched_objects, bound_obj)
+            enriched = _enrich_workspace_fields(ws_data.get("fields", []), combined_map, bound_obj)
             rows = []
             for item in enriched:
                 rows.append({
@@ -232,9 +280,9 @@ def fetch_rest_schemas():
 
         summary = {
             "workspace_count": len(existing_ws),
-            "object_count": len(fetched_objects),
+            "object_count": len(combined_map),
             "total_workspace_fields": sum(len(w.get("fields", [])) for w in existing_ws),
-            "total_object_fields": sum(len(o.get("fields", [])) for o in fetched_objects.values()),
+            "total_object_fields": sum(len(o.get("fields", [])) for o in combined_map.values()),
             "skipped_files": 0
         }
         RESULTS_CACHE["summary"] = summary
@@ -322,25 +370,35 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     out_dir = os.path.join(CURRENT_DIR, "results")
     os.makedirs(out_dir, exist_ok=True)
 
-    ws_xlsx_path = os.path.join(out_dir, "workspaces.xlsx")
-    obj_xlsx_path = os.path.join(out_dir, "objects.xlsx")
+    RESULTS_CACHE["custom_objects_map"] = parsed_objects
+    std_map = RESULTS_CACHE.get("standard_objects_map") or {}
+    combined_map = merge_objects_maps(std_map, parsed_objects)
+    RESULTS_CACHE["combined_objects_map"] = combined_map
+
+    std_xlsx_path  = os.path.join(out_dir, "standard_objects.xlsx")
+    cst_xlsx_path  = os.path.join(out_dir, "custom_objects.xlsx")
+    ws_xlsx_path   = os.path.join(out_dir, "workspaces.xlsx")
+    obj_xlsx_path  = os.path.join(out_dir, "objects.xlsx")
     comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
 
-    write_workspaces_excel(parsed_workspaces, parsed_objects, ws_xlsx_path)
-    write_objects_excel(parsed_objects, obj_xlsx_path)
-    write_combined_excel(parsed_workspaces, parsed_objects, comb_xlsx_path)
+    if std_map:
+        write_objects_excel(std_map, std_xlsx_path)
+    write_objects_excel(parsed_objects, cst_xlsx_path)
+    write_objects_excel(combined_map, obj_xlsx_path)
+
+    write_workspaces_excel(parsed_workspaces, combined_map, ws_xlsx_path)
+    write_combined_excel(parsed_workspaces, combined_map, comb_xlsx_path)
 
     RESULTS_CACHE["workspaces"] = parsed_workspaces
-    RESULTS_CACHE["objects_map"] = parsed_objects
     RESULTS_CACHE["output_dir"] = out_dir
 
-    add_log("Generated Excel files: workspaces.xlsx, objects.xlsx, combined.xlsx", "SUCCESS")
+    add_log("Generated Excel files: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
 
     # Build JSON preview payload for the UI
     preview_workspaces = []
     for ws_data in parsed_workspaces:
         bound_obj = ws_data.get("bound_object", "Contact")
-        enriched = _enrich_workspace_fields(ws_data.get("fields", []), parsed_objects, bound_obj)
+        enriched = _enrich_workspace_fields(ws_data.get("fields", []), combined_map, bound_obj)
         rows = []
         for item in enriched:
             rows.append({
@@ -436,7 +494,8 @@ def download_file(filename):
     """Downloads generated Excel files or ZIP package."""
     out_dir = RESULTS_CACHE.get("output_dir") or os.path.join(CURRENT_DIR, "results")
 
-    if filename in ["workspaces.xlsx", "objects.xlsx", "combined.xlsx"]:
+    valid_files = ["standard_objects.xlsx", "custom_objects.xlsx", "workspaces.xlsx", "objects.xlsx", "combined.xlsx"]
+    if filename in valid_files:
         file_path = os.path.join(out_dir, filename)
         if os.path.exists(file_path):
             return send_file(file_path, as_attachment=True)
@@ -445,7 +504,7 @@ def download_file(filename):
     if filename == "all_reports.zip":
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as z:
-            for fname in ["workspaces.xlsx", "objects.xlsx", "combined.xlsx"]:
+            for fname in valid_files:
                 fpath = os.path.join(out_dir, fname)
                 if os.path.exists(fpath):
                     z.write(fpath, arcname=fname)
