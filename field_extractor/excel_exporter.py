@@ -5,7 +5,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 # ---------------------------------------------------------------------------
-# Styling helpers
+# Styling constants
 # ---------------------------------------------------------------------------
 
 HEADER_FILL  = PatternFill("solid", fgColor="2E75B6")   # professional blue
@@ -61,34 +61,130 @@ def _safe_tab_name(name):
 
 
 # ---------------------------------------------------------------------------
-# Field normalisation (for object matching)
+# Option value formatting
 # ---------------------------------------------------------------------------
 
-def normalize_field_name(name):
-    if not name:
-        return ""
-    clean = name
-    clean = re.sub(r'^(?:[a-zA-Z0-9_]+\.)+', '', clean)
-    clean = re.sub(r'^(?:CustomFields\.)', '', clean, flags=re.IGNORECASE)
-    clean = re.sub(r'^(?:c\$|c_)', '', clean, flags=re.IGNORECASE)
-    clean = re.sub(r'^(?:CO\.)', '', clean, flags=re.IGNORECASE)
-    return clean.strip().lower()
+_TRIGGER_MAP = {
+    "onnew":    "New",
+    "onedit":   "Edit",
+    "onsave":   "Save",
+    "onalways": "Always",
+    "ondelete": "Delete",
+}
 
+def _format_option(raw):
+    """
+    Converts OSVC workspace option strings to clean readable values.
+    Examples:
+      ""                            -> No
+      "OnNew:~any~;OnEdit:~any~"   -> Yes (New + Edit)
+      "OnEdit:~any~"               -> Yes (Edit Only)
+      "OnNew:~any~"                -> Yes (New Only)
+      "True"                       -> Yes
+      "False"                      -> No
+    """
+    if not raw or raw.strip() == "":
+        return "No"
+
+    raw = raw.strip()
+
+    # Simple boolean-style values
+    if raw.lower() in ("true", "yes", "1"):
+        return "Yes"
+    if raw.lower() in ("false", "no", "0"):
+        return "No"
+
+    # Parse segment list like OnNew:~any~;OnEdit:~any~
+    segments = raw.split(";")
+    triggers = []
+    for seg in segments:
+        seg = seg.strip()
+        if not seg:
+            continue
+        if ":" in seg:
+            trigger, condition = seg.split(":", 1)
+            trigger   = trigger.strip().lower()
+            condition = condition.strip().strip("~")
+            label = _TRIGGER_MAP.get(trigger, trigger.capitalize())
+            if condition == "any":
+                triggers.append(label)
+            else:
+                triggers.append(f"{label} ({condition})")
+        else:
+            triggers.append(seg)
+
+    if not triggers:
+        return "No"
+    if len(triggers) == 1:
+        return f"Yes ({triggers[0]} Only)"
+    return "Yes (" + " + ".join(triggers) + ")"
+
+
+# ---------------------------------------------------------------------------
+# Field key builder (PackageName$Name)
+# ---------------------------------------------------------------------------
+
+_SYSTEM_PACKAGES = {"oracleservicecloud", "rightnow", ""}
+
+def _obj_field_key(field_dict):
+    """
+    Builds a lookup key for an object field as PackageName$Name.
+    System fields (OracleServiceCloud package) use just the field Name.
+    Custom package fields use PackageName$Name (e.g. C$org_id_temp).
+    """
+    pkg  = (field_dict.get("package_name") or "").strip()
+    name = (field_dict.get("field_name")   or "").strip()
+    if pkg.lower() in _SYSTEM_PACKAGES:
+        return name.lower()
+    return f"{pkg}${name}".lower()
+
+
+def _ws_field_key(raw_field_id):
+    """
+    Normalizes a workspace FieldId into the same key format used by _obj_field_key.
+    Examples:
+      "Name.First"                     -> "name.first"
+      "C$PhoneExt"                     -> "c$phoneext"
+      "CustomFields.c$org_id_temp"     -> "c$org_id_temp"
+      "OrgId"                          -> "orgid"
+    """
+    if not raw_field_id:
+        return ""
+    key = raw_field_id.strip()
+    # Strip leading ObjectId prefix (e.g. "Contact." when already prefixed)
+    key = re.sub(r'^[A-Za-z0-9_]+\.[A-Za-z0-9_]+\.', '', key)  # e.g. Contact.CustomFields.
+    # Collapse CustomFields. prefix
+    key = re.sub(r'^CustomFields\.', '', key, flags=re.IGNORECASE)
+    return key.lower()
+
+
+# ---------------------------------------------------------------------------
+# Object index builder
+# ---------------------------------------------------------------------------
 
 def _build_obj_index(objects_map):
+    """
+    Returns dict keyed by lowercase object name ->
+    {field_key: field_dict} where field_key = PackageName$Name or just Name.
+    """
     indexed = {}
     for oname, odata in objects_map.items():
         lookup = {}
         for of in odata.get("fields", []):
-            nn = normalize_field_name(of.get("field_name"))
-            nl = normalize_field_name(of.get("field_label"))
-            if nn:
-                lookup[nn] = of
-            if nl and nl not in lookup:
-                lookup[nl] = of
+            key = _obj_field_key(of)
+            if key:
+                lookup[key] = of
+            # Also index by plain lowercased field name as secondary fallback
+            plain = (of.get("field_name") or "").lower()
+            if plain and plain not in lookup:
+                lookup[plain] = of
         indexed[oname] = lookup
     return indexed
 
+
+# ---------------------------------------------------------------------------
+# Workspace field enrichment
+# ---------------------------------------------------------------------------
 
 def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
     indexed = _build_obj_index(objects_map)
@@ -96,42 +192,51 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
 
     for wf in ws_fields:
         target_obj = wf.get("target_object") or bound_object
-        target_key  = target_obj.lower()
+        target_key = target_obj.lower()
 
-        norm_code  = normalize_field_name(wf.get("field_code", ""))
-        norm_label = normalize_field_name(wf.get("field_label", ""))
+        raw_id     = wf.get("raw_field_id", "") or wf.get("field_code", "")
+        ws_key     = _ws_field_key(raw_id)
+        ws_key_alt = _ws_field_key(wf.get("field_code", ""))
 
         target_idx = indexed.get(target_key, {})
         if not target_idx and len(indexed) == 1:
             target_idx = list(indexed.values())[0]
 
-        matched = target_idx.get(norm_code) or target_idx.get(norm_label)
+        matched = target_idx.get(ws_key) or target_idx.get(ws_key_alt)
 
         if matched:
-            data_type    = matched.get("data_type", "Text")
-            is_system    = "Yes" if matched.get("is_system_field") else "No"
-            is_nullable  = "Yes" if matched.get("is_nullable")     else "No"
-            is_lookup    = "Yes" if matched.get("is_lookup")       else "No"
-            max_len      = matched.get("max_length", "-")
-            obj_field_id = matched.get("field_id", "-")
+            data_type   = matched.get("data_type", "Text")
+            is_system   = "Yes" if matched.get("is_system_field") else "No"
+            is_nullable = "Yes" if matched.get("is_nullable")     else "No"
+            is_lookup   = "Yes" if matched.get("is_lookup")       else "No"
+            max_len     = matched.get("max_length", "-")
+            # Build the display field name: PackageName$Name
+            pkg  = (matched.get("package_name") or "").strip()
+            fname = matched.get("field_name", "")
+            if pkg.lower() in _SYSTEM_PACKAGES:
+                obj_field_key = fname
+            else:
+                obj_field_key = f"{pkg}${fname}"
         else:
-            f_code = wf.get("field_code", "")
-            data_type    = "Standard Data Field"
-            is_system    = "Yes"
-            is_nullable  = "Yes"
-            is_lookup    = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
-            max_len      = "-"
-            obj_field_id = "-"
+            f_code      = wf.get("field_code", "")
+            data_type   = "Standard Data Field"
+            is_system   = "Yes"
+            is_nullable = "Yes"
+            is_lookup   = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
+            max_len     = "-"
+            obj_field_key = raw_id  # keep raw as fallback
 
         item = dict(wf)
         item.update({
-            "target_object": target_obj,
-            "object_field_id": obj_field_id,
-            "data_type": data_type,
+            "target_object":  target_obj,
+            "obj_field_key":  obj_field_key,
+            "data_type":      data_type,
             "is_system_field": is_system,
-            "is_nullable": is_nullable,
-            "is_lookup": is_lookup,
-            "max_length": max_len,
+            "is_nullable":    is_nullable,
+            "is_lookup":      is_lookup,
+            "max_length":     max_len,
+            "required_fmt":   _format_option(wf.get("required_option", "")),
+            "readonly_fmt":   _format_option(wf.get("readonly_option", "")),
         })
         enriched.append(item)
 
@@ -144,18 +249,16 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
 
 def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     """
-    workspaces.xlsx
-    One tab per workspace (tab name = workspace name).
-    Columns do NOT include a 'Workspace Name' column.
+    workspaces.xlsx — one tab per workspace.
+    Tab name = workspace name. No 'Workspace Name' column.
     """
     wb = openpyxl.Workbook()
-    wb.remove(wb.active)   # Remove default empty sheet
+    wb.remove(wb.active)
 
     headers = [
-        "Bound Object", "Target Object", "Field Code", "Field Label",
-        "Location / Tab", "Row", "Column", "Required", "Read Only",
-        "Object Field ID", "Data Type", "Is System Field", "Is Nullable",
-        "Is Lookup", "Max Length"
+        "Bound Object", "Target Object", "Object Field Name",
+        "Field Label", "Location / Tab", "Required", "Read Only",
+        "Data Type", "Is System Field", "Is Nullable", "Is Lookup", "Max Length"
     ]
 
     for ws_data in parsed_workspaces:
@@ -169,13 +272,18 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
         rows = []
         for item in enriched:
             rows.append([
-                item["bound_object"], item["target_object"],
-                item["field_code"], item["field_label"],
-                item["location_tab"], item["row"], item["column"],
-                item["required_option"], item["readonly_option"],
-                item["object_field_id"], item["data_type"],
-                item["is_system_field"], item["is_nullable"],
-                item["is_lookup"], item["max_length"]
+                item["bound_object"],
+                item["target_object"],
+                item["obj_field_key"],
+                item["field_label"],
+                item["location_tab"],
+                item["required_fmt"],
+                item["readonly_fmt"],
+                item["data_type"],
+                item["is_system_field"],
+                item["is_nullable"],
+                item["is_lookup"],
+                item["max_length"],
             ])
 
         _write_rows(sheet, rows, headers)
@@ -186,15 +294,15 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
 def write_objects_excel(objects_map, output_path):
     """
-    objects.xlsx
-    One tab per object (tab name = object name).
-    Columns do NOT include an 'Object Name' column.
+    objects.xlsx — one tab per object.
+    Tab name = object name. No 'Object Name' column.
+    Field key shown as PackageName$Name.
     """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
     headers = [
-        "Package Name", "Field ID", "Field Name", "Field Label",
+        "Field Key (Package$Name)", "Field Label",
         "Data Type", "Is System Field", "Is Nullable", "Is Lookup",
         "Is Read Only", "Max Length", "Description"
     ]
@@ -206,10 +314,9 @@ def write_objects_excel(objects_map, output_path):
 
         rows = []
         for of in obj_data.get("fields", []):
+            key = _obj_field_key(of)
             rows.append([
-                of.get("package_name", ""),
-                of.get("field_id", ""),
-                of.get("field_name", ""),
+                key,
                 of.get("field_label", ""),
                 of.get("data_type", ""),
                 "Yes" if of.get("is_system_field") else "No",
@@ -228,19 +335,17 @@ def write_objects_excel(objects_map, output_path):
 
 def write_combined_excel(parsed_workspaces, objects_map, output_path):
     """
-    combined.xlsx
-    One tab per workspace (tab name = workspace name).
-    Fields are enriched with object schema data.
-    Columns do NOT include 'Workspace Name' or 'Object Name'.
+    combined.xlsx — one tab per workspace.
+    Tab name = workspace name. Fields enriched with object schema data.
     """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
     headers = [
-        "Bound Object", "Target Object", "Field Code", "Field Label",
-        "Workspace Tab", "Grid Position", "Required", "Read Only",
-        "Object Field ID", "Data Type", "Is System Field",
-        "Is Nullable", "Is Lookup", "Max Length", "In Workspace Layout"
+        "Bound Object", "Target Object", "Object Field Name",
+        "Field Label", "Workspace Tab", "Required", "Read Only",
+        "Data Type", "Is System Field", "Is Nullable",
+        "Is Lookup", "Max Length", "In Workspace Layout"
     ]
 
     for ws_data in parsed_workspaces:
@@ -253,16 +358,20 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
 
         rows = []
         for item in enriched:
-            grid = f"Row {item['row']}, Col {item['column']}"
             rows.append([
-                item["bound_object"], item["target_object"],
-                item["field_code"], item["field_label"],
-                item["location_tab"], grid,
-                item["required_option"], item["readonly_option"],
-                item["object_field_id"], item["data_type"],
-                item["is_system_field"], item["is_nullable"],
-                item["is_lookup"], item["max_length"],
-                "Yes (Layout Used)"
+                item["bound_object"],
+                item["target_object"],
+                item["obj_field_key"],
+                item["field_label"],
+                item["location_tab"],
+                item["required_fmt"],
+                item["readonly_fmt"],
+                item["data_type"],
+                item["is_system_field"],
+                item["is_nullable"],
+                item["is_lookup"],
+                item["max_length"],
+                "Yes",
             ])
 
         _write_rows(sheet, rows, headers)
