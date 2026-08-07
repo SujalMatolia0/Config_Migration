@@ -2112,6 +2112,37 @@ function renderAiAssistTab(node, mdText) {
       const keyInput = document.getElementById("geminiApiKeyInput");
       const keyVal = (keyInput ? keyInput.value.trim() : "") || localStorage.getItem("gemini_api_key") || configKey;
       const outputArea = document.getElementById("aiOutputArea");
+
+      if (outputArea) {
+        outputArea.innerHTML = `<div style="padding: 12px; color: var(--text-muted); font-size: 12px; font-weight: 600;">Analyzing component documentation with AI...</div>`;
+      }
+
+      try {
+        // 1. Try server-side proxy endpoint first (reads .env API key on server side automatically)
+        const serverRes = await fetch("/api/generate-ai-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            doc_text: mdText,
+            component_name: node.label || node.id,
+            apiKey: keyVal
+          })
+        });
+
+        if (serverRes.ok) {
+          const sData = await serverRes.json();
+          if (sData.summary && outputArea) {
+            outputArea.innerHTML = `<div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.5;" class="ai-summary-content">` + (typeof marked !== "undefined" ? marked.parse(sData.summary) : `<pre style="white-space:pre-wrap;">${esc(sData.summary)}</pre>`) + `</div>`;
+            return;
+          } else if (sData.error && outputArea) {
+            outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">AI Error: ${esc(sData.error)}</div>`;
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback to direct client-side fetch if backend server route is unavailable
+      }
+
       if (!keyVal) {
         if (outputArea) {
           outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">Please enter and save your API Key first.</div>`;

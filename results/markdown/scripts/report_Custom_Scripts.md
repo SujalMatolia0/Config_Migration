@@ -27,7 +27,7 @@
 - **External SOAP APIs:** 0
 - **External REST APIs:** 3
 - **OSVC Objects:** `Configuration`, `ConnectAPIErrorBase`, `ROQL`
-- **URLs / Endpoints:** `https://js.arcgis.com/4.20/esri/themes/light/main.css`, `https://js.arcgis.com/4.20/`, `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js`
+- **URLs / Endpoints:** `https://js.arcgis.com/4.20/`, `https://js.arcgis.com/4.20/esri/themes/light/main.css`, `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js`
 - **[WARNING] Hardcoded Credential:** Potential credentials found in variable assignments (count: 1)
 
 ### Script: `bluebox_greencart_validation.php` (Server-side Utility)
@@ -74,7 +74,7 @@
 - **External SOAP APIs:** 0
 - **External REST APIs:** 0
 - **OSVC Objects:** `CO`, `ConnectAPIErrorBase`, `Contact`, `ROQL`
-- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`
+- **URLs / Endpoints:** `https://use.fontawesome.com/releases/v5.1.1/css/all.css`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`
 
 ### Script: `duplicate_incidents.php` (Server-side Utility)
 
@@ -82,7 +82,7 @@
 - **External SOAP APIs:** 0
 - **External REST APIs:** 0
 - **OSVC Objects:** `ConnectAPIErrorBase`, `ROQL`
-- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`
+- **URLs / Endpoints:** `https://use.fontawesome.com/releases/v5.1.1/css/all.css`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`
 
 ### Script: `eventclock.php` (Server-side Utility)
 

@@ -264,6 +264,60 @@ def get_config_key():
     key = get_ai_api_key() or ""
     return jsonify({"apiKey": key, "hasKey": bool(key)})
 
+@app.route("/api/generate-ai-summary", methods=["POST"])
+def generate_ai_summary_api():
+    from src.parsers.cpm_parser import get_ai_api_key
+    data = request.json or {}
+    custom_key = (data.get("apiKey") or "").strip()
+    api_key = custom_key or get_ai_api_key()
+
+    if not api_key:
+        return jsonify({"error": "No API Key found in .env file or request body."}), 400
+
+    doc_text = data.get("doc_text", "")
+    component_name = data.get("component_name", "Component")
+    sliced_doc = doc_text[:2500] if doc_text else "No detailed markdown content available."
+
+    prompt_text = (
+        f"Provide a concise, 2 to 3 sentence executive AI summary for the following Oracle Service Cloud component documentation. "
+        f"Highlight main purpose, execution flow, and any risk flags:\n\nComponent: {component_name}\nDocumentation:\n{sliced_doc}"
+    )
+
+    import urllib.request
+    import json
+
+    try:
+        if api_key.startswith("gsk_"):
+            req_data = json.dumps({
+                "model": "llama-3.1-8b-instant",
+                "messages": [{"role": "user", "content": prompt_text}]
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "https://api.groq.com/openai/v1/chat/completions",
+                data=req_data,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0"
+                }
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                res_obj = json.loads(resp.read().decode("utf-8"))
+                summary = res_obj.get("choices", [{}])[0].get("message", {}).get("content", "")
+                return jsonify({"summary": summary})
+        else:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+            req_data = json.dumps({
+                "contents": [{"parts": [{"text": prompt_text}]}]
+            }).encode("utf-8")
+            req = urllib.request.Request(url, data=req_data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                res_obj = json.loads(resp.read().decode("utf-8"))
+                summary = res_obj.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                return jsonify({"summary": summary})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/clear-input", methods=["POST"])
 def clear_input():
     for item in os.listdir(INPUT_DIR):
