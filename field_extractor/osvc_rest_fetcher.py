@@ -10,11 +10,11 @@ from requests.auth import HTTPBasicAuth
 DEFAULT_REST_VERSION = "v1.4"
 HEADERS_SCHEMA_JSON = {
     'Accept': 'application/schema+json',
-    'OSvC-CREST-Application-Context': 'metadata_catalog'
+    'OSvC-CREST-Application-Context': 'Metadata-Schema-Fetch'
 }
 HEADERS_CATALOG_JSON = {
     'Accept': 'application/json',
-    'OSvC-CREST-Application-Context': 'metadata_catalog'
+    'OSvC-CREST-Application-Context': 'Metadata-Catalog-List'
 }
 
 from urllib.parse import urlparse
@@ -127,11 +127,23 @@ def _resolve_property_field(field_name, field_info, session, auth, log_cb=print,
     return [field_dict]
 
 
+# Known OSVC standard object names to probe directly when catalog list is empty
+KNOWN_STANDARD_OBJECTS = [
+    "contacts", "incidents", "organizations", "answers", "tasks",
+    "opportunities", "quotes", "products", "assets", "serviceContracts",
+    "accounts", "surveys", "chats", "emails", "notes", "threads"
+]
+
 def fetch_standard_objects_via_rest(host, username, password, selected_objects=None, include_custom=False, log_cb=print):
     """
     STRICT READ-ONLY API FETCHER:
     Connects to the OSVC Connect REST API via HTTP GET requests only.
     Fetches standard object schemas and converts them into standard objects_map format.
+
+    Strategy:
+      1. GET /metadata-catalog (root) to discover all object names + alternate schema links.
+      2. If root returns no items (some instances restrict it), directly probe known standard
+         object endpoints: GET /metadata-catalog/{objectName} with Accept: application/schema+json.
     """
     base_url = _clean_host_url(host)
     catalog_url = f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog"
@@ -139,19 +151,29 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
     session = requests.Session()
     auth = HTTPBasicAuth(username, password)
 
-    log_cb(f"[STRICT GET ONLY] Connecting to OSVC Metadata Catalog: {catalog_url}")
+    log_cb(f"[STRICT GET ONLY] Connecting to OSVC Metadata Catalog root: {catalog_url}")
 
+    items = []
     try:
         catalog_data = fetch_metadata_catalog_get_only(catalog_url, session, auth)
+        items = catalog_data.get("items", []) or catalog_data.get("objects", [])
+        if not items and isinstance(catalog_data, list):
+            items = catalog_data
+        log_cb(f"[SUCCESS] Metadata catalog root returned {len(items)} objects")
     except Exception as err:
-        log_cb(f"[ERROR] Failed to fetch metadata catalog: {err}")
-        raise
+        log_cb(f"[WARNING] Catalog root returned error ({err}). Will probe standard object endpoints directly.")
 
-    items = catalog_data.get("items", []) or catalog_data.get("objects", [])
-    if not items and isinstance(catalog_data, list):
-        items = catalog_data
+    # If catalog root returned no items, build synthetic items from known standard objects
+    if not items:
+        probe_targets = selected_objects if selected_objects else KNOWN_STANDARD_OBJECTS
+        log_cb(f"[INFO] Probing {len(probe_targets)} standard object schema endpoints directly via GET")
+        for obj_name in probe_targets:
+            items.append({
+                "name": obj_name,
+                "links": [{"rel": "alternate", "href": f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog/{obj_name}"}]
+            })
 
-    log_cb(f"[SUCCESS] Metadata catalog returned {len(items)} items/objects")
+    log_cb(f"[INFO] Processing {len(items)} object candidate(s)...")
 
     objects_map = {}
     processed_count = 0
@@ -187,7 +209,15 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
 
         try:
             log_cb(f"[STRICT GET ONLY] Fetching schema for object: {obj_name}")
-            schema_data = fetch_schema_get_only(schema_url, session, auth)
+            # Use per-object context header (e.g. Get-contacts) matching OSVC Postman conventions
+            obj_context_headers = {
+                'Accept': 'application/schema+json',
+                'OSvC-CREST-Application-Context': f'Get-{obj_name}'
+            }
+            time.sleep(0.3)
+            resp = session.get(schema_url, headers=obj_context_headers, auth=auth, timeout=30)
+            resp.raise_for_status()
+            schema_data = resp.json()
 
             singular = schema_data.get("definitions", {}).get("singularResource", {})
             if singular.get("isMenu") is True:
