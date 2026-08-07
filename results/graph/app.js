@@ -2044,11 +2044,21 @@ function attachAccordionToggleBar(container) {
   renderAiAssistTab(node, mdText);
 }
 
+let configFetchedApiKey = "";
+try {
+  fetch("/api/config-key")
+    .then(res => res.json())
+    .then(d => {
+      if (d && d.apiKey) configFetchedApiKey = d.apiKey;
+    })
+    .catch(() => {});
+} catch (e) {}
+
 function renderAiAssistTab(node, mdText) {
   const tabAi = document.getElementById("tab-ai");
   if (!tabAi) return;
 
-  const configKey = (window.GRAPH_META && (window.GRAPH_META.apiKey || window.GRAPH_META.api_key)) || "";
+  const configKey = configFetchedApiKey || (window.GRAPH_META && (window.GRAPH_META.apiKey || window.GRAPH_META.api_key)) || "";
   const savedKey = localStorage.getItem("gemini_api_key") || configKey || "";
   const isFromConfig = !!configKey && savedKey === configKey;
 

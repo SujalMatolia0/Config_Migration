@@ -258,6 +258,12 @@ def delete_file():
         return jsonify({"success": True, "removed": rel_path})
     return jsonify({"success": False, "error": "File not found"}), 440
 
+@app.route("/api/config-key", methods=["GET"])
+def get_config_key():
+    from src.parsers.cpm_parser import get_ai_api_key
+    key = get_ai_api_key() or ""
+    return jsonify({"apiKey": key, "hasKey": bool(key)})
+
 @app.route("/api/clear-input", methods=["POST"])
 def clear_input():
     for item in os.listdir(INPUT_DIR):
