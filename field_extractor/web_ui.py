@@ -27,6 +27,17 @@ from excel_exporter import (
 )
 from osvc_rest_fetcher import fetch_standard_objects_via_rest
 
+# Load connection config if available
+try:
+    from config import BASE_URL, USERNAME, PASSWORD as CONFIG_PASSWORD
+    _cfg_host = BASE_URL
+    _cfg_user = USERNAME
+    _cfg_pass = CONFIG_PASSWORD
+except ImportError:
+    _cfg_host = ""
+    _cfg_user = ""
+    _cfg_pass = ""
+
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
 
@@ -44,6 +55,15 @@ def add_log(msg, level="INFO"):
     entry = f"[{t_str}] [{level}] {msg}"
     print(entry)
     RESULTS_CACHE["logs"].append(entry)
+
+@app.route("/api/config", methods=["GET"])
+def get_config():
+    """Returns saved connection config for auto-filling the UI form. Password is masked."""
+    return jsonify({
+        "host": _cfg_host,
+        "username": _cfg_user,
+        "password": _cfg_pass  # sent only to pre-fill local browser form
+    })
 
 @app.route("/")
 def index():

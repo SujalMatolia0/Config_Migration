@@ -11,3 +11,4 @@ input/
 *.zip
 
 results/
+field_extractor/config.py

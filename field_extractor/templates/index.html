@@ -749,6 +749,18 @@
         wsFileInput.addEventListener('change', () => updateFileList('ws'));
         objFileInput.addEventListener('change', () => updateFileList('obj'));
 
+        // Auto-fill REST connection form from config.py on page load
+        async function autoFillConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                if (cfg.host)     document.getElementById('rest-host').value = cfg.host;
+                if (cfg.username) document.getElementById('rest-user').value = cfg.username;
+                if (cfg.password) document.getElementById('rest-pass').value = cfg.password;
+            } catch (err) {}
+        }
+        autoFillConfig();
+
         function updateFileList(type) {
             const input = document.getElementById(`${type}-file-input`);
             const list = document.getElementById(`${type}-file-list`);
