@@ -49,8 +49,8 @@
 
 | Protocol | HTTP Method | Endpoint URL | Details |
 | --- | --- | --- | --- |
-| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/` | cURL POST/GET request |
+| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | cURL POST/GET request |
 
 ## Security & Risk Analysis
@@ -85,9 +85,9 @@ sequenceDiagram
   OSVC-->>Script: Return Data / Context
   Script->>OSVC: Validate Agent Session ID
   OSVC-->>Script: Return Data / Context
-  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
-  REST-->>Script: Return REST Response Payload
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/
+  REST-->>Script: Return REST Response Payload
+  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
   REST-->>Script: Return REST Response Payload
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css
   REST-->>Script: Return REST Response Payload
