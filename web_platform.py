@@ -276,11 +276,21 @@ def generate_ai_summary_api():
 
     doc_text = data.get("doc_text", "")
     component_name = data.get("component_name", "Component")
-    sliced_doc = doc_text[:2500] if doc_text else "No detailed markdown content available."
+    sliced_doc = doc_text[:4000] if doc_text else "No detailed markdown content available."
 
     prompt_text = (
-        f"Provide a concise, 2 to 3 sentence executive AI summary for the following Oracle Service Cloud component documentation. "
-        f"Highlight main purpose, execution flow, and any risk flags:\n\nComponent: {component_name}\nDocumentation:\n{sliced_doc}"
+        f"You are an expert Enterprise Solutions Architect analyzing Oracle Service Cloud (OSVC) technical documentation.\n"
+        f"Provide a structured, comprehensive, and detailed executive AI summary for the component: '{component_name}'.\n\n"
+        f"Format your output cleanly in Markdown with these 4 sections:\n\n"
+        f"### 1. Core Purpose & Business Objective\n"
+        f"Provide a clear narrative explaining what this component does and its role in the system.\n\n"
+        f"### 2. Detailed Execution Flow & Data Operations\n"
+        f"Detail the step-by-step execution flow, object CRUD operations ($obj->save(), fetch, ROQL), and field mutations.\n\n"
+        f"### 3. External Integrations & SOAP/REST Services\n"
+        f"Detail external web services, SOAP actions, BUI extensions, or third-party API calls.\n\n"
+        f"### 4. Risk Audit & Architectural Flags\n"
+        f"Highlight security risks (credentials, cURL calls), unhandled elements, or architectural bottlenecks.\n\n"
+        f"Component Documentation Content:\n{sliced_doc}"
     )
 
     import urllib.request

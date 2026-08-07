@@ -2155,8 +2155,26 @@ function renderAiAssistTab(node, mdText) {
       }
 
       try {
-        const slicedDoc = (mdText || "No detailed markdown content available.").slice(0, 2500);
-        const promptText = `Provide a concise, 2 to 3 sentence executive AI summary for the following Oracle Service Cloud component documentation. Highlight main purpose, execution flow, and any risk flags:\n\nComponent: ${node.label || node.id}\nDocumentation:\n${slicedDoc}`;
+        const slicedDoc = (mdText || "No detailed markdown content available.").slice(0, 4000);
+        const promptText = `You are an expert Enterprise Solutions Architect analyzing Oracle Service Cloud (OSVC) technical documentation.
+Provide a structured, comprehensive, and detailed executive AI summary for the component: '${node.label || node.id}'.
+
+Format your output cleanly in Markdown with these 4 sections:
+
+### 1. Core Purpose & Business Objective
+Provide a clear narrative explaining what this component does and its role in the system.
+
+### 2. Detailed Execution Flow & Data Operations
+Detail the step-by-step execution flow, object CRUD operations ($obj->save(), fetch, ROQL), and field mutations.
+
+### 3. External Integrations & SOAP/REST Services
+Detail external web services, SOAP actions, BUI extensions, or third-party API calls.
+
+### 4. Risk Audit & Architectural Flags
+Highlight security risks (credentials, cURL calls), unhandled elements, or architectural bottlenecks.
+
+Component Documentation Content:
+${slicedDoc}`;
 
         let generatedMd = null;
 
