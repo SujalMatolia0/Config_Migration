@@ -201,6 +201,69 @@ def format_ribbon_button(btn):
     }
     return mapping.get(btn, btn)
 
+def collect_all_workspace_fields(ws):
+    """
+    Recursively collects ALL form fields used across root layout, tabs, nested tabs, and sub-tabsets in a workspace.
+    Returns a list of dicts.
+    """
+    all_fields = []
+    seen = set()
+
+    for f in ws.get("fields", []):
+        fid = f.get("field_id") or f.get("label") or f.get("name")
+        if not fid:
+            continue
+        key = (fid, "Top-level Layout")
+        if key in seen:
+            continue
+        seen.add(key)
+
+        is_c = "c$" in str(fid).lower() or str(fid).lower().startswith("c$")
+        all_fields.append({
+            "field_id": fid,
+            "label": f.get("label") or fid,
+            "is_custom": is_c,
+            "location": "Top-level Layout",
+            "readonly_option": f.get("readonly_option"),
+            "required_option": f.get("required_option"),
+            "hidden_option": f.get("hidden_option"),
+            "default_value": f.get("default_value") or f.get("default_phone_type")
+        })
+
+    def walk_tab(tab, parent_path=""):
+        tab_label = clean_tab_label(tab.get("text") or tab.get("label") or "Tab")
+        loc_name = f"Tab: {tab_label}" if not parent_path else f"{parent_path} -> Tab: {tab_label}"
+
+        for f in tab.get("fields", []):
+            fid = f.get("field_id") or f.get("label") or f.get("name")
+            if not fid:
+                continue
+            key = (fid, loc_name)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            is_c = "c$" in str(fid).lower() or str(fid).lower().startswith("c$")
+            all_fields.append({
+                "field_id": fid,
+                "label": f.get("label") or fid,
+                "is_custom": is_c,
+                "location": loc_name,
+                "readonly_option": f.get("readonly_option"),
+                "required_option": f.get("required_option"),
+                "hidden_option": f.get("hidden_option"),
+                "default_value": f.get("default_value") or f.get("default_phone_type")
+            })
+
+        for nts in tab.get("nested_tabsets", []):
+            for sub_t in nts.get("sub_tabs", []):
+                walk_tab(sub_t, loc_name)
+
+    for t in ws.get("tabs", []):
+        walk_tab(t)
+
+    return all_fields
+
 def generate_report_markdown(ws):
     lines = []
     
@@ -540,6 +603,46 @@ def generate_report_markdown(ws):
     for t in ws.get("tabs", []):
         render_single_tab(t, is_subtab=False)
         
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Workspace Fields Inventory Section
+    lines.append("## Workspace Fields Inventory")
+    lines.append("")
+
+    all_ws_fields = collect_all_workspace_fields(ws)
+    if not all_ws_fields:
+        lines.append("No form fields detected in this workspace layout.")
+    else:
+        custom_cnt = sum(1 for f in all_ws_fields if f["is_custom"])
+        standard_cnt = len(all_ws_fields) - custom_cnt
+        lines.append(f"Total Fields Used in Workspace: **{len(all_ws_fields)}** (Standard Schema Fields: **{standard_cnt}** | Custom Fields (`c$`): **{custom_cnt}**)")
+        lines.append("")
+        lines.append("| Field ID / Reference | Field Label | Field Type | Location / Tab | Options & Constraints |")
+        lines.append("|---|---|---|---|---|")
+        for f in all_ws_fields:
+            fid = f["field_id"]
+            lbl = f["label"] if f["label"] != fid else "—"
+            ftype = "Custom (`c$`)" if f["is_custom"] else "Standard Schema"
+            loc = f["location"]
+            
+            opts = []
+            if f.get("readonly_option"):
+                c_str = format_profile_constraint(f["readonly_option"])
+                if c_str: opts.append(f"ReadOnly: {c_str}")
+            if f.get("hidden_option"):
+                c_str = format_profile_constraint(f["hidden_option"])
+                if c_str: opts.append(f"Hidden: {c_str}")
+            if f.get("required_option"):
+                c_str = format_profile_constraint(f["required_option"])
+                if c_str: opts.append(f"Required: {c_str}")
+            if f.get("default_value"):
+                opts.append(f"Default: `{f['default_value']}`")
+            
+            opts_str = "; ".join(opts) if opts else "—"
+            lines.append(f"| `{fid}` | {lbl} | {ftype} | {loc} | {opts_str} |")
+
     lines.append("")
     lines.append("---")
     

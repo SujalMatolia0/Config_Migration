@@ -139,6 +139,22 @@ Below is the detailed content breakdown of each tab:
 
 
 ---
+
+## Workspace Fields Inventory
+
+Total Fields Used in Workspace: **7** (Standard Schema Fields: **6** | Custom Fields (`c$`): **1**)
+
+| Field ID / Reference | Field Label | Field Type | Location / Tab | Options & Constraints |
+|---|---|---|---|---|
+| `Name.First` | — | Standard Schema | Tab: Summary | ReadOnly: OnNew (All Profiles), OnEdit (All Profiles) |
+| `Name.Last` | — | Standard Schema | Tab: Summary | ReadOnly: OnNew (All Profiles), OnEdit (All Profiles) |
+| `Email` | — | Standard Schema | Tab: Summary | ReadOnly: OnNew (All Profiles), OnEdit (All Profiles) |
+| `OrgId` | &Account | Standard Schema | Tab: Summary | — |
+| `C$IsRegistered` | — | Custom (`c$`) | Tab: Summary | ReadOnly: OnNew (27 profiles), OnEdit (27 profiles) |
+| `Disabled` | — | Standard Schema | Tab: Summary | ReadOnly: OnNew (29 profiles), OnEdit (29 profiles); Hidden: OnNew (29 profiles), OnEdit (29 profiles) |
+| `CId` | — | Standard Schema | Tab: Summary | — |
+
+---
 ## Workspace Rules
 
 ### Event: Editor Initialized (On Load)

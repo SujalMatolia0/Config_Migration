@@ -358,30 +358,31 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
         ws_nodes = [n for n in nodes if n.get("type") == "workspace"]
         ws_items = [n.get("data", {}) for n in ws_nodes if n.get("data")]
 
+    from src.output.markdown_generator import collect_all_workspace_fields
+
     if ws_items:
         for ws in sorted(ws_items, key=lambda x: x.get("name", "")):
             wname = ws.get("name") or "Workspace"
             wobj = canonical_module_name(ws.get("object_type") or ws.get("module"))
-            fields = ws.get("fields", [])
+            fields = collect_all_workspace_fields(ws)
             tabs = len(ws.get("tabs", []))
             rules = len(ws.get("rules", []))
             
             lines.append(f"### Workspace: {wname}")
             lines.append(f"- **Primary Object Binding**: **{wobj}**")
-            lines.append(f"- **Layout Summary**: {len(fields)} fields rendered across {tabs} tabsets ({rules} rules)")
+            lines.append(f"- **Layout Summary**: {len(fields)} form fields used across {tabs} tabsets ({rules} rules)")
             lines.append("")
             if fields:
-                lines.append("| Field Name / ID | Data Type | Custom Field (c$) | Parent Tab | Dependencies |")
-                lines.append("| :--- | :--- | :---: | :--- | :---: |")
+                lines.append("| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |")
+                lines.append("| :--- | :---: | :--- | :---: |")
                 for f in fields:
-                    fid = f.get("field_id") or f.get("label") or f.get("name") or "Unnamed"
-                    ftype = f.get("type") or "Standard"
-                    is_c = "Yes (c$)" if "c$" in str(fid).lower() else "No"
-                    tab_name = f.get("tab") or "Main Tab"
+                    fid = f.get("field_id") or f.get("label") or "Unnamed"
+                    is_c = "Yes (c$)" if f.get("is_custom") else "No"
+                    tab_name = f.get("location") or "Top-level Layout"
                     f_node_id = f"workspacefield:{str(fid).lower()}"
                     f_deg = degree_map.get(f_node_id, {"in": 0, "out": 0})
                     f_link = f"`{f_deg['in']} in -> {f_deg['out']} out`"
-                    lines.append(f"| `{fid}` | `{ftype}` | {is_c} | {tab_name} | {f_link} |")
+                    lines.append(f"| `{fid}` | {is_c} | {tab_name} | {f_link} |")
             lines.append("")
     else:
         lines.append("*No Workspace XML configuration files detected in dataset.*")
@@ -669,26 +670,25 @@ def generate_single_object_master_report(obj_name, results_dir, master_data, com
         for ws in sorted(obj_ws_items, key=lambda x: x.get("name", "")):
             wname = ws.get("name") or "Workspace"
             wobj = canonical_module_name(ws.get("object_type") or ws.get("module"))
-            fields = ws.get("fields", [])
+            fields = collect_all_workspace_fields(ws)
             tabs = len(ws.get("tabs", []))
             rules = len(ws.get("rules", []))
 
             lines.append(f"### Workspace: {wname}")
             lines.append(f"- **Primary Object Binding**: **{wobj}**")
-            lines.append(f"- **Layout Summary**: {len(fields)} fields rendered across {tabs} tabsets ({rules} rules)")
+            lines.append(f"- **Layout Summary**: {len(fields)} form fields used across {tabs} tabsets ({rules} rules)")
             lines.append("")
             if fields:
-                lines.append("| Field Name / ID | Data Type | Custom Field (c$) | Parent Tab | Dependencies |")
-                lines.append("| :--- | :--- | :---: | :--- | :---: |")
+                lines.append("| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |")
+                lines.append("| :--- | :---: | :--- | :---: |")
                 for f in fields:
-                    fid = f.get("field_id") or f.get("label") or f.get("name") or "Unnamed"
-                    ftype = f.get("type") or "Standard"
-                    is_c = "Yes (c$)" if "c$" in str(fid).lower() else "No"
-                    tab_name = f.get("tab") or "Main Tab"
+                    fid = f.get("field_id") or f.get("label") or "Unnamed"
+                    is_c = "Yes (c$)" if f.get("is_custom") else "No"
+                    tab_name = f.get("location") or "Top-level Layout"
                     f_node_id = f"workspacefield:{str(fid).lower()}"
                     f_deg = degree_map.get(f_node_id, {"in": 0, "out": 0})
                     f_link = f"`{f_deg['in']} in -> {f_deg['out']} out`"
-                    lines.append(f"| `{fid}` | `{ftype}` | {is_c} | {tab_name} | {f_link} |")
+                    lines.append(f"| `{fid}` | {is_c} | {tab_name} | {f_link} |")
             lines.append("")
     else:
         lines.append(f"*No Workspaces detected for {obj_name}.*")

@@ -213,6 +213,41 @@ Below is the detailed content breakdown of each tab:
 
 
 ---
+
+## Workspace Fields Inventory
+
+Total Fields Used in Workspace: **26** (Standard Schema Fields: **25** | Custom Fields (`c$`): **1**)
+
+| Field ID / Reference | Field Label | Field Type | Location / Tab | Options & Constraints |
+|---|---|---|---|---|
+| `ProdId` | — | Standard Schema | Tab: Summary | Required: OnNew (All Profiles), OnEdit (All Profiles) |
+| `CId` | — | Standard Schema | Tab: Summary | — |
+| `Status.Id` | — | Standard Schema | Tab: Summary | — |
+| `Subject` | — | Standard Schema | Tab: Summary | — |
+| `ChanId` | — | Standard Schema | Tab: Summary | — |
+| `CatId` | — | Standard Schema | Tab: Summary | Required: OnNew (All Profiles), OnEdit (All Profiles) |
+| `RefNo` | — | Standard Schema | Tab: Summary | — |
+| `Assigned` | — | Standard Schema | Tab: Summary | — |
+| `PhOffice` | &Mobile Phone | Standard Schema | Tab: Summary | Default: `1` |
+| `QueueId` | — | Standard Schema | Tab: Summary | — |
+| `C$Gender` | — | Custom (`c$`) | Tab: Summary | Required: OnNew (All Profiles), OnEdit (All Profiles) |
+| `Name.First` | — | Standard Schema | Tab: Contacts | — |
+| `Name.Last` | — | Standard Schema | Tab: Contacts | — |
+| `Email` | — | Standard Schema | Tab: Contacts | — |
+| `Addr` | — | Standard Schema | Tab: Contacts | — |
+| `PhOffice` | — | Standard Schema | Tab: Contacts | Default: `0` |
+| `Login` | — | Standard Schema | Tab: Contacts -> Tab: Contact Fields | — |
+| `MaOptIn` | — | Standard Schema | Tab: Contacts -> Tab: Contact Fields | — |
+| `State` | — | Standard Schema | Tab: Contacts -> Tab: Contact Fields | — |
+| `MaMailType` | — | Standard Schema | Tab: Contacts -> Tab: Contact Fields | — |
+| `Source` | — | Standard Schema | Tab: Contacts -> Tab: Contact Fields | — |
+| `MailboxId` | — | Standard Schema | Tab: Other Info | — |
+| `InterfaceId` | — | Standard Schema | Tab: Other Info | — |
+| `SlaiId` | — | Standard Schema | Tab: Other Info | — |
+| `Source` | — | Standard Schema | Tab: Other Info | — |
+| `LangId` | — | Standard Schema | Tab: Other Info | — |
+
+---
 ## Workspace Rules
 
 ### Event: Editor Initialized (On Load)

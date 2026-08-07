@@ -110,6 +110,24 @@ Below is the detailed content breakdown of each tab:
 
 
 ---
+
+## Workspace Fields Inventory
+
+Total Fields Used in Workspace: **9** (Standard Schema Fields: **7** | Custom Fields (`c$`): **2**)
+
+| Field ID / Reference | Field Label | Field Type | Location / Tab | Options & Constraints |
+|---|---|---|---|---|
+| `Title` | — | Standard Schema | Top-level Layout | — |
+| `Name.First` | — | Standard Schema | Top-level Layout | — |
+| `Name.Last` | — | Standard Schema | Top-level Layout | — |
+| `Addr` | — | Standard Schema | Top-level Layout | — |
+| `PhOffice` | &Mobile Phone | Standard Schema | Top-level Layout | Default: `1` |
+| `C$CustomerId` | — | Custom (`c$`) | Top-level Layout | — |
+| `Email` | — | Standard Schema | Top-level Layout | — |
+| `CtypeId` | — | Standard Schema | Top-level Layout | — |
+| `C$Gender` | — | Custom (`c$`) | Top-level Layout | — |
+
+---
 ## Workspace Rules
 
 ### Event: Editor Initialized (On Load)

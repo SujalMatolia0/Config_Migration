@@ -106,6 +106,21 @@ Below is the detailed content breakdown of each tab:
 
 
 ---
+
+## Workspace Fields Inventory
+
+Total Fields Used in Workspace: **6** (Standard Schema Fields: **4** | Custom Fields (`c$`): **2**)
+
+| Field ID / Reference | Field Label | Field Type | Location / Tab | Options & Constraints |
+|---|---|---|---|---|
+| `C$AccountNumber` | — | Custom (`c$`) | Tab: Summary | — |
+| `PhOffice` | — | Standard Schema | Tab: Summary | Default: `0` |
+| `OrgId` | — | Standard Schema | Tab: Summary | — |
+| `Addr` | — | Standard Schema | Tab: Summary | — |
+| `C$Gender` | — | Custom (`c$`) | Tab: Summary | — |
+| `Email` | — | Standard Schema | Tab: Summary | — |
+
+---
 ## Workspace Rules
 
 ### Event: Editor Initialized (On Load)

@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-07 12:46:24  
+**Generated**: 2026-08-07 12:59:50  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -121,9 +121,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
-    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
     N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
+    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
   end
 ```
 
@@ -241,60 +241,140 @@ flowchart LR
 
 ### Workspace: Contact
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 9 fields rendered across 5 tabsets (1 rules)
+- **Layout Summary**: 9 form fields used across 5 tabsets (1 rules)
 
-| Field Name / ID | Data Type | Custom Field (c$) | Parent Tab | Dependencies |
-| :--- | :--- | :---: | :--- | :---: |
-| `Title` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Name.First` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Name.Last` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Addr` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `PhOffice` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `C$CustomerId` | `Standard` | Yes (c$) | Main Tab | `0 in -> 0 out` |
-| `Email` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `CtypeId` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `C$Gender` | `Standard` | Yes (c$) | Main Tab | `0 in -> 0 out` |
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `Title` | No | Top-level Layout | `0 in -> 0 out` |
+| `Name.First` | No | Top-level Layout | `0 in -> 0 out` |
+| `Name.Last` | No | Top-level Layout | `0 in -> 0 out` |
+| `Addr` | No | Top-level Layout | `0 in -> 0 out` |
+| `PhOffice` | No | Top-level Layout | `0 in -> 0 out` |
+| `C$CustomerId` | Yes (c$) | Top-level Layout | `0 in -> 0 out` |
+| `Email` | No | Top-level Layout | `0 in -> 0 out` |
+| `CtypeId` | No | Top-level Layout | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Top-level Layout | `0 in -> 0 out` |
 
 ### Workspace: Contact test
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 0 fields rendered across 6 tabsets (3 rules)
+- **Layout Summary**: 7 form fields used across 6 tabsets (3 rules)
 
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `Name.First` | No | Tab: Summary | `0 in -> 0 out` |
+| `Name.Last` | No | Tab: Summary | `0 in -> 0 out` |
+| `Email` | No | Tab: Summary | `0 in -> 0 out` |
+| `OrgId` | No | Tab: Summary | `0 in -> 0 out` |
+| `C$IsRegistered` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `Disabled` | No | Tab: Summary | `0 in -> 0 out` |
+| `CId` | No | Tab: Summary | `0 in -> 0 out` |
 
 ### Workspace: Incident
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 0 fields rendered across 8 tabsets (2 rules)
+- **Layout Summary**: 26 form fields used across 8 tabsets (2 rules)
 
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `ProdId` | No | Tab: Summary | `0 in -> 0 out` |
+| `CId` | No | Tab: Summary | `0 in -> 0 out` |
+| `Status.Id` | No | Tab: Summary | `0 in -> 0 out` |
+| `Subject` | No | Tab: Summary | `0 in -> 0 out` |
+| `ChanId` | No | Tab: Summary | `0 in -> 0 out` |
+| `CatId` | No | Tab: Summary | `0 in -> 0 out` |
+| `RefNo` | No | Tab: Summary | `0 in -> 0 out` |
+| `Assigned` | No | Tab: Summary | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Summary | `0 in -> 0 out` |
+| `QueueId` | No | Tab: Summary | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `Name.First` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Name.Last` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Email` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Addr` | No | Tab: Contacts | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Login` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MaOptIn` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `State` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MaMailType` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `Source` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MailboxId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `InterfaceId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `SlaiId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `Source` | No | Tab: Other Info | `0 in -> 0 out` |
+| `LangId` | No | Tab: Other Info | `0 in -> 0 out` |
 
 ### Workspace: New Workspace
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 0 fields rendered across 5 tabsets (0 rules)
+- **Layout Summary**: 6 form fields used across 5 tabsets (0 rules)
 
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `C$AccountNumber` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Summary | `0 in -> 0 out` |
+| `OrgId` | No | Tab: Summary | `0 in -> 0 out` |
+| `Addr` | No | Tab: Summary | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `Email` | No | Tab: Summary | `0 in -> 0 out` |
 
 ### Workspace: real_edge_01_nested_tabset
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 0 fields rendered across 7 tabsets (2 rules)
+- **Layout Summary**: 25 form fields used across 7 tabsets (2 rules)
 
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `ProdId` | No | Tab: Summary | `0 in -> 0 out` |
+| `CId` | No | Tab: Summary | `0 in -> 0 out` |
+| `Status.Id` | No | Tab: Summary | `0 in -> 0 out` |
+| `Subject` | No | Tab: Summary | `0 in -> 0 out` |
+| `ChanId` | No | Tab: Summary | `0 in -> 0 out` |
+| `CatId` | No | Tab: Summary | `0 in -> 0 out` |
+| `Assigned` | No | Tab: Summary | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Summary | `0 in -> 0 out` |
+| `QueueId` | No | Tab: Summary | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `Name.First` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Name.Last` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Email` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Addr` | No | Tab: Contacts | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Contacts | `0 in -> 0 out` |
+| `Login` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MaOptIn` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `State` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MaMailType` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `Source` | No | Tab: Contacts -> Tab: Contact Fields | `0 in -> 0 out` |
+| `MailboxId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `InterfaceId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `SlaiId` | No | Tab: Other Info | `0 in -> 0 out` |
+| `Source` | No | Tab: Other Info | `0 in -> 0 out` |
+| `LangId` | No | Tab: Other Info | `0 in -> 0 out` |
 
 ### Workspace: real_edge_02_new_workspace_patterns
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 0 fields rendered across 5 tabsets (1 rules)
+- **Layout Summary**: 6 form fields used across 5 tabsets (1 rules)
 
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `C$AccountNumber` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `PhOffice` | No | Tab: Summary | `0 in -> 0 out` |
+| `OrgId` | No | Tab: Summary | `0 in -> 0 out` |
+| `Addr` | No | Tab: Summary | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Tab: Summary | `0 in -> 0 out` |
+| `Email` | No | Tab: Summary | `0 in -> 0 out` |
 
 ### Workspace: real_edge_03_split_panel_contact
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 9 fields rendered across 5 tabsets (1 rules)
+- **Layout Summary**: 9 form fields used across 5 tabsets (1 rules)
 
-| Field Name / ID | Data Type | Custom Field (c$) | Parent Tab | Dependencies |
-| :--- | :--- | :---: | :--- | :---: |
-| `Title` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Name.First` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Name.Last` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `Addr` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `PhOffice` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `C$CustomerId` | `Standard` | Yes (c$) | Main Tab | `0 in -> 0 out` |
-| `Email` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `CtypeId` | `Standard` | No | Main Tab | `0 in -> 0 out` |
-| `C$Gender` | `Standard` | Yes (c$) | Main Tab | `0 in -> 0 out` |
+| Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
+| :--- | :---: | :--- | :---: |
+| `Title` | No | Top-level Layout | `0 in -> 0 out` |
+| `Name.First` | No | Top-level Layout | `0 in -> 0 out` |
+| `Name.Last` | No | Top-level Layout | `0 in -> 0 out` |
+| `Addr` | No | Top-level Layout | `0 in -> 0 out` |
+| `PhOffice` | No | Top-level Layout | `0 in -> 0 out` |
+| `C$CustomerId` | Yes (c$) | Top-level Layout | `0 in -> 0 out` |
+| `Email` | No | Top-level Layout | `0 in -> 0 out` |
+| `CtypeId` | No | Top-level Layout | `0 in -> 0 out` |
+| `C$Gender` | Yes (c$) | Top-level Layout | `0 in -> 0 out` |
 
 
 ## CPM Event Handlers & Procedures Matrix
@@ -322,9 +402,9 @@ flowchart LR
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |

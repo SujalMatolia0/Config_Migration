@@ -9,14 +9,14 @@
     "ROQL"
   ],
   "external_calls": [
-    "REST cURL POST/GET: https://js.arcgis.com/4.20/",
     "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css",
-    "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+    "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+    "REST cURL POST/GET: https://js.arcgis.com/4.20/"
   ],
   "urls": [
-    "https://js.arcgis.com/4.20/",
     "https://js.arcgis.com/4.20/esri/themes/light/main.css",
-    "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+    "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+    "https://js.arcgis.com/4.20/"
   ],
   "exposed_routes": [],
   "risk_flags": [
@@ -77,12 +77,6 @@
     {
       "protocol": "REST / HTTP",
       "method": "POST/GET",
-      "endpoint": "https://js.arcgis.com/4.20/",
-      "details": "cURL POST/GET request"
-    },
-    {
-      "protocol": "REST / HTTP",
-      "method": "POST/GET",
       "endpoint": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
       "details": "cURL POST/GET request"
     },
@@ -90,6 +84,12 @@
       "protocol": "REST / HTTP",
       "method": "POST/GET",
       "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+      "details": "cURL POST/GET request"
+    },
+    {
+      "protocol": "REST / HTTP",
+      "method": "POST/GET",
+      "endpoint": "https://js.arcgis.com/4.20/",
       "details": "cURL POST/GET request"
     }
   ],
@@ -132,15 +132,15 @@
     },
     {
       "stage": "External REST",
-      "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
-    },
-    {
-      "stage": "External REST",
       "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css"
     },
     {
       "stage": "External REST",
       "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+    },
+    {
+      "stage": "External REST",
+      "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
     }
   ],
   "has_html": true,
