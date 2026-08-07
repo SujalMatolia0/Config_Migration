@@ -19,3 +19,4 @@ Contact,Other,F01-Email Routing,"01-Delivery delayed, scheduled Day 2",Enabled,"
 Contact,Other,F01-Email Routing,01-Incorrect Address Day 2,Enabled,If (Contacts > Email - Primary  contains  @fedex.com  AND  Incidents > Customer thread  match regex  \<2. Incorrect Address\>),Do Not Create Incident
 Contact,Other,F23-Chewy Contact Us Routing,F23 - AAQ Cancel Order,Enabled,If (Incidents > Category  equals  Cancel Order  AND  Orders > OrderId  is not null),Escalate to Cancel Order Process +15 Minutes Exactly From Now
 Contact,Other,F56-CA-Chewy Contact Us Routing,F56-CA - AAQ Cancel Order,Enabled,If (Incidents > Category  equals  Cancel Order  AND  Incidents > Interface  equals  chewyca  AND  Orders > OrderId  is not null),Escalate to CA-Cancel Order Process +15 Minutes Exactly From Now
+Contact,Other,Contact Rules,01-Contact Duplicate Check,Enabled,If (Contacts > Email - Primary is modified this edit),Execute Process Script duplicate_contacts.php

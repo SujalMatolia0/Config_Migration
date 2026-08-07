@@ -23,30 +23,28 @@
     "jspdf.plugin.autotable.min.js"
   ],
   "osvc_fields_read": [
-    "Contact.OrgId",
-    "Contact.first_name",
-    "Contact.last_name",
+    "Contact.CId",
+    "Contact.Email",
     "Incident.CId",
     "Incident.CO$Org",
-    "Incident.IId",
     "Incident.c$org_id_temp",
-    "Incident.c$org_label_temp",
-    "Incident.c_id",
-    "Incident.source"
+    "Incident.c$org_label_temp"
   ],
   "osvc_fields_written": [
+    "Contact.CustomFields.c$org_id_temp",
     "Incident.CId",
     "Incident.CO$Org",
     "Incident.c$org_id_temp",
     "Incident.c$org_label_temp"
   ],
   "field_listeners": [
-    "Incident.CO$Org",
-    "Incident.c_id"
+    "Contact.CustomFields.c$vip_status",
+    "Contact.Email"
   ],
   "lifecycle_listeners": [],
   "editor_commands": [],
   "report_ids": [
+    100008,
     100407
   ],
   "api_calls": [
@@ -70,7 +68,7 @@
   "workspace_objects_opened": [],
   "extension_ids_registered": {
     "logic.js": [
-      "triggerOrgChange"
+      "triggerVipChange"
     ]
   },
   "risk_flags": [
@@ -78,11 +76,6 @@
       "severity": "medium",
       "type": "Synchronous AJAX",
       "detail": "Synchronous AJAX (async: false) detected in logic.js — blocks browser UI thread"
-    },
-    {
-      "severity": "medium",
-      "type": "Custom Field Schema Dependency",
-      "detail": "Direct CustomFields.c ROQL LookupName query in logic.js — vulnerable to schema alterations"
     },
     {
       "severity": "high",
@@ -93,6 +86,11 @@
       "severity": "high",
       "type": "Relative Path Dependency",
       "detail": "Relative path script reference '../../AuthLibraryExtn/AuthLibraryExtn.js' in init.html — will fail if add-in path changes"
+    },
+    {
+      "severity": "medium",
+      "type": "Hardcoded Report ID",
+      "detail": "Hardcoded Report ID 100008 in BUI Add-In code — risks silent failure if report ID changes"
     },
     {
       "severity": "medium",

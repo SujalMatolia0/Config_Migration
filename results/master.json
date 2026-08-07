@@ -4,7 +4,7 @@
     "serverVersion": "Oracle Service Cloud Unknown",
     "totalComponents": 37,
     "useAiSummary": true,
-    "generatedAt": "2026-08-07T13:34:13.201371"
+    "generatedAt": "2026-08-07T13:48:18.682711"
   },
   "objects": {
     "Contact": {
@@ -20,7 +20,7 @@
           {
             "name": "Contact",
             "file": "json/workspaces/Contact.json",
-            "summary": "9 fields, 5 tabs, 1 rules"
+            "summary": "9 fields, 7 tabs, 1 rules"
           },
           {
             "name": "New Workspace",
@@ -82,7 +82,7 @@
           {
             "name": "ContactOrgLookupBUIAddin",
             "file": "json/scripts/ContactOrgLookupBUIAddin.json",
-            "summary": "10 fields read, 4 fields written, 2 API calls"
+            "summary": "6 fields read, 5 fields written, 2 API calls"
           }
         ],
         "custom_scripts": [],
@@ -135,7 +135,7 @@
           {
             "name": "ContactOrgLookupBUIAddin",
             "file": "json/scripts/ContactOrgLookupBUIAddin.json",
-            "summary": "10 fields read, 4 fields written, 2 API calls"
+            "summary": "6 fields read, 5 fields written, 2 API calls"
           },
           {
             "name": "SendToSiebelBUIAddin",
@@ -183,11 +183,6 @@
         "workspaces": [],
         "reports": [],
         "cpm": [
-          {
-            "name": "contact_update",
-            "file": "json/cpm/contact_update.json",
-            "summary": "Event: event_handler"
-          },
           {
             "name": "contact_update_internal",
             "file": "json/cpm/contact_update_internal.json",
@@ -246,31 +241,22 @@
     "items": [
       {
         "type": "cpm",
-        "name": "contact_update",
-        "objects": [
-          "Contact",
-          "Organization"
-        ],
-        "reason": "Component references multiple objects: Contact, Organization"
-      },
-      {
-        "type": "cpm",
         "name": "contact_update_internal",
         "objects": [
-          "Contact",
-          "Organization"
+          "Organization",
+          "Contact"
         ],
-        "reason": "Component references multiple objects: Contact, Organization"
+        "reason": "Component references multiple objects: Organization, Contact"
       },
       {
         "type": "cpm",
         "name": "incident_routing",
         "objects": [
           "Incident",
-          "Contact",
-          "Organization"
+          "Organization",
+          "Contact"
         ],
-        "reason": "Component references multiple objects: Incident, Contact, Organization"
+        "reason": "Component references multiple objects: Incident, Organization, Contact"
       },
       {
         "type": "BUIAddin",
@@ -284,12 +270,6 @@
     ]
   },
   "orphans": [
-    {
-      "type": "CustomScript",
-      "name": "address_validation.php",
-      "file": "json/workspaces/address_validation.php.json",
-      "reason": "Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script"
-    },
     {
       "type": "CustomScript",
       "name": "bluebox_greencart_validation.php",
@@ -306,12 +286,6 @@
       "type": "CustomScript",
       "name": "closing_notes.php",
       "file": "json/workspaces/closing_notes.php.json",
-      "reason": "Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script"
-    },
-    {
-      "type": "CustomScript",
-      "name": "duplicate_contacts.php",
-      "file": "json/workspaces/duplicate_contacts.php.json",
       "reason": "Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script"
     },
     {
@@ -340,6 +314,11 @@
       "risk": "External API Call"
     },
     {
+      "url": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php",
+      "referencedBy": [],
+      "risk": "External API Call"
+    },
+    {
       "url": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php",
       "referencedBy": [],
       "risk": "External API Call"
@@ -351,6 +330,16 @@
     },
     {
       "url": "urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL",
+      "referencedBy": [],
+      "risk": "External API Call"
+    },
+    {
+      "url": "https://siebel.enterprise.com/ContactSyncService",
+      "referencedBy": [],
+      "risk": "External API Call"
+    },
+    {
+      "url": "https://siebel.enterprise.com/ContactUpdateService",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -370,17 +359,17 @@
       "risk": "External API Call"
     },
     {
-      "url": "https://js.arcgis.com/4.20/",
-      "referencedBy": [],
-      "risk": "External API Call"
-    },
-    {
       "url": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
       "referencedBy": [],
       "risk": "External API Call"
     },
     {
       "url": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+      "referencedBy": [],
+      "risk": "External API Call"
+    },
+    {
+      "url": "https://js.arcgis.com/4.20/",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -535,6 +524,8 @@
           "module": "Contact",
           "mdPath": "../workspaces/Contact/report.md",
           "tabs": [
+            null,
+            null,
             null,
             null,
             null,
@@ -825,6 +816,8 @@
           "module": "Contact",
           "mdPath": "../rules/report_Business_Rules_Contact.md",
           "rules": [
+            null,
+            null,
             null,
             null,
             null,
@@ -2063,8 +2056,8 @@
         "id": "customscript:address_validation.php",
         "type": "customscript",
         "label": "address_validation.php",
-        "isOrphan": true,
-        "orphanReason": "Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script",
+        "isOrphan": false,
+        "orphanReason": null,
         "data": {
           "name": "address_validation.php",
           "type": null,
@@ -2223,8 +2216,8 @@
         "id": "customscript:duplicate_contacts.php",
         "type": "customscript",
         "label": "duplicate_contacts.php",
-        "isOrphan": true,
-        "orphanReason": "Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script",
+        "isOrphan": false,
+        "orphanReason": null,
         "data": {
           "name": "duplicate_contacts.php",
           "type": null,
@@ -2409,15 +2402,19 @@
           "module": "Contact",
           "mdPath": "../cpm/report_CPM_Contact_contact_create.md",
           "soap_actions": [],
-          "custom_fields_read": [],
-          "custom_fields_written": [],
-          "config_vars": [],
+          "custom_fields_read": [
+            "c$loyalty_tier"
+          ],
+          "custom_fields_written": [
+            "c$org_id_temp",
+            "c$vip_status"
+          ],
+          "config_vars": [
+            "CUSTOM_CFG_API_KEY",
+            "CUSTOM_CFG_SIEBEL_HOST"
+          ],
           "osvc_objects": [
-            "ConnectAPIError",
-            "Contact",
-            "PersonName",
-            "RNObject",
-            "SocialUser"
+            "Configuration"
           ],
           "detailsPath": "details/cpm_contact_create.json"
         }
@@ -2473,20 +2470,17 @@
           "module": "Contact",
           "mdPath": "../cpm/report_CPM_Contact_contact_update.md",
           "soap_actions": [],
-          "custom_fields_read": [],
-          "custom_fields_written": [
+          "custom_fields_read": [
             "c$org_id_temp"
           ],
-          "config_vars": [],
+          "custom_fields_written": [
+            "c$vip_status"
+          ],
+          "config_vars": [
+            "CUSTOM_CFG_SIEBEL_HOST"
+          ],
           "osvc_objects": [
-            "CO\\ContactOrgJoin",
-            "ConnectAPIError",
-            "ConnectAPIErrorBase",
-            "Contact",
-            "Organization",
-            "PersonName",
-            "RNObject",
-            "ROQL"
+            "Configuration"
           ],
           "detailsPath": "details/cpm_contact_update.json"
         }
@@ -2698,6 +2692,26 @@
         }
       },
       {
+        "id": "externalendpoint:https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php",
+        "type": "externalendpoint",
+        "label": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php",
+          "type": "EmbeddedBrowser (Custom PHP Script)",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Incident",
+          "detailsPath": "details/externalendpoint_https___gcb.custhelp.com_cgi-bin_gcb.cfg_php_custom_address_validation.php.json"
+        }
+      },
+      {
         "id": "externalendpoint:https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php",
         "type": "externalendpoint",
         "label": "https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php",
@@ -2755,6 +2769,46 @@
           "entry_point": null,
           "module": "Contact",
           "detailsPath": "details/externalendpoint_urn_soap_registercontact_via_custom_cfg_siebel_url.json"
+        }
+      },
+      {
+        "id": "externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "type": "externalendpoint",
+        "label": "https://siebel.enterprise.com/ContactSyncService",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://siebel.enterprise.com/ContactSyncService",
+          "type": "CPM-Sync",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Contact",
+          "detailsPath": "details/externalendpoint_https___siebel.enterprise.com_contactsyncservice.json"
+        }
+      },
+      {
+        "id": "externalendpoint:https://siebel.enterprise.com/contactupdateservice",
+        "type": "externalendpoint",
+        "label": "https://siebel.enterprise.com/ContactUpdateService",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://siebel.enterprise.com/ContactUpdateService",
+          "type": "CPM-Sync",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Contact",
+          "detailsPath": "details/externalendpoint_https___siebel.enterprise.com_contactupdateservice.json"
         }
       },
       {
@@ -2818,26 +2872,6 @@
         }
       },
       {
-        "id": "externalendpoint:https://js.arcgis.com/4.20/",
-        "type": "externalendpoint",
-        "label": "https://js.arcgis.com/4.20/",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "name": "https://js.arcgis.com/4.20/",
-          "type": "CustomScript",
-          "id": null,
-          "object_type": null,
-          "script_type": null,
-          "php_version": null,
-          "is_async": null,
-          "operations_label": null,
-          "entry_point": null,
-          "module": "Other",
-          "detailsPath": "details/externalendpoint_https___js.arcgis.com_4.20_.json"
-        }
-      },
-      {
         "id": "externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
         "type": "externalendpoint",
         "label": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
@@ -2875,6 +2909,26 @@
           "entry_point": null,
           "module": "Other",
           "detailsPath": "details/externalendpoint_https___js.arcgis.com_4.20_esri_themes_light_main.css.json"
+        }
+      },
+      {
+        "id": "externalendpoint:https://js.arcgis.com/4.20/",
+        "type": "externalendpoint",
+        "label": "https://js.arcgis.com/4.20/",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "name": "https://js.arcgis.com/4.20/",
+          "type": "CustomScript",
+          "id": null,
+          "object_type": null,
+          "script_type": null,
+          "php_version": null,
+          "is_async": null,
+          "operations_label": null,
+          "entry_point": null,
+          "module": "Other",
+          "detailsPath": "details/externalendpoint_https___js.arcgis.com_4.20_.json"
         }
       },
       {
@@ -3036,18 +3090,15 @@
           "module": "Contact",
           "mdPath": "../bui_addins/report_ContactOrgLookupBUIAddin.md",
           "osvc_fields_read": [
-            "Contact.OrgId",
-            "Contact.first_name",
-            "Contact.last_name",
+            "Contact.CId",
+            "Contact.Email",
             "Incident.CId",
             "Incident.CO$Org",
-            "Incident.IId",
             "Incident.c$org_id_temp",
-            "Incident.c$org_label_temp",
-            "Incident.c_id",
-            "Incident.source"
+            "Incident.c$org_label_temp"
           ],
           "osvc_fields_written": [
+            "Contact.CustomFields.c$org_id_temp",
             "Incident.CId",
             "Incident.CO$Org",
             "Incident.c$org_id_temp",
@@ -3067,9 +3118,9 @@
           ],
           "risk_flags": [
             "Synchronous AJAX",
-            "Custom Field Schema Dependency",
             "Duplicate Library Load",
             "Relative Path Dependency",
+            "Hardcoded Report ID",
             "Hardcoded Report ID",
             "Unused Library Import"
           ],
@@ -3431,46 +3482,31 @@
         }
       },
       {
-        "id": "workspacefield:contact.orgid",
+        "id": "workspacefield:contact.cid",
         "type": "workspacefield",
-        "label": "Contact.OrgId",
+        "label": "Contact.CId",
         "isOrphan": false,
         "orphanReason": null,
         "data": {
           "_fallback": true,
           "_type_hint": "WorkspaceField",
-          "name": "Contact.OrgId",
-          "label": "Contact.OrgId",
+          "name": "Contact.CId",
+          "label": "Contact.CId",
           "module": "Contact",
           "object": "Contact"
         }
       },
       {
-        "id": "workspacefield:contact.first_name",
+        "id": "workspacefield:contact.email",
         "type": "workspacefield",
-        "label": "Contact.first_name",
+        "label": "Contact.Email",
         "isOrphan": false,
         "orphanReason": null,
         "data": {
           "_fallback": true,
           "_type_hint": "WorkspaceField",
-          "name": "Contact.first_name",
-          "label": "Contact.first_name",
-          "module": "Contact",
-          "object": "Contact"
-        }
-      },
-      {
-        "id": "workspacefield:contact.last_name",
-        "type": "workspacefield",
-        "label": "Contact.last_name",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "_fallback": true,
-          "_type_hint": "WorkspaceField",
-          "name": "Contact.last_name",
-          "label": "Contact.last_name",
+          "name": "Contact.Email",
+          "label": "Contact.Email",
           "module": "Contact",
           "object": "Contact"
         }
@@ -3506,21 +3542,6 @@
         }
       },
       {
-        "id": "workspacefield:incident.iid",
-        "type": "workspacefield",
-        "label": "Incident.IId",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "_fallback": true,
-          "_type_hint": "WorkspaceField",
-          "name": "Incident.IId",
-          "label": "Incident.IId",
-          "module": "Incident",
-          "object": "Incident"
-        }
-      },
-      {
         "id": "workspacefield:incident.c$org_id_temp",
         "type": "workspacefield",
         "label": "Incident.c$org_id_temp",
@@ -3551,33 +3572,18 @@
         }
       },
       {
-        "id": "workspacefield:incident.c_id",
+        "id": "workspacefield:contact.customfields.c$org_id_temp",
         "type": "workspacefield",
-        "label": "Incident.c_id",
+        "label": "Contact.CustomFields.c$org_id_temp",
         "isOrphan": false,
         "orphanReason": null,
         "data": {
           "_fallback": true,
           "_type_hint": "WorkspaceField",
-          "name": "Incident.c_id",
-          "label": "Incident.c_id",
-          "module": "Incident",
-          "object": "Incident"
-        }
-      },
-      {
-        "id": "workspacefield:incident.source",
-        "type": "workspacefield",
-        "label": "Incident.source",
-        "isOrphan": false,
-        "orphanReason": null,
-        "data": {
-          "_fallback": true,
-          "_type_hint": "WorkspaceField",
-          "name": "Incident.source",
-          "label": "Incident.source",
-          "module": "Incident",
-          "object": "Incident"
+          "name": "Contact.CustomFields.c$org_id_temp",
+          "label": "Contact.CustomFields.c$org_id_temp",
+          "module": "Contact",
+          "object": "Contact"
         }
       },
       {
@@ -3606,6 +3612,21 @@
           "_type_hint": "WorkspaceField",
           "name": "Incident.Created",
           "label": "Incident.Created",
+          "module": "Incident",
+          "object": "Incident"
+        }
+      },
+      {
+        "id": "workspacefield:incident.iid",
+        "type": "workspacefield",
+        "label": "Incident.IId",
+        "isOrphan": false,
+        "orphanReason": null,
+        "data": {
+          "_fallback": true,
+          "_type_hint": "WorkspaceField",
+          "name": "Incident.IId",
+          "label": "Incident.IId",
           "module": "Incident",
           "object": "Incident"
         }
@@ -3657,7 +3678,7 @@
         "type": "object",
         "label": "Organization",
         "data": {
-          "componentCount": 3,
+          "componentCount": 2,
           "osvc_table": "organizations"
         }
       },
@@ -3732,671 +3753,695 @@
       {
         "id": "edge-8",
         "source": "workspace:contact",
+        "target": "report:contacts",
+        "label": "Tab 'Contact Report Summary' → RelationshipItem AcId: 100008"
+      },
+      {
+        "id": "edge-10",
+        "source": "workspace:contact",
         "target": "report:report 9029",
         "label": "Tab 'Incidents' → RelationshipItem AcId: 9029"
       },
       {
-        "id": "edge-9",
+        "id": "edge-11",
         "source": "workspace:contact",
         "target": "report:report 0",
         "label": "Tab 'Incidents' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-10",
+        "id": "edge-12",
         "source": "workspace:contact",
         "target": "report:report 9050",
         "label": "Tab 'Audit' → RelationshipItem AcId: 9050"
       },
       {
-        "id": "edge-11",
+        "id": "edge-13",
+        "source": "workspace:contact",
+        "target": "customscript:address_validation.php",
+        "label": "Tab 'Address Validation' → Browser → Custom PHP Script (https://gcb.custhelp...."
+      },
+      {
+        "id": "edge-14",
         "source": "workspace:contact",
         "target": "customscript:gcb_flex.php",
         "label": "Tab 'Customer360' → Browser → Custom PHP Script (https://gcb.custhelp.com/cgi..."
       },
       {
-        "id": "edge-12",
+        "id": "edge-15",
+        "source": "workspace:contact",
+        "target": "customscript:duplicate_contacts.php",
+        "label": "Rule 'Check Contact Duplicates' → Action: RunScript"
+      },
+      {
+        "id": "edge-16",
         "source": "workspace:incident",
         "target": "report:report 125",
         "label": "Tab 'Incident Details' → RelationshipItem SearchReportId: 125"
       },
       {
-        "id": "edge-13",
+        "id": "edge-17",
         "source": "workspace:incident",
         "target": "report:report 9011",
         "label": "Tab 'CONTACTS_LBL' → RelationshipItem AcId: 9011"
       },
       {
-        "id": "edge-14",
+        "id": "edge-18",
         "source": "workspace:incident",
         "target": "report:report 8014",
         "label": "Tab 'CONTACTS_LBL' → RelationshipItem SearchReportId: 8014"
       },
       {
-        "id": "edge-15",
+        "id": "edge-19",
         "source": "workspace:incident",
         "target": "report:report 9029",
         "label": "Tab 'INCIDENT_HISTORY_LBL' → RelationshipItem AcId: 9029"
       },
       {
-        "id": "edge-16",
+        "id": "edge-20",
         "source": "workspace:incident",
         "target": "report:report 0",
         "label": "Tab 'INCIDENT_HISTORY_LBL' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-17",
+        "id": "edge-21",
         "source": "workspace:incident",
         "target": "report:report 9018",
         "label": "Tab 'TASKS_LBL' → RelationshipItem AcId: 9018"
       },
       {
-        "id": "edge-18",
+        "id": "edge-22",
         "source": "workspace:incident",
         "target": "report:report 8010",
         "label": "Tab 'TASKS_LBL' → RelationshipItem SearchReportId: 8010"
       },
       {
-        "id": "edge-19",
+        "id": "edge-23",
         "source": "workspace:incident",
         "target": "report:report 9041",
         "label": "Tab 'AUDIT_LOG_LBL' → RelationshipItem AcId: 9041"
       },
       {
-        "id": "edge-20",
+        "id": "edge-24",
         "source": "workspace:incident",
         "target": "report:report 8014",
         "label": "Tab 'SUMMARY_LBL' → Field 'CId' → ReportId 8014"
       },
       {
-        "id": "edge-21",
+        "id": "edge-25",
         "source": "workspace:incident",
         "target": "customscript:gcb_flex.php",
         "label": "Tab 'Customer 360' → Browser → Custom PHP Script (https://gcb.custhelp.com/cg..."
       },
       {
-        "id": "edge-22",
+        "id": "edge-26",
         "source": "workspace:new workspace",
         "target": "report:report 0",
         "label": "Tab 'New Tab 2' → RelationshipItem AcId: 0"
       },
       {
-        "id": "edge-23",
+        "id": "edge-27",
         "source": "workspace:new workspace",
         "target": "report:report 0",
         "label": "Tab 'New Tab 2' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-24",
+        "id": "edge-28",
         "source": "workspace:new workspace",
         "target": "report:report 9016",
         "label": "Tab 'New Tab 3' → RelationshipItem AcId: 9016"
       },
       {
-        "id": "edge-25",
+        "id": "edge-29",
         "source": "workspace:new workspace",
         "target": "report:report 8012",
         "label": "Tab 'New Tab 3' → RelationshipItem SearchReportId: 8012"
       },
       {
-        "id": "edge-26",
+        "id": "edge-30",
         "source": "workspace:new workspace",
         "target": "report:report 8001",
         "label": "Tab 'Summary' → Field 'OrgId' → ReportId 8001"
       },
       {
-        "id": "edge-27",
+        "id": "edge-31",
         "source": "workspace:new workspace",
         "target": "externalendpoint:http://cloud.oracle.com/service",
         "label": "Ribbon Link 'Oracle Service Cloud' → External Endpoint"
       },
       {
-        "id": "edge-28",
+        "id": "edge-32",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 9011",
         "label": "Tab 'CONTACTS_LBL' → RelationshipItem AcId: 9011"
       },
       {
-        "id": "edge-29",
+        "id": "edge-33",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 8014",
         "label": "Tab 'CONTACTS_LBL' → RelationshipItem SearchReportId: 8014"
       },
       {
-        "id": "edge-30",
+        "id": "edge-34",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 9029",
         "label": "Tab 'INCIDENT_HISTORY_LBL' → RelationshipItem AcId: 9029"
       },
       {
-        "id": "edge-31",
+        "id": "edge-35",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 0",
         "label": "Tab 'INCIDENT_HISTORY_LBL' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-32",
+        "id": "edge-36",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 125",
         "label": "Tab 'Incident Details' → RelationshipItem SearchReportId: 125"
       },
       {
-        "id": "edge-33",
+        "id": "edge-37",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 9018",
         "label": "Tab 'TASKS_LBL' → RelationshipItem AcId: 9018"
       },
       {
-        "id": "edge-34",
+        "id": "edge-38",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 8010",
         "label": "Tab 'TASKS_LBL' → RelationshipItem SearchReportId: 8010"
       },
       {
-        "id": "edge-35",
+        "id": "edge-39",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 9041",
         "label": "Tab 'AUDIT_LOG_LBL' → RelationshipItem AcId: 9041"
       },
       {
-        "id": "edge-36",
+        "id": "edge-40",
         "source": "workspace:real_edge_01_nested_tabset",
         "target": "report:report 8014",
         "label": "Tab 'SUMMARY_LBL' → Field 'CId' → ReportId 8014"
       },
       {
-        "id": "edge-37",
+        "id": "edge-41",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "report:report 0",
         "label": "Tab 'New Tab 2' → RelationshipItem AcId: 0"
       },
       {
-        "id": "edge-38",
+        "id": "edge-42",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "report:report 0",
         "label": "Tab 'New Tab 2' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-39",
+        "id": "edge-43",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "report:report 9016",
         "label": "Tab 'New Tab 3' → RelationshipItem AcId: 9016"
       },
       {
-        "id": "edge-40",
+        "id": "edge-44",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "report:report 8012",
         "label": "Tab 'New Tab 3' → RelationshipItem SearchReportId: 8012"
       },
       {
-        "id": "edge-41",
+        "id": "edge-45",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "report:report 8001",
         "label": "Tab 'Summary' → Field 'OrgId' → ReportId 8001"
       },
       {
-        "id": "edge-42",
+        "id": "edge-46",
         "source": "workspace:real_edge_02_new_workspace_patterns",
         "target": "externalendpoint:http://cloud.oracle.com/service",
         "label": "Ribbon Link 'Oracle Service Cloud' → External Endpoint"
       },
       {
-        "id": "edge-43",
+        "id": "edge-47",
         "source": "workspace:real_edge_03_split_panel_contact",
         "target": "report:report 9029",
         "label": "Tab 'Incidents' → RelationshipItem AcId: 9029"
       },
       {
-        "id": "edge-44",
+        "id": "edge-48",
         "source": "workspace:real_edge_03_split_panel_contact",
         "target": "report:report 0",
         "label": "Tab 'Incidents' → RelationshipItem SearchReportId: 0"
       },
       {
-        "id": "edge-45",
+        "id": "edge-49",
         "source": "workspace:real_edge_03_split_panel_contact",
         "target": "report:report 9050",
         "label": "Tab 'Audit' → RelationshipItem AcId: 9050"
       },
       {
-        "id": "edge-46",
+        "id": "edge-50",
         "source": "workspace:real_edge_03_split_panel_contact",
         "target": "customscript:gcb_flex.php",
         "label": "Tab 'Customer360' → Browser → Custom PHP Script (https://gcb.custhelp.com/cgi..."
       },
       {
-        "id": "edge-47",
+        "id": "edge-51",
         "source": "customscript:child_incident_create.php",
         "target": "customscript:include/init.phph",
         "label": "import/require: 'include/init.phph'"
       },
       {
-        "id": "edge-48",
+        "id": "edge-52",
         "source": "customscript:cityworksapicall.php",
         "target": "customscript:include/init.phph",
         "label": "import/require: 'include/init.phph'"
       },
       {
-        "id": "edge-49",
+        "id": "edge-53",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:contact_create",
         "label": "Event Routing: Contact (scriptpro / Create)"
       },
       {
-        "id": "edge-50",
+        "id": "edge-54",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:contact_update",
         "label": "Event Routing: Contact (scriptpro / Update)"
       },
       {
-        "id": "edge-51",
+        "id": "edge-55",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:contact_create_internal",
         "label": "Event Routing: Contact (scriptpro_customerservice_2 / Create)"
       },
       {
-        "id": "edge-52",
+        "id": "edge-56",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:contact_update_internal",
         "label": "Event Routing: Contact (scriptpro_customerservice_2 / Update)"
       },
       {
-        "id": "edge-53",
+        "id": "edge-57",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:incident_create",
         "label": "Event Routing: Incident (scriptpro / Create)"
       },
       {
-        "id": "edge-54",
+        "id": "edge-58",
         "source": "cpmmappings:mappings.xml",
         "target": "cpm:incident_back_in_stock_sync",
         "label": "Event Routing: Incident (scriptpro / Update)"
       },
       {
-        "id": "edge-56",
+        "id": "edge-60",
         "source": "cpm:contactasync",
         "target": "externalendpoint:soap: registercontact",
         "label": "Siebel SOAP invocation: RegisterContact"
       },
       {
-        "id": "edge-89",
+        "id": "edge-100",
         "source": "cpm:incident_routing",
         "target": "externalendpoint:soap: getaccounts",
         "label": "Siebel SOAP invocation: GetAccounts"
       },
       {
-        "id": "edge-108",
+        "id": "edge-119",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_depricated_autorespond",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_depricated_autorespond'"
       },
       {
-        "id": "edge-109",
+        "id": "edge-120",
         "source": "businessrule:incident business rules",
         "target": "cpm:gbl_con_region_assoc",
         "label": "Incident Business Rule triggers CPM Handler 'gbl_con_region_assoc'"
       },
       {
-        "id": "edge-110",
+        "id": "edge-121",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_get_order_number",
         "label": "Incident Business Rule triggers CPM Handler 'incident_get_order_number'"
       },
       {
-        "id": "edge-112",
+        "id": "edge-123",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_autoresponse",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_autoresponse'"
       },
       {
-        "id": "edge-113",
+        "id": "edge-124",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_cancelorderprocessstart",
         "label": "Incident Business Rule triggers CPM Handler 'inc_cancelOrderProcessStart'"
       },
       {
-        "id": "edge-114",
+        "id": "edge-125",
         "source": "businessrule:incident business rules",
         "target": "cpm:incidentfcr",
         "label": "Incident Business Rule triggers CPM Handler 'IncidentFCR'"
       },
       {
-        "id": "edge-118",
+        "id": "edge-129",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_resolveblockprocessstart",
         "label": "Incident Business Rule triggers CPM Handler 'inc_resolveBlockProcessStart'"
       },
       {
-        "id": "edge-119",
+        "id": "edge-130",
         "source": "businessrule:incident business rules",
         "target": "cpm:dedup_rx_incidents_sync",
         "label": "Incident Business Rule triggers CPM Handler 'dedup_rx_incidents_sync'"
       },
       {
-        "id": "edge-120",
+        "id": "edge-131",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_customer_routing",
         "label": "Incident Business Rule triggers CPM Handler 'inc_customer_routing'"
       },
       {
-        "id": "edge-121",
+        "id": "edge-132",
         "source": "businessrule:incident business rules",
         "target": "cpm:ocr_get_fax_number",
         "label": "Incident Business Rule triggers CPM Handler 'ocr_get_fax_number'"
       },
       {
-        "id": "edge-123",
+        "id": "edge-134",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_router",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_router'"
       },
       {
-        "id": "edge-125",
+        "id": "edge-136",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_sync_contact",
         "label": "Incident Business Rule triggers CPM Handler 'inc_sync_contact'"
       },
       {
-        "id": "edge-131",
+        "id": "edge-142",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_set_parent_child",
         "label": "Incident Business Rule triggers CPM Handler 'incident_set_parent_child'"
       },
       {
-        "id": "edge-133",
+        "id": "edge-144",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_rxm_transmission",
         "label": "Incident Business Rule triggers CPM Handler 'incident_rxm_transmission'"
       },
       {
-        "id": "edge-135",
+        "id": "edge-146",
         "source": "businessrule:incident business rules",
         "target": "cpm:petscription_link_auth_sync",
         "label": "Incident Business Rule triggers CPM Handler 'petscription_link_auth_sync'"
       },
       {
-        "id": "edge-136",
+        "id": "edge-147",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_genesys_conv_sendadminmsg",
         "label": "Incident Business Rule triggers CPM Handler 'inc_genesys_conv_SendAdminMsg'"
       },
       {
-        "id": "edge-137",
+        "id": "edge-148",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_om_status_update_retry",
         "label": "Incident Business Rule triggers CPM Handler 'inc_om_status_update_retry'"
       },
       {
-        "id": "edge-138",
+        "id": "edge-149",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_rx_cancel",
         "label": "Incident Business Rule triggers CPM Handler 'incident_Rx_cancel'"
       },
       {
-        "id": "edge-139",
+        "id": "edge-150",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_kyrios_shipper_request",
         "label": "Incident Business Rule triggers CPM Handler 'inc_kyrios_shipper_request'"
       },
       {
-        "id": "edge-140",
+        "id": "edge-151",
         "source": "businessrule:incident business rules",
         "target": "cpm:post_askavet_chat_notification",
         "label": "Incident Business Rule triggers CPM Handler 'post_askavet_chat_notification'"
       },
       {
-        "id": "edge-143",
+        "id": "edge-154",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_send_refax",
         "label": "Incident Business Rule triggers CPM Handler 'inc_send_refax'"
       },
       {
-        "id": "edge-145",
+        "id": "edge-156",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_releaseorderprocessstart",
         "label": "Incident Business Rule triggers CPM Handler 'inc_releaseOrderProcessStart'"
       },
       {
-        "id": "edge-146",
+        "id": "edge-157",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_pro_sync_dispo_to_status",
         "label": "Incident Business Rule triggers CPM Handler 'inc_pro_sync_dispo_to_status'"
       },
       {
-        "id": "edge-150",
+        "id": "edge-161",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_b2b_entity_status_update",
         "label": "Incident Business Rule triggers CPM Handler 'inc_b2b_entity_status_update'"
       },
       {
-        "id": "edge-151",
+        "id": "edge-162",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_reopen",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_reopen'"
       },
       {
-        "id": "edge-153",
+        "id": "edge-164",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_esclation_email",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_esclation_email'"
       },
       {
-        "id": "edge-154",
+        "id": "edge-165",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_csat_email",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_csat_email'"
       },
       {
-        "id": "edge-155",
+        "id": "edge-166",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_post_reopen",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_post_reopen'"
       },
       {
-        "id": "edge-157",
+        "id": "edge-168",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_notif_vd_warn_48hr",
         "label": "Incident Business Rule triggers CPM Handler 'inc_notif_vd_warn_48hr'"
       },
       {
-        "id": "edge-161",
+        "id": "edge-172",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_vet_diet_cancellation",
         "label": "Incident Business Rule triggers CPM Handler 'inc_vet_diet_cancellation'"
       },
       {
-        "id": "edge-163",
+        "id": "edge-174",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_send_rxs_to_clinic",
         "label": "Incident Business Rule triggers CPM Handler 'inc_send_rxs_to_clinic'"
       },
       {
-        "id": "edge-166",
+        "id": "edge-177",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_verify_parent_close",
         "label": "Incident Business Rule triggers CPM Handler 'incident_verify_parent_close'"
       },
       {
-        "id": "edge-173",
+        "id": "edge-184",
         "source": "businessrule:incident business rules",
         "target": "cpm:rx_notification_7_day_reminder",
         "label": "Incident Business Rule triggers CPM Handler 'rx_notification_7_day_reminder'"
       },
       {
-        "id": "edge-180",
+        "id": "edge-191",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_sync_rhapsody_task",
         "label": "Incident Business Rule triggers CPM Handler 'inc_sync_rhapsody_task'"
       },
       {
-        "id": "edge-188",
+        "id": "edge-199",
         "source": "businessrule:contact business rules",
         "target": "cpm:ocr_get_fax_number",
         "label": "Contact Business Rule triggers CPM Handler 'ocr_get_fax_number'"
       },
       {
-        "id": "edge-198",
+        "id": "edge-209",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_rx_cancel_v2",
         "label": "Incident Business Rule triggers CPM Handler 'incident_Rx_cancel_v2'"
       },
       {
-        "id": "edge-200",
+        "id": "edge-211",
         "source": "businessrule:incident business rules",
         "target": "cpm:incident_back_in_stock_sync",
         "label": "Incident Business Rule triggers CPM Handler 'incident_back_in_stock_sync'"
       },
       {
-        "id": "edge-205",
+        "id": "edge-216",
         "source": "businessrule:incident business rules",
         "target": "cpm:rx_notification_3_day_reminder",
         "label": "Incident Business Rule triggers CPM Handler 'rx_notification_3_day_reminder'"
       },
       {
-        "id": "edge-207",
+        "id": "edge-218",
         "source": "businessrule:contact business rules",
         "target": "cpm:inc_cancelorderprocessstart",
         "label": "Contact Business Rule triggers CPM Handler 'inc_cancelOrderProcessStart'"
       },
       {
-        "id": "edge-238",
+        "id": "edge-249",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_genesys_conv_createupdate",
         "label": "Incident Business Rule triggers CPM Handler 'inc_genesys_conv_createUpdate'"
       },
       {
-        "id": "edge-246",
+        "id": "edge-257",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_notif_rx_pickup_script",
         "label": "Incident Business Rule triggers CPM Handler 'inc_notif_rx_pickup_script'"
       },
       {
-        "id": "edge-247",
+        "id": "edge-258",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_notif_vd_warn_contact_vet",
         "label": "Incident Business Rule triggers CPM Handler 'inc_notif_vd_warn_contact_vet'"
       },
       {
-        "id": "edge-257",
+        "id": "edge-268",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_notif_rx_vet_see_pet",
         "label": "Incident Business Rule triggers CPM Handler 'inc_notif_rx_vet_see_pet'"
       },
       {
-        "id": "edge-259",
+        "id": "edge-270",
         "source": "businessrule:incident business rules",
         "target": "cpm:inc_notif_rx_pet_not_found_v2",
         "label": "Incident Business Rule triggers CPM Handler 'inc_notif_rx_pet_not_found_v2'"
       },
       {
-        "id": "edge-269",
+        "id": "edge-280",
         "source": "businessrule:incident business rules",
         "target": "cpm:object_detail_logging_inc",
         "label": "Incident Business Rule triggers CPM Handler 'object_detail_logging_inc'"
       },
       {
-        "id": "edge-301",
+        "id": "edge-312",
         "source": "businessrule:incident business rules",
         "target": "cpm:vsp_inc_unassigned",
         "label": "Incident Business Rule triggers CPM Handler 'vsp_inc_unassigned'"
       },
       {
-        "id": "edge-309",
+        "id": "edge-316",
+        "source": "businessrule:contact business rules",
+        "target": "cpm:contact_create",
+        "label": "Contact Business Rule triggers CPM Handler 'contact_create'"
+      },
+      {
+        "id": "edge-317",
+        "source": "businessrule:contact business rules",
+        "target": "cpm:contact_update",
+        "label": "Contact Business Rule triggers CPM Handler 'contact_update'"
+      },
+      {
+        "id": "edge-318",
+        "source": "businessrule:contact business rules",
+        "target": "cpm:contactasync",
+        "label": "Contact Business Rule triggers CPM Handler 'ContactAsync'"
+      },
+      {
+        "id": "edge-323",
+        "source": "buiaddin:contactorglookupbuiaddin",
+        "target": "report:contacts",
+        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Report Dependency (Report ID: 100008)"
+      },
+      {
+        "id": "edge-324",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "report:report 100407",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Report Dependency (Report ID: 100407)"
       },
       {
-        "id": "edge-310",
+        "id": "edge-325",
         "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:contact.orgid",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Contact.OrgId)"
+        "target": "workspacefield:contact.cid",
+        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Contact.CId)"
       },
       {
-        "id": "edge-311",
+        "id": "edge-326",
         "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:contact.first_name",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Contact.first_name)"
+        "target": "workspacefield:contact.email",
+        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Contact.Email)"
       },
       {
-        "id": "edge-312",
-        "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:contact.last_name",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Contact.last_name)"
-      },
-      {
-        "id": "edge-313",
+        "id": "edge-327",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "workspacefield:incident.cid",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.CId)"
       },
       {
-        "id": "edge-314",
+        "id": "edge-328",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "workspacefield:incident.co$org",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.CO$Org)"
       },
       {
-        "id": "edge-315",
-        "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:incident.iid",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.IId)"
-      },
-      {
-        "id": "edge-316",
+        "id": "edge-329",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "workspacefield:incident.c$org_id_temp",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.c$org_id_temp)"
       },
       {
-        "id": "edge-317",
+        "id": "edge-330",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "workspacefield:incident.c$org_label_temp",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.c$org_label_temp)"
       },
       {
-        "id": "edge-318",
+        "id": "edge-331",
         "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:incident.c_id",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.c_id)"
+        "target": "workspacefield:contact.customfields.c$org_id_temp",
+        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Write Field (Contact.CustomFields.c$..."
       },
       {
-        "id": "edge-319",
-        "source": "buiaddin:contactorglookupbuiaddin",
-        "target": "workspacefield:incident.source",
-        "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Read Field (Incident.source)"
-      },
-      {
-        "id": "edge-324",
+        "id": "edge-336",
         "source": "buiaddin:contactorglookupbuiaddin",
         "target": "customscript:../../authlibraryextn/authlibraryextn.js",
         "label": "BUI Add-In 'ContactOrgLookupBUIAddin' -> Relative Script Dependency (../../Au..."
       },
       {
-        "id": "edge-325",
+        "id": "edge-337",
         "source": "buiaddin:sendtosiebelbuiaddin",
         "target": "workspacefield:incident.created",
         "label": "BUI Add-In 'SendToSiebelBUIAddin' -> Read Field (Incident.Created)"
       },
       {
-        "id": "edge-326",
+        "id": "edge-338",
         "source": "buiaddin:sendtosiebelbuiaddin",
         "target": "workspacefield:incident.iid",
         "label": "BUI Add-In 'SendToSiebelBUIAddin' -> Read Field (Incident.IId)"
       },
       {
-        "id": "edge-327",
+        "id": "edge-339",
         "source": "buiaddin:sendtosiebelbuiaddin",
         "target": "workspacefield:incident.c$siebel_sr_number",
         "label": "BUI Add-In 'SendToSiebelBUIAddin' -> Read Field (Incident.c$siebel_sr_number)"
       },
       {
-        "id": "edge-328",
+        "id": "edge-340",
         "source": "buiaddin:sendtosiebelbuiaddin",
         "target": "workspacefield:incident.c$siebel_sr_number",
         "label": "BUI Add-In 'SendToSiebelBUIAddin' -> Write Field (Incident.c$siebel_sr_number)"
       },
       {
-        "id": "edge-329",
+        "id": "edge-341",
         "source": "buiaddin:sendtosiebelbuiaddin",
         "target": "customscript:../../authlibraryextn/authlibraryextn.js",
         "label": "BUI Add-In 'SendToSiebelBUIAddin' -> Relative Script Dependency (../../AuthLi..."
@@ -4480,6 +4525,18 @@
         "label": "belongs to object"
       },
       {
+        "id": "e_obj_Contact_externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "source": "object:contact",
+        "target": "externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "label": "belongs to object"
+      },
+      {
+        "id": "e_obj_Contact_externalendpoint:https://siebel.enterprise.com/contactupdateservice",
+        "source": "object:contact",
+        "target": "externalendpoint:https://siebel.enterprise.com/contactupdateservice",
+        "label": "belongs to object"
+      },
+      {
         "id": "e_obj_Contact_buiaddin:contactorglookupbuiaddin",
         "source": "object:contact",
         "target": "buiaddin:contactorglookupbuiaddin",
@@ -4492,21 +4549,21 @@
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.orgid",
+        "id": "e_obj_Contact_workspacefield:contact.cid",
         "source": "object:contact",
-        "target": "workspacefield:contact.orgid",
+        "target": "workspacefield:contact.cid",
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.first_name",
+        "id": "e_obj_Contact_workspacefield:contact.email",
         "source": "object:contact",
-        "target": "workspacefield:contact.first_name",
+        "target": "workspacefield:contact.email",
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.last_name",
+        "id": "e_obj_Contact_workspacefield:contact.customfields.c$org_id_temp",
         "source": "object:contact",
-        "target": "workspacefield:contact.last_name",
+        "target": "workspacefield:contact.customfields.c$org_id_temp",
         "label": "belongs to object"
       },
       {
@@ -4537,6 +4594,12 @@
         "id": "e_obj_Contact_customscript:duplicate_contacts.php",
         "source": "object:contact",
         "target": "customscript:duplicate_contacts.php",
+        "label": "belongs to object"
+      },
+      {
+        "id": "e_obj_Contact_externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "source": "object:contact",
+        "target": "externalendpoint:https://siebel.enterprise.com/contactsyncservice",
         "label": "belongs to object"
       },
       {
@@ -4666,6 +4729,18 @@
         "label": "belongs to object"
       },
       {
+        "id": "e_obj_Contact_externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "source": "object:contact",
+        "target": "externalendpoint:https://siebel.enterprise.com/contactsyncservice",
+        "label": "belongs to object"
+      },
+      {
+        "id": "e_obj_Contact_externalendpoint:https://siebel.enterprise.com/contactupdateservice",
+        "source": "object:contact",
+        "target": "externalendpoint:https://siebel.enterprise.com/contactupdateservice",
+        "label": "belongs to object"
+      },
+      {
         "id": "e_obj_Contact_buiaddin:contactorglookupbuiaddin",
         "source": "object:contact",
         "target": "buiaddin:contactorglookupbuiaddin",
@@ -4678,21 +4753,21 @@
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.orgid",
+        "id": "e_obj_Contact_workspacefield:contact.cid",
         "source": "object:contact",
-        "target": "workspacefield:contact.orgid",
+        "target": "workspacefield:contact.cid",
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.first_name",
+        "id": "e_obj_Contact_workspacefield:contact.email",
         "source": "object:contact",
-        "target": "workspacefield:contact.first_name",
+        "target": "workspacefield:contact.email",
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Contact_workspacefield:contact.last_name",
+        "id": "e_obj_Contact_workspacefield:contact.customfields.c$org_id_temp",
         "source": "object:contact",
-        "target": "workspacefield:contact.last_name",
+        "target": "workspacefield:contact.customfields.c$org_id_temp",
         "label": "belongs to object"
       },
       {
@@ -4750,12 +4825,6 @@
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Incident_workspacefield:incident.iid",
-        "source": "object:incident",
-        "target": "workspacefield:incident.iid",
-        "label": "belongs to object"
-      },
-      {
         "id": "e_obj_Incident_workspacefield:incident.c$org_id_temp",
         "source": "object:incident",
         "target": "workspacefield:incident.c$org_id_temp",
@@ -4768,21 +4837,15 @@
         "label": "belongs to object"
       },
       {
-        "id": "e_obj_Incident_workspacefield:incident.c_id",
-        "source": "object:incident",
-        "target": "workspacefield:incident.c_id",
-        "label": "belongs to object"
-      },
-      {
-        "id": "e_obj_Incident_workspacefield:incident.source",
-        "source": "object:incident",
-        "target": "workspacefield:incident.source",
-        "label": "belongs to object"
-      },
-      {
         "id": "e_obj_Incident_workspacefield:incident.created",
         "source": "object:incident",
         "target": "workspacefield:incident.created",
+        "label": "belongs to object"
+      },
+      {
+        "id": "e_obj_Incident_workspacefield:incident.iid",
+        "source": "object:incident",
+        "target": "workspacefield:incident.iid",
         "label": "belongs to object"
       },
       {
@@ -4843,18 +4906,6 @@
         "id": "e_obj_Unknown_cpmmappings:mappings.xml",
         "source": "object:unknown",
         "target": "cpmmappings:mappings.xml",
-        "label": "belongs to object"
-      },
-      {
-        "id": "e_obj_Organization_cpm:contact_update",
-        "source": "object:organization",
-        "target": "cpm:contact_update",
-        "label": "belongs to object"
-      },
-      {
-        "id": "e_obj_Organization_cpm:contact_update_internal",
-        "source": "object:organization",
-        "target": "cpm:contact_update_internal",
         "label": "belongs to object"
       },
       {

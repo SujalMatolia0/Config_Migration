@@ -1,13 +1,13 @@
 {
-  "total_rules": 1207,
+  "total_rules": 1209,
   "rule_sets_count": 1,
   "rule_sets": [
     {
       "file_name": "Business_Rules.csv",
       "format": "business_rules_csv",
       "name": "Business_Rules",
-      "total_rules": 1207,
-      "enabled_count": 1055,
+      "total_rules": 1209,
+      "enabled_count": 1057,
       "disabled_count": 152,
       "states": [
         "01-Initial State",
@@ -17,6 +17,7 @@
         "05-Chewy Vet Care",
         "06-Rx Pharmacy Initial Routing",
         "50-Chewy CA State",
+        "Contact Rules",
         "testevent"
       ],
       "functions": [
@@ -85,7 +86,10 @@
         "F999-Interface Check"
       ],
       "cpm_handlers_invoked": [
+        "ContactAsync",
         "IncidentFCR",
+        "contact_create",
+        "contact_update",
         "dedup_rx_incidents_sync",
         "gbl_con_region_assoc",
         "inc_b2b_entity_status_update",
@@ -130,7 +134,9 @@
         "vsp_inc_router",
         "vsp_inc_unassigned"
       ],
-      "process_scripts_invoked": [],
+      "process_scripts_invoked": [
+        "duplicate_contacts"
+      ],
       "custom_fields_referenced": [
         "Agent Re-Open Date",
         "Agent Re-Open Date equal to the value of Now",
@@ -224,7 +230,9 @@
         "Vet Diet Escalation Reason",
         "VetHealthConsEmailTriggered  is null",
         "WOWGift",
-        "Warehouse Complaints"
+        "Warehouse Complaints",
+        "org_id_temp",
+        "vip_status"
       ],
       "rules": [
         {
@@ -41076,6 +41084,75 @@
             "And Stop 02-Updated State"
           ],
           "custom_fields_referenced": []
+        },
+        {
+          "id": "CSV_Rule_1208",
+          "name": "01-Contact Duplicate Check",
+          "object": "Contact",
+          "group_type": "State",
+          "group_name": "Contact Rules",
+          "active": true,
+          "deployed": true,
+          "description": "Check contact duplicate and invoke CPM",
+          "variable_type": "Custom Field",
+          "variable_default": "Default",
+          "condition_raw": "If (Contacts > Email - Primary is modified this edit)",
+          "actions_raw": [
+            "Then > 1. Execute Object Event Handler contact_create 2. Execute Object Event Handler contact_update 3. Execute Process Script duplicate_contacts.php"
+          ],
+          "primary_action_type": "CPMCall",
+          "actions_by_type": {
+            "CPMCall": [
+              "Execute Object Event Handler contact_create",
+              "Execute Object Event Handler contact_update"
+            ],
+            "Other": [
+              "Execute Process Script duplicate_contacts.php"
+            ]
+          },
+          "cpm_handlers_invoked": [
+            "contact_create",
+            "contact_update"
+          ],
+          "process_scripts_invoked": [
+            "duplicate_contacts"
+          ],
+          "state_transitions": [],
+          "custom_fields_referenced": []
+        },
+        {
+          "id": "CSV_Rule_1209",
+          "name": "02-Contact VIP Verification",
+          "object": "Contact",
+          "group_type": "State",
+          "group_name": "Contact Rules",
+          "active": true,
+          "deployed": true,
+          "description": "Verify VIP status for contact",
+          "variable_type": "Custom Field",
+          "variable_default": "Default",
+          "condition_raw": "If (Contacts > Custom Field > vip_status equals YES)",
+          "actions_raw": [
+            "Then > 1. Execute Object Event Handler ContactAsync 2. Set Field Custom Field > org_id_temp assign as 1001"
+          ],
+          "primary_action_type": "CPMCall",
+          "actions_by_type": {
+            "CPMCall": [
+              "Execute Object Event Handler ContactAsync"
+            ],
+            "SetField": [
+              "Set Field Custom Field > org_id_temp assign as 1001"
+            ]
+          },
+          "cpm_handlers_invoked": [
+            "ContactAsync"
+          ],
+          "process_scripts_invoked": [],
+          "state_transitions": [],
+          "custom_fields_referenced": [
+            "org_id_temp",
+            "vip_status"
+          ]
         }
       ],
       "unhandled_elements": [],

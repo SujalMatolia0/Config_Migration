@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-07 13:34:13  
+**Generated**: 2026-08-07 13:48:18  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -11,19 +11,19 @@
 | :--- | :---: | :--- |
 | Workspaces | 7 | Parsed & Mapped |
 | Analytics Reports | 18 | Parsed & Mapped |
-| Business Rules Sets | 1 (1207 Rules) | Parsed & Policy Mapped |
+| Business Rules Sets | 1 (1209 Rules) | Parsed & Policy Mapped |
 | CPM Procedures & Handlers | 8 | Parsed & Event Mapped |
 | PHP Custom Scripts | 13 | Analyzed |
 | BUI Add-Ins | 2 | Archive Extracted |
 | Custom Objects & Entities | 6 | Schema Mapped |
-| External Integration Endpoints | 17 | Endpoint Extracted |
-| Orphaned Components | 8 | Audit Flagged |
+| External Integration Endpoints | 20 | Endpoint Extracted |
+| Orphaned Components | 6 | Audit Flagged |
 
 > [!WARNING]
-> **8 Orphaned Component(s) Flagged**: Custom scripts or components exist in dataset with zero active workspace or CPM bindings.
+> **6 Orphaned Component(s) Flagged**: Custom scripts or components exist in dataset with zero active workspace or CPM bindings.
 
 > [!IMPORTANT]
-> **17 External HTTP Integration Endpoints Detected**: Outbound web calls to external REST/SOAP servers require security verification.
+> **20 External HTTP Integration Endpoints Detected**: Outbound web calls to external REST/SOAP servers require security verification.
 
 > [!TIP]
 > **Optimization Recommendation**: Review orphaned scripts to reclaim workspace performance and audit outbound endpoints for TLS verification.
@@ -32,18 +32,16 @@
 
 | Component Name / ID | Type | Associated Object | Linkage Count | Audit Risk Flag & Reason |
 | :--- | :--- | :--- | :---: | :--- |
-| `address_validation.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `bluebox_greencart_validation.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `callcheck.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `closing_notes.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `duplicate_contacts.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `duplicate_incidents.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `eventclock.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 | `sms_integration 1.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
 
 ## Consolidated Entity Module Inventory
 
-### Entity Module: Contact (24 Mapped Components)
+### Entity Module: Contact (26 Mapped Components)
 
 #### Module Flowchart: Contact
 
@@ -56,33 +54,36 @@ flowchart LR
     N_workspace_real_edge_02_new_workspace_patterns["real_edge_02_new_workspace_patterns (workspace)"]
     N_workspace_real_edge_03_split_panel_contact["real_edge_03_split_panel_contact (workspace)"]
     N_report_contacts["Contacts (report)"]
+    N_workspace_contact -->|"Tab 'Contact Report Summary' → RelationshipItem AcId: 100008"| N_report_contacts
   end
 ```
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Contact` | `object` | `0 in -> 49 out` | Primary OSVC Entity Module Schema Root |
-| `Contact` | `workspace` | `2 in -> 4 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
+| `Contact` | `object` | `0 in -> 54 out` | Primary OSVC Entity Module Schema Root |
+| `Contact` | `workspace` | `2 in -> 7 out` | Bound Object: `Contact` | 9 fields, 7 tabs, 1 rules |
 | `Contact test` | `workspace` | `3 in -> 8 out` | Bound Object: `Contact` | 0 fields, 6 tabs, 3 rules |
 | `New Workspace` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 0 rules |
 | `real_edge_02_new_workspace_patterns` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 1 rules |
 | `real_edge_03_split_panel_contact` | `workspace` | `3 in -> 4 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
-| `Contacts` | `report` | `3 in -> 0 out` | Report AC_ID: `100008` | 13 columns, 0 tables joined |
-| `contact_create` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `Contacts` | `report` | `5 in -> 0 out` | Report AC_ID: `100008` | 13 columns, 0 tables joined |
+| `contact_create` | `cpm` | `5 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_create_internal` | `cpm` | `5 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_update` | `cpm` | `5 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `contact_update_internal` | `cpm` | `7 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `ContactAsync` | `asynccpm` | `3 in -> 1 out` | Trigger: `Update` | Async Execution | Entry: `ObjectProcedure::apply` |
+| `contact_update_internal` | `cpm` | `6 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `ContactAsync` | `asynccpm` | `4 in -> 1 out` | Trigger: `Update` | Async Execution | Entry: `ObjectProcedure::apply` |
 | `callcheck.php` | `customscript` | `0 in -> 0 out` | PHP Script: `callcheck.php` | 0 functions |
 | `cityworksapicall.php` | `customscript` | `0 in -> 1 out` | PHP Script: `cityworksapicall.php` | 0 functions |
-| `duplicate_contacts.php` | `customscript` | `3 in -> 0 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
+| `duplicate_contacts.php` | `customscript` | `4 in -> 0 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
 | `sms_integration 1.php` | `customscript` | `0 in -> 0 out` | PHP Script: `sms_integration 1.php` | 0 functions |
-| `ContactOrgLookupBUIAddin` | `buiaddin` | `4 in -> 12 out` | BUI Extension: `ContactOrgLookupBUIAddin` | Entry: `init.html` | Reads: 10, Writes: 4 |
-| `Contact.first_name` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.last_name` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact.OrgId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact Business Rules` | `businessrule` | `2 in -> 2 out` | OSVC Component ID: `businessrule:contact business rules` |
+| `ContactOrgLookupBUIAddin` | `buiaddin` | `4 in -> 10 out` | BUI Extension: `ContactOrgLookupBUIAddin` | Entry: `init.html` | Reads: 6, Writes: 5 |
+| `Contact.CId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
+| `Contact.CustomFields.c$org_id_temp` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
+| `Contact.Email` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
+| `Contact Business Rules` | `businessrule` | `2 in -> 5 out` | OSVC Component ID: `businessrule:contact business rules` |
 | `http://209.91.135.228/api/listactivecalls/` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://209.91.135.228/api/listactivecalls/` |
+| `https://siebel.enterprise.com/ContactSyncService` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:https://siebel.enterprise.com/contactsyncservice` |
+| `https://siebel.enterprise.com/ContactUpdateService` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:https://siebel.enterprise.com/contactupdateservice` |
 | `SOAP: RegisterContact` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: registercontact` |
 | `urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:registercontact via custom_cfg_siebel_url` |
 
@@ -96,9 +97,9 @@ flowchart LR
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
-    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
     N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
+    N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
   end
 ```
 
@@ -137,7 +138,7 @@ flowchart LR
 | `Mappings.xml` | `cpmmappings` | `1 in -> 6 out` | OSVC Component ID: `cpmmappings:mappings.xml` |
 | `SOAP: GetAccounts` | `externalendpoint` | `1 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: getaccounts` |
 
-### Entity Module: Incident (24 Mapped Components)
+### Entity Module: Incident (23 Mapped Components)
 
 #### Module Flowchart: Incident
 
@@ -155,13 +156,13 @@ flowchart LR
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Incident` | `object` | `0 in -> 23 out` | Primary OSVC Entity Module Schema Root |
+| `Incident` | `object` | `0 in -> 21 out` | Primary OSVC Entity Module Schema Root |
 | `Incident` | `workspace` | `1 in -> 10 out` | Bound Object: `Incident` | 0 fields, 8 tabs, 2 rules |
 | `real_edge_01_nested_tabset` | `workspace` | `1 in -> 9 out` | Bound Object: `Incident` | 0 fields, 7 tabs, 2 rules |
 | `incident_back_in_stock_sync` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_create` | `cpm` | `3 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
-| `address_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
+| `address_validation.php` | `customscript` | `1 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
 | `bluebox_greencart_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `bluebox_greencart_validation.php` | 0 functions |
 | `child_incident_create.php` | `customscript` | `2 in -> 1 out` | PHP Script: `child_incident_create.php` | 0 functions |
 | `closing_notes.php` | `customscript` | `0 in -> 0 out` | PHP Script: `closing_notes.php` | 0 functions |
@@ -171,13 +172,12 @@ flowchart LR
 | `Incident.c$org_id_temp` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c$org_label_temp` | `workspacefield` | `2 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Incident.c$siebel_sr_number` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
-| `Incident.c_id` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.CId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.CO$Org` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Incident.Created` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.IId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Incident.source` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
+| `Incident.IId` | `workspacefield` | `2 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `/cc/ajaxCustom/addSrToSiebel` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:/cc/ajaxcustom/addsrtosiebel` |
+| `https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php` |
 | `Incident Business Rules` | `businessrule` | `1 in -> 44 out` | OSVC Component ID: `businessrule:incident business rules` |
 
 ### Entity Module: Organization (7 Mapped Components)
@@ -198,7 +198,7 @@ flowchart LR
 
 | Component ID / Name | Type | Dependencies (In -> Out) | Details & Execution Context |
 | :--- | :--- | :---: | :--- |
-| `Organization` | `object` | `0 in -> 4 out` | Primary OSVC Entity Module Schema Root |
+| `Organization` | `object` | `0 in -> 2 out` | Primary OSVC Entity Module Schema Root |
 | `VSP Routing Table` | `report` | `1 in -> 0 out` | Report AC_ID: `122026` | 10 columns, 0 tables joined |
 | `connect/v1.3/queryResults (Organizations)` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:connect/v1.3/queryresults (organizations)` |
 | `http://siebel.com/CustomUI` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://siebel.com/customui` |
@@ -216,7 +216,7 @@ flowchart LR
 
 ### Workspace: Contact
 - **Primary Object Binding**: **General / Unassigned**
-- **Layout Summary**: 9 form fields used across 5 tabsets (1 rules)
+- **Layout Summary**: 9 form fields used across 7 tabsets (1 rules)
 
 | Field Name / ID | Custom Field (c$) | Parent Location / Tab | Dependencies |
 | :--- | :---: | :--- | :---: |
@@ -357,11 +357,11 @@ flowchart LR
 | CPM Handler / XML | Object Binding | Event Trigger | Execution Mode | Entry Point Method | Dependencies |
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | `Mappings.xml` | **General / Unassigned** | `Event Handler` | Synchronous Execution | `ObjectProcedure::apply` | `0 in -> 0 out` |
-| `ContactAsync` | **General / Unassigned** | `Update` | Async Execution | `ObjectProcedure::apply` | `3 in -> 1 out` |
-| `contact_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `4 in -> 0 out` |
+| `ContactAsync` | **General / Unassigned** | `Update` | Async Execution | `ObjectProcedure::apply` | `4 in -> 1 out` |
+| `contact_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
 | `contact_create_internal` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
 | `contact_update` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
-| `contact_update_internal` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `7 in -> 0 out` |
+| `contact_update_internal` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `6 in -> 0 out` |
 | `incident_back_in_stock_sync` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `4 in -> 0 out` |
 | `incident_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `3 in -> 0 out` |
 | `incident_routing` | **General / Unassigned** | `Create, Update` | Async Execution | `ObjectProcedure::apply` | `4 in -> 1 out` |
@@ -371,15 +371,18 @@ flowchart LR
 | Target Endpoint URL | Source Component / File | HTTP / Protocol Context | Extracted Code Snippet / Detail |
 | :--- | :--- | :--- | :--- |
 | `http://cloud.oracle.com/service` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/ws/fault` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://siebel.enterprise.com/ContactSyncService` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://siebel.enterprise.com/ContactUpdateService` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://siebel.com/CustomUI` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
@@ -394,7 +397,10 @@ flowchart LR
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **Workspace: Contact** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
+| **Workspace: Contact** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `CustomScript: gcb_flex.php` | Cross-Component Mapping |
+| **Workspace: Contact** | `Linkage` | `Report 100008 (Contacts)` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `Report 9029` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `Report 9050` | Cross-Component Mapping |
 | **Workspace: Contact test** | `Linkage` | `ExternalEndpoint: http://cloud.oracle.com/service` | Cross-Component Mapping |
@@ -440,9 +446,16 @@ flowchart LR
 | **CPM: ContactAsync** | `Linkage` | `ConfigSetting: CUSTOM_CFG_WEB_SERVICE_ERROR_EMAIL` | Cross-Component Mapping |
 | **CPM: ContactAsync** | `Linkage` | `ExternalEndpoint: SOAP: RegisterContact` | Cross-Component Mapping |
 | **CPM: ContactAsync** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `ConfigSetting: CUSTOM_CFG_API_KEY` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$loyalty_tier` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_create_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
@@ -499,17 +512,15 @@ flowchart LR
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `CustomScript: ../../AuthLibraryExtn/AuthLibraryExtn.js` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `Report 100008 (Contacts)` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `Report 100407` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.OrgId` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.first_name` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.last_name` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.CId` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.CustomFields.c$org_id_temp` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.Email` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.CId` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.CO$Org` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.IId` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c$org_id_temp` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c$org_label_temp` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c_id` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.source` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `CustomScript: ../../AuthLibraryExtn/AuthLibraryExtn.js` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `WorkspaceField: Incident.Created` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `WorkspaceField: Incident.IId` | Cross-Component Mapping |
@@ -526,6 +537,9 @@ flowchart LR
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ContactAsync` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_create` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: inc_cancelOrderProcessStart` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ocr_get_fax_number` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: IncidentFCR` | Cross-Component Mapping |

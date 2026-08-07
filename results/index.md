@@ -1,6 +1,6 @@
 # OSVC Configuration Master Index
 
-**Generated**: 2026-08-07 13:34:13  
+**Generated**: 2026-08-07 13:48:18  
 **Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  
 
 > [!NOTE]
@@ -22,7 +22,7 @@
 
 | Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |
 | :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- |
-| **Contact** | `Contact` | 5 | 9 | 1 | 0 | `9029`, `9050` | [report.md](workspaces/Contact/report.md) |
+| **Contact** | `Contact` | 7 | 9 | 1 | 0 | `100008`, `9029`, `9050` | [report.md](workspaces/Contact/report.md) |
 | **Incident** | `Incident` | 8 | 0 | 2 | 0 | `125`, `8010`, `8014`, `9011`, `9018`, `9029`, `9041` | [report.md](workspaces/Incident/report.md) |
 
 ### Custom & Edge Layout Workspaces
@@ -60,7 +60,7 @@
 
 | Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `100008` | **Contacts** | `Standard Table` | 13 | Global Catalog | — |
+| `100008` | **Contacts** | `Standard Table` | 13 | **Contact** | — |
 | `122026` | **VSP Routing Table** | `Standard Table` | 10 | Global Catalog | — |
 
 ## CPM
@@ -115,7 +115,7 @@
 
 | Rule Set / Source File | Format | Total Rules | Enabled Rules | Invoked CPM Handlers | Documentation |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| `Business_Rules.csv` | `business_rules_csv` | 1207 | 1055 | 44 | [report_Business_Rules.md](rules/report_Business_Rules.md) |
+| `Business_Rules.csv` | `business_rules_csv` | 1209 | 1057 | 47 | [report_Business_Rules.md](rules/report_Business_Rules.md) |
 
 ## Shared Resources
 
@@ -141,7 +141,10 @@ The following shared reports and resources are referenced across multiple worksp
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **Workspace: Contact** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
+| **Workspace: Contact** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `CustomScript: gcb_flex.php` | Cross-Component Mapping |
+| **Workspace: Contact** | `Linkage` | `Report 100008 (Contacts)` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `Report 9029` | Cross-Component Mapping |
 | **Workspace: Contact** | `Linkage` | `Report 9050` | Cross-Component Mapping |
 | **Workspace: Contact test** | `Linkage` | `ExternalEndpoint: http://cloud.oracle.com/service` | Cross-Component Mapping |
@@ -187,9 +190,16 @@ The following shared reports and resources are referenced across multiple worksp
 | **CPM: ContactAsync** | `Linkage` | `ConfigSetting: CUSTOM_CFG_WEB_SERVICE_ERROR_EMAIL` | Cross-Component Mapping |
 | **CPM: ContactAsync** | `Linkage` | `ExternalEndpoint: SOAP: RegisterContact` | Cross-Component Mapping |
 | **CPM: ContactAsync** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `ConfigSetting: CUSTOM_CFG_API_KEY` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$loyalty_tier` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_create_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
@@ -246,17 +256,15 @@ The following shared reports and resources are referenced across multiple worksp
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `CustomScript: ../../AuthLibraryExtn/AuthLibraryExtn.js` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `Report 100008 (Contacts)` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `Report 100407` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.OrgId` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.first_name` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.last_name` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.CId` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.CustomFields.c$org_id_temp` | Cross-Component Mapping |
+| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Contact.Email` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.CId` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.CO$Org` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.IId` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c$org_id_temp` | Cross-Component Mapping |
 | **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c$org_label_temp` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.c_id` | Cross-Component Mapping |
-| **BUIAddin: ContactOrgLookupBUIAddin** | `Linkage` | `WorkspaceField: Incident.source` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `CustomScript: ../../AuthLibraryExtn/AuthLibraryExtn.js` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `WorkspaceField: Incident.Created` | Cross-Component Mapping |
 | **BUIAddin: SendToSiebelBUIAddin** | `Linkage` | `WorkspaceField: Incident.IId` | Cross-Component Mapping |
@@ -273,6 +281,9 @@ The following shared reports and resources are referenced across multiple worksp
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ContactAsync` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_create` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: inc_cancelOrderProcessStart` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ocr_get_fax_number` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: IncidentFCR` | Cross-Component Mapping |

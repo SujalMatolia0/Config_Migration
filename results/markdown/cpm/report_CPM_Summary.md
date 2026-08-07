@@ -78,12 +78,17 @@ graph TD
 - **Operations Bitmask**: `Create (code: 1)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Create)
-- **Key Logic Summary**: Processes Techmail-originated incoming records. Instantiates and updates OSVC Connect API objects (`Contact`, `PersonName`, `SocialUser`).
+- **Key Logic Summary**: Instantiates and updates OSVC Connect API objects (`Configuration`).
 - **SOAP Actions**: None
+- **Config Settings / Variables**: `CUSTOM_CFG_API_KEY`, `CUSTOM_CFG_SIEBEL_HOST`
 
 #### Custom Field Workspace Mappings for `contact_create`
 
-*No custom fields accessed by this procedure (operates via standard Connect API object properties).*
+| CPM Custom Field | Access Mode | Target Workspace | Location / Tab | Grid Position | Field Label | Audit / Relationship Note |
+|---|---|---|---|---|---|---|
+| `c$loyalty_tier` | **Read** | ***(Background Logic)*** | — | — | — | Operated purely via Connect API / CPM script logic |
+| `c$org_id_temp` | **Write** | **Contact test** | Top Form Layout | Row 5, Col 0 | OrgId (Account Lookup) | Temporary Org ID used to populate Contact Organization linkage |
+| `c$vip_status` | **Write** | ***(Background Logic)*** | — | — | — | Operated purely via Connect API / CPM script logic |
 
 - **Extracted Functions**: `apply()`
 
@@ -152,16 +157,18 @@ graph TD
 - **Operations Bitmask**: `Update (code: 2)`
 - **Bound Classes**: `Contact`
 - **Mapped Event**: `Contact` on `scriptpro` interface (Update)
-- **Key Logic Summary**: Executes ROQL queries against OSVC tables (`CO.ContactOrgJoin`, `Contact`). Instantiates and updates OSVC Connect API objects (`CO\ContactOrgJoin`, `Contact`, `Organization`, `PersonName`, ...).
+- **Key Logic Summary**: Instantiates and updates OSVC Connect API objects (`Configuration`).
 - **SOAP Actions**: None
+- **Config Settings / Variables**: `CUSTOM_CFG_SIEBEL_HOST`
 
 #### Custom Field Workspace Mappings for `contact_update`
 
 | CPM Custom Field | Access Mode | Target Workspace | Location / Tab | Grid Position | Field Label | Audit / Relationship Note |
 |---|---|---|---|---|---|---|
-| `c$org_id_temp` | **Write** | **Contact test** | Top Form Layout | Row 5, Col 0 | OrgId (Account Lookup) | Temporary Org ID used to populate Contact Organization linkage |
+| `c$org_id_temp` | **Read** | **Contact test** | Top Form Layout | Row 5, Col 0 | OrgId (Account Lookup) | Temporary Org ID used to populate Contact Organization linkage |
+| `c$vip_status` | **Write** | ***(Background Logic)*** | — | — | — | Operated purely via Connect API / CPM script logic |
 
-- **Extracted Functions**: `apply()`, `setPrimaryOrgId()`, `updateContactOrgJoin()`
+- **Extracted Functions**: `apply()`
 
 **Logic Flow Diagram**:
 <div align="center">

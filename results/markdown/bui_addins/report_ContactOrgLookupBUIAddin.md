@@ -74,15 +74,15 @@
 
 ## OSVC Workspace Interactions
 
-- **Fields Read**: `Contact.OrgId`, `Contact.first_name`, `Contact.last_name`, `Incident.CId`, `Incident.CO$Org`, `Incident.IId`, `Incident.c$org_id_temp`, `Incident.c$org_label_temp`, `Incident.c_id`, `Incident.source`
-- **Fields Written**: `Incident.CId`, `Incident.CO$Org`, `Incident.c$org_id_temp`, `Incident.c$org_label_temp`
-- **Field Listeners Registered**: `Incident.CO$Org`, `Incident.c_id`
+- **Fields Read**: `Contact.CId`, `Contact.Email`, `Incident.CId`, `Incident.CO$Org`, `Incident.c$org_id_temp`, `Incident.c$org_label_temp`
+- **Fields Written**: `Contact.CustomFields.c$org_id_temp`, `Incident.CId`, `Incident.CO$Org`, `Incident.c$org_id_temp`, `Incident.c$org_label_temp`
+- **Field Listeners Registered**: `Contact.CustomFields.c$vip_status`, `Contact.Email`
 
 ---
 
 ## Report Dependencies & REST API Endpoints
 
-- **Report Dependencies**: `100407`
+- **Report Dependencies**: `100008` (Contacts), `100407`
 ### API Call & Web Service Endpoints Table
 
 | HTTP Method | Endpoint URL / Path | Operation Type | Target Object / Table | Report ID | Source Asset |
@@ -97,9 +97,9 @@
 | Severity | Risk Type | Detail |
 |---|---|---|
 | Medium | `Synchronous AJAX` | Synchronous AJAX (async: false) detected in logic.js — blocks browser UI thread |
-| Medium | `Custom Field Schema Dependency` | Direct CustomFields.c ROQL LookupName query in logic.js — vulnerable to schema alterations |
 | **High** | `Duplicate Library Load` | Duplicate jQuery versions loaded in init.html: https://code.jquery.com/jquery-3.5.1.min.js, https://code.jquery.com/jquery-3.6.0.min.js |
 | **High** | `Relative Path Dependency` | Relative path script reference '../../AuthLibraryExtn/AuthLibraryExtn.js' in init.html — will fail if add-in path changes |
+| Medium | `Hardcoded Report ID` | Hardcoded Report ID 100008 in BUI Add-In code — risks silent failure if report ID changes |
 | Medium | `Hardcoded Report ID` | Hardcoded Report ID 100407 in BUI Add-In code — risks silent failure if report ID changes |
 | Low | `Unused Library Import` | jsPDF / jsPDF-AutoTable loaded in HTML headers but unreferenced in JavaScript |
 
@@ -115,12 +115,16 @@ graph LR
   classDef field fill:#8b5cf6,stroke:#6d28d9,stroke-width:1px,color:#fff;
 
   BUI_ContactOrgLookupBUIAddin["BUI Add-In: ContactOrgLookupBUIAddin"]:::addin
+  REP_100008["Report 100008: Contacts"]:::rep
+  BUI_ContactOrgLookupBUIAddin --> |"Report Dependency"| REP_100008
   REP_100407["Report 100407: Report 100407"]:::rep
   BUI_ContactOrgLookupBUIAddin --> |"Report Dependency"| REP_100407
   API_connectv13analyticsReportResults["API: connect/v1.3/analyticsReportResults"]:::api
   BUI_ContactOrgLookupBUIAddin --> |"POST"| API_connectv13analyticsReportResults
   API_connectv13queryResults["API: connect/v1.3/queryResults"]:::api
   BUI_ContactOrgLookupBUIAddin --> |"GET"| API_connectv13queryResults
+  FW_ContactCustomFieldscorg_id_temp["Field Write: Contact.CustomFields.c$org_id_temp"]:::field
+  BUI_ContactOrgLookupBUIAddin -.-> |"Write"| FW_ContactCustomFieldscorg_id_temp
   FW_IncidentCId["Field Write: Incident.CId"]:::field
   BUI_ContactOrgLookupBUIAddin -.-> |"Write"| FW_IncidentCId
   FW_IncidentCOOrg["Field Write: Incident.CO$Org"]:::field

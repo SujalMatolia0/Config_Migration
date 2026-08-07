@@ -1,6 +1,6 @@
 # OSVC Business Rules Report — Object: Contact
 
-_Source: Object Analysis — 141 Business Rules for Object `Contact`_
+_Source: Object Analysis — 143 Business Rules for Object `Contact`_
 
 > [!NOTE]
 > **Entity Focus**: Dedicated report for OSVC Object **`Contact`**. Contains active action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.
@@ -10,10 +10,10 @@ _Source: Object Analysis — 141 Business Rules for Object `Contact`_
 | Metric | Value |
 |---|---|
 | Target Object | **Contact** |
-| Total Rules | 141 |
-| Active Rules | 121 |
+| Total Rules | 143 |
+| Active Rules | 123 |
 | Disabled Rules | 20 |
-| Action Breakdown | SetField: 354, TransitionState_Stop: 80, Other: 19, CPMCall: 9, FunctionCall: 7, StopProcessing: 7, AppendTemplate: 6, SendEmail: 2, SendMarketingEmail: 1 |
+| Action Breakdown | SetField: 355, TransitionState_Stop: 80, Other: 20, CPMCall: 12, FunctionCall: 7, StopProcessing: 7, AppendTemplate: 6, SendEmail: 2, SendMarketingEmail: 1 |
 | CSV Exports | `results/csv/rules/Contact_*.csv` |
 
 ## 2. Contact Business Rules Architecture Flowchart
@@ -212,7 +212,7 @@ graph LR
 </div>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SetField (97 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SetField (98 Active Rules)</summary>
 
 Export CSV: `Contact_SetField.csv`
 
@@ -315,6 +315,7 @@ Export CSV: `Contact_SetField.csv`
 | F56-CA-Chewy Contact Us Routing | F56-CA - AAQ Where is my order | Active | If (Incidents > Category  equals  Order Status / Where is my order?  AND  Incidents > Interface  equals  chewyca) | Set Field Incidents > Queue assign as CA - General Email \| Set Field Custom Field > Open Date equal to the value of Now \| Set Field Custom Field > OpenMethods Status assign as pre-initial \| Set Field Incidents > Category assign as Tracking/ETA |
 | F56-CA-Chewy Contact Us Routing | F56-CA - AAQ Returns | Active | If (Incidents > Category  equals  Request a return or replacement  AND  Incidents > Interface  equals  chewyca) | Set Field Incidents > Queue assign as CA - General Email \| Set Field Custom Field > Open Date equal to the value of Now \| Set Field Custom Field > OpenMethods Status assign as pre-initial |
 | F56-CA-Chewy Contact Us Routing | F56-CA - AAQ All Other | Active | If (Incidents > Category  equals  Other reason, Unspecified  AND  Incidents > Interface  equals  chewyca) | Set Field Incidents > Queue assign as CA - General Email \| Set Field Custom Field > Open Date equal to the value of Now \| Set Field Custom Field > OpenMethods Status assign as pre-initial \| Set Field Incidents > Category assign as Unspecified |
+| Contact Rules | 02-Contact VIP Verification | Active | If (Contacts > Custom Field > vip_status equals YES) | Set Field Custom Field > org_id_temp assign as 1001 |
 
 </details>
 
@@ -409,7 +410,7 @@ Export CSV: `Contact_TransitionState_Stop.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: CPMCall (9 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: CPMCall (11 Active Rules)</summary>
 
 Export CSV: `Contact_CPMCall.csv`
 
@@ -424,6 +425,8 @@ Export CSV: `Contact_CPMCall.csv`
 | F01-G Email Routing | F01-G- Chewy Rx Pharmacy Verbal Rout -GABA | Active | If ((  Contacts > Email - Primary  equals  pharmacyteam@chewy.com  OR  Contacts > Email - Primary  equals  verbals@chewy.com )  AND  Incidents > Incoming Mailbox  equals  RX  AND  Incidents > Queue  equals  Rx Pharmacy Data Entry - AVP  AND  Custom Field > Channel  equals  Gabapentin) | Execute Object Event Handler ocr_get_fax_number |
 | F23-Chewy Contact Us Routing | F23 - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Orders > OrderId  is not null) | Execute Object Event Handler inc_cancelOrderProcessStart |
 | F56-CA-Chewy Contact Us Routing | F56-CA - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Incidents > Interface  equals  chewyca  AND  Orders > OrderId  is not null) | Execute Object Event Handler inc_cancelOrderProcessStart |
+| Contact Rules | 01-Contact Duplicate Check | Active | If (Contacts > Email - Primary is modified this edit) | Execute Object Event Handler contact_create \| Execute Object Event Handler contact_update |
+| Contact Rules | 02-Contact VIP Verification | Active | If (Contacts > Custom Field > vip_status equals YES) | Execute Object Event Handler ContactAsync |
 
 </details>
 
@@ -478,7 +481,7 @@ Export CSV: `Contact_AppendTemplate.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: Other (19 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: Other (20 Active Rules)</summary>
 
 Export CSV: `Contact_Other.csv`
 
@@ -503,6 +506,7 @@ Export CSV: `Contact_Other.csv`
 | F01-Email Routing | 01-Incorrect Address Day 2 | Active | If (Contacts > Email - Primary  contains  @fedex.com  AND  Incidents > Customer thread  match regex  \<2. Incorrect Address\>) | Do Not Create Incident |
 | F23-Chewy Contact Us Routing | F23 - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Orders > OrderId  is not null) | Escalate to Cancel Order Process +15 Minutes Exactly From Now |
 | F56-CA-Chewy Contact Us Routing | F56-CA - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Incidents > Interface  equals  chewyca  AND  Orders > OrderId  is not null) | Escalate to CA-Cancel Order Process +15 Minutes Exactly From Now |
+| Contact Rules | 01-Contact Duplicate Check | Active | If (Contacts > Email - Primary is modified this edit) | Execute Process Script duplicate_contacts.php |
 
 </details>
 

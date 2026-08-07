@@ -31,6 +31,23 @@ The workspace has a **5-column table layout** (11 rows × 5 columns):
 Below is the detailed content breakdown of each tab:
 
 <details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
+  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>Contact Report Summary</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(1 Controls)</span></summary>
+  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
+
+### Tab: `Contact Report Summary`
+
+> **Single Component Tab**
+
+- **Control Type:** Related Object (`Incident`)
+  - **Primary Report (AcId):** `100008`
+  - **Secondary Report (SearchId):** `100008`
+  - **Behavior:** Skips execution on unsaved new records
+
+  </div>
+</details>
+
+
+<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
   <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>Incidents</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(1 Controls)</span></summary>
   <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
 
@@ -41,6 +58,21 @@ Below is the detailed content breakdown of each tab:
 - **Control Type:** Related Object (`Incident`)
   - **Primary Report (AcId):** `9029`
   - **Behavior:** Skips execution on unsaved new records
+
+  </div>
+</details>
+
+
+<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
+  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Tab: <b>Address Validation</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(1 Controls)</span></summary>
+  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
+
+### Tab: `Address Validation`
+
+> **Single Component Tab**
+
+- **Control Type:** Embedded Browser
+  - **Target URL:** `https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php`
 
   </div>
 </details>
@@ -129,13 +161,13 @@ Total Fields Used in Workspace: **9** (Standard Schema Fields: **7** | Custom Fi
 ### Event: Editor Initialized (On Load)
 
 <details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">
-  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #94a3b8; color: #94a3b8; margin-right: 8px;">Inactive</span>Rule: <b>New Rule</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Event: Editor Initialized (On Load))</span></summary>
+  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #10b981; color: #10b981; margin-right: 8px;">Active</span>Rule: <b>Check Contact Duplicates</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Event: Editor Initialized (On Load))</span></summary>
   <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">
 
-#### Rule: `New Rule` (Inactive)
+#### Rule: `Check Contact Duplicates` (Active)
 - **Condition:** `Field: Contact.CtypeId == 3` (a specific contact type, likely "Email" or similar)
 - **Then:**
-  - Show a message box — *"This contact is created through email and may not hold sufficient information in the system"*
+  - RunScript:   (duplicate_contacts.php)
 
   </div>
 </details>
@@ -151,9 +183,10 @@ Standard actions: Appointment, Copy, Delete, Info, New, Print, Refresh, Save, Sa
 ## Key Observations
 
 - The `PhOffice` field is **mislabeled as "Mobile Phone"** — that's either intentional repurposing or a bug worth flagging.
+- The **Address Validation** tab embeds an internal **custom PHP script**: `address_validation.php` (`/cgi-bin/gcb.cfg/php/custom/address_validation.php`). Errors are suppressed.
 - The **Customer360** tab embeds an internal **custom PHP script**: `gcb_flex.php` (`/cgi-bin/gcb.cfg/php/custom/gcb_flex.php`) — passes URL params: `mobile`. Errors are suppressed.
 - `C$` prefix fields are **custom fields** added on top of the standard schema.
-- The inactive rule suggests there was a workflow for email-originated contacts that's either been deprecated or temporarily disabled.
+- The workspace defines **1 active business rules** triggered by editor loading events, enforcing profile-based field locking and toolbar UI visibility.
 
 ---
 
@@ -175,29 +208,34 @@ graph LR
   end
 
   subgraph Tabs_Layer["Workspace Tabs"]
-    Tab_0["Tab: Incidents"]:::tab
-    Tab_1["Tab: Customer360"]:::tab
-    Tab_2["Tab: Attachments"]:::tab
-    Tab_3["Tab: Notes"]:::tab
-    Tab_4["Tab: Audit"]:::tab
+    Tab_0["Tab: Contact Report Summary"]:::tab
+    Tab_1["Tab: Incidents"]:::tab
+    Tab_2["Tab: Address Validation"]:::tab
+    Tab_3["Tab: Customer360"]:::tab
+    Tab_4["Tab: Attachments"]:::tab
+    Tab_5["Tab: Notes"]:::tab
+    Tab_6["Tab: Audit"]:::tab
   end
 
   subgraph Rules_Layer["Business Rules"]
-    Rule_0["Rule: New Rule (Inactive)"]:::rule
+    Rule_0["Rule: Check Contact Duplicates (Active)"]:::rule
   end
 
   subgraph Objects_Layer["Related Objects"]
     Obj_0_IncidentView["Related Object: Incident"]:::object
-    Obj_2_FileAttachments["Related Object: File Attachment"]:::object
-    Obj_3_ContactNotes["Related Object: Note"]:::object
-    Obj_4_ContactAuditLog["Related Object: Audit Log"]:::object
+    Obj_1_IncidentView["Related Object: Incident"]:::object
+    Obj_4_FileAttachments["Related Object: File Attachment"]:::object
+    Obj_5_ContactNotes["Related Object: Note"]:::object
+    Obj_6_ContactAuditLog["Related Object: Audit Log"]:::object
   end
 
   subgraph Addins_Layer["BUI Extensions"]
+    B_636908689046358799["Custom Script: address_validation.php"]:::addin
     B_636908689046358732["Custom Script: gcb_flex.php"]:::addin
   end
 
   subgraph Reports_Layer["Target Reports"]
+    R_100008["Report: 100008"]:::report
     R_9029["Report: 9029"]:::report
     R_9050["Report: 9050"]:::report
   end
@@ -207,14 +245,20 @@ graph LR
   WS_Contact --> Tab_2
   WS_Contact --> Tab_3
   WS_Contact --> Tab_4
+  WS_Contact --> Tab_5
+  WS_Contact --> Tab_6
   WS_Contact --> |"Trig: Editor loads"| Rule_0
   Tab_0 --> |"Related Object"| Obj_0_IncidentView
-  Tab_1 --> |"Custom Script"| B_636908689046358732
-  Tab_2 --> |"Related Object"| Obj_2_FileAttachments
-  Tab_3 --> |"Related Object"| Obj_3_ContactNotes
-  Tab_4 --> |"Related Object"| Obj_4_ContactAuditLog
-  Obj_0_IncidentView --> |"Primary Report (AcId)"| R_9029
-  Obj_4_ContactAuditLog --> |"Primary Report (AcId)"| R_9050
+  Tab_1 --> |"Related Object"| Obj_1_IncidentView
+  Tab_2 --> |"Custom Script"| B_636908689046358799
+  Tab_3 --> |"Custom Script"| B_636908689046358732
+  Tab_4 --> |"Related Object"| Obj_4_FileAttachments
+  Tab_5 --> |"Related Object"| Obj_5_ContactNotes
+  Tab_6 --> |"Related Object"| Obj_6_ContactAuditLog
+  Obj_0_IncidentView --> |"Primary Report (AcId)"| R_100008
+  Obj_0_IncidentView --> |"Secondary Report (SearchId)"| R_100008
+  Obj_1_IncidentView --> |"Primary Report (AcId)"| R_9029
+  Obj_6_ContactAuditLog --> |"Primary Report (AcId)"| R_9050
 ```
 
 ---
