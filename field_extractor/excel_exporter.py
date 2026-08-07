@@ -126,20 +126,53 @@ def _format_option(raw):
 
 _SYSTEM_PACKAGES = {"oracleservicecloud", "rightnow", ""}
 
-def _field_type(field_dict):
+def _field_type_from_obj(field_dict):
     """
-    Returns a human-readable Field Type for a given object field dict.
-      - 'Custom (PackageName)'  if the field belongs to a custom package (e.g. C, CO, MY_PKG)
-      - 'System Field'          if it is a built-in OSVC system field (IsSystemField = True)
-      - 'OSVC Standard'         if it is an OSVC platform field but not IsSystemField = True
+    Determines Field Type from the Object XML field definition.
+    Primary signal: PackageName attribute — if it is a non-system package, the field is Custom.
+    Secondary signal: whether the Name itself contains '$'.
+    Falls back to IsSystemField attribute.
+
+    Values returned:
+      'Custom (PackageName)' — field created by the org (e.g. C, CO, MY_PKG)
+      'System Field'         — built-in OSVC system field (IsSystemField=True)
+      'OSVC Standard'        — built-in OSVC platform field (IsSystemField=False)
     """
-    pkg = (field_dict.get("package_name") or "").strip()
-    is_system = field_dict.get("is_system_field", False)
-    if pkg.lower() not in _SYSTEM_PACKAGES:
+    pkg  = (field_dict.get("package_name") or "").strip()
+    name = (field_dict.get("field_name")   or "").strip()
+
+    # Package name is the clearest signal
+    if pkg and pkg.lower() not in _SYSTEM_PACKAGES:
         return f"Custom ({pkg})"
-    if is_system:
+
+    # If the name itself contains $ it is a custom field (e.g. C$FieldName in raw XML)
+    if "$" in name:
+        pkg_part = name.split("$", 1)[0]
+        return f"Custom ({pkg_part})"
+
+    # Fall back to the IsSystemField flag from the XML
+    return "System Field" if field_dict.get("is_system_field", False) else "OSVC Standard"
+
+
+def _field_type_from_ws_id(raw_field_id):
+    """
+    Determines Field Type from the raw workspace FieldId string alone.
+    If the FieldId contains '$' it is a custom field.
+    Examples:
+      'C$PhoneExt'                  -> Custom (C)
+      'CustomFields.c$org_id_temp'  -> Custom (c)
+      'Name.First'                  -> System Field
+      'OrgId'                       -> System Field
+    """
+    if not raw_field_id:
         return "System Field"
-    return "OSVC Standard"
+    # Strip object and CustomFields prefix to get the bare field token
+    token = re.sub(r'^[^.]+\.', '', raw_field_id)           # remove e.g. "Contact."
+    token = re.sub(r'^CustomFields\.', '', token, flags=re.IGNORECASE)
+    if "$" in token:
+        pkg_part = token.split("$", 1)[0]
+        return f"Custom ({pkg_part})"
+    return "System Field"
 
 def _obj_field_key(field_dict):
     """
@@ -221,7 +254,7 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
 
         if matched:
             data_type   = matched.get("data_type", "Text")
-            ftype       = _field_type(matched)
+            ftype       = _field_type_from_obj(matched)
             is_nullable = "Yes" if matched.get("is_nullable") else "No"
             is_lookup   = "Yes" if matched.get("is_lookup")   else "No"
             max_len     = matched.get("max_length", "-")
@@ -235,11 +268,12 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
         else:
             f_code        = wf.get("field_code", "")
             data_type     = "Standard Data Field"
-            ftype         = "System Field"
+            # Determine type from the raw workspace field ID name ($ = custom)
+            ftype         = _field_type_from_ws_id(raw_id or f_code)
             is_nullable   = "Yes"
             is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
             max_len       = "-"
-            obj_field_key = raw_id  # keep raw as fallback
+            obj_field_key = raw_id
 
         item = dict(wf)
         item.update({
@@ -334,7 +368,7 @@ def write_objects_excel(objects_map, output_path):
                 key,
                 of.get("field_label", ""),
                 of.get("data_type", ""),
-                _field_type(of),
+                _field_type_from_obj(of),
                 "Yes" if of.get("is_nullable") else "No",
                 "Yes" if of.get("is_lookup")   else "No",
                 "Yes" if of.get("is_readonly") else "No",
