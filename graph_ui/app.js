@@ -2054,6 +2054,65 @@ try {
     .catch(() => {});
 } catch (e) {}
 
+function renderAiSummaryResult(summaryText, componentName) {
+  const outputArea = document.getElementById("aiOutputArea");
+  if (!outputArea) return;
+
+  const htmlContent = typeof marked !== "undefined" ? marked.parse(summaryText) : `<pre style="white-space:pre-wrap;">${esc(summaryText)}</pre>`;
+
+  outputArea.innerHTML = `
+    <div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; margin-bottom: 12px; font-size: 12px; line-height: 1.5;" class="ai-summary-content">
+      ${htmlContent}
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 10px;">
+      <button id="downloadAiSummaryBtn" style="flex: 1; padding: 7px 12px; font-size: 11px; font-weight: 700; background: linear-gradient(180deg, #10b981, #059669); color: #ffffff; border: 1px solid #047857; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;min-width:14px;max-width:14px;display:inline-block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download AI Report (.md)
+      </button>
+
+      <button id="copyAiSummaryBtn" style="flex: 1; padding: 7px 12px; font-size: 11px; font-weight: 700; background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); transition: all 0.15s ease;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;min-width:14px;max-width:14px;display:inline-block;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy to Clipboard
+      </button>
+    </div>
+  `;
+
+  const dlBtn = document.getElementById("downloadAiSummaryBtn");
+  if (dlBtn) {
+    dlBtn.addEventListener("click", () => {
+      const cleanName = (componentName || "Component").replace(/[^a-zA-Z0-9_\-]/g, "_");
+      const blob = new Blob([summaryText], { type: "text/markdown;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AI_Summary_${cleanName}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const copyBtn = document.getElementById("copyAiSummaryBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(summaryText).then(() => {
+        copyBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;min-width:14px;max-width:14px;display:inline-block;"><polyline points="20 6 9 17 4 12"/></svg>
+          Copied!
+        `;
+        setTimeout(() => {
+          copyBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;min-width:14px;max-width:14px;display:inline-block;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy to Clipboard
+          `;
+        }, 2000);
+      });
+    });
+  }
+}
+
 function renderAiAssistTab(node, mdText) {
   const tabAi = document.getElementById("tab-ai");
   if (!tabAi) return;
@@ -2132,7 +2191,7 @@ function renderAiAssistTab(node, mdText) {
         if (serverRes.ok) {
           const sData = await serverRes.json();
           if (sData.summary && outputArea) {
-            outputArea.innerHTML = `<div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.5;" class="ai-summary-content">` + (typeof marked !== "undefined" ? marked.parse(sData.summary) : `<pre style="white-space:pre-wrap;">${esc(sData.summary)}</pre>`) + `</div>`;
+            renderAiSummaryResult(sData.summary, node.label || node.id);
             return;
           } else if (sData.error && outputArea) {
             outputArea.innerHTML = `<div style="padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-size: 12px;">AI Error: ${esc(sData.error)}</div>`;
@@ -2240,7 +2299,7 @@ ${slicedDoc}`;
         }
 
         if (generatedMd && outputArea) {
-          outputArea.innerHTML = `<div style="background: var(--panel2); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 14px; font-size: 12px; line-height: 1.5;" class="ai-summary-content">` + (typeof marked !== "undefined" ? marked.parse(generatedMd) : `<pre style="white-space:pre-wrap;">${esc(generatedMd)}</pre>`) + `</div>`;
+          renderAiSummaryResult(generatedMd, node.label || node.id);
         } else if (outputArea) {
           outputArea.innerHTML = `<div style="padding: 10px; color: var(--text-muted); font-size: 12px;">No summary response received from API.</div>`;
         }
