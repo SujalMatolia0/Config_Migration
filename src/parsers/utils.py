@@ -9,6 +9,7 @@ def capture_unknown(elem, known_attrs=None, known_children=None, context_name=""
     Cross-checks local sets and the global tag registry superset.
     Returns a dictionary containing unknown_attrs, unknown_children, and context.
     """
+    from src.parsers.known_tags_registry import is_known_tag, is_known_attr
     if known_attrs is None:
         known_attrs = set()
     if known_children is None:
@@ -34,7 +35,7 @@ def capture_unknown(elem, known_attrs=None, known_children=None, context_name=""
     unk_children = []
     for child in elem:
         tag = child.tag.split("}")[-1] if "}" in child.tag else child.tag
-        if tag.lower() not in known_children_lower:
+        if tag.lower() not in known_children_lower and not is_known_tag(tag):
             raw_xml = ""
             try:
                 raw_xml = etree.tostring(child, encoding="unicode").strip()

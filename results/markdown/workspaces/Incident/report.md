@@ -4,12 +4,6 @@
 - Client Version: `26.2.0.326`
 - Workspace Type: **Incident** (single record, not multi-edit)
 
-> [!WARNING] Unhandled Schema Elements Detected in Source Export
-> The following 3 raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>`
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>`
-> - Attribute `CanUseStandardText`: `True`
-
 ---
 
 ## Layout Structure
@@ -395,8 +389,4 @@ graph LR
 
 The following elements were found in this workspace XML but are not fully parsed by the current accelerator. Raw data is preserved in `master.json` under `unknowns`.
 
-| Location | Element / Attribute | Raw Value / XML |
-|---|---|---|
-| Tab: Incident Details RelationshipItem: RichIncidentThread | Attribute: `CanUseStandardText` | `True` |
-| Rule: New Rule | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
-| Rule: Show Gmoney related product and categories | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
+*No parser coverage gaps identified for this workspace.*

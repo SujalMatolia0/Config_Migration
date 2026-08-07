@@ -13,7 +13,7 @@ KNOWN_WORKSPACE_CHILDREN = {
     "table", "tabset", "recordtypes", "recordtype", "info", "infoitem", "rules", "rule",
     "triggers", "trigger", "conditions", "condition", "then", "else", "action", "field",
     "menu", "browser", "relationshipitem", "report", "addinitem", "titlebar",
-    "spacer", "links", "linkitem", "flag", "quickaccesstoolbar", "ribbon", "tab"
+    "spacer", "links", "linkitem", "flag", "quickaccesstoolbar", "ribbon", "tab", "property"
 }
 
 KNOWN_TABSET_ATTRS = {
@@ -32,7 +32,8 @@ KNOWN_FIELD_ATTRS = {
     "objectid", "fieldid", "labeltext", "id", "row", "column", "defaultphonetype", "defaultvalue",
     "initialvalue", "value", "reportid", "readonlyoption", "hiddenoption", "requiredoption",
     "acceptsreturn", "booleanrenderview", "height", "layoutlabelalignment", "multiline",
-    "requiredforsolved", "rowspan", "columnspan", "showparent", "spellcheck", "tabindex", "trimtextwhitespace"
+    "requiredforsolved", "rowspan", "columnspan", "showparent", "spellcheck", "tabindex", "trimtextwhitespace",
+    "disableemailicon"
 }
 KNOWN_FIELD_CHILDREN = set()
 
@@ -46,7 +47,8 @@ KNOWN_RELATIONSHIP_ATTRS = {
     "defaulttoplaintext", "delayreportexecution", "font", "isusingdefaultemailfont", "margin",
     "padding", "reassignonresponse", "responsepanelcoupled", "sendresponsedefault", "showrowcount",
     "threadorientation", "thumbnailsenabled", "thumbnailsthreshold", "filteronprimarykeyonly",
-    "refreshreportondatachange", "tabindex"
+    "refreshreportondatachange", "tabindex", "canusestandardtext", "hidereportcommands",
+    "layoutlabelalignment", "layoutlabelposition", "readonlyoption"
 }
 KNOWN_RELATIONSHIP_CHILDREN = set()
 
@@ -58,19 +60,19 @@ KNOWN_BROWSER_CHILDREN = set()
 
 KNOWN_ADDIN_ATTRS = {
     "itemtype", "addinname", "fileid", "buiextension", "id", "row", "column", "height",
-    "width", "assemblyname", "assembly"
+    "width", "assemblyname", "assembly", "anchor", "autosize"
 }
 KNOWN_ADDIN_CHILDREN = set()
 
 # Reconciled Business Rule schema (merged across workspace_parser and rule_parser)
 KNOWN_RULE_ATTRS = {"name", "active", "id", "notes"}
-KNOWN_RULE_CHILDREN = {"trigger", "conditions", "condition", "then", "else", "action", "rule", "rules"}
+KNOWN_RULE_CHILDREN = {"trigger", "triggers", "conditions", "condition", "then", "else", "action", "rule", "rules", "property"}
 
 KNOWN_CONDITION_ATTRS = {"logicalexpression", "operator", "value", "type", "source", "property"}
-KNOWN_CONDITION_CHILDREN = {"source", "operator", "value", "property"}
+KNOWN_CONDITION_CHILDREN = {"source", "operator", "value", "property", "condition", "conditions", "trigger", "triggers"}
 
 KNOWN_ACTION_ATTRS = {"type", "scriptpath", "script"}
-KNOWN_ACTION_CHILDREN = {"object", "operation", "value", "scriptpath"}
+KNOWN_ACTION_CHILDREN = {"object", "operation", "value", "scriptpath", "property"}
 
 # Navigation Set Schema
 KNOWN_NAV_ATTRS = {"name", "id"}
@@ -127,29 +129,31 @@ KNOWN_OBJECT_ALL_ATTRS = {
     "serverdefaultvalue", "usage"
 }
 
-# Universal Global Tag & Attribute Superset
-GLOBAL_KNOWN_TAGS = (
-    KNOWN_WORKSPACE_CHILDREN | KNOWN_TABSET_CHILDREN | KNOWN_TAB_CHILDREN |
-    KNOWN_RULE_CHILDREN | KNOWN_CONDITION_CHILDREN | KNOWN_ACTION_CHILDREN |
-    KNOWN_NAV_CHILDREN | KNOWN_REPORT_ALL_TAGS | KNOWN_CPM_ALL_TAGS | KNOWN_OBJECT_ALL_TAGS
-)
+def get_global_known_tags():
+    return (
+        KNOWN_WORKSPACE_CHILDREN | KNOWN_TABSET_CHILDREN | KNOWN_TAB_CHILDREN |
+        KNOWN_RULE_CHILDREN | KNOWN_CONDITION_CHILDREN | KNOWN_ACTION_CHILDREN |
+        KNOWN_NAV_CHILDREN | KNOWN_REPORT_ALL_TAGS | KNOWN_CPM_ALL_TAGS | KNOWN_OBJECT_ALL_TAGS |
+        {"property"}
+    )
 
-GLOBAL_KNOWN_ATTRS = (
-    KNOWN_WORKSPACE_ATTRS | KNOWN_TABSET_ATTRS | KNOWN_TAB_ATTRS |
-    KNOWN_FIELD_ATTRS | KNOWN_RELATIONSHIP_ATTRS | KNOWN_BROWSER_ATTRS |
-    KNOWN_ADDIN_ATTRS | KNOWN_RULE_ATTRS | KNOWN_CONDITION_ATTRS |
-    KNOWN_ACTION_ATTRS | KNOWN_NAV_ATTRS | KNOWN_REPORT_ALL_ATTRS |
-    KNOWN_CPM_ALL_ATTRS | KNOWN_OBJECT_ALL_ATTRS
-)
+def get_global_known_attrs():
+    return (
+        KNOWN_WORKSPACE_ATTRS | KNOWN_TABSET_ATTRS | KNOWN_TAB_ATTRS |
+        KNOWN_FIELD_ATTRS | KNOWN_RELATIONSHIP_ATTRS | KNOWN_BROWSER_ATTRS |
+        KNOWN_ADDIN_ATTRS | KNOWN_RULE_ATTRS | KNOWN_CONDITION_ATTRS |
+        KNOWN_ACTION_ATTRS | KNOWN_NAV_ATTRS | KNOWN_REPORT_ALL_ATTRS |
+        KNOWN_CPM_ALL_ATTRS | KNOWN_OBJECT_ALL_ATTRS
+    )
 
 def is_known_tag(tag):
     if not tag:
         return False
     clean_tag = tag.split("}")[-1].lower()
-    return clean_tag in GLOBAL_KNOWN_TAGS
+    return clean_tag in get_global_known_tags()
 
 def is_known_attr(attr):
     if not attr:
         return False
     clean_attr = attr.split("}")[-1].lower()
-    return clean_attr in GLOBAL_KNOWN_ATTRS
+    return clean_attr in get_global_known_attrs()

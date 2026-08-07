@@ -714,10 +714,9 @@ def main():
 
     all_unknowns_summary["total_unknowns"] = total_unknown_count
 
-    if args.dump_unknowns or total_unknown_count > 0:
-        with open(unknowns_json_path, "w", encoding="utf-8") as f:
-            json.dump(all_unknowns_summary, f, indent=2)
-        print(f"Unknown elements dump written -> {unknowns_json_path} ({total_unknown_count} items)")
+    with open(unknowns_json_path, "w", encoding="utf-8") as f:
+        json.dump(all_unknowns_summary, f, indent=2)
+    print(f"Unknown elements dump written -> {unknowns_json_path} ({total_unknown_count} items)")
 
     graph_path = build_graph_ui(master_data, os.path.join(output_dir, "graph"))
     print(f"Global dependency graph viewer written -> {graph_path}")

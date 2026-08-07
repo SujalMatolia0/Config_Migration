@@ -4,10 +4,6 @@
 - Client Version: `26.2.0.326`
 - Workspace Type: **Contact** (single record, not multi-edit)
 
-> [!WARNING] Unhandled Schema Elements Detected in Source Export
-> The following 1 raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">                 <Trigger Type="EditorLoaded"/>       `
-
 ---
 
 ## Layout Structure
@@ -226,6 +222,4 @@ graph LR
 
 The following elements were found in this workspace XML but are not fully parsed by the current accelerator. Raw data is preserved in `master.json` under `unknowns`.
 
-| Location | Element / Attribute | Raw Value / XML |
-|---|---|---|
-| Rule: New Rule | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit">                 <Trigger Type="EditorLoaded"/>             </Triggers>` |
+*No parser coverage gaps identified for this workspace.*

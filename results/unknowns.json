@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-08-07T13:05:16.319594",
-  "strict_mode": true,
+  "generated_at": "2026-08-07T13:33:35.786609",
+  "strict_mode": false,
   "summary": {
-    "workspaces": 19,
+    "workspaces": 0,
     "reports": 0,
     "cpm": 0,
     "rules": 0,
@@ -12,158 +12,7 @@
     "objectRelationships": 0
   },
   "components": {
-    "workspaces": [
-      {
-        "name": "Contact test",
-        "total_unknowns": 10,
-        "unknown_attrs": [
-          {
-            "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
-            "attribute": "LayoutLabelAlignment",
-            "value": "Right"
-          },
-          {
-            "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
-            "attribute": "LayoutLabelPosition",
-            "value": "Left"
-          },
-          {
-            "location": "Tab: SUMMARY_LBL RelationshipItem: SlaContainer",
-            "attribute": "ReadOnlyOption",
-            "value": "OnNew:~any~;OnEdit:~any~"
-          },
-          {
-            "location": "Tab: SUMMARY_LBL Field: Email",
-            "attribute": "DisableEmailIcon",
-            "value": "True"
-          },
-          {
-            "location": "Tab: Surveys RelationshipItem: SurveyHistoryView",
-            "attribute": "HideReportCommands",
-            "value": "True"
-          },
-          {
-            "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
-            "attribute": "Anchor",
-            "value": "Top, Left"
-          },
-          {
-            "location": "Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin",
-            "attribute": "AutoSize",
-            "value": "False"
-          }
-        ],
-        "unknown_children": [
-          {
-            "location": "Rule: Admin Fields",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
-          },
-          {
-            "location": "Rule: Admin Fields - Support Supervisors",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
-          },
-          {
-            "location": "Rule: Hide Delete and New button",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
-          }
-        ]
-      },
-      {
-        "name": "Contact",
-        "total_unknowns": 1,
-        "unknown_attrs": [],
-        "unknown_children": [
-          {
-            "location": "Rule: New Rule",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">\n                <Trigger Type=\"EditorLoaded\"/>\n            </Triggers>"
-          }
-        ]
-      },
-      {
-        "name": "Incident",
-        "total_unknowns": 3,
-        "unknown_attrs": [
-          {
-            "location": "Tab: Incident Details RelationshipItem: RichIncidentThread",
-            "attribute": "CanUseStandardText",
-            "value": "True"
-          }
-        ],
-        "unknown_children": [
-          {
-            "location": "Rule: New Rule",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
-          },
-          {
-            "location": "Rule: Show Gmoney related product and categories",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\"><Trigger Type=\"EditorLoaded\"/></Triggers>"
-          }
-        ]
-      },
-      {
-        "name": "real_edge_01_nested_tabset",
-        "total_unknowns": 3,
-        "unknown_attrs": [
-          {
-            "location": "Tab: Incident Details RelationshipItem: RichIncidentThread",
-            "attribute": "CanUseStandardText",
-            "value": "True"
-          }
-        ],
-        "unknown_children": [
-          {
-            "location": "Rule: Hide Customer360 for Email Contacts",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">\n                <Trigger Type=\"EditorLoaded\"/>\n            </Triggers>"
-          },
-          {
-            "location": "Rule: Filter Products for Segment",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">\n                <Trigger Type=\"EditorLoaded\"/>\n            </Triggers>"
-          }
-        ]
-      },
-      {
-        "name": "real_edge_02_new_workspace_patterns",
-        "total_unknowns": 1,
-        "unknown_attrs": [],
-        "unknown_children": [
-          {
-            "location": "Rule: New Rule",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">\n                <Trigger Type=\"EditorLoaded\"/>\n            </Triggers>"
-          }
-        ]
-      },
-      {
-        "name": "real_edge_03_split_panel_contact",
-        "total_unknowns": 1,
-        "unknown_attrs": [],
-        "unknown_children": [
-          {
-            "location": "Rule: New Rule",
-            "tag": "Triggers",
-            "attrs": {},
-            "raw": "<Triggers xmlns:dbaudit=\"http://www.rightnow.com/schemas/dbaudit\">\n                <Trigger Type=\"EditorLoaded\"/>\n            </Triggers>"
-          }
-        ]
-      }
-    ],
+    "workspaces": [],
     "reports": [],
     "cpm": [],
     "rules": [],
@@ -172,5 +21,5 @@
     "customObjects": [],
     "objectRelationships": []
   },
-  "total_unknowns": 19
+  "total_unknowns": 0
 }

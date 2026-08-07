@@ -4,19 +4,6 @@
 - Client Version: `26.2.0.326`
 - Workspace Type: **Contact** (single record, not multi-edit)
 
-> [!WARNING] Unhandled Schema Elements Detected in Source Export
-> The following 10 raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>`
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>`
-> - Element `<Triggers>`: `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>`
-> - Attribute `LayoutLabelAlignment`: `Right`
-> - Attribute `LayoutLabelPosition`: `Left`
-> - Attribute `ReadOnlyOption`: `OnNew:~any~;OnEdit:~any~`
-> - Attribute `DisableEmailIcon`: `True`
-> - Attribute `HideReportCommands`: `True`
-> - Attribute `Anchor`: `Top, Left`
-> - Attribute `AutoSize`: `False`
-
 ---
 
 ## Layout Structure
@@ -309,15 +296,4 @@ graph LR
 
 The following elements were found in this workspace XML but are not fully parsed by the current accelerator. Raw data is preserved in `master.json` under `unknowns`.
 
-| Location | Element / Attribute | Raw Value / XML |
-|---|---|---|
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelAlignment` | `Right` |
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `LayoutLabelPosition` | `Left` |
-| Tab: SUMMARY_LBL RelationshipItem: SlaContainer | Attribute: `ReadOnlyOption` | `OnNew:~any~;OnEdit:~any~` |
-| Tab: SUMMARY_LBL Field: Email | Attribute: `DisableEmailIcon` | `True` |
-| Tab: Surveys RelationshipItem: SurveyHistoryView | Attribute: `HideReportCommands` | `True` |
-| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `Anchor` | `Top, Left` |
-| Tab: New Tab 1 AddIn: ContactOrgLookupBUIAddin | Attribute: `AutoSize` | `False` |
-| Rule: Admin Fields | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
-| Rule: Admin Fields - Support Supervisors | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
-| Rule: Hide Delete and New button | Element: `<Triggers>` | `<Triggers xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit"><Trigger Type="EditorLoaded"/></Triggers>` |
+*No parser coverage gaps identified for this workspace.*

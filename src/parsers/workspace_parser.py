@@ -130,7 +130,7 @@ def parse_workspace_file(file_path, strict=False):
         is_active = active_str.lower() == "true"
         rule_notes = rule.get("Notes")
         
-        rule_unk = capture_unknown(rule, KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN, f"Rule: {name_attr}")
+        rule_unk = capture_unknown(rule, KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN | {"property"}, f"Rule: {name_attr}")
         record_unknown(f"Rule: {name_attr}", rule_unk)
         
         triggers = []
@@ -147,7 +147,7 @@ def parse_workspace_file(file_path, strict=False):
         for cond_block in rule.findall(".//Conditions"):
             logic_expr = cond_block.get("LogicalExpression")  # e.g. "0 AND 1" or "0 OR 1"
             for cond in cond_block.findall("Condition"):
-                cond_unk = capture_unknown(cond, KNOWN_CONDITION_ATTRS, KNOWN_CONDITION_CHILDREN, f"Condition in Rule: {name_attr}")
+                cond_unk = capture_unknown(cond, KNOWN_CONDITION_ATTRS, KNOWN_CONDITION_CHILDREN | {"property"}, f"Condition in Rule: {name_attr}")
                 record_unknown(f"Condition in Rule: {name_attr}", cond_unk)
 
                 source = cond.find("Source")
@@ -170,7 +170,7 @@ def parse_workspace_file(file_path, strict=False):
         # Fallback: bare <Condition> tags not wrapped in <Conditions>
         if not conditions:
             for cond in rule.findall(".//Condition"):
-                cond_unk = capture_unknown(cond, KNOWN_CONDITION_ATTRS, KNOWN_CONDITION_CHILDREN, f"Condition in Rule: {name_attr}")
+                cond_unk = capture_unknown(cond, KNOWN_CONDITION_ATTRS, KNOWN_CONDITION_CHILDREN | {"property"}, f"Condition in Rule: {name_attr}")
                 record_unknown(f"Condition in Rule: {name_attr}", cond_unk)
 
                 source = cond.find("Source")
@@ -195,7 +195,7 @@ def parse_workspace_file(file_path, strict=False):
             """Parse a list of <Action> elements and tag with branch (then/else)."""
             result = []
             for act in action_elements:
-                act_unk = capture_unknown(act, KNOWN_ACTION_ATTRS, KNOWN_ACTION_CHILDREN, f"Action in Rule: {name_attr}")
+                act_unk = capture_unknown(act, KNOWN_ACTION_ATTRS, KNOWN_ACTION_CHILDREN | {"property"}, f"Action in Rule: {name_attr}")
                 record_unknown(f"Action in Rule: {name_attr}", act_unk)
 
                 act_type = act.get("Type")
@@ -537,7 +537,7 @@ def parse_workspace_file(file_path, strict=False):
         "Menu", "Items", "Item", "Browser", "RelationshipItem", "Report",
         "AddinItem", "AddInItem", "TitleBar", "Spacer", "Links", "LinkItem", "Flag",
         "QuickAccessToolbar", "QuickAccessToolbarItem", "Ribbon",
-        "RibbonTab", "RibbonGroup", "RibbonButtonItem"
+        "RibbonTab", "RibbonGroup", "RibbonButtonItem", "Property"
     }
 
     raw_unhandled_tags = []

@@ -21,7 +21,7 @@ def parse_rule_file(file_path):
     unhandled_elements = []
 
     # Check root for unhandled attributes or tags
-    root_unk = capture_unknown(root, KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN, "Business Rule Root")
+    root_unk = capture_unknown(root, KNOWN_RULE_ATTRS, KNOWN_RULE_CHILDREN | {"property"}, "Business Rule Root")
     if root_unk and "unknown_children" in root_unk:
         for child in root_unk["unknown_children"]:
             unhandled_elements.append({
