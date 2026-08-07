@@ -17,12 +17,25 @@ HEADERS_CATALOG_JSON = {
     'OSvC-CREST-Application-Context': 'metadata_catalog'
 }
 
+from urllib.parse import urlparse
+
 def _clean_host_url(host):
-    """Formats raw host or URL into a clean base URL."""
-    host = host.strip().rstrip('/')
+    """
+    Extracts scheme and domain from any user-provided URL or host string.
+    Prevents path duplication when user enters full endpoint URLs.
+    Examples:
+      'gcb.custhelp.com'                                                                  -> 'https://gcb.custhelp.com'
+      'https://gcb.custhelp.com/services/rest/connect/v1.4/metadata-catalog/contacts'     -> 'https://gcb.custhelp.com'
+      'http://myinstance.custhelp.com/services/rest'                                      -> 'http://myinstance.custhelp.com'
+    """
+    host = host.strip()
     if not host.startswith('http://') and not host.startswith('https://'):
         host = f"https://{host}"
-    return host
+    
+    parsed = urlparse(host)
+    scheme = parsed.scheme or 'https'
+    netloc = parsed.netloc or parsed.path.split('/')[0]
+    return f"{scheme}://{netloc}"
 
 def fetch_schema_get_only(url, session, auth):
     """
@@ -169,6 +182,8 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
 
         if not schema_url:
             schema_url = f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog/{obj_name}"
+        elif not schema_url.startswith("http"):
+            schema_url = f"{base_url}{schema_url}"
 
         try:
             log_cb(f"[STRICT GET ONLY] Fetching schema for object: {obj_name}")
