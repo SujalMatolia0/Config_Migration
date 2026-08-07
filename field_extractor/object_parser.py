@@ -12,6 +12,9 @@ def parse_object_xml(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
 
+    if root.tag != "CustomObject" and root.find(".//Fields") is None:
+        raise ValueError(f"File {file_path} is not a valid CustomObject XML.")
+
     obj_name = root.get("Name") or root.get("CoLabel") or os.path.basename(file_path).replace(".xml", "")
     package_elem = root.find("Package")
     package_name = package_elem.get("Name") if package_elem is not None else "CO"

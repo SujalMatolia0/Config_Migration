@@ -12,6 +12,9 @@ def parse_workspace_xml(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
 
+    if root.tag != "Workspace" and root.find(".//TabSet") is None and root.find(".//Table") is None:
+        raise ValueError(f"File {file_path} is not a valid Workspace XML.")
+
     ws_name = os.path.basename(file_path).replace(".xml", "")
     bound_object = root.get("Type") or root.get("UIType") or "Unknown"
 

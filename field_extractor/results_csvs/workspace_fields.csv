@@ -17,3 +17,20 @@ Contact_Workspace,Contact,Contact,Contact.CustomFields.c$loyalty_tier,c$loyalty_
 Contact_Workspace,Contact,Contact,Contact.CustomFields.c$customer_number,c$customer_number,Customer Details,7,1,No,No,16,Text,No,Yes,No,50
 Contact_Workspace,Contact,Contact,Contact.CustomFields.c$is_internal,c$is_internal,Customer Details,8,0,No,No,17,Yes/No,No,Yes,No,—
 Contact_Workspace,Contact,Contact,Contact.CustomFields.c$is_manual,c$is_manual,Customer Details,8,1,No,No,18,Yes/No,No,Yes,No,—
+contact1,Contact,Contact,Contact.Name.First,First,Summary,0,0,OnNew:~any~;OnEdit:~any~,OnEdit:~any~,1,Text,Yes,No,No,80
+contact1,Contact,Contact,Contact.State,State,Summary,0,1,No,OnEdit:~any~,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.Name.Last,Last,Summary,1,0,OnNew:~any~;OnEdit:~any~,OnEdit:~any~,2,Text,Yes,No,No,80
+contact1,Contact,Contact,Contact.OrgId,OrgId,Summary,1,1,No,No,12,Integer,Yes,Yes,Yes,—
+contact1,Contact,Contact,Contact.Email,Email,Summary,2,0,No,OnNew:~any~;OnEdit:~any~,4,Text,Yes,No,No,255
+contact1,Contact,Contact,Contact.SalesAcctId,SalesAcctId,Summary,2,1,No,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,Yes,—
+contact1,Contact,Contact,Contact.PhOffice,PhOffice,Summary,3,0,No,No,5,Phone,Yes,Yes,No,40
+contact1,Contact,Contact,Contact.C$PhoneExt,C$PhoneExt,Summary,3,1,,,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.C$DsnPhone,C$DsnPhone,Summary,4,0,,,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.C$DsnPhoneExt,C$DsnPhoneExt,Summary,4,1,,,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.C$International,C$International,Summary,5,0,,,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.C$IntPhoneExt,C$IntPhoneExt,Summary,5,1,,,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.Addr,Addr,Summary,6,0,No,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.Title,Title,Summary,6,1,No,OnNew:~any~;OnEdit:~any~,3,Text,Yes,Yes,No,40
+contact1,Contact,Contact,Contact.CtypeId,CtypeId,Summary,7,0,No,OnNew:~any~;OnEdit:~any~,11,Menu,Yes,Yes,Yes,—
+contact1,Contact,Contact,Contact.Login,Login,Summary,7,1,,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,No,—
+contact1,Contact,Contact,Contact.MaOptIn,MaOptIn,Summary,8,0,No,OnNew:~any~;OnEdit:~any~,—,Standard Data Field,Yes,Yes,No,—

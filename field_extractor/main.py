@@ -48,10 +48,14 @@ def main():
     primary_bound_obj = "Contact"
 
     for w_file in ws_files:
-        ws_data = parse_workspace_xml(w_file)
-        combined_ws_fields.extend(ws_data.get("fields", []))
-        ws_name_list.append(ws_data["workspace_name"])
-        primary_bound_obj = ws_data.get("bound_object", primary_bound_obj)
+        try:
+            ws_data = parse_workspace_xml(w_file)
+            combined_ws_fields.extend(ws_data.get("fields", []))
+            ws_name_list.append(ws_data["workspace_name"])
+            primary_bound_obj = ws_data.get("bound_object", primary_bound_obj)
+        except Exception:
+            # Skip XML files that are not valid Workspace XMLs
+            pass
 
     ws_data_aggregated = {
         "workspace_name": ", ".join(ws_name_list),
