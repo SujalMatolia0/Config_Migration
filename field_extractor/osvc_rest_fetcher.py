@@ -18,15 +18,27 @@ HEADERS_CATALOG_JSON = {
 }
 
 from urllib.parse import urlparse
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+_SCHEMA_CACHE = {}
+
+def _create_http_session():
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=0.5,
+        status_forcelist=[429, 500, 502, 503, 504]
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    return session
 
 def _clean_host_url(host):
     """
     Extracts scheme and domain from any user-provided URL or host string.
     Prevents path duplication when user enters full endpoint URLs.
-    Examples:
-      'gcb.custhelp.com'                                                                  -> 'https://gcb.custhelp.com'
-      'https://gcb.custhelp.com/services/rest/connect/v1.4/metadata-catalog/contacts'     -> 'https://gcb.custhelp.com'
-      'http://myinstance.custhelp.com/services/rest'                                      -> 'http://myinstance.custhelp.com'
     """
     host = host.strip()
     if not host.startswith('http://') and not host.startswith('https://'):
@@ -40,12 +52,17 @@ def _clean_host_url(host):
 def fetch_schema_get_only(url, session, auth):
     """
     STRICT READ-ONLY: Executes HTTP GET request to fetch JSON schema metadata.
-    NEVER sends POST, PUT, DELETE, or PATCH requests.
+    Uses in-memory _SCHEMA_CACHE to prevent repeated network requests for same endpoint.
     """
-    time.sleep(0.3)  # Gentle delay to avoid rate limiting
+    if url in _SCHEMA_CACHE:
+        return _SCHEMA_CACHE[url]
+
+    time.sleep(0.1)  # Gentle delay to avoid rate limiting
     resp = session.get(url, headers=HEADERS_SCHEMA_JSON, auth=auth, timeout=30)
     resp.raise_for_status()
-    return resp.json()
+    data = resp.json()
+    _SCHEMA_CACHE[url] = data
+    return data
 
 def fetch_metadata_catalog_get_only(catalog_url, session, auth):
     """
@@ -55,12 +72,12 @@ def fetch_metadata_catalog_get_only(catalog_url, session, auth):
     resp.raise_for_status()
     return resp.json()
 
-def _resolve_property_field(field_name, field_info, session, auth, log_cb=print, parent_prefix="", depth=0):
+def _resolve_property_field(field_name, field_info, session, auth, base_url, log_cb=print, parent_prefix="", depth=0):
     """
     Recursively inspects a schema property definition and resolves $ref links via HTTP GET.
     Returns a list of extracted field metadata dicts.
     """
-    if depth > 3:  # Safeguard against deep circular $ref loops
+    if depth > 2:  # Safeguard against deep circular $ref loops
         return []
 
     full_name = f"{parent_prefix}.{field_name}" if parent_prefix else field_name
@@ -76,32 +93,44 @@ def _resolve_property_field(field_name, field_info, session, auth, log_cb=print,
 
     ref_url = field_info.get("$ref")
 
-    # If it has a $ref link, perform a GET request to inspect the referenced schema
-    if ref_url and (field_type == "object" or field_type == "unknown"):
-        try:
-            ref_schema = fetch_schema_get_only(ref_url, session, auth)
-            singular = ref_schema.get("definitions", {}).get("singularResource", {})
-            is_menu = singular.get("isMenu", False)
-            ref_name = singular.get("name") or ref_url.rstrip('/').split('/')[-1]
+    # Fast-path namedIDs and lookup shortcuts without unnecessary network recursion
+    if ref_url:
+        # Prepend base_url if ref_url is a relative path
+        if not ref_url.startswith("http"):
+            if not ref_url.startswith("/"):
+                ref_url = f"/{ref_url}"
+            ref_url = f"{base_url}{ref_url}"
 
-            if is_menu:
-                field_type = f"_menu:{ref_name}"
-            else:
-                child_props = singular.get("properties", {})
-                if child_props and not ref_name.startswith("http"):
-                    # Composite standard field (e.g. name -> name.first, name.last)
-                    sub_fields = []
-                    for c_name, c_info in child_props.items():
-                        if c_name != "customFields":
-                            sub_fields.extend(
-                                _resolve_property_field(c_name, c_info, session, auth, log_cb=log_cb, parent_prefix=full_name, depth=depth+1)
-                            )
-                    if sub_fields:
-                        return sub_fields
-                field_type = f"_lookup:{ref_name}"
-        except Exception as err:
-            log_cb(f"[WARN] Unable to resolve $ref schema for field '{full_name}': {err}")
-            field_type = f"lookup:unresolved"
+        ref_basename = ref_url.rstrip('/').split('/')[-1]
+
+        # NamedID fast-path
+        if "/namedIDs/" in ref_url or "namedID" in ref_url.lower():
+            field_type = f"_lookup:NamedID({ref_basename})"
+        elif field_type in ("object", "unknown"):
+            try:
+                ref_schema = fetch_schema_get_only(ref_url, session, auth)
+                singular = ref_schema.get("definitions", {}).get("singularResource", {})
+                is_menu = singular.get("isMenu", False)
+                ref_name = singular.get("name") or ref_basename
+
+                if is_menu:
+                    field_type = f"_menu:{ref_name}"
+                else:
+                    child_props = singular.get("properties", {})
+                    # Only recurse into composite structures (like name -> first, last)
+                    if child_props and depth < 1 and not ref_name.startswith("http"):
+                        sub_fields = []
+                        for c_name, c_info in child_props.items():
+                            if c_name != "customFields":
+                                sub_fields.extend(
+                                    _resolve_property_field(c_name, c_info, session, auth, base_url, log_cb=log_cb, parent_prefix=full_name, depth=depth+1)
+                                )
+                        if sub_fields:
+                            return sub_fields
+                    field_type = f"_lookup:{ref_name}"
+            except Exception as err:
+                log_cb(f"[WARN] Unable to resolve $ref schema for field '{full_name}': {err}")
+                field_type = f"_lookup:{ref_basename}"
 
     is_custom = field_name.startswith("c$") or "customFields" in full_name
     pkg_name = "c" if is_custom else "OracleServiceCloud"
@@ -148,7 +177,8 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
     base_url = _clean_host_url(host)
     catalog_url = f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog"
 
-    session = requests.Session()
+    _SCHEMA_CACHE.clear()
+    session = _create_http_session()
     auth = HTTPBasicAuth(username, password)
 
     log_cb(f"[STRICT GET ONLY] Connecting to OSVC Metadata Catalog root: {catalog_url}")
@@ -231,7 +261,7 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
                 if f_name == "customFields" and not include_custom:
                     continue
 
-                fields_resolved = _resolve_property_field(f_name, f_info, session, auth, log_cb=log_cb)
+                fields_resolved = _resolve_property_field(f_name, f_info, session, auth, base_url, log_cb=log_cb)
                 extracted_fields.extend(fields_resolved)
 
             if extracted_fields:
