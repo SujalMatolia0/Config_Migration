@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Workspace Type="Contact" UIType="Contact">
+    <Table RowCount="18" ColumnCount="2">
+        <TabSet>
+            <Tab Text="Customer Details">
+                <Table>
+                    <Field Row="0" Column="0" ObjectId="Contact" FieldId="Name.First" RequiredOption="Yes" ReadOnlyOption="No" />
+                    <Field Row="0" Column="1" ObjectId="Contact" FieldId="Name.Last" RequiredOption="Yes" ReadOnlyOption="No" />
+                    <Field Row="1" Column="0" ObjectId="Contact" FieldId="Title" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="1" Column="1" ObjectId="Contact" FieldId="Email" RequiredOption="Yes" ReadOnlyOption="No" />
+                    <Field Row="2" Column="0" ObjectId="Contact" FieldId="PhOffice" LabelText="Office Phone" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="2" Column="1" ObjectId="Contact" FieldId="PhMobile" LabelText="Mobile Phone" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="3" Column="0" ObjectId="Contact" FieldId="CId" RequiredOption="No" ReadOnlyOption="Yes" />
+                    <Field Row="3" Column="1" ObjectId="Contact" FieldId="Created" RequiredOption="No" ReadOnlyOption="Yes" />
+                    <Field Row="4" Column="0" ObjectId="Contact" FieldId="Updated" RequiredOption="No" ReadOnlyOption="Yes" />
+                    <Field Row="4" Column="1" ObjectId="Contact" FieldId="Disabled" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="5" Column="0" ObjectId="Contact" FieldId="CtypeId" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="5" Column="1" ObjectId="Contact" FieldId="OrgId" ReportId="8001" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="6" Column="0" ObjectId="Contact" FieldId="CustomFields.c$org_id_temp" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="6" Column="1" ObjectId="Contact" FieldId="CustomFields.c$vip_status" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="7" Column="0" ObjectId="Contact" FieldId="CustomFields.c$loyalty_tier" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="7" Column="1" ObjectId="Contact" FieldId="CustomFields.c$customer_number" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="8" Column="0" ObjectId="Contact" FieldId="CustomFields.c$is_internal" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="8" Column="1" ObjectId="Contact" FieldId="CustomFields.c$is_manual" RequiredOption="No" ReadOnlyOption="No" />
+                </Table>
+            </Tab>
+        </TabSet>
+    </Table>
+</Workspace>

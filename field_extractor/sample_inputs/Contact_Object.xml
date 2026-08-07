@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CustomObject Id="1" Name="Contact" CoLabel="Contact" Description="Contact Standard &amp; Custom Entity Schema">
+    <Package Name="OracleServiceCloud" Id="1" />
+    <Fields>
+        <Field Id="1" Label="First Name" Name="Name.First" DataTypeName="Text" DataType="2" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="80" />
+        <Field Id="2" Label="Last Name" Name="Name.Last" DataTypeName="Text" DataType="2" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="80" />
+        <Field Id="3" Label="Title" Name="Title" DataTypeName="Text" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="40" />
+        <Field Id="4" Label="Email Address" Name="Email" DataTypeName="Text" DataType="2" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="255" />
+        <Field Id="5" Label="Office Phone" Name="PhOffice" DataTypeName="Phone" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="40" />
+        <Field Id="6" Label="Mobile Phone" Name="PhMobile" DataTypeName="Phone" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="40" />
+        <Field Id="7" Label="Contact ID" Name="CId" DataTypeName="Integer" DataType="1" IsNullable="False" IsList="False" IsLookup="True" IsCoReadOnly="True" IsSystemField="True" />
+        <Field Id="8" Label="Date Created" Name="Created" DataTypeName="Date Time" DataType="5" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="True" IsSystemField="True" />
+        <Field Id="9" Label="Date Updated" Name="Updated" DataTypeName="Date Time" DataType="5" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="True" IsSystemField="True" />
+        <Field Id="10" Label="Disabled" Name="Disabled" DataTypeName="Yes/No" DataType="3" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="11" Label="Contact Type" Name="CtypeId" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="12" Label="Organization ID" Name="OrgId" DataTypeName="Integer" DataType="1" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="13" Label="Temp Org ID" Name="org_id_temp" DataTypeName="Integer" DataType="1" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" />
+        <Field Id="14" Label="VIP Status" Name="vip_status" DataTypeName="Text" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" MaxLength="40" />
+        <Field Id="15" Label="Loyalty Tier" Name="loyalty_tier" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" />
+        <Field Id="16" Label="Customer Number" Name="customer_number" DataTypeName="Text" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" MaxLength="50" />
+        <Field Id="17" Label="Is Internal" Name="is_internal" DataTypeName="Yes/No" DataType="3" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" />
+        <Field Id="18" Label="Is Manual" Name="is_manual" DataTypeName="Yes/No" DataType="3" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" />
+        <Field Id="19" Label="Secret PIN" Name="secret_pin" DataTypeName="Integer" DataType="1" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Workspace Layout" />
+        <Field Id="20" Label="Audit Notes" Name="audit_notes" DataTypeName="Text" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" MaxLength="1000" Description="Object field NOT present in Workspace Layout" />
+    </Fields>
+</CustomObject>

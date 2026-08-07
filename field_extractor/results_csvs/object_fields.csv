@@ -1,0 +1,21 @@
+Object Name,Package Name,Field ID,Field Name,Field Label,Data Type,Is System Field,Is Nullable,Is Lookup,Is Read Only,Max Length,Description,Is Used In Workspace
+Contact,OracleServiceCloud,1,Name.First,First Name,Text,Yes,No,No,No,80,,Yes
+Contact,OracleServiceCloud,2,Name.Last,Last Name,Text,Yes,No,No,No,80,,Yes
+Contact,OracleServiceCloud,3,Title,Title,Text,Yes,Yes,No,No,40,,Yes
+Contact,OracleServiceCloud,4,Email,Email Address,Text,Yes,No,No,No,255,,Yes
+Contact,OracleServiceCloud,5,PhOffice,Office Phone,Phone,Yes,Yes,No,No,40,,Yes
+Contact,OracleServiceCloud,6,PhMobile,Mobile Phone,Phone,Yes,Yes,No,No,40,,Yes
+Contact,OracleServiceCloud,7,CId,Contact ID,Integer,Yes,No,Yes,Yes,—,,Yes
+Contact,OracleServiceCloud,8,Created,Date Created,Date Time,Yes,No,No,Yes,—,,Yes
+Contact,OracleServiceCloud,9,Updated,Date Updated,Date Time,Yes,No,No,Yes,—,,Yes
+Contact,OracleServiceCloud,10,Disabled,Disabled,Yes/No,Yes,No,No,No,—,,Yes
+Contact,OracleServiceCloud,11,CtypeId,Contact Type,Menu,Yes,Yes,Yes,No,—,,Yes
+Contact,OracleServiceCloud,12,OrgId,Organization ID,Integer,Yes,Yes,Yes,No,—,,Yes
+Contact,OracleServiceCloud,13,org_id_temp,Temp Org ID,Integer,No,Yes,No,No,—,,Yes
+Contact,OracleServiceCloud,14,vip_status,VIP Status,Text,No,Yes,No,No,40,,Yes
+Contact,OracleServiceCloud,15,loyalty_tier,Loyalty Tier,Menu,No,Yes,No,No,—,,Yes
+Contact,OracleServiceCloud,16,customer_number,Customer Number,Text,No,Yes,No,No,50,,Yes
+Contact,OracleServiceCloud,17,is_internal,Is Internal,Yes/No,No,Yes,No,No,—,,Yes
+Contact,OracleServiceCloud,18,is_manual,Is Manual,Yes/No,No,Yes,No,No,—,,Yes
+Contact,OracleServiceCloud,19,secret_pin,Secret PIN,Integer,No,Yes,No,No,—,Object field NOT present in Workspace Layout,No
+Contact,OracleServiceCloud,20,audit_notes,Audit Notes,Text,No,Yes,No,No,1000,Object field NOT present in Workspace Layout,No
