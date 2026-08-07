@@ -19,6 +19,14 @@
 | **External REST APIs** | 0 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: closing_notes.php** | `->` | **OSVCObject: Account** | Custom Script 'closing_notes.php' operates on entity 'Account' |
+| **CustomScript: closing_notes.php** | `->` | **OSVCObject: ConnectAPI** | Custom Script 'closing_notes.php' operates on entity 'ConnectAPI' |
+| **CustomScript: closing_notes.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'closing_notes.php' operates on entity 'ConnectAPIErrorBase' |
+
 ## OSVC Data Objects Referenced
 
 - `Account`

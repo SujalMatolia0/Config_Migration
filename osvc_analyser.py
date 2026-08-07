@@ -933,7 +933,7 @@ def main():
 
             for sc in script_items:
                 sname = sc.get("file_name", "script").replace(" ", "_")
-                single_md = generate_single_custom_script_markdown(sc)
+                single_md = generate_single_custom_script_markdown(sc, relationships=relationships)
                 single_filename = f"report_{sname}.md"
                 single_json_filename = f"report_{sname}.json"
 

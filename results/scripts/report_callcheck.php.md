@@ -19,6 +19,13 @@
 | **External REST APIs** | 1 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: callcheck.php** | `->` | **OSVCObject: Account** | Custom Script 'callcheck.php' operates on entity 'Account' |
+| **CustomScript: callcheck.php** | `->` | **OSVCObject: Configuration** | Custom Script 'callcheck.php' operates on entity 'Configuration' |
+
 ## OSVC Data Objects Referenced
 
 - `Account`

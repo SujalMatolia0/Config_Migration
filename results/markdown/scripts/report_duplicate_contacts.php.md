@@ -19,6 +19,19 @@
 | **External REST APIs** | 0 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **Workspace: Contact** | `->` | **CustomScript: duplicate_contacts.php** | Rule 'Check Contact Duplicates' → Action: RunScript |
+| **CustomScript: duplicate_contacts.php** | `->` | **CustomScript: address_validation.php** | import/require: 'address_validation.php' |
+| **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: AnalyticsReport** | Custom Script 'duplicate_contacts.php' operates on entity 'AnalyticsReport' |
+| **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: CO** | Custom Script 'duplicate_contacts.php' operates on entity 'CO' |
+| **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'duplicate_contacts.php' operates on entity 'ConnectAPIErrorBase' |
+| **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: Contact** | Custom Script 'duplicate_contacts.php' operates on entity 'Contact' |
+| **CPM: contact_create** | `->` | **CustomScript: duplicate_contacts.php** | CPM Procedure 'contact_create' requires Custom Script 'duplicate_contacts.php' |
+| **BusinessRule: Contact Business Rules** | `->` | **CustomScript: duplicate_contacts.php** | Contact Business Rule executes Custom Script 'duplicate_contacts.php' |
+
 ## Code Imports
 
 - `address_validation.php`

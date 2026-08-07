@@ -19,6 +19,12 @@
 | **External REST APIs** | 0 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: duplicate_incidents.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'duplicate_incidents.php' operates on entity 'ConnectAPIErrorBase' |
+
 ## OSVC Data Objects Referenced
 
 - `ConnectAPIErrorBase`

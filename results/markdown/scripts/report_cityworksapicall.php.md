@@ -19,6 +19,14 @@
 | **External REST APIs** | 1 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: cityworksapicall.php** | `->` | **CustomScript: include/init.phph** | import/require: 'include/init.phph' |
+| **CustomScript: cityworksapicall.php** | `->` | **OSVCObject: Configuration** | Custom Script 'cityworksapicall.php' operates on entity 'Configuration' |
+| **CustomScript: cityworksapicall.php** | `->` | **OSVCObject: ConnectAPI** | Custom Script 'cityworksapicall.php' operates on entity 'ConnectAPI' |
+
 ## Code Imports
 
 - `include/init.phph`

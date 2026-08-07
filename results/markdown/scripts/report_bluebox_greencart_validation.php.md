@@ -19,6 +19,12 @@
 | **External REST APIs** | 0 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: bluebox_greencart_validation.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'bluebox_greencart_validation.php' operates on entity 'ConnectAPIErrorBase' |
+
 ## OSVC Data Objects Referenced
 
 - `ConnectAPIErrorBase`

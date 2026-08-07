@@ -19,6 +19,20 @@
 | **External REST APIs** | 0 |
 | **Risk Flags** | 0 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: child_incident_create.php** | `->` | **CustomScript: include/init.phph** | import/require: 'include/init.phph' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: Banner** | Custom Script 'child_incident_create.php' operates on entity 'Banner' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: ConnectAPI** | Custom Script 'child_incident_create.php' operates on entity 'ConnectAPI' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: GroupAccount** | Custom Script 'child_incident_create.php' operates on entity 'GroupAccount' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: Incident** | Custom Script 'child_incident_create.php' operates on entity 'Incident' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: NamedIDLabel** | Custom Script 'child_incident_create.php' operates on entity 'NamedIDLabel' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: NamedIDOptList** | Custom Script 'child_incident_create.php' operates on entity 'NamedIDOptList' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: RNObject** | Custom Script 'child_incident_create.php' operates on entity 'RNObject' |
+| **CustomScript: child_incident_create.php** | `->` | **OSVCObject: StatusWithType** | Custom Script 'child_incident_create.php' operates on entity 'StatusWithType' |
+
 ## Code Imports
 
 - `include/init.phph`

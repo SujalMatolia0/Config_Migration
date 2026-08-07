@@ -2696,7 +2696,7 @@ def generate_custom_scripts_summary_markdown(scripts):
     return "\n".join(lines)
 
 
-def generate_single_custom_script_markdown(script):
+def generate_single_custom_script_markdown(script, relationships=None):
     fname = script.get("file_name", "Unknown")
     stype = script.get("script_type", "Custom Script")
 
@@ -2731,6 +2731,31 @@ def generate_single_custom_script_markdown(script):
     lines.append(f"| **External REST APIs** | {len(rest_apis)} |")
     lines.append(f"| **Risk Flags** | {len(script.get('risk_flags', []))} |")
     lines.append("")
+
+    if relationships:
+        fname_lower = fname.lower()
+        fname_no_ext = os.path.splitext(fname_lower)[0]
+        linked_rel = []
+        for rel in relationships:
+            f_name = str(rel.get("from", {}).get("name", "")).lower()
+            t_name = str(rel.get("to", {}).get("name", "")).lower()
+            if (fname_lower in f_name or fname_no_ext in f_name or
+                fname_lower in t_name or fname_no_ext in t_name):
+                linked_rel.append(rel)
+
+        if linked_rel:
+            lines.append("## Cross-Component System Linkages")
+            lines.append("")
+            lines.append("| Source Component | Linkage Direction | Target Component | Details / Context |")
+            lines.append("| :--- | :---: | :--- | :--- |")
+            for r in linked_rel:
+                src_type = r.get("from", {}).get("type", "")
+                src_name = r.get("from", {}).get("name", "")
+                dst_type = r.get("to", {}).get("type", "")
+                dst_name = r.get("to", {}).get("name", "")
+                via = r.get("via", "Linkage")
+                lines.append(f"| **{src_type}: {src_name}** | `->` | **{dst_type}: {dst_name}** | {via} |")
+            lines.append("")
 
     if script.get("imports"):
         lines.append("## Code Imports")

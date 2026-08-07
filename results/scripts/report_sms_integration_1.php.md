@@ -19,6 +19,17 @@
 | **External REST APIs** | 1 |
 | **Risk Flags** | 1 |
 
+## Cross-Component System Linkages
+
+| Source Component | Linkage Direction | Target Component | Details / Context |
+| :--- | :---: | :--- | :--- |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: Configuration** | Custom Script 'sms_integration 1.php' operates on entity 'Configuration' |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'sms_integration 1.php' operates on entity 'ConnectAPIErrorBase' |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: NamedIDLabel** | Custom Script 'sms_integration 1.php' operates on entity 'NamedIDLabel' |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: Note** | Custom Script 'sms_integration 1.php' operates on entity 'Note' |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: NoteArray** | Custom Script 'sms_integration 1.php' operates on entity 'NoteArray' |
+| **CustomScript: sms_integration 1.php** | `->` | **OSVCObject: RNObject** | Custom Script 'sms_integration 1.php' operates on entity 'RNObject' |
+
 ## OSVC Data Objects Referenced
 
 - `Configuration`
