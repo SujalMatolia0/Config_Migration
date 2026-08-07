@@ -235,7 +235,7 @@ def fetch_rest_schemas():
             "success": False,
             "error": f"REST API Connection error: {str(err)}",
             "traceback": tb
-        }), 500
+        }), 200
 
 @app.route("/api/extract", methods=["POST"])
 def extract_files():
