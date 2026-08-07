@@ -188,6 +188,34 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
             "rows": rows
         })
 
+    preview_combined = []
+    for ws_data in parsed_workspaces:
+        bound_obj = ws_data.get("bound_object", "Contact")
+        enriched = _enrich_workspace_fields(ws_data.get("fields", []), parsed_objects, bound_obj)
+        rows = []
+        for item in enriched:
+            rows.append({
+                "bound_object": item["bound_object"],
+                "target_object": item["target_object"],
+                "object_field_name": item["obj_field_key"],
+                "field_label": item["field_label"],
+                "workspace_tab": item["location_tab"],
+                "required": item["required_fmt"],
+                "readonly": item["readonly_fmt"],
+                "data_type": item["data_type"],
+                "field_type": item["field_type"],
+                "is_nullable": item["is_nullable"],
+                "is_lookup": item["is_lookup"],
+                "max_length": item["max_length"],
+                "in_layout": "Yes"
+            })
+        preview_combined.append({
+            "workspace_name": ws_data["workspace_name"],
+            "bound_object": bound_obj,
+            "field_count": len(rows),
+            "rows": rows
+        })
+
     summary = {
         "workspace_count": len(parsed_workspaces),
         "object_count": len(parsed_objects),
@@ -201,7 +229,8 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
         "success": True,
         "summary": summary,
         "workspaces": preview_workspaces,
-        "objects": preview_objects
+        "objects": preview_objects,
+        "combined": preview_combined
     })
 
 @app.route("/api/download/<filename>")

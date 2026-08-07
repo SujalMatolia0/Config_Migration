@@ -633,6 +633,7 @@
                 <div class="tab-buttons">
                     <button class="tab-btn active" onclick="switchMainTab('workspaces')">Workspaces Preview</button>
                     <button class="tab-btn" onclick="switchMainTab('objects')">Objects Preview</button>
+                    <button class="tab-btn" onclick="switchMainTab('combined')">Combined Preview</button>
                 </div>
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -772,11 +773,19 @@
             container.innerHTML = '';
             if (!extractedData) return;
 
-            const list = activeMainTab === 'workspaces' ? extractedData.workspaces : extractedData.objects;
+            let list = [];
+            if (activeMainTab === 'workspaces') {
+                list = extractedData.workspaces || [];
+            } else if (activeMainTab === 'objects') {
+                list = extractedData.objects || [];
+            } else if (activeMainTab === 'combined') {
+                list = extractedData.combined || [];
+            }
+
             list.forEach((item, idx) => {
                 const btn = document.createElement('button');
                 btn.className = `sub-tab-btn ${idx === activeSubTabIdx ? 'active' : ''}`;
-                const name = activeMainTab === 'workspaces' ? item.workspace_name : item.object_name;
+                const name = item.workspace_name || item.object_name;
                 btn.innerText = `${name} (${item.field_count})`;
                 btn.onclick = () => {
                     activeSubTabIdx = idx;
@@ -796,9 +805,17 @@
 
             if (!extractedData) return;
 
-            const list = activeMainTab === 'workspaces' ? extractedData.workspaces : extractedData.objects;
+            let list = [];
+            if (activeMainTab === 'workspaces') {
+                list = extractedData.workspaces || [];
+            } else if (activeMainTab === 'objects') {
+                list = extractedData.objects || [];
+            } else if (activeMainTab === 'combined') {
+                list = extractedData.combined || [];
+            }
+
             if (!list || list.length === 0 || !list[activeSubTabIdx]) {
-                body.innerHTML = '<tr><td colspan="12" class="empty-state">No items available</td></tr>';
+                body.innerHTML = '<tr><td colspan="13" class="empty-state">No items available</td></tr>';
                 return;
             }
 
@@ -841,7 +858,7 @@
                     `;
                     body.appendChild(tr);
                 });
-            } else {
+            } else if (activeMainTab === 'objects') {
                 head.innerHTML = `
                     <tr>
                         <th>Field Key (Package$Name)</th>
@@ -868,6 +885,44 @@
                         <td><span class="badge ${r.is_readonly === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly}</span></td>
                         <td>${r.max_length}</td>
                         <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+            } else if (activeMainTab === 'combined') {
+                head.innerHTML = `
+                    <tr>
+                        <th>Bound Object</th>
+                        <th>Target Object</th>
+                        <th>Object Field Name</th>
+                        <th>Field Label</th>
+                        <th>Workspace Tab</th>
+                        <th>Required</th>
+                        <th>Read Only</th>
+                        <th>Data Type</th>
+                        <th>Field Type</th>
+                        <th>Is Nullable</th>
+                        <th>Is Lookup</th>
+                        <th>Max Length</th>
+                        <th>In Workspace Layout</th>
+                    </tr>
+                `;
+                rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const isCustom = r.field_type.includes('Custom');
+                    tr.innerHTML = `
+                        <td><strong>${r.bound_object}</strong></td>
+                        <td>${r.target_object}</td>
+                        <td><code>${r.object_field_name}</code></td>
+                        <td>${r.field_label}</td>
+                        <td>${r.workspace_tab}</td>
+                        <td>${r.required}</td>
+                        <td>${r.readonly}</td>
+                        <td>${r.data_type}</td>
+                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
+                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
+                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td>${r.max_length}</td>
+                        <td><span class="badge badge-yes">Yes</span></td>
                     `;
                     body.appendChild(tr);
                 });
