@@ -126,6 +126,21 @@ def _format_option(raw):
 
 _SYSTEM_PACKAGES = {"oracleservicecloud", "rightnow", ""}
 
+def _field_type(field_dict):
+    """
+    Returns a human-readable Field Type for a given object field dict.
+      - 'Custom (PackageName)'  if the field belongs to a custom package (e.g. C, CO, MY_PKG)
+      - 'System Field'          if it is a built-in OSVC system field (IsSystemField = True)
+      - 'OSVC Standard'         if it is an OSVC platform field but not IsSystemField = True
+    """
+    pkg = (field_dict.get("package_name") or "").strip()
+    is_system = field_dict.get("is_system_field", False)
+    if pkg.lower() not in _SYSTEM_PACKAGES:
+        return f"Custom ({pkg})"
+    if is_system:
+        return "System Field"
+    return "OSVC Standard"
+
 def _obj_field_key(field_dict):
     """
     Builds a lookup key for an object field as PackageName$Name.
@@ -206,24 +221,24 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
 
         if matched:
             data_type   = matched.get("data_type", "Text")
-            is_system   = "Yes" if matched.get("is_system_field") else "No"
-            is_nullable = "Yes" if matched.get("is_nullable")     else "No"
-            is_lookup   = "Yes" if matched.get("is_lookup")       else "No"
+            ftype       = _field_type(matched)
+            is_nullable = "Yes" if matched.get("is_nullable") else "No"
+            is_lookup   = "Yes" if matched.get("is_lookup")   else "No"
             max_len     = matched.get("max_length", "-")
             # Build the display field name: PackageName$Name
-            pkg  = (matched.get("package_name") or "").strip()
+            pkg   = (matched.get("package_name") or "").strip()
             fname = matched.get("field_name", "")
             if pkg.lower() in _SYSTEM_PACKAGES:
                 obj_field_key = fname
             else:
                 obj_field_key = f"{pkg}${fname}"
         else:
-            f_code      = wf.get("field_code", "")
-            data_type   = "Standard Data Field"
-            is_system   = "Yes"
-            is_nullable = "Yes"
-            is_lookup   = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
-            max_len     = "-"
+            f_code        = wf.get("field_code", "")
+            data_type     = "Standard Data Field"
+            ftype         = "System Field"
+            is_nullable   = "Yes"
+            is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
+            max_len       = "-"
             obj_field_key = raw_id  # keep raw as fallback
 
         item = dict(wf)
@@ -231,7 +246,7 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
             "target_object":  target_obj,
             "obj_field_key":  obj_field_key,
             "data_type":      data_type,
-            "is_system_field": is_system,
+            "field_type":     ftype,
             "is_nullable":    is_nullable,
             "is_lookup":      is_lookup,
             "max_length":     max_len,
@@ -258,7 +273,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     headers = [
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Location / Tab", "Required", "Read Only",
-        "Data Type", "Is System Field", "Is Nullable", "Is Lookup", "Max Length"
+        "Data Type", "Field Type", "Is Nullable", "Is Lookup", "Max Length"
     ]
 
     for ws_data in parsed_workspaces:
@@ -280,7 +295,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
                 item["required_fmt"],
                 item["readonly_fmt"],
                 item["data_type"],
-                item["is_system_field"],
+                item["field_type"],
                 item["is_nullable"],
                 item["is_lookup"],
                 item["max_length"],
@@ -303,7 +318,7 @@ def write_objects_excel(objects_map, output_path):
 
     headers = [
         "Field Key (Package$Name)", "Field Label",
-        "Data Type", "Is System Field", "Is Nullable", "Is Lookup",
+        "Data Type", "Field Type", "Is Nullable", "Is Lookup",
         "Is Read Only", "Max Length", "Description"
     ]
 
@@ -319,10 +334,10 @@ def write_objects_excel(objects_map, output_path):
                 key,
                 of.get("field_label", ""),
                 of.get("data_type", ""),
-                "Yes" if of.get("is_system_field") else "No",
-                "Yes" if of.get("is_nullable")     else "No",
-                "Yes" if of.get("is_lookup")       else "No",
-                "Yes" if of.get("is_readonly")     else "No",
+                _field_type(of),
+                "Yes" if of.get("is_nullable") else "No",
+                "Yes" if of.get("is_lookup")   else "No",
+                "Yes" if of.get("is_readonly") else "No",
                 of.get("max_length", "-"),
                 of.get("description", "")
             ])
@@ -344,7 +359,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
     headers = [
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Workspace Tab", "Required", "Read Only",
-        "Data Type", "Is System Field", "Is Nullable",
+        "Data Type", "Field Type", "Is Nullable",
         "Is Lookup", "Max Length", "In Workspace Layout"
     ]
 
@@ -367,7 +382,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
                 item["required_fmt"],
                 item["readonly_fmt"],
                 item["data_type"],
-                item["is_system_field"],
+                item["field_type"],
                 item["is_nullable"],
                 item["is_lookup"],
                 item["max_length"],
