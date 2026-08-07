@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script handles **SMS Webhook Integration**. It receives XML POST payloads (`php://input`), authenticates integration agent credentials via `AgentAuthenticator::authenticateCredentials()`, parses customer response keywords (`YES` / `OUI`), updates Contact preferred language custom fields, and dispatches SMS subscription confirmations.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "Configuration",
     "ConnectAPIErrorBase",

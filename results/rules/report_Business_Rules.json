@@ -135,7 +135,7 @@
         "vsp_inc_unassigned"
       ],
       "process_scripts_invoked": [
-        "duplicate_contacts"
+        "duplicate_contacts.php"
       ],
       "custom_fields_referenced": [
         "Agent Re-Open Date",
@@ -41115,7 +41115,7 @@
             "contact_update"
           ],
           "process_scripts_invoked": [
-            "duplicate_contacts"
+            "duplicate_contacts.php"
           ],
           "state_transitions": [],
           "custom_fields_referenced": []

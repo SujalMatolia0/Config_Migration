@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script provides **Address Validation & Geocoding Service**. It interacts with external REST APIs (ArcGIS / CityWorks Geocoding Service), queries OSVC Configuration settings, and validates customer street address inputs.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "Configuration",
     "ConnectAPIErrorBase",

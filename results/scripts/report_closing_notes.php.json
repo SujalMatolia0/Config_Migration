@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script performs **Incident Closing Notes Management**. It retrieves Incident records via Connect PHP API, instantiates `RNCPHP\\Note` objects, appends resolution notes, and updates incident statuses upon closure.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "Account",
     "ConnectAPI",

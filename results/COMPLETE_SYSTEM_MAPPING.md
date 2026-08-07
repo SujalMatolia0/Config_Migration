@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-07 13:49:53  
+**Generated**: 2026-08-07 14:20:03  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -17,10 +17,7 @@
 | BUI Add-Ins | 2 | Archive Extracted |
 | Custom Objects & Entities | 6 | Schema Mapped |
 | External Integration Endpoints | 20 | Endpoint Extracted |
-| Orphaned Components | 6 | Audit Flagged |
-
-> [!WARNING]
-> **6 Orphaned Component(s) Flagged**: Custom scripts or components exist in dataset with zero active workspace or CPM bindings.
+| Orphaned Components | 0 | Audit Flagged |
 
 > [!IMPORTANT]
 > **20 External HTTP Integration Endpoints Detected**: Outbound web calls to external REST/SOAP servers require security verification.
@@ -30,14 +27,7 @@
 
 ## Audit-Critical Orphaned Components
 
-| Component Name / ID | Type | Associated Object | Linkage Count | Audit Risk Flag & Reason |
-| :--- | :--- | :--- | :---: | :--- |
-| `bluebox_greencart_validation.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `callcheck.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `closing_notes.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `duplicate_incidents.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `eventclock.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
-| `sms_integration 1.php` | `CustomScript` | **General** | `0 in, 0 out` | `Not imported or called by any Workspace Rule, BUI Add-In, CPM, or Custom Script` |
+*No orphaned components detected. All components are actively referenced.*
 
 ## Consolidated Entity Module Inventory
 
@@ -67,20 +57,20 @@ flowchart LR
 | `real_edge_02_new_workspace_patterns` | `workspace` | `1 in -> 6 out` | Bound Object: `Contact` | 0 fields, 5 tabs, 1 rules |
 | `real_edge_03_split_panel_contact` | `workspace` | `3 in -> 4 out` | Bound Object: `Contact` | 9 fields, 5 tabs, 1 rules |
 | `Contacts` | `report` | `5 in -> 0 out` | Report AC_ID: `100008` | 13 columns, 0 tables joined |
-| `contact_create` | `cpm` | `5 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `contact_create` | `cpm` | `5 in -> 1 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_create_internal` | `cpm` | `5 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
-| `contact_update` | `cpm` | `5 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
+| `contact_update` | `cpm` | `5 in -> 1 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `contact_update_internal` | `cpm` | `6 in -> 0 out` | Trigger: `Update` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `ContactAsync` | `asynccpm` | `4 in -> 1 out` | Trigger: `Update` | Async Execution | Entry: `ObjectProcedure::apply` |
 | `callcheck.php` | `customscript` | `0 in -> 0 out` | PHP Script: `callcheck.php` | 0 functions |
 | `cityworksapicall.php` | `customscript` | `0 in -> 1 out` | PHP Script: `cityworksapicall.php` | 0 functions |
-| `duplicate_contacts.php` | `customscript` | `4 in -> 0 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
+| `duplicate_contacts.php` | `customscript` | `6 in -> 1 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
 | `sms_integration 1.php` | `customscript` | `0 in -> 0 out` | PHP Script: `sms_integration 1.php` | 0 functions |
 | `ContactOrgLookupBUIAddin` | `buiaddin` | `4 in -> 10 out` | BUI Extension: `ContactOrgLookupBUIAddin` | Entry: `init.html` | Reads: 6, Writes: 5 |
 | `Contact.CId` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
 | `Contact.CustomFields.c$org_id_temp` | `workspacefield` | `3 in -> 0 out` | Custom Field (c$) | Data Type: `Data Field` |
 | `Contact.Email` | `workspacefield` | `3 in -> 0 out` | Standard Field | Data Type: `Data Field` |
-| `Contact Business Rules` | `businessrule` | `2 in -> 5 out` | OSVC Component ID: `businessrule:contact business rules` |
+| `Contact Business Rules` | `businessrule` | `2 in -> 6 out` | OSVC Component ID: `businessrule:contact business rules` |
 | `http://209.91.135.228/api/listactivecalls/` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:http://209.91.135.228/api/listactivecalls/` |
 | `https://siebel.enterprise.com/ContactSyncService` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:https://siebel.enterprise.com/contactsyncservice` |
 | `https://siebel.enterprise.com/ContactUpdateService` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:https://siebel.enterprise.com/contactupdateservice` |
@@ -162,7 +152,7 @@ flowchart LR
 | `incident_back_in_stock_sync` | `cpm` | `4 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_create` | `cpm` | `3 in -> 0 out` | Trigger: `Create` | Synchronous Execution | Entry: `ObjectProcedure::apply` |
 | `incident_routing` | `asynccpm` | `4 in -> 1 out` | Trigger: `Create, Update` | Async Execution | Entry: `ObjectProcedure::apply` |
-| `address_validation.php` | `customscript` | `1 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
+| `address_validation.php` | `customscript` | `3 in -> 0 out` | PHP Script: `address_validation.php` | 0 functions |
 | `bluebox_greencart_validation.php` | `customscript` | `0 in -> 0 out` | PHP Script: `bluebox_greencart_validation.php` | 0 functions |
 | `child_incident_create.php` | `customscript` | `2 in -> 1 out` | PHP Script: `child_incident_create.php` | 0 functions |
 | `closing_notes.php` | `customscript` | `0 in -> 0 out` | PHP Script: `closing_notes.php` | 0 functions |
@@ -358,9 +348,9 @@ flowchart LR
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | `Mappings.xml` | **General / Unassigned** | `Event Handler` | Synchronous Execution | `ObjectProcedure::apply` | `0 in -> 0 out` |
 | `ContactAsync` | **General / Unassigned** | `Update` | Async Execution | `ObjectProcedure::apply` | `4 in -> 1 out` |
-| `contact_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
+| `contact_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 1 out` |
 | `contact_create_internal` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
-| `contact_update` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 0 out` |
+| `contact_update` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `5 in -> 1 out` |
 | `contact_update_internal` | **General / Unassigned** | `Update` | Synchronous Execution | `ObjectProcedure::apply` | `6 in -> 0 out` |
 | `incident_back_in_stock_sync` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `4 in -> 0 out` |
 | `incident_create` | **General / Unassigned** | `Create` | Synchronous Execution | `ObjectProcedure::apply` | `3 in -> 0 out` |
@@ -384,8 +374,8 @@ flowchart LR
 | `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/queryResults (Organizations)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
@@ -451,11 +441,13 @@ flowchart LR
 | **CPM: contact_create** | `Linkage` | `CustomField: c$loyalty_tier` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_create_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
@@ -530,8 +522,39 @@ flowchart LR
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: bluebox_greencart_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
+| **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
 | **CustomScript: child_incident_create.php** | `Linkage` | `CustomScript: include/init.phph` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: Banner` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: GroupAccount` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: NamedIDOptList` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: StatusWithType` | Cross-Component Mapping |
 | **CustomScript: cityworksapicall.php** | `Linkage` | `CustomScript: include/init.phph` | Cross-Component Mapping |
+| **CustomScript: cityworksapicall.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: cityworksapicall.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: AnalyticsReport` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: CO` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: duplicate_incidents.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: eventclock.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Note` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NoteArray` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
 
 ### Other Cross-Component Linkages Linkages
 
@@ -542,6 +565,7 @@ flowchart LR
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: inc_cancelOrderProcessStart` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ocr_get_fax_number` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: IncidentFCR` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: dedup_rx_incidents_sync` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: gbl_con_region_assoc` | Cross-Component Mapping |

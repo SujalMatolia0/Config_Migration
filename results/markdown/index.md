@@ -1,6 +1,6 @@
 # OSVC Configuration Master Index
 
-**Generated**: 2026-08-07 13:49:53  
+**Generated**: 2026-08-07 14:20:03  
 **Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  
 
 > [!NOTE]
@@ -195,11 +195,13 @@ The following shared reports and resources are referenced across multiple worksp
 | **CPM: contact_create** | `Linkage` | `CustomField: c$loyalty_tier` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
+| **CPM: contact_create** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **CPM: contact_create** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_create_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `ConfigSetting: CUSTOM_CFG_SIEBEL_HOST` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `CustomField: c$vip_status` | Cross-Component Mapping |
+| **CPM: contact_update** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
 | **CPM: contact_update** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `CustomField: c$org_id_temp` | Cross-Component Mapping |
 | **CPM: contact_update_internal** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
@@ -274,8 +276,39 @@ The following shared reports and resources are referenced across multiple worksp
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
+| **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: bluebox_greencart_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
+| **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
 | **CustomScript: child_incident_create.php** | `Linkage` | `CustomScript: include/init.phph` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: Banner` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: GroupAccount` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: NamedIDOptList` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
+| **CustomScript: child_incident_create.php** | `Linkage` | `OSVCObject: StatusWithType` | Cross-Component Mapping |
 | **CustomScript: cityworksapicall.php** | `Linkage` | `CustomScript: include/init.phph` | Cross-Component Mapping |
+| **CustomScript: cityworksapicall.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: cityworksapicall.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
+| **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: AnalyticsReport` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: CO` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: duplicate_incidents.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: eventclock.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Note` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NoteArray` | Cross-Component Mapping |
+| **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
 
 ### Other Cross-Component Linkages Linkages
 
@@ -286,6 +319,7 @@ The following shared reports and resources are referenced across multiple worksp
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: contact_update` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: inc_cancelOrderProcessStart` | Cross-Component Mapping |
 | **BusinessRule: Contact Business Rules** | `Linkage` | `CPM: ocr_get_fax_number` | Cross-Component Mapping |
+| **BusinessRule: Contact Business Rules** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: IncidentFCR` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: dedup_rx_incidents_sync` | Cross-Component Mapping |
 | **BusinessRule: Incident Business Rules** | `Linkage` | `CPM: gbl_con_region_assoc` | Cross-Component Mapping |

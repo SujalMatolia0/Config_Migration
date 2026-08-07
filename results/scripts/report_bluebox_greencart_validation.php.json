@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "ConnectAPIErrorBase"
   ],

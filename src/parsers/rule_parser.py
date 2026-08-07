@@ -166,9 +166,9 @@ def parse_rule_csv_file(file_path):
                 cpm_handlers.append(h_name)
                 cpm_handlers_set.add(h_name)
 
-            # Extract Process Scripts: "Execute Process Script (\w+)"
+            # Extract Process Scripts: "Execute Process Script (\w+)" or "RunScript (\w+)"
             process_scripts = []
-            for m in re.finditer(r"Execute Process Script\s+([\w_]+)", act_raw, re.IGNORECASE):
+            for m in re.finditer(r"(?:Execute Process Script|RunScript|Execute Script)\s+([\w_\.-]+)", act_raw, re.IGNORECASE):
                 s_name = m.group(1).strip()
                 process_scripts.append(s_name)
                 process_scripts_set.add(s_name)

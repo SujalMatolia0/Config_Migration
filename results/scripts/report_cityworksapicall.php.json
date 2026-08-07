@@ -5,6 +5,7 @@
   "imports": [
     "include/init.phph"
   ],
+  "report_ids": [],
   "osvc_objects": [
     "Configuration",
     "ConnectAPI"

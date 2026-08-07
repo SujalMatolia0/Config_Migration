@@ -216,7 +216,7 @@ def map_relationships(components):
                     "via":  f"Nav Item '{label}' ({item_type})"
                 })
 
-    # ── 4. Custom Scripts → Other Custom Scripts ───────────────────────────
+    # ── 4. Custom Scripts → Other Custom Scripts, Reports & Objects ─────────
     for script in scripts:
         script_name = script.get("file_name")
         for imp in script.get("imports", []):
@@ -228,6 +228,24 @@ def map_relationships(components):
                 "to":   {"type": "CustomScript", "name": imported},
                 "via":  f"import/require: '{imp}'"
             })
+
+        for rid in script.get("report_ids", []):
+            str_rid = str(rid)
+            ref_rep = reports_by_id.get(str_rid)
+            rep_name = ref_rep.get("name") if ref_rep else f"Report {rid}"
+            relationships.append({
+                "from": {"type": "CustomScript", "name": script_name},
+                "to":   {"type": "Report", "id": str_rid, "name": rep_name},
+                "via":  f"Custom Script '{script_name}' -> Report Dependency (Report ID: {rid})"
+            })
+
+        for obj in script.get("osvc_objects", []):
+            if obj not in ("v1_1", "v1_3", "v1_4", "ConnectAPIError", "ROQL", "RightNow Client Framework"):
+                relationships.append({
+                    "from": {"type": "CustomScript", "name": script_name},
+                    "to":   {"type": "OSVCObject", "name": obj},
+                    "via":  f"Custom Script '{script_name}' operates on entity '{obj}'"
+                })
 
     # ── 5. CPM Procedures ──────────────────────────────────────────────────
     for cpm in cpm_handlers:
@@ -303,6 +321,17 @@ def map_relationships(components):
                         "via":  f"Custom Field '{cf}' read by CPM → matches report column"
                     })
 
+            # 5f. CPM procedure imports → CustomScript
+            for imp in cpm.get("imports", []):
+                imp_base = os.path.basename(imp).lower()
+                ref = scripts_by_name.get(imp_base)
+                script_name = ref.get("file_name") if ref else imp
+                relationships.append({
+                    "from": {"type": "CPM", "name": cpm_name},
+                    "to":   {"type": "CustomScript", "name": script_name},
+                    "via":  f"CPM Procedure '{cpm_name}' requires Custom Script '{script_name}'"
+                })
+
         elif cpm_format == "cpm_mappings":
             for m in cpm.get("mappings", []):
                 p_name   = m.get("procedure")
@@ -331,6 +360,16 @@ def map_relationships(components):
                     "from": {"type": "BusinessRule", "name": br_node_name, "module": obj_name},
                     "to":   {"type": "CPM", "name": h, "module": obj_name},
                     "via":  f"{obj_name} Business Rule triggers CPM Handler '{h}'"
+                })
+
+            for ps in r.get("process_scripts_invoked", []):
+                ps_base = os.path.basename(ps).lower()
+                ref = scripts_by_name.get(ps_base) or scripts_by_name.get(f"{ps_base}.php")
+                script_name = ref.get("file_name") if ref else ps
+                relationships.append({
+                    "from": {"type": "BusinessRule", "name": br_node_name, "module": obj_name},
+                    "to":   {"type": "CustomScript", "name": script_name, "module": obj_name},
+                    "via":  f"{obj_name} Business Rule executes Custom Script '{script_name}'"
                 })
 
     # ── 6. Reports → OSVC Tables ───────────────────────────────────────────

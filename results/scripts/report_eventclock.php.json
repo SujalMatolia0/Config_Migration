@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script calculates **Incident SLA Clocks & Response Timers**. It calculates elapsed handling times, monitors response deadlines, and updates SLA milestone tracking fields.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "ConnectAPIErrorBase",
     "ROQL"

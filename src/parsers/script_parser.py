@@ -156,6 +156,10 @@ def parse_script_file(file_path):
             if "schemas/dbaudit" not in u and "rightnow.com" not in u and u not in urls:
                 urls.append(u)
 
+        # Extract Analytics Report IDs
+        report_ids_raw = re.findall(r'(?:AnalyticsReport::fetch|runReport|report_id|AcId|SearchReportId|report\s*id)\D*(\d{4,6})', content, re.IGNORECASE)
+        report_ids = sorted(list(set([int(r) for r in report_ids_raw])))
+
         # Exposed routes/endpoints
         route_matches = re.findall(r'public\s+function\s+(action\w+)\s*\(', content, re.IGNORECASE)
         for route in route_matches:
@@ -783,6 +787,7 @@ def parse_script_file(file_path):
         "script_type": script_type,
         "summary": summary,
         "imports": imports,
+        "report_ids": report_ids if 'report_ids' in locals() else [],
         "osvc_objects": osvc_objects,
         "external_calls": external_calls,
         "urls": urls,

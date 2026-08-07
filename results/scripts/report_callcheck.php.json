@@ -3,6 +3,7 @@
   "script_type": "Server-side Utility",
   "summary": "This script performs **Active Telephony Call Verification**. It validates agent session tokens, queries an external telephony REST API (`http://209.91.135.228/api/listactivecalls/`), and matches active caller numbers against OSVC Contact accounts for screen-pop automation.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "Account",
     "Configuration"

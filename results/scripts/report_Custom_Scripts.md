@@ -12,7 +12,7 @@
 | `child_incident_create.php` | Server-side Utility | 1 | 0 | 0 | [OK] |
 | `cityworksapicall.php` | Server-side Utility | 3 | 0 | 1 | [OK] |
 | `closing_notes.php` | Server-side Utility | 2 | 0 | 0 | [OK] |
-| `duplicate_contacts.php` | Server-side Utility | 8 | 0 | 0 | [OK] |
+| `duplicate_contacts.php` | Server-side Utility | 9 | 0 | 0 | [OK] |
 | `duplicate_incidents.php` | Server-side Utility | 3 | 0 | 0 | [OK] |
 | `eventclock.php` | Server-side Utility | 2 | 0 | 0 | [OK] |
 | `sms_integration 1.php` | Server-side Utility | 5 | 1 | 1 | [RISK: 1] |
@@ -70,11 +70,12 @@
 
 ### Script: `duplicate_contacts.php` (Server-side Utility)
 
-- **Internal APIs (ROQL/Connect):** 8
+- **Internal APIs (ROQL/Connect):** 9
 - **External SOAP APIs:** 0
 - **External REST APIs:** 0
-- **OSVC Objects:** `CO`, `ConnectAPIErrorBase`, `Contact`, `ROQL`
-- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`
+- **Imports:** `address_validation.php`
+- **OSVC Objects:** `AnalyticsReport`, `CO`, `ConnectAPIErrorBase`, `Contact`, `ROQL`
+- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`
 
 ### Script: `duplicate_incidents.php` (Server-side Utility)
 
@@ -82,7 +83,7 @@
 - **External SOAP APIs:** 0
 - **External REST APIs:** 0
 - **OSVC Objects:** `ConnectAPIErrorBase`, `ROQL`
-- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`
+- **URLs / Endpoints:** `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js`, `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css`, `https://use.fontawesome.com/releases/v5.1.1/css/all.css`
 
 ### Script: `eventclock.php` (Server-side Utility)
 

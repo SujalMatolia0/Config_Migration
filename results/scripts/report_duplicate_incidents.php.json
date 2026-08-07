@@ -3,14 +3,15 @@
   "script_type": "Server-side Utility",
   "summary": "This script handles **Duplicate Incident Detection**. It validates agent session ID, parses support ticket parameters (`subject`, `contact_id`, `category`), and executes ROQL queries against `Incident` and `CO.PotentialDuplicate` tables to identify matching open or historical support tickets.",
   "imports": [],
+  "report_ids": [],
   "osvc_objects": [
     "ConnectAPIErrorBase",
     "ROQL"
   ],
   "external_calls": [],
   "urls": [
-    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
     "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
+    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
     "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
   ],
   "exposed_routes": [],
