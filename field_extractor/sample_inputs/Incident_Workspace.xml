@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Workspace Type="Incident" UIType="Incident">
+    <Table RowCount="10" ColumnCount="2">
+        <TabSet>
+            <Tab Text="Incident Details">
+                <Table>
+                    <Field Row="0" Column="0" ObjectId="Incident" FieldId="Subject" RequiredOption="Yes" ReadOnlyOption="No" />
+                    <Field Row="0" Column="1" ObjectId="Incident" FieldId="Queue" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="1" Column="0" ObjectId="Incident" FieldId="Status" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="1" Column="1" ObjectId="Incident" FieldId="Severity" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="2" Column="0" ObjectId="Incident" FieldId="Category" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="2" Column="1" ObjectId="Incident" FieldId="Product" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="3" Column="0" ObjectId="Incident" FieldId="Disposition" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="3" Column="1" ObjectId="Incident" FieldId="AssignedTo" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="4" Column="0" ObjectId="Incident" FieldId="CustomFields.c$priority_override" RequiredOption="No" ReadOnlyOption="No" />
+                    <Field Row="4" Column="1" ObjectId="Incident" FieldId="CustomFields.c$sla_breach_flag" RequiredOption="No" ReadOnlyOption="No" />
+                </Table>
+            </Tab>
+        </TabSet>
+    </Table>
+</Workspace>

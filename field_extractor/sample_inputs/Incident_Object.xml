@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CustomObject Id="2" Name="Incident" CoLabel="Incident" Description="Incident Standard and Custom Entity Schema">
+    <Package Name="OracleServiceCloud" Id="1" />
+    <Fields>
+        <Field Id="1" Label="Subject" Name="Subject" DataTypeName="Text" DataType="2" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="240" />
+        <Field Id="2" Label="Queue" Name="Queue" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="3" Label="Status" Name="Status" DataTypeName="Menu" DataType="6" IsNullable="False" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="4" Label="Severity" Name="Severity" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="5" Label="Category" Name="Category" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="6" Label="Product" Name="Product" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="7" Label="Disposition" Name="Disposition" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="8" Label="Assigned To" Name="AssignedTo" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="True" IsCoReadOnly="False" IsSystemField="True" />
+        <Field Id="9" Label="Date Created" Name="Created" DataTypeName="Date Time" DataType="5" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="True" IsSystemField="True" />
+        <Field Id="10" Label="Date Updated" Name="Updated" DataTypeName="Date Time" DataType="5" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="True" IsSystemField="True" />
+        <Field Id="11" Label="Priority Override" Name="priority_override" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
+        <Field Id="12" Label="SLA Breach Flag" Name="sla_breach_flag" DataTypeName="Yes/No" DataType="3" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
+        <Field Id="13" Label="Resolution Code" Name="resolution_code" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
+    </Fields>
+</CustomObject>
