@@ -602,7 +602,7 @@ def write_objects_excel(objects_map, output_path):
 
 def write_combined_excel(parsed_workspaces, objects_map, output_path):
     """
-    combined.xlsx — one tab per workspace.
+    field_catalog.xlsx — one tab per workspace.
     Tab name = workspace name. Fields enriched with all workspace + object schema metadata (Standard & Custom).
     """
     wb = openpyxl.Workbook()
@@ -664,3 +664,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
 
     wb.save(output_path)
     return output_path
+
+
+write_field_catalog_excel = write_combined_excel
+

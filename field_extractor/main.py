@@ -110,7 +110,7 @@ def main():
     std_xlsx  = os.path.join(output_dir, "standard_objects.xlsx")
     cst_xlsx  = os.path.join(output_dir, "custom_objects.xlsx")
     ws_xlsx   = os.path.join(output_dir, "workspaces.xlsx")
-    comb_xlsx = os.path.join(output_dir, "combined.xlsx")
+    comb_xlsx = os.path.join(output_dir, "field_catalog.xlsx")
 
     # Separate standard objects and custom objects maps
     std_map = {k: v for k, v in objects_map.items() if '.' not in k}
@@ -128,7 +128,7 @@ def main():
     print(f"[SUCCESS] workspaces.xlsx       -> {ws_xlsx}")
 
     write_combined_excel(parsed_workspaces, objects_map, comb_xlsx)
-    print(f"[SUCCESS] combined.xlsx         -> {comb_xlsx}")
+    print(f"[SUCCESS] field_catalog.xlsx    -> {comb_xlsx}")
 
     print("==========================================================================")
     print(f"Done. Reports written to: {output_dir}")

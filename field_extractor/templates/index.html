@@ -8,501 +8,509 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        /* Same design system as OSVC Configuration Accelerator root */
         :root {
-            --bg-base: #0B0F19;
-            --bg-surface: #131B2E;
-            --bg-card: #1B2640;
-            --bg-card-hover: #223050;
-            --border-color: #2D3D66;
-            --accent-primary: #3B82F6;
-            --accent-glow: rgba(59, 130, 246, 0.35);
-            --accent-cyan: #06B6D4;
-            --accent-green: #10B981;
-            --accent-purple: #8B5CF6;
-            --text-primary: #F3F4F6;
-            --text-secondary: #9CA3AF;
-            --text-muted: #6B7280;
-            --radius-lg: 16px;
-            --radius-md: 10px;
-            --radius-sm: 6px;
+            --bg-main:        #FDFBF7;
+            --bg-card:        #FFFFFF;
+            --border-color:   rgba(153, 0, 38, 0.15);
+            --border-accent:  #990026;
+            --text-main:      #2C070B;
+            --text-muted:     #7A4047;
+            --accent-primary: #990026;
+            --accent-warning: #B91C1C;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-primary);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            line-height: 1.5;
         }
 
+        /* ── Header ── */
         header {
-            background: rgba(19, 27, 46, 0.85);
+            background: rgba(253, 251, 247, 0.95);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 32px;
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .brand { display: flex; align-items: center; gap: 12px; }
 
         .brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-cyan));
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px var(--accent-glow);
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #990026, #660019);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(153, 0, 38, 0.35);
+            flex-shrink: 0;
         }
 
         .brand-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #FFFFFF, #93C5FD);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #990026;
         }
 
         .brand-badge {
-            font-size: 0.75rem;
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--accent-primary);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #990026, #660019);
+            color: #FFFDF5;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
             letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
+        .header-actions { display: flex; gap: 10px; }
 
+        /* ── Buttons ── */
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 10px 18px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: var(--radius-md);
-            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
             text-decoration: none;
+            font-family: var(--font-sans);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), #2563EB);
-            color: #FFFFFF;
-            box-shadow: 0 4px 14px var(--accent-glow);
+            background: linear-gradient(135deg, #990026, #660019);
+            color: #FFFDF5;
+            box-shadow: 0 4px 14px rgba(153, 0, 38, 0.35);
         }
-
         .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(153, 0, 38, 0.5);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px var(--accent-glow);
         }
 
         .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
+            background: #F3ECE0;
+            border-color: rgba(153, 0, 38, 0.2);
+            color: #2C070B;
         }
-
         .btn-secondary:hover {
-            background: var(--bg-card-hover);
+            background: #EAE0D0;
             border-color: var(--accent-primary);
         }
 
         .btn-sample {
-            background: rgba(139, 92, 246, 0.15);
-            color: #C4B5FD;
-            border: 1px solid rgba(139, 92, 246, 0.4);
+            background: rgba(153, 0, 38, 0.08);
+            border-color: rgba(153, 0, 38, 0.25);
+            color: #990026;
         }
-
         .btn-sample:hover {
-            background: rgba(139, 92, 246, 0.25);
-            border-color: #8B5CF6;
+            background: rgba(153, 0, 38, 0.15);
+            border-color: #990026;
         }
 
+        /* ── Layout ── */
         main {
             flex: 1;
             max-width: 1400px;
             width: 100%;
             margin: 0 auto;
-            padding: 32px;
+            padding: 28px 24px;
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            gap: 24px;
         }
 
         .grid-dual {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px;
+            gap: 20px;
         }
-
         @media (max-width: 900px) {
-            .grid-dual {
-                grid-template-columns: 1fr;
-            }
+            .grid-dual { grid-template-columns: 1fr; }
         }
 
+        /* ── Cards ── */
         .card {
-            background: var(--bg-surface);
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 24px;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 16px rgba(153, 0, 38, 0.04);
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            border-color: var(--border-accent);
+            box-shadow: 0 8px 24px rgba(153, 0, 38, 0.10);
         }
 
         .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 15px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #2C070B;
+            display: flex; align-items: center; gap: 9px;
         }
 
+        /* ── Dropzone ── */
         .dropzone {
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 32px 20px;
+            border: 2px dashed rgba(153, 0, 38, 0.3);
+            background: #FAF5ED;
+            border-radius: 10px;
+            padding: 28px 18px;
             text-align: center;
-            background: rgba(11, 15, 25, 0.4);
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
         }
-
         .dropzone:hover, .dropzone.dragover {
             border-color: var(--accent-primary);
-            background: rgba(59, 130, 246, 0.05);
+            background: #F5EBE0;
         }
-
         .dropzone input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; opacity: 0; cursor: pointer;
         }
-
         .dropzone-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            color: var(--text-muted);
-            transition: color 0.2s ease;
-        }
-
-        .dropzone:hover .dropzone-icon {
+            width: 44px; height: 44px;
+            margin: 0 auto 10px;
             color: var(--accent-primary);
+            transition: color 0.2s;
         }
 
+        /* ── File list ── */
         .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 140px;
-            overflow-y: auto;
+            display: flex; flex-direction: column;
+            gap: 6px; max-height: 130px; overflow-y: auto;
         }
-
         .file-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-card);
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            background: #FAF5ED;
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid rgba(153, 0, 38, 0.12);
         }
 
+        /* ── Process bar ── */
         .process-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-surface);
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 20px 32px;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 16px rgba(153, 0, 38, 0.04);
         }
 
+        /* ── Stats grid ── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            gap: 14px;
         }
-
         @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .stat-card {
-            background: var(--bg-surface);
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            border-radius: 10px;
+            padding: 18px;
+            display: flex; flex-direction: column; gap: 5px;
+            box-shadow: 0 2px 8px rgba(153, 0, 38, 0.04);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-
+        .stat-card:hover {
+            border-color: var(--border-accent);
+            box-shadow: 0 4px 16px rgba(153, 0, 38, 0.10);
+        }
         .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            color: var(--text-muted);
         }
-
         .stat-val {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 800;
-            color: #FFFFFF;
+            color: var(--accent-primary);
         }
 
+        /* ── Results section ── */
         .results-section {
-            background: var(--bg-surface);
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 4px 16px rgba(153, 0, 38, 0.04);
         }
 
+        /* ── Main tab buttons ── */
         .tabs-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--bg-card);
-            padding: 12px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: #F5EEE2;
+            padding: 10px 20px;
             border-bottom: 1px solid var(--border-color);
         }
 
-        .tab-buttons {
-            display: flex;
-            gap: 8px;
-        }
+        .tab-buttons { display: flex; gap: 6px; }
 
         .tab-btn {
             background: transparent;
             border: none;
-            color: var(--text-secondary);
-            padding: 8px 16px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s;
+            font-family: var(--font-sans);
         }
-
         .tab-btn:hover {
-            color: var(--text-primary);
-            background: rgba(255, 255, 255, 0.05);
+            background: #EAE0D0;
+            color: #2C070B;
         }
-
         .tab-btn.active {
-            color: #FFFFFF;
-            background: var(--accent-primary);
+            background: linear-gradient(135deg, #990026, #660019);
+            color: #FFFDF5;
+            box-shadow: 0 2px 8px rgba(153, 0, 38, 0.3);
         }
 
-        .search-box {
-            position: relative;
-            width: 260px;
-        }
-
+        /* ── Search box ── */
+        .search-box { position: relative; width: 240px; }
         .search-box input {
             width: 100%;
-            background: var(--bg-base);
+            background: var(--bg-main);
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            padding: 8px 12px 8px 36px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
+            border-radius: 6px;
+            padding: 7px 12px 7px 32px;
+            color: var(--text-main);
+            font-size: 13px;
             outline: none;
+            font-family: var(--font-sans);
+            transition: border-color 0.2s;
         }
-
-        .search-box input:focus {
-            border-color: var(--accent-primary);
-        }
-
+        .search-box input:focus { border-color: var(--accent-primary); }
+        .search-box input::placeholder { color: var(--text-muted); }
         .search-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
+            position: absolute; left: 10px; top: 50%;
             transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: var(--text-muted);
+            width: 14px; height: 14px; color: var(--text-muted);
         }
 
+        /* ── Sub-tabs ── */
         .sub-tabs {
-            display: flex;
-            gap: 8px;
-            padding: 12px 24px;
-            background: rgba(11, 15, 25, 0.5);
+            display: flex; gap: 6px;
+            padding: 10px 20px;
+            background: #FAF5ED;
             border-bottom: 1px solid var(--border-color);
             overflow-x: auto;
         }
-
         .sub-tab-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            border-radius: 14px;
+            background: #F3ECE0;
+            border: 1px solid rgba(153, 0, 38, 0.15);
+            color: var(--text-muted);
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.2s ease;
+            transition: all 0.15s;
+            font-family: var(--font-sans);
         }
-
         .sub-tab-btn:hover {
+            background: #EAE0D0;
             border-color: var(--accent-primary);
-            color: var(--text-primary);
+            color: #2C070B;
         }
-
         .sub-tab-btn.active {
-            background: rgba(59, 130, 246, 0.2);
+            background: var(--accent-primary);
             border-color: var(--accent-primary);
-            color: #FFFFFF;
-            font-weight: 600;
+            color: #FFFDF5;
         }
 
+        /* ── Table ── */
         .table-container {
             overflow-x: auto;
             max-height: 500px;
             overflow-y: auto;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 13px;
             text-align: left;
         }
-
         th {
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            font-weight: 600;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            background: #F5EEE2;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 14px;
+            border-bottom: 2px solid rgba(153, 0, 38, 0.15);
+            position: sticky; top: 0; z-index: 10;
             white-space: nowrap;
         }
-
         td {
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(45, 61, 102, 0.4);
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(153, 0, 38, 0.08);
+            color: var(--text-main);
             white-space: nowrap;
         }
+        tr:hover td { background: rgba(153, 0, 38, 0.02); }
 
-        tr:nth-child(even) {
-            background: rgba(27, 38, 64, 0.4);
-        }
-
-        tr:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-
+        /* ── Badges ── */
         .badge {
             display: inline-block;
             padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid transparent;
         }
-
         .badge-custom {
-            background: rgba(139, 92, 246, 0.2);
-            color: #C4B5FD;
-            border: 1px solid rgba(139, 92, 246, 0.4);
+            background: rgba(153, 0, 38, 0.08);
+            color: #990026;
+            border-color: rgba(153, 0, 38, 0.25);
         }
-
         .badge-system {
-            background: rgba(59, 130, 246, 0.2);
-            color: #93C5FD;
-            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: rgba(185, 28, 28, 0.08);
+            color: #B91C1C;
+            border-color: rgba(185, 28, 28, 0.25);
         }
-
         .badge-yes {
-            background: rgba(16, 185, 129, 0.15);
-            color: #6EE7B7;
+            background: rgba(21, 128, 61, 0.08);
+            color: #15803D;
+            border-color: rgba(21, 128, 61, 0.2);
         }
-
         .badge-no {
-            background: rgba(107, 114, 128, 0.2);
-            color: #9CA3AF;
+            background: #F3ECE0;
+            color: var(--text-muted);
+            border-color: rgba(153, 0, 38, 0.1);
         }
 
+        /* ── Console / log box ── */
+        .console-box {
+            background: #1C0307;
+            border: 1px solid rgba(153, 0, 38, 0.3);
+            border-radius: 8px;
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #F5D5DA;
+            height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .log-info    { color: #F5D5DA; }
+        .log-success { color: #6EE7B7; font-weight: 600; }
+        .log-warning { color: #FCD34D; }
+        .log-error   { color: #FCA5A5; font-weight: 600; }
+
+        /* ── Form inputs ── */
+        .form-input {
+            width: 100%;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            font-family: var(--font-sans);
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: var(--accent-primary); }
+        .form-input::placeholder { color: var(--text-muted); }
+
+        label.form-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ── Empty state ── */
         .empty-state {
-            padding: 64px 24px;
+            padding: 60px 24px;
             text-align: center;
             color: var(--text-muted);
         }
+        .empty-icon { width: 56px; height: 56px; margin: 0 auto 14px; color: rgba(153,0,38,0.2); }
 
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px;
-            color: var(--border-color);
+        /* ── Download strip ── */
+        .download-strip {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            padding: 14px 20px;
+            background: #F5EEE2;
+            border-top: 1px solid var(--border-color);
+            align-items: center;
         }
 
+        /* ── Footer ── */
         footer {
             text-align: center;
-            padding: 24px;
-            font-size: 0.8rem;
+            padding: 18px;
+            font-size: 12px;
             color: var(--text-muted);
             border-top: 1px solid var(--border-color);
         }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #FAF5ED; }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(153, 0, 38, 0.25);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(153, 0, 38, 0.45); }
     </style>
 </head>
 <body>
     <header>
         <div class="brand">
             <div class="brand-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFDF5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                    <line x1="3" y1="15" x2="21" y2="15"></line>
+                    <line x1="9" y1="9" x2="9" y2="21"></line>
                 </svg>
             </div>
             <div>
@@ -582,10 +590,10 @@
         </div>
 
         <!-- OSVC Live REST API Fetcher (Strict HTTP GET Only) -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(19,27,46,0.95), rgba(27,38,64,0.95)); border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div class="card" style="border: 1px solid rgba(153, 0, 38, 0.25);">
             <div class="card-header">
                 <div class="card-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
                         <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
                         <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
                         <line x1="6" y1="6" x2="6.01" y2="6"></line>
@@ -593,23 +601,23 @@
                     </svg>
                     Fetch Standard Objects via Live OSVC REST API (Strict HTTP GET Only)
                 </div>
-                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.4);">READ-ONLY GET GUARANTEE</span>
+                <span class="badge" style="background: rgba(21,128,61,0.1); color: #15803D; border: 1px solid rgba(21,128,61,0.25);">READ-ONLY GET GUARANTEE</span>
             </div>
             <div style="display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 1fr; gap: 12px; align-items: end;">
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">OSVC Host / URL</label>
-                    <input type="text" id="rest-host" placeholder="e.g. gcb.custhelp.com" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                    <label class="form-label">OSVC Host / URL</label>
+                    <input type="text" id="rest-host" class="form-input" placeholder="e.g. gcb.custhelp.com">
                 </div>
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Username</label>
-                    <input type="text" id="rest-user" placeholder="API Username" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="rest-user" class="form-input" placeholder="API Username">
                 </div>
                 <div>
-                    <label style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; margin-bottom: 4px; display: block;">Password</label>
-                    <input type="password" id="rest-pass" placeholder="API Password" style="width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; color: #FFF; font-size: 0.85rem;">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="rest-pass" class="form-input" placeholder="API Password">
                 </div>
                 <div>
-                    <button class="btn btn-primary" onclick="fetchLiveRESTSchemas()" style="width: 100%; justify-content: center; height: 36px;">
+                    <button class="btn btn-primary" onclick="fetchLiveRESTSchemas()" style="width: 100%; justify-content: center;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><polyline points="21 3 21 8 16 8"></polyline></svg>
                         Fetch via GET
                     </button>
@@ -621,10 +629,10 @@
         </div>
 
         <!-- Live Execution Logs Console -->
-        <div class="card" style="background: #0D1322; border: 1px solid var(--border-color);">
+        <div class="card">
             <div class="card-header">
                 <div class="card-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
                         <polyline points="4 17 10 11 4 5"></polyline>
                         <line x1="12" y1="19" x2="20" y2="19"></line>
                     </svg>
@@ -639,7 +647,7 @@
                     </button>
                 </div>
             </div>
-            <div id="log-console" style="background: #060911; border: 1px solid #1A243B; border-radius: var(--radius-sm); padding: 14px; height: 160px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #A7F3D0; line-height: 1.6;">
+            <div id="log-console" class="console-box">
                 <div style="color: var(--text-muted);">[Ready] Awaiting user action or REST API connection request...</div>
             </div>
         </div>
@@ -667,8 +675,8 @@
         <!-- Download Toolbar (Visible after processing) -->
         <div class="process-bar" id="download-bar" style="display: none;">
             <div>
-                <h4 style="font-size: 1rem; font-weight: 700;">Generated Excel Reports Ready</h4>
-                <p style="font-size: 0.85rem; color: var(--text-secondary);">Standard, Custom, Workspaces, and Combined multi-tab workbooks</p>
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-main);">Generated Excel Reports Ready</h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Standard, Custom, Workspaces, and Field Catalog multi-tab workbooks</p>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <a href="/api/download/standard_objects.xlsx" class="btn btn-secondary" title="Standard Objects & Fields from REST API">
@@ -683,9 +691,9 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     workspaces.xlsx
                 </a>
-                <a href="/api/download/combined.xlsx" class="btn btn-secondary">
+                <a href="/api/download/field_catalog.xlsx" class="btn btn-secondary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    combined.xlsx
+                    field_catalog.xlsx
                 </a>
                 <a href="/api/download/all_reports.zip" class="btn btn-primary">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -701,7 +709,7 @@
                     <button class="tab-btn active" onclick="switchMainTab('workspaces')">Workspaces Preview</button>
                     <button class="tab-btn" onclick="switchMainTab('std_objects')">Standard Objects Preview</button>
                     <button class="tab-btn" onclick="switchMainTab('cst_objects')">Custom Objects Preview</button>
-                    <button class="tab-btn" onclick="switchMainTab('combined')">Combined Preview</button>
+                    <button class="tab-btn" onclick="switchMainTab('combined')">Field Catalog Preview</button>
                 </div>
                 <div class="search-box">
                     <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
