@@ -3,6 +3,10 @@ import re
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+try:
+    from field_extractor.field_id_mapping import get_mapped_rest_key
+except ImportError:
+    from field_id_mapping import get_mapped_rest_key
 
 # ---------------------------------------------------------------------------
 # Styling constants
@@ -337,9 +341,15 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
 
         comb_idx = combined_indexed.get(target_key, {})
 
+        mapped_key     = _ws_field_key(get_mapped_rest_key(target_obj, raw_id))
+        mapped_key_alt = _ws_field_key(get_mapped_rest_key(target_obj, f_code))
+
         matched = (
+            primary_idx.get(mapped_key) or primary_idx.get(mapped_key_alt) or
             primary_idx.get(ws_key) or primary_idx.get(ws_key_alt) or
+            secondary_idx.get(mapped_key) or secondary_idx.get(mapped_key_alt) or
             secondary_idx.get(ws_key) or secondary_idx.get(ws_key_alt) or
+            comb_idx.get(mapped_key) or comb_idx.get(mapped_key_alt) or
             comb_idx.get(ws_key) or comb_idx.get(ws_key_alt)
         )
 
