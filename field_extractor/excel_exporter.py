@@ -460,7 +460,7 @@ def write_objects_excel(objects_map, output_path):
     """
     objects.xlsx / standard_objects.xlsx / custom_objects.xlsx — one tab per object.
     Tab name = object name. Field key shown as PackageName$Name.
-    Captures ALL 21 explicit field attributes + extra attributes into Excel columns.
+    Outputs STRICTLY the 21 requested columns in exact order.
     """
     if not objects_map:
         wb = openpyxl.Workbook()
@@ -473,24 +473,6 @@ def write_objects_excel(objects_map, output_path):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
-    core_keys = {
-        "field_id", "field_name", "field_label", "data_type", "is_system_field",
-        "package_name", "is_nullable", "is_lookup", "is_readonly", "max_length",
-        "description", "is_available_get", "is_available_post", "is_available_patch",
-        "is_deprecated", "raw_schema_attributes", "object_name",
-        "isEnumerable", "minimum", "maximum", "$ref", "ref", "ref_url", "items", "pattern",
-        # Ignore redundant raw JSON Schema camelCase aliases that map to standard columns
-        "isAvailableForGET", "isAvailableForPOST", "isAvailableForPATCH",
-        "isDeprecated", "nullable", "label", "type", "title", "maxLength", "maxLengthBytes"
-    }
-
-    extra_keys = []
-    for o_data in objects_map.values():
-        for of in o_data.get("fields", []):
-            for k in of.keys():
-                if k not in core_keys and k not in extra_keys:
-                    extra_keys.append(k)
-
     headers = [
         "Field Key", "Field Label", "Data Type", "Field Type",
         "Is System Field", "Package Name", "Is Nullable", "Is Lookup",
@@ -498,7 +480,7 @@ def write_objects_excel(objects_map, output_path):
         "Is Available GET", "Is Available POST", "Is Available PATCH",
         "Is Deprecated", "Is Enumerable", "Minimum", "Maximum",
         "$Ref", "Items", "Pattern"
-    ] + [re.sub(r'([a-z])([A-Z])', r'\1 \2', k).replace('_', ' ').title() for k in extra_keys]
+    ]
 
     for obj_name, obj_data in objects_map.items():
         display_name = obj_data.get("object_name", obj_name)
@@ -546,14 +528,6 @@ def write_objects_excel(objects_map, output_path):
                 items_str,
                 str(of.get("pattern", "-"))
             ]
-            for ek in extra_keys:
-                val = of.get(ek, "-")
-                if isinstance(val, (dict, list)):
-                    val = str(val)
-                elif isinstance(val, bool):
-                    val = "Yes" if val else "No"
-                row.append(str(val) if val is not None else "-")
-
             rows.append(row)
 
         _write_rows(sheet, rows, headers)
