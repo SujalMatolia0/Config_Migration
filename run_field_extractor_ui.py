@@ -12,7 +12,7 @@ if not os.path.exists(VENV_PYTHON):
     VENV_PYTHON = sys.executable
 
 def main():
-    port = "5050"
+    port = "5055"
     if len(sys.argv) > 1:
         port = sys.argv[1]
 
