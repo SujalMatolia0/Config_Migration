@@ -439,8 +439,22 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             pattern       = "-"
             obj_field_key = raw_id
 
+            fid_low = (raw_id or f_code).lower()
+            if fid_low.startswith("rulectx.") or fid_low == "rulestate":
+                unmapped_category = "Business Rule Context Variable"
+            elif fid_low.endswith(".invalid"):
+                unmapped_category = "UI Validation Control"
+            elif fid_low in ("dormant", "linesperpage", "searchtext", "searchtype", "state", "passwordencrypt"):
+                unmapped_category = "Workspace UI Control"
+            elif fid_low in ("mamailtype", "maorgname", "totrev"):
+                unmapped_category = "Legacy Workspace Field"
+            else:
+                unmapped_category = "Unmapped Workspace Control"
+
         item = dict(wf)
         item.update({
+            "is_unmapped":        matched is None,
+            "unmapped_category":  unmapped_category if matched is None else "",
             "target_object":      target_obj,
             "obj_field_key":      obj_field_key,
             "data_type":          data_type,
@@ -477,10 +491,40 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
 # Public Excel writers
 # ---------------------------------------------------------------------------
 
+def _write_ignored_fields_tab(wb, unmapped_records):
+    """
+    Creates an 'Ignored_Fields' tab listing all workspace UI controls, rule context variables,
+    and unmapped fields that do not exist in standard or custom object schemas.
+    """
+    if not unmapped_records:
+        return
+
+    headers = [
+        "Workspace Name", "Bound Object", "Target Object",
+        "Field ID", "Field Label", "Location / Tab", "Reason / Category"
+    ]
+    sheet = wb.create_sheet(title="Ignored_Fields")
+    _style_sheet(sheet, headers)
+
+    rows = []
+    for r in unmapped_records:
+        rows.append([
+            r["workspace_name"],
+            r["bound_object"],
+            r["target_object"],
+            r.get("raw_field_id") or r.get("field_code") or "",
+            r.get("field_label", ""),
+            r.get("location_tab", ""),
+            r.get("unmapped_category", "Unmapped Workspace Control")
+        ])
+    _write_rows(sheet, rows, headers)
+
+
 def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     """
     Workspaces.xlsx — one tab per workspace.
     Tab name = workspace name. No 'Workspace Name' column.
+    Includes 'Ignored_Fields' tab for UI controls and unmapped fields.
     """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
@@ -492,6 +536,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
         "Is Available GET", "Is Available POST", "Is Available PATCH", "Is Deprecated", "Description"
     ]
 
+    all_unmapped = []
     for ws_data in parsed_workspaces:
         ws_name      = ws_data["workspace_name"]
         bound_object = ws_data.get("bound_object", "Contact")
@@ -502,6 +547,11 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
         rows = []
         for item in enriched:
+            if item.get("is_unmapped"):
+                rec = dict(item)
+                rec["workspace_name"] = ws_name
+                all_unmapped.append(rec)
+
             rows.append([
                 item["bound_object"],
                 item["target_object"],
@@ -526,6 +576,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
         _write_rows(sheet, rows, headers)
 
+    _write_ignored_fields_tab(wb, all_unmapped)
     wb.save(output_path)
     return output_path
 
@@ -616,6 +667,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
     """
     field_catalog.xlsx — one tab per workspace.
     Tab name = workspace name. Fields enriched with all workspace + object schema metadata (Standard & Custom).
+    Includes 'Ignored_Fields' tab for UI controls and unmapped fields.
     """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
@@ -630,6 +682,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
         "Pattern", "Is List", "Is Auto Update", "In Workspace Layout"
     ]
 
+    all_unmapped = []
     for ws_data in parsed_workspaces:
         ws_name      = ws_data["workspace_name"]
         bound_object = ws_data.get("bound_object", "Contact")
@@ -640,6 +693,11 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
 
         rows = []
         for item in enriched:
+            if item.get("is_unmapped"):
+                rec = dict(item)
+                rec["workspace_name"] = ws_name
+                all_unmapped.append(rec)
+
             rows.append([
                 item["bound_object"],
                 item["target_object"],
@@ -674,8 +732,10 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
 
         _write_rows(sheet, rows, headers)
 
+    _write_ignored_fields_tab(wb, all_unmapped)
     wb.save(output_path)
     return output_path
+
 
 
 write_field_catalog_excel = write_combined_excel
