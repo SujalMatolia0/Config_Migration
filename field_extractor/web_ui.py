@@ -373,19 +373,24 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     RESULTS_CACHE["custom_objects_map"] = parsed_objects
     std_map = RESULTS_CACHE.get("standard_objects_map") or {}
 
-    if not std_map and _cfg_host and _cfg_user and _cfg_pass:
-        add_log("Auto-fetching standard & custom object schemas from OSVC Connect REST API...", "INFO")
-        try:
-            std_map = fetch_standard_objects_via_rest(
-                host=_cfg_host,
-                username=_cfg_user,
-                password=_cfg_pass,
-                include_custom=True,
-                log_cb=add_log
-            )
-            RESULTS_CACHE["standard_objects_map"] = std_map
-        except Exception as err:
-            add_log(f"Auto-fetch REST schemas warning: {err}", "WARNING")
+    # Always auto-fetch ALL 37+ standard object schemas via REST API if not yet loaded
+    if not std_map:
+        host_to_use = _cfg_host or BASE_URL
+        user_to_use = _cfg_user or USERNAME
+        pass_to_use = _cfg_pass or PASSWORD
+        if host_to_use and user_to_use and pass_to_use:
+            add_log("Auto-fetching ALL standard object schemas from OSVC Connect REST API...", "INFO")
+            try:
+                std_map = fetch_standard_objects_via_rest(
+                    host=host_to_use,
+                    username=user_to_use,
+                    password=pass_to_use,
+                    include_custom=True,
+                    log_cb=add_log
+                )
+                RESULTS_CACHE["standard_objects_map"] = std_map
+            except Exception as err:
+                add_log(f"Auto-fetch REST schemas warning: {err}", "WARNING")
 
     combined_map = merge_objects_maps(std_map, parsed_objects)
     RESULTS_CACHE["combined_objects_map"] = combined_map

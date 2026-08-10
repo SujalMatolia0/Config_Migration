@@ -155,6 +155,12 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
         "is_available_post": field_info.get("isAvailableForPOST", False),
         "is_available_patch": field_info.get("isAvailableForPATCH", False),
         "is_deprecated": field_info.get("isDeprecated", False),
+        "$ref": field_info.get("$ref") or field_info.get("ref") or "-",
+        "items": field_info.get("items") or "-",
+        "pattern": field_info.get("pattern") or "-",
+        "minimum": field_info.get("minimum") if field_info.get("minimum") is not None else "-",
+        "maximum": field_info.get("maximum") if field_info.get("maximum") is not None else "-",
+        "isEnumerable": field_info.get("isEnumerable") if field_info.get("isEnumerable") is not None else "-",
         "raw_schema_attributes": dict(field_info)
     })
 

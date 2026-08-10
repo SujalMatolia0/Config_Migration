@@ -460,7 +460,7 @@ def write_objects_excel(objects_map, output_path):
     """
     objects.xlsx / standard_objects.xlsx / custom_objects.xlsx — one tab per object.
     Tab name = object name. Field key shown as PackageName$Name.
-    Captures ALL field attributes into Excel columns.
+    Captures ALL 21 explicit field attributes + extra attributes into Excel columns.
     """
     if not objects_map:
         wb = openpyxl.Workbook()
@@ -478,6 +478,7 @@ def write_objects_excel(objects_map, output_path):
         "package_name", "is_nullable", "is_lookup", "is_readonly", "max_length",
         "description", "is_available_get", "is_available_post", "is_available_patch",
         "is_deprecated", "raw_schema_attributes", "object_name",
+        "isEnumerable", "minimum", "maximum", "$ref", "ref", "ref_url", "items", "pattern",
         # Ignore redundant raw JSON Schema camelCase aliases that map to standard columns
         "isAvailableForGET", "isAvailableForPOST", "isAvailableForPATCH",
         "isDeprecated", "nullable", "label", "type", "title", "maxLength", "maxLengthBytes"
@@ -491,10 +492,12 @@ def write_objects_excel(objects_map, output_path):
                     extra_keys.append(k)
 
     headers = [
-        "Field Key (Package$Name)", "Field Label",
-        "Data Type", "Field Type", "Is System Field", "Package Name",
-        "Is Nullable", "Is Lookup", "Is Read Only", "Max Length", "Description",
-        "Is Available GET", "Is Available POST", "Is Available PATCH", "Is Deprecated"
+        "Field Key", "Field Label", "Data Type", "Field Type",
+        "Is System Field", "Package Name", "Is Nullable", "Is Lookup",
+        "Is Read Only", "Max Length", "Description",
+        "Is Available GET", "Is Available POST", "Is Available PATCH",
+        "Is Deprecated", "Is Enumerable", "Minimum", "Maximum",
+        "$Ref", "Items", "Pattern"
     ] + [re.sub(r'([a-z])([A-Z])', r'\1 \2', k).replace('_', ' ').title() for k in extra_keys]
 
     for obj_name, obj_data in objects_map.items():
@@ -505,6 +508,21 @@ def write_objects_excel(objects_map, output_path):
         rows = []
         for of in obj_data.get("fields", []):
             key = _obj_field_key(of)
+
+            is_enum_val = of.get("isEnumerable")
+            if isinstance(is_enum_val, bool):
+                is_enum_str = "Yes" if is_enum_val else "No"
+            else:
+                is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
+
+            items_val = of.get("items")
+            if isinstance(items_val, (dict, list)):
+                items_str = str(items_val)
+            else:
+                items_str = str(items_val) if items_val is not None else "-"
+
+            ref_val = of.get("$ref") or of.get("ref") or of.get("ref_url") or "-"
+
             row = [
                 key,
                 of.get("field_label", ""),
@@ -520,7 +538,13 @@ def write_objects_excel(objects_map, output_path):
                 "Yes" if of.get("is_available_get", True) else "No",
                 "Yes" if of.get("is_available_post", False) else "No",
                 "Yes" if of.get("is_available_patch", False) else "No",
-                "Yes" if of.get("is_deprecated", False) else "No"
+                "Yes" if of.get("is_deprecated", False) else "No",
+                is_enum_str,
+                str(of.get("minimum", "-")),
+                str(of.get("maximum", "-")),
+                str(ref_val),
+                items_str,
+                str(of.get("pattern", "-"))
             ]
             for ek in extra_keys:
                 val = of.get(ek, "-")
