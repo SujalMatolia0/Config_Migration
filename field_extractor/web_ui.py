@@ -41,10 +41,31 @@ except ImportError:
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
 
+CACHE_FILE = os.path.join(CURRENT_DIR, "results", "standard_objects_cache.json")
+
+def _load_std_cache():
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+def _save_std_cache(std_map):
+    if std_map:
+        try:
+            out_d = os.path.join(CURRENT_DIR, "results")
+            os.makedirs(out_d, exist_ok=True)
+            with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                json.dump(std_map, f)
+        except Exception:
+            pass
+
 # Global store for current session outputs
 RESULTS_CACHE = {
     "workspaces": [],
-    "standard_objects_map": {},
+    "standard_objects_map": _load_std_cache(),
     "custom_objects_map": {},
     "combined_objects_map": {},
     "output_dir": None,
@@ -193,6 +214,7 @@ def fetch_rest_schemas():
         write_combined_excel(existing_ws, fetched_objects, comb_xlsx_path)
 
         RESULTS_CACHE["standard_objects_map"] = fetched_objects
+        _save_std_cache(fetched_objects)
         custom_map = RESULTS_CACHE.get("custom_objects_map") or {}
         combined_map = merge_objects_maps(fetched_objects, custom_map)
         RESULTS_CACHE["combined_objects_map"] = combined_map
@@ -461,18 +483,44 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             disp_name = o_data.get("object_name", o_name)
             rows = []
             for of in o_data.get("fields", []):
+                is_enum_val = of.get("isEnumerable")
+                if isinstance(is_enum_val, bool):
+                    is_enum_str = "Yes" if is_enum_val else "No"
+                else:
+                    is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
+
+                items_val = of.get("items")
+                if isinstance(items_val, (dict, list)):
+                    items_str = str(items_val)
+                elif of.get("is_list"):
+                    items_str = "IsList: Yes"
+                else:
+                    items_str = str(items_val) if items_val is not None else "-"
+
+                ref_val = of.get("$ref") or of.get("ref") or of.get("ref_url") or "-"
+
                 rows.append({
                     "field_key": _obj_field_key(of),
                     "field_label": of.get("field_label", ""),
                     "data_type": of.get("data_type", ""),
                     "field_type": _field_type_from_obj(of),
+                    "is_system_field": "Yes" if of.get("is_system_field") else "No",
+                    "package_name": of.get("package_name", ""),
                     "is_nullable": "Yes" if of.get("is_nullable") else "No",
                     "is_lookup": "Yes" if of.get("is_lookup") else "No",
-                    "is_list": "Yes" if of.get("is_list") else "No",
-                    "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
                     "is_readonly": "Yes" if of.get("is_readonly") else "No",
                     "max_length": str(of.get("max_length", "-")),
-                    "description": of.get("description", "")
+                    "description": of.get("description", ""),
+                    "is_available_get": "Yes" if of.get("is_available_get", True) else "No",
+                    "is_available_post": "Yes" if of.get("is_available_post", False) else "No",
+                    "is_available_patch": "Yes" if of.get("is_available_patch", False) else "No",
+                    "is_deprecated": "Yes" if of.get("is_deprecated", False) else "No",
+                    "is_enumerable": is_enum_str,
+                    "minimum": str(of.get("minimum", "-")),
+                    "maximum": str(of.get("maximum", "-")),
+                    "ref": str(ref_val),
+                    "items": items_str,
+                    "pattern": str(of.get("pattern", "-"))
                 })
             lst.append({
                 "object_name": disp_name,
