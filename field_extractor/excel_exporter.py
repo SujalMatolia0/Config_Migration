@@ -218,6 +218,8 @@ def _normalize_obj_keys(oname):
     """Returns singular and plural variations of an object name to bridge REST API and Workspace XML naming."""
     oname = oname.lower().strip()
     keys = {oname}
+    if oname in ('org', 'orgs', 'organisation', 'organisations', 'organization', 'organizations'):
+        keys.update({'org', 'orgs', 'organisation', 'organisations', 'organization', 'organizations'})
     if oname.endswith('s') and not oname.endswith('ss'):
         keys.add(oname[:-1])
     else:
