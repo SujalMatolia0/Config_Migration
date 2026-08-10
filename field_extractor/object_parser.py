@@ -30,12 +30,20 @@ def parse_object_xml(file_path):
         is_lookup = f.get("IsLookup", "False").lower() in ("true", "1")
         is_readonly = f.get("IsCoReadOnly", "False").lower() in ("true", "1")
         is_system = f.get("IsSystemField", "False").lower() in ("true", "1")
-        max_length = f.get("MaxLength") or "—"
+        max_len_val = (
+            f.get("MaxLength") or f.get("Size") or f.get("MaxLen") or f.get("Length") or
+            (f.find("TextLength").text if f.find("TextLength") is not None else None) or
+            (f.find("Size").text if f.find("Size") is not None else None) or
+            "-"
+        )
+
+        f_pkg = f.get("PackageName") or f.get("Package") or package_name
+        
         desc = f.get("Description") or ""
 
         fields.append({
             "object_name": obj_name,
-            "package_name": package_name,
+            "package_name": f_pkg,
             "field_id": f_id,
             "field_name": f_name,
             "field_label": f_label,
@@ -44,7 +52,7 @@ def parse_object_xml(file_path):
             "is_nullable": is_nullable,
             "is_lookup": is_lookup,
             "is_readonly": is_readonly,
-            "max_length": max_length,
+            "max_length": max_len_val,
             "description": desc
         })
 

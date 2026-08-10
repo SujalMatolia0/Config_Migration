@@ -213,20 +213,37 @@ def _ws_field_key(raw_field_id):
 def _build_obj_index(objects_map):
     """
     Returns dict keyed by lowercase object name ->
-    {field_key: field_dict} where field_key = PackageName$Name or just Name.
+    {field_key: field_dict} where field_key = PackageName$Name, plain Name, or token.
     """
     indexed = {}
-    for oname, odata in objects_map.items():
+    for oname, odata in (objects_map or {}).items():
         lookup = {}
         for of in odata.get("fields", []):
             key = _obj_field_key(of)
             if key:
                 lookup[key] = of
-            # Also index by plain lowercased field name as secondary fallback
+
             plain = (of.get("field_name") or "").lower()
-            if plain and plain not in lookup:
+            if plain:
                 lookup[plain] = of
-        indexed[oname] = lookup
+
+            field_id = (of.get("field_id") or "").lower()
+            if field_id:
+                lookup[field_id] = of
+
+            # Fallback for composite names (e.g. name.first -> first)
+            if "." in plain:
+                last_part = plain.split(".")[-1]
+                if last_part not in lookup:
+                    lookup[last_part] = of
+
+            # Fallback for custom fields (e.g. c$phone_ext -> phone_ext)
+            if "$" in key:
+                bare_custom = key.split("$")[-1]
+                if bare_custom not in lookup:
+                    lookup[bare_custom] = of
+
+        indexed[oname.lower()] = lookup
     return indexed
 
 
@@ -234,8 +251,32 @@ def _build_obj_index(objects_map):
 # Workspace field enrichment
 # ---------------------------------------------------------------------------
 
-def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
-    indexed = _build_obj_index(objects_map)
+def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_objects_map=None, custom_objects_map=None):
+    """
+    Enriches workspace fields with object schema metadata (Max Length, Data Type, Is Nullable, Is Lookup, etc.).
+    First differentiates workspace fields into Standard vs Custom:
+      - Standard fields -> searched in standard_objects_map (REST API schemas)
+      - Custom fields / Custom objects -> searched in custom_objects_map (XML schemas)
+    """
+    if standard_objects_map is None and custom_objects_map is None:
+        std_map = {}
+        cst_map = {}
+        for oname, odata in (objects_map or {}).items():
+            if '.' in oname:
+                cst_map[oname] = odata
+            else:
+                std_map[oname] = odata
+                # Standard objects may also contain custom fields
+                c_fields = [f for f in odata.get("fields", []) if f.get("package_name", "").lower() not in _SYSTEM_PACKAGES or "$" in f.get("field_name", "")]
+                if c_fields:
+                    cst_map[oname] = {"object_name": odata.get("object_name", oname), "fields": c_fields}
+        std_indexed = _build_obj_index(std_map)
+        cst_indexed = _build_obj_index(cst_map)
+    else:
+        std_indexed = _build_obj_index(standard_objects_map or {})
+        cst_indexed = _build_obj_index(custom_objects_map or {})
+
+    combined_indexed = _build_obj_index(objects_map or {})
     enriched = []
 
     for wf in ws_fields:
@@ -243,22 +284,41 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
         target_key = target_obj.lower()
 
         raw_id     = wf.get("raw_field_id", "") or wf.get("field_code", "")
+        f_code     = wf.get("field_code", "")
+
         ws_key     = _ws_field_key(raw_id)
-        ws_key_alt = _ws_field_key(wf.get("field_code", ""))
+        ws_key_alt = _ws_field_key(f_code)
 
-        target_idx = indexed.get(target_key, {})
-        if not target_idx and len(indexed) == 1:
-            target_idx = list(indexed.values())[0]
+        # Differentiate Standard vs Custom field
+        is_custom_ws = ("$" in raw_id) or ("customfields" in raw_id.lower()) or ("$" in f_code)
 
-        matched = target_idx.get(ws_key) or target_idx.get(ws_key_alt)
+        # Select primary index based on standard vs custom differentiation
+        if is_custom_ws:
+            primary_idx   = cst_indexed.get(target_key, {})
+            secondary_idx = std_indexed.get(target_key, {})
+        else:
+            primary_idx   = std_indexed.get(target_key, {})
+            secondary_idx = cst_indexed.get(target_key, {})
+
+        comb_idx = combined_indexed.get(target_key, {})
+
+        matched = (
+            primary_idx.get(ws_key) or primary_idx.get(ws_key_alt) or
+            secondary_idx.get(ws_key) or secondary_idx.get(ws_key_alt) or
+            comb_idx.get(ws_key) or comb_idx.get(ws_key_alt)
+        )
+
+        # Fallback to trailing component match (e.g. name.first -> first)
+        if not matched and "." in ws_key:
+            bare = ws_key.split(".")[-1]
+            matched = primary_idx.get(bare) or secondary_idx.get(bare) or comb_idx.get(bare)
 
         if matched:
             data_type   = matched.get("data_type", "Text")
             ftype       = _field_type_from_obj(matched)
             is_nullable = "Yes" if matched.get("is_nullable") else "No"
             is_lookup   = "Yes" if matched.get("is_lookup")   else "No"
-            max_len     = matched.get("max_length", "-")
-            # Build the display field name: PackageName$Name
+            max_len     = str(matched.get("max_length", "-"))
             pkg   = (matched.get("package_name") or "").strip()
             fname = matched.get("field_name", "")
             if pkg.lower() in _SYSTEM_PACKAGES:
@@ -266,9 +326,7 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object):
             else:
                 obj_field_key = f"{pkg}${fname}"
         else:
-            f_code        = wf.get("field_code", "")
             data_type     = "Standard Data Field"
-            # Determine type from the raw workspace field ID name ($ = custom)
             ftype         = _field_type_from_ws_id(raw_id or f_code)
             is_nullable   = "Yes"
             is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
@@ -343,10 +401,18 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
 def write_objects_excel(objects_map, output_path):
     """
-    objects.xlsx — one tab per object.
-    Tab name = object name. No 'Object Name' column.
-    Field key shown as PackageName$Name.
+    objects.xlsx / standard_objects.xlsx / custom_objects.xlsx — one tab per object.
+    Tab name = object name. Field key shown as PackageName$Name.
     """
+    if not objects_map:
+        # Create blank file with placeholder sheet if no objects
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "No_Objects"
+        ws.cell(row=1, column=1, value="No object schemas extracted.")
+        wb.save(output_path)
+        return output_path
+
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
