@@ -210,9 +210,34 @@ def _ws_field_key(raw_field_id):
 # Object index builder
 # ---------------------------------------------------------------------------
 
+def _normalize_obj_keys(oname):
+    """Returns singular and plural variations of an object name to bridge REST API and Workspace XML naming."""
+    oname = oname.lower().strip()
+    keys = {oname}
+    if oname.endswith('s') and not oname.endswith('ss'):
+        keys.add(oname[:-1])
+    else:
+        keys.add(oname + 's')
+    if oname.endswith('ies'):
+        keys.add(oname[:-3] + 'y')
+    elif oname.endswith('y'):
+        keys.add(oname[:-1] + 'ies')
+    return keys
+
+_FIELD_ALIASES = {
+    "phoffice": "phones.office",
+    "phmobile": "phones.mobile",
+    "phhome":   "phones.home",
+    "phfax":    "phones.fax",
+    "addr":     "address",
+    "state":    "address.stateorprovince",
+    "city":     "address.city",
+    "postalcode": "address.postalcode",
+}
+
 def _build_obj_index(objects_map):
     """
-    Returns dict keyed by lowercase object name ->
+    Returns dict keyed by lowercase object name (singular & plural) ->
     {field_key: field_dict} where field_key = PackageName$Name, plain Name, or token.
     """
     indexed = {}
@@ -243,7 +268,17 @@ def _build_obj_index(objects_map):
                 if bare_custom not in lookup:
                     lookup[bare_custom] = of
 
-        indexed[oname.lower()] = lookup
+        # Add field alias entries (e.g. phoffice -> phones.office)
+        for alias_key, target_field_name in _FIELD_ALIASES.items():
+            if target_field_name in lookup and alias_key not in lookup:
+                lookup[alias_key] = lookup[target_field_name]
+
+        for k in _normalize_obj_keys(oname):
+            if k not in indexed:
+                indexed[k] = lookup
+            else:
+                indexed[k].update(lookup)
+
     return indexed
 
 
@@ -319,6 +354,12 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             is_nullable = "Yes" if matched.get("is_nullable") else "No"
             is_lookup   = "Yes" if matched.get("is_lookup")   else "No"
             max_len     = str(matched.get("max_length", "-"))
+            desc        = matched.get("description", "")
+            avail_get   = "Yes" if matched.get("is_available_get", True) else "No"
+            avail_post  = "Yes" if matched.get("is_available_post", False) else "No"
+            avail_patch = "Yes" if matched.get("is_available_patch", False) else "No"
+            is_deprec   = "Yes" if matched.get("is_deprecated", False) else "No"
+
             pkg   = (matched.get("package_name") or "").strip()
             fname = matched.get("field_name", "")
             if pkg.lower() in _SYSTEM_PACKAGES:
@@ -331,6 +372,11 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             is_nullable   = "Yes"
             is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
             max_len       = "-"
+            desc          = ""
+            avail_get     = "Yes"
+            avail_post    = "No"
+            avail_patch   = "No"
+            is_deprec     = "No"
             obj_field_key = raw_id
 
         item = dict(wf)
@@ -342,6 +388,11 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             "is_nullable":    is_nullable,
             "is_lookup":      is_lookup,
             "max_length":     max_len,
+            "description":    desc,
+            "avail_get":      avail_get,
+            "avail_post":     avail_post,
+            "avail_patch":    avail_patch,
+            "is_deprecated":  is_deprec,
             "required_fmt":   _format_option(wf.get("required_option", "")),
             "readonly_fmt":   _format_option(wf.get("readonly_option", "")),
         })
@@ -365,7 +416,8 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     headers = [
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Location / Tab", "Required", "Read Only",
-        "Data Type", "Field Type", "Is Nullable", "Is Lookup", "Max Length"
+        "Data Type", "Field Type", "Is Nullable", "Is Lookup", "Max Length",
+        "Is Available GET", "Is Available POST", "Is Available PATCH", "Is Deprecated", "Description"
     ]
 
     for ws_data in parsed_workspaces:
@@ -391,6 +443,11 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
                 item["is_nullable"],
                 item["is_lookup"],
                 item["max_length"],
+                item.get("avail_get", "Yes"),
+                item.get("avail_post", "No"),
+                item.get("avail_patch", "No"),
+                item.get("is_deprecated", "No"),
+                item.get("description", ""),
             ])
 
         _write_rows(sheet, rows, headers)
@@ -403,9 +460,9 @@ def write_objects_excel(objects_map, output_path):
     """
     objects.xlsx / standard_objects.xlsx / custom_objects.xlsx — one tab per object.
     Tab name = object name. Field key shown as PackageName$Name.
+    Captures ALL field attributes into Excel columns.
     """
     if not objects_map:
-        # Create blank file with placeholder sheet if no objects
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "No_Objects"
@@ -416,11 +473,26 @@ def write_objects_excel(objects_map, output_path):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
+    core_keys = {
+        "field_id", "field_name", "field_label", "data_type", "is_system_field",
+        "package_name", "is_nullable", "is_lookup", "is_readonly", "max_length",
+        "description", "is_available_get", "is_available_post", "is_available_patch",
+        "is_deprecated", "raw_schema_attributes", "object_name"
+    }
+
+    extra_keys = []
+    for o_data in objects_map.values():
+        for of in o_data.get("fields", []):
+            for k in of.keys():
+                if k not in core_keys and k not in extra_keys:
+                    extra_keys.append(k)
+
     headers = [
         "Field Key (Package$Name)", "Field Label",
-        "Data Type", "Field Type", "Is Nullable", "Is Lookup",
-        "Is Read Only", "Max Length", "Description"
-    ]
+        "Data Type", "Field Type", "Is System Field", "Package Name",
+        "Is Nullable", "Is Lookup", "Is Read Only", "Max Length", "Description",
+        "Is Available GET", "Is Available POST", "Is Available PATCH", "Is Deprecated"
+    ] + [re.sub(r'([a-z])([A-Z])', r'\1 \2', k).replace('_', ' ').title() for k in extra_keys]
 
     for obj_name, obj_data in objects_map.items():
         display_name = obj_data.get("object_name", obj_name)
@@ -430,17 +502,32 @@ def write_objects_excel(objects_map, output_path):
         rows = []
         for of in obj_data.get("fields", []):
             key = _obj_field_key(of)
-            rows.append([
+            row = [
                 key,
                 of.get("field_label", ""),
                 of.get("data_type", ""),
                 _field_type_from_obj(of),
+                "Yes" if of.get("is_system_field") else "No",
+                of.get("package_name", ""),
                 "Yes" if of.get("is_nullable") else "No",
                 "Yes" if of.get("is_lookup")   else "No",
                 "Yes" if of.get("is_readonly") else "No",
-                of.get("max_length", "-"),
-                of.get("description", "")
-            ])
+                str(of.get("max_length", "-")),
+                of.get("description", ""),
+                "Yes" if of.get("is_available_get", True) else "No",
+                "Yes" if of.get("is_available_post", False) else "No",
+                "Yes" if of.get("is_available_patch", False) else "No",
+                "Yes" if of.get("is_deprecated", False) else "No"
+            ]
+            for ek in extra_keys:
+                val = of.get(ek, "-")
+                if isinstance(val, (dict, list)):
+                    val = str(val)
+                elif isinstance(val, bool):
+                    val = "Yes" if val else "No"
+                row.append(str(val) if val is not None else "-")
+
+            rows.append(row)
 
         _write_rows(sheet, rows, headers)
 
@@ -460,7 +547,8 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Workspace Tab", "Required", "Read Only",
         "Data Type", "Field Type", "Is Nullable",
-        "Is Lookup", "Max Length", "In Workspace Layout"
+        "Is Lookup", "Max Length", "Is Available GET", "Is Available POST",
+        "Is Available PATCH", "Is Deprecated", "Description", "In Workspace Layout"
     ]
 
     for ws_data in parsed_workspaces:
@@ -486,6 +574,11 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
                 item["is_nullable"],
                 item["is_lookup"],
                 item["max_length"],
+                item.get("avail_get", "Yes"),
+                item.get("avail_post", "No"),
+                item.get("avail_patch", "No"),
+                item.get("is_deprecated", "No"),
+                item.get("description", ""),
                 "Yes",
             ])
 
