@@ -1,6 +1,9 @@
 import time
 import requests
 from requests.auth import HTTPBasicAuth
+from urllib.parse import urlparse
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # ---------------------------------------------------------------------------
 # Strict Read-Only OSVC Connect REST API Metadata Fetcher
@@ -16,10 +19,6 @@ HEADERS_CATALOG_JSON = {
     'Accept': 'application/json',
     'OSvC-CREST-Application-Context': 'Metadata-Catalog-List'
 }
-
-from urllib.parse import urlparse
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 _SCHEMA_CACHE = {}
 
@@ -43,7 +42,7 @@ def _clean_host_url(host):
     host = host.strip()
     if not host.startswith('http://') and not host.startswith('https://'):
         host = f"https://{host}"
-    
+
     parsed = urlparse(host)
     scheme = parsed.scheme or 'https'
     netloc = parsed.netloc or parsed.path.split('/')[0]
@@ -95,7 +94,6 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
 
     # Fast-path namedIDs and lookup shortcuts without unnecessary network recursion
     if ref_url:
-        # Prepend base_url if ref_url is a relative path
         if not ref_url.startswith("http"):
             if not ref_url.startswith("/"):
                 ref_url = f"/{ref_url}"
@@ -103,7 +101,6 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
 
         ref_basename = ref_url.rstrip('/').split('/')[-1]
 
-        # NamedID fast-path
         if "/namedIDs/" in ref_url or "namedID" in ref_url.lower():
             field_type = f"_lookup:NamedID({ref_basename})"
         elif field_type in ("object", "unknown"):
@@ -117,7 +114,6 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
                     field_type = f"_menu:{ref_name}"
                 else:
                     child_props = singular.get("properties", {})
-                    # Only recurse into composite structures (like name -> first, last)
                     if child_props and depth < 1 and not ref_name.startswith("http"):
                         sub_fields = []
                         for c_name, c_info in child_props.items():
@@ -135,10 +131,8 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
     is_custom = field_name.startswith("c$") or "customFields" in full_name
     pkg_name = "c" if is_custom else "OracleServiceCloud"
 
-    # Start with ALL raw schema attributes from REST JSON Schema field_info to prevent data loss
     field_dict = dict(field_info)
 
-    # Standardize domain metadata keys
     field_dict.update({
         "field_id": field_name,
         "field_name": full_name,
@@ -167,7 +161,6 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
     return [field_dict]
 
 
-# Known OSVC standard object names to probe directly when catalog list is empty
 KNOWN_STANDARD_OBJECTS = [
     "contacts", "incidents", "organizations", "answers", "tasks",
     "opportunities", "quotes", "products", "assets", "serviceContracts",
@@ -179,11 +172,6 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
     STRICT READ-ONLY API FETCHER:
     Connects to the OSVC Connect REST API via HTTP GET requests only.
     Fetches standard object schemas and converts them into standard objects_map format.
-
-    Strategy:
-      1. GET /metadata-catalog (root) to discover all object names + alternate schema links.
-      2. If root returns no items (some instances restrict it), directly probe known standard
-         object endpoints: GET /metadata-catalog/{objectName} with Accept: application/schema+json.
     """
     base_url = _clean_host_url(host)
     catalog_url = f"{base_url}/services/rest/connect/{DEFAULT_REST_VERSION}/metadata-catalog"
@@ -204,7 +192,6 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
     except Exception as err:
         log_cb(f"[WARNING] Catalog root returned error ({err}). Will probe standard object endpoints directly.")
 
-    # If catalog root returned no items, build synthetic items from known standard objects
     if not items:
         probe_targets = selected_objects if selected_objects else KNOWN_STANDARD_OBJECTS
         log_cb(f"[INFO] Probing {len(probe_targets)} standard object schema endpoints directly via GET")
@@ -224,18 +211,15 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
         if not obj_name:
             continue
 
-        # Skip custom objects if standard-only mode is active (custom objects contain a dot, e.g. CO.MyObj)
         is_custom_obj = '.' in obj_name
         if is_custom_obj and not include_custom:
             continue
 
-        # Filter by selected objects list if provided
         if selected_objects:
             sel_lower = [s.strip().lower() for s in selected_objects]
             if obj_name.lower() not in sel_lower:
                 continue
 
-        # Locate alternate link for schema GET request
         links = item.get("links", [])
         schema_url = None
         for l in links:
@@ -250,7 +234,6 @@ def fetch_standard_objects_via_rest(host, username, password, selected_objects=N
 
         try:
             log_cb(f"[STRICT GET ONLY] Fetching schema for object: {obj_name}")
-            # Use per-object context header (e.g. Get-contacts) matching OSVC Postman conventions
             obj_context_headers = {
                 'Accept': 'application/schema+json',
                 'OSvC-CREST-Application-Context': f'Get-{obj_name}'

@@ -19,15 +19,6 @@ def parse_workspace_xml(file_path):
     bound_object = root.get("Type") or root.get("UIType") or "Unknown"
 
     fields = []
-    
-    # Process all tabs and layout containers
-    def find_parent_tab(elem):
-        parent = elem
-        while parent is not None:
-            if parent.tag == "Tab":
-                return parent.get("Text") or parent.get("TextLabelName") or "Layout Tab"
-            # ET doesn't store parent pointers, handled below by walking tabs
-        return "Top Form Layout"
 
     def extract_field_info(f, tab_name):
         obj_id = f.get("ObjectId") or bound_object
@@ -54,7 +45,7 @@ def parse_workspace_xml(file_path):
 
     # Walk through TabSet -> Tab structure
     tabs = root.findall(".//Tab")
-    
+
     if not tabs:
         # Simple form layout without explicit tabs
         for f in root.findall(".//Field"):

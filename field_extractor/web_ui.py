@@ -14,9 +14,9 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-from workspace_parser import parse_workspace_xml
-from object_parser import parse_object_xml
-from excel_exporter import (
+from parsers.workspace_parser import parse_workspace_xml
+from parsers.object_parser import parse_object_xml
+from exporters.excel_exporter import (
     _enrich_workspace_fields,
     _field_type_from_obj,
     _field_type_from_ws_id,
@@ -26,7 +26,7 @@ from excel_exporter import (
     write_objects_excel,
     write_combined_excel,
 )
-from osvc_rest_fetcher import fetch_standard_objects_via_rest
+from fetchers.osvc_rest_fetcher import fetch_standard_objects_via_rest
 
 # Load connection config if available
 try:

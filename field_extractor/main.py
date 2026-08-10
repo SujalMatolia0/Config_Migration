@@ -1,10 +1,16 @@
 import os
 import sys
 import argparse
-from workspace_parser import parse_workspace_xml
-from object_parser import parse_object_xml
-from excel_exporter import write_workspaces_excel, write_objects_excel, write_combined_excel
-from osvc_rest_fetcher import fetch_standard_objects_via_rest
+try:
+    from parsers.workspace_parser import parse_workspace_xml
+    from parsers.object_parser import parse_object_xml
+    from exporters.excel_exporter import write_workspaces_excel, write_objects_excel, write_combined_excel
+    from fetchers.osvc_rest_fetcher import fetch_standard_objects_via_rest
+except ImportError:
+    from field_extractor.parsers.workspace_parser import parse_workspace_xml
+    from field_extractor.parsers.object_parser import parse_object_xml
+    from field_extractor.exporters.excel_exporter import write_workspaces_excel, write_objects_excel, write_combined_excel
+    from field_extractor.fetchers.osvc_rest_fetcher import fetch_standard_objects_via_rest
 
 def main():
     parser = argparse.ArgumentParser(description="Standalone OSVC Field Extractor - Excel Output")

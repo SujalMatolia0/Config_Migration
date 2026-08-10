@@ -92,6 +92,20 @@ An enterprise-grade analysis platform for Oracle Service Cloud (OSVC) that parse
 │   ├── json/                 # Format-sorted JSON files
 │   ├── markdown/             # Format-sorted Markdown reports
 │   └── workspaces/           # Per-workspace reports & graphs
+├── field_extractor/          # OSVC Field Extractor Studio & REST API schema extractor
+│   ├── parsers/              # XML Layout & Schema Parsers
+│   │   ├── workspace_parser.py
+│   │   └── object_parser.py
+│   ├── mappings/             # Control ID Translation Subsystem
+│   │   └── field_id_mapping.py
+│   ├── fetchers/             # REST API Schema Extractor
+│   │   └── osvc_rest_fetcher.py
+│   ├── exporters/            # OpenPyXL Reporting Engine
+│   │   └── excel_exporter.py
+│   ├── main.py               # Standalone CLI entry point
+│   ├── web_ui.py             # Flask Web App Server (Port 5055)
+│   ├── config.py             # OSVC credentials & connection configuration
+│   └── README.md             # Field Extractor user guide & API docs
 ├── osvc_analyser.py          # Orchestrator CLI entry point
 ├── schema.json               # Master JSON validation schema
 └── README.md

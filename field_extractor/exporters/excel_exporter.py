@@ -3,10 +3,11 @@ import re
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+
 try:
-    from field_extractor.field_id_mapping import get_mapped_rest_key
+    from mappings.field_id_mapping import get_mapped_rest_key
 except ImportError:
-    from field_id_mapping import get_mapped_rest_key
+    from field_extractor.mappings.field_id_mapping import get_mapped_rest_key
 
 # ---------------------------------------------------------------------------
 # Styling constants
@@ -32,16 +33,11 @@ def _style_sheet(ws, headers):
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = THIN_BORDER
 
-    # Keep header visible when scrolling
     ws.freeze_panes = "A2"
-
-    # Add filter dropdowns on all header columns
     last_col = get_column_letter(len(headers))
     ws.auto_filter.ref = f"A1:{last_col}1"
-
     ws.row_dimensions[1].height = 34
 
-    # Auto-fit column widths (capped at 50)
     for col_idx, header in enumerate(headers, start=1):
         col_letter = get_column_letter(col_idx)
         ws.column_dimensions[col_letter].width = min(max(len(header) + 4, 14), 50)
@@ -77,28 +73,17 @@ _TRIGGER_MAP = {
 }
 
 def _format_option(raw):
-    """
-    Converts OSVC workspace option strings to clean readable values.
-    Examples:
-      ""                            -> No
-      "OnNew:~any~;OnEdit:~any~"   -> Yes (New + Edit)
-      "OnEdit:~any~"               -> Yes (Edit Only)
-      "OnNew:~any~"                -> Yes (New Only)
-      "True"                       -> Yes
-      "False"                      -> No
-    """
+    """Converts OSVC workspace option strings to clean readable values."""
     if not raw or raw.strip() == "":
         return "No"
 
     raw = raw.strip()
 
-    # Simple boolean-style values
     if raw.lower() in ("true", "yes", "1"):
         return "Yes"
     if raw.lower() in ("false", "no", "0"):
         return "No"
 
-    # Parse segment list like OnNew:~any~;OnEdit:~any~
     segments = raw.split(";")
     triggers = []
     for seg in segments:
@@ -131,47 +116,23 @@ def _format_option(raw):
 _SYSTEM_PACKAGES = {"oracleservicecloud", "rightnow", ""}
 
 def _field_type_from_obj(field_dict):
-    """
-    Determines Field Type from the Object XML field definition.
-    Primary signal: PackageName attribute — if it is a non-system package, the field is Custom.
-    Secondary signal: whether the Name itself contains '$'.
-    Falls back to IsSystemField attribute.
-
-    Values returned:
-      'Custom (PackageName)' — field created by the org (e.g. C, CO, MY_PKG)
-      'System Field'         — built-in OSVC system field (IsSystemField=True)
-      'OSVC Standard'        — built-in OSVC platform field (IsSystemField=False)
-    """
     pkg  = (field_dict.get("package_name") or "").strip()
     name = (field_dict.get("field_name")   or "").strip()
 
-    # Package name is the clearest signal
     if pkg and pkg.lower() not in _SYSTEM_PACKAGES:
         return f"Custom ({pkg})"
 
-    # If the name itself contains $ it is a custom field (e.g. C$FieldName in raw XML)
     if "$" in name:
         pkg_part = name.split("$", 1)[0]
         return f"Custom ({pkg_part})"
 
-    # Fall back to the IsSystemField flag from the XML
     return "System Field" if field_dict.get("is_system_field", False) else "OSVC Standard"
 
 
 def _field_type_from_ws_id(raw_field_id):
-    """
-    Determines Field Type from the raw workspace FieldId string alone.
-    If the FieldId contains '$' it is a custom field.
-    Examples:
-      'C$PhoneExt'                  -> Custom (C)
-      'CustomFields.c$org_id_temp'  -> Custom (c)
-      'Name.First'                  -> System Field
-      'OrgId'                       -> System Field
-    """
     if not raw_field_id:
         return "System Field"
-    # Strip object and CustomFields prefix to get the bare field token
-    token = re.sub(r'^[^.]+\.', '', raw_field_id)           # remove e.g. "Contact."
+    token = re.sub(r'^[^.]+\.', '', raw_field_id)
     token = re.sub(r'^CustomFields\.', '', token, flags=re.IGNORECASE)
     if "$" in token:
         pkg_part = token.split("$", 1)[0]
@@ -179,11 +140,6 @@ def _field_type_from_ws_id(raw_field_id):
     return "System Field"
 
 def _obj_field_key(field_dict):
-    """
-    Builds a lookup key for an object field as PackageName$Name.
-    System fields (OracleServiceCloud package) use just the field Name.
-    Custom package fields use PackageName$Name (e.g. C$org_id_temp).
-    """
     pkg  = (field_dict.get("package_name") or "").strip()
     name = (field_dict.get("field_name")   or "").strip()
     if pkg.lower() in _SYSTEM_PACKAGES:
@@ -192,20 +148,10 @@ def _obj_field_key(field_dict):
 
 
 def _ws_field_key(raw_field_id):
-    """
-    Normalizes a workspace FieldId into the same key format used by _obj_field_key.
-    Examples:
-      "Name.First"                     -> "name.first"
-      "C$PhoneExt"                     -> "c$phoneext"
-      "CustomFields.c$org_id_temp"     -> "c$org_id_temp"
-      "OrgId"                          -> "orgid"
-    """
     if not raw_field_id:
         return ""
     key = raw_field_id.strip()
-    # Strip leading ObjectId prefix (e.g. "Contact." when already prefixed)
-    key = re.sub(r'^[A-Za-z0-9_]+\.[A-Za-z0-9_]+\.', '', key)  # e.g. Contact.CustomFields.
-    # Collapse CustomFields. prefix
+    key = re.sub(r'^[A-Za-z0-9_]+\.[A-Za-z0-9_]+\.', '', key)
     key = re.sub(r'^CustomFields\.', '', key, flags=re.IGNORECASE)
     return key.lower()
 
@@ -215,7 +161,6 @@ def _ws_field_key(raw_field_id):
 # ---------------------------------------------------------------------------
 
 def _normalize_obj_keys(oname):
-    """Returns singular and plural variations of an object name to bridge REST API and Workspace XML naming."""
     oname = oname.lower().strip()
     keys = {oname}
     if oname in ('org', 'orgs', 'organisation', 'organisations', 'organization', 'organizations'):
@@ -242,10 +187,6 @@ _FIELD_ALIASES = {
 }
 
 def _build_obj_index(objects_map):
-    """
-    Returns dict keyed by lowercase object name (singular & plural) ->
-    {field_key: field_dict} where field_key = PackageName$Name, plain Name, or token.
-    """
     indexed = {}
     for oname, odata in (objects_map or {}).items():
         lookup = {}
@@ -262,19 +203,16 @@ def _build_obj_index(objects_map):
             if field_id:
                 lookup[field_id] = of
 
-            # Fallback for composite names (e.g. name.first -> first)
             if "." in plain:
                 last_part = plain.split(".")[-1]
                 if last_part not in lookup:
                     lookup[last_part] = of
 
-            # Fallback for custom fields (e.g. c$phone_ext -> phone_ext)
             if "$" in key:
                 bare_custom = key.split("$")[-1]
                 if bare_custom not in lookup:
                     lookup[bare_custom] = of
 
-        # Add field alias entries (e.g. phoffice -> phones.office)
         for alias_key, target_field_name in _FIELD_ALIASES.items():
             if target_field_name in lookup and alias_key not in lookup:
                 lookup[alias_key] = lookup[target_field_name]
@@ -293,12 +231,6 @@ def _build_obj_index(objects_map):
 # ---------------------------------------------------------------------------
 
 def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_objects_map=None, custom_objects_map=None):
-    """
-    Enriches workspace fields with object schema metadata (Max Length, Data Type, Is Nullable, Is Lookup, etc.).
-    First differentiates workspace fields into Standard vs Custom:
-      - Standard fields -> searched in standard_objects_map (REST API schemas)
-      - Custom fields / Custom objects -> searched in custom_objects_map (XML schemas)
-    """
     if standard_objects_map is None and custom_objects_map is None:
         std_map = {}
         cst_map = {}
@@ -307,7 +239,6 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
                 cst_map[oname] = odata
             else:
                 std_map[oname] = odata
-                # Standard objects may also contain custom fields
                 c_fields = [f for f in odata.get("fields", []) if f.get("package_name", "").lower() not in _SYSTEM_PACKAGES or "$" in f.get("field_name", "")]
                 if c_fields:
                     cst_map[oname] = {"object_name": odata.get("object_name", oname), "fields": c_fields}
@@ -330,10 +261,8 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
         ws_key     = _ws_field_key(raw_id)
         ws_key_alt = _ws_field_key(f_code)
 
-        # Differentiate Standard vs Custom field
         is_custom_ws = ("$" in raw_id) or ("customfields" in raw_id.lower()) or ("$" in f_code)
 
-        # Select primary index based on standard vs custom differentiation
         if is_custom_ws:
             primary_idx   = cst_indexed.get(target_key, {})
             secondary_idx = std_indexed.get(target_key, {})
@@ -355,7 +284,6 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             comb_idx.get(ws_key) or comb_idx.get(ws_key_alt)
         )
 
-        # Fallback to trailing component match (e.g. name.first -> first)
         if not matched and "." in ws_key:
             bare = ws_key.split(".")[-1]
             matched = primary_idx.get(bare) or secondary_idx.get(bare) or comb_idx.get(bare)
@@ -373,9 +301,6 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             is_sequence   = "Yes" if matched.get("is_sequence")   else "No"
             max_len       = str(matched.get("max_length", "-"))
             desc          = matched.get("description", "")
-            # REST-only attrs — only emit Yes/No if the key was actually populated
-            # by the standard objects API extractor. Custom XML fields will not
-            # carry these keys, so we fall back to "-" to avoid false data.
             avail_get  = ("-" if "is_available_get"  not in matched else
                           "Yes" if matched["is_available_get"]  else "No")
             avail_post = ("-" if "is_available_post" not in matched else
@@ -413,8 +338,6 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             else:
                 obj_field_key = f"{pkg}${fname}"
         else:
-            # No object schema match found — emit "-" for every attribute we
-            # cannot derive. Never fabricate Yes/No from missing data.
             data_type     = "-"
             ftype         = _field_type_from_ws_id(raw_id or f_code)
             is_sys        = "-"
@@ -492,10 +415,6 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
 # ---------------------------------------------------------------------------
 
 def _write_ignored_fields_tab(wb, unmapped_records):
-    """
-    Creates an 'Ignored_Fields' tab listing all workspace UI controls, rule context variables,
-    and unmapped fields that do not exist in standard or custom object schemas.
-    """
     if not unmapped_records:
         return
 
@@ -521,11 +440,6 @@ def _write_ignored_fields_tab(wb, unmapped_records):
 
 
 def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
-    """
-    Workspaces.xlsx — one tab per workspace.
-    Tab name = workspace name. No 'Workspace Name' column.
-    Includes 'Ignored_Fields' tab for UI controls and unmapped fields.
-    """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
@@ -582,11 +496,6 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
 
 def write_objects_excel(objects_map, output_path):
-    """
-    Objects.xlsx / Standard_Objects.xlsx / Custom_Objects.xlsx — one tab per object.
-    Tab name = object name. Field key shown as PackageName$Name.
-    Outputs STRICTLY the 21 requested columns in exact order.
-    """
     if not objects_map:
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -664,11 +573,6 @@ def write_objects_excel(objects_map, output_path):
 
 
 def write_combined_excel(parsed_workspaces, objects_map, output_path):
-    """
-    field_catalog.xlsx — one tab per workspace.
-    Tab name = workspace name. Fields enriched with all workspace + object schema metadata (Standard & Custom).
-    Includes 'Ignored_Fields' tab for UI controls and unmapped fields.
-    """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
@@ -737,6 +641,4 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
     return output_path
 
 
-
 write_field_catalog_excel = write_combined_excel
-

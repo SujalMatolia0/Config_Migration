@@ -44,17 +44,21 @@ Workspace layout XMLs contain UI display controls and Business Rules variables t
 
 ---
 
-## System Architecture & File Structure
+## System Architecture & Modular Folder Structure
 
 ```
 field_extractor/
+├── parsers/                # XML Layout & Schema Parsers
+│   ├── workspace_parser.py # Workspace XML layout parser
+│   └── object_parser.py    # Custom Object XML parser
+├── mappings/               # Control ID Translation Subsystem
+│   └── field_id_mapping.py # Workspace Field ID to REST API Schema Translation
+├── fetchers/               # REST API Schema Extractor
+│   └── osvc_rest_fetcher.py# Strict HTTP GET REST API schema extractor
+├── exporters/              # OpenPyXL Reporting Engine
+│   └── excel_exporter.py   # Multi-tab Excel workbook generator
 ├── main.py                 # Standalone CLI entry point
 ├── web_ui.py               # Flask Web Application & REST API Server (Port 5055)
-├── excel_exporter.py       # OpenPyXL Excel generation engine
-├── field_id_mapping.py     # Workspace Field ID to REST API Schema Translation
-├── osvc_rest_fetcher.py    # Strict HTTP GET REST API schema extractor
-├── object_parser.py        # XML parser for OSVC Custom Objects
-├── workspace_parser.py     # XML parser for OSVC Workspace layouts
 ├── config.py               # Credential configuration store
 ├── requirements.txt        # Python dependency manifest
 ├── README.md               # Feature documentation and user guide
