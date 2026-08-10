@@ -483,14 +483,20 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             disp_name = o_data.get("object_name", o_name)
             rows = []
             for of in o_data.get("fields", []):
-                is_enum_val = of.get("isEnumerable")
-                if isinstance(is_enum_val, bool):
-                    is_enum_str = "Yes" if is_enum_val else "No"
+                # isEnumerable is REST-only; check key presence
+                if "isEnumerable" not in of:
+                    is_enum_str = "-"
                 else:
-                    is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
+                    is_enum_val = of["isEnumerable"]
+                    if isinstance(is_enum_val, bool):
+                        is_enum_str = "Yes" if is_enum_val else "No"
+                    else:
+                        is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
 
                 items_val = of.get("items")
-                if isinstance(items_val, (dict, list)):
+                if "items" not in of and not of.get("is_list"):
+                    items_str = "-"
+                elif isinstance(items_val, (dict, list)):
                     items_str = str(items_val)
                 elif of.get("is_list"):
                     items_str = "IsList: Yes"
@@ -511,13 +517,13 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
                     "is_readonly": "Yes" if of.get("is_readonly") else "No",
                     "max_length": str(of.get("max_length", "-")),
                     "description": of.get("description", ""),
-                    "is_available_get": "Yes" if of.get("is_available_get", True) else "No",
-                    "is_available_post": "Yes" if of.get("is_available_post") else "No",
-                    "is_available_patch": "Yes" if of.get("is_available_patch") else "No",
-                    "is_deprecated": "Yes" if of.get("is_deprecated") else "No",
+                    "is_available_get":   ("-" if "is_available_get"   not in of else "Yes" if of["is_available_get"]   else "No"),
+                    "is_available_post":  ("-" if "is_available_post"  not in of else "Yes" if of["is_available_post"]  else "No"),
+                    "is_available_patch": ("-" if "is_available_patch" not in of else "Yes" if of["is_available_patch"] else "No"),
+                    "is_deprecated":      ("-" if "is_deprecated"      not in of else "Yes" if of["is_deprecated"]      else "No"),
                     "is_enumerable": is_enum_str,
-                    "minimum": str(of.get("minimum", "-")),
-                    "maximum": str(of.get("maximum", "-")),
+                    "minimum": "-" if "minimum" not in of else str(of["minimum"]),
+                    "maximum": "-" if "maximum" not in of else str(of["maximum"]),
                     "ref": str(ref_val),
                     "items": items_str,
                     "pattern": str(of.get("pattern", "-"))

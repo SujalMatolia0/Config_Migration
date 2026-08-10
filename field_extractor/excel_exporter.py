@@ -361,22 +361,33 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             is_sequence   = "Yes" if matched.get("is_sequence")   else "No"
             max_len       = str(matched.get("max_length", "-"))
             desc          = matched.get("description", "")
-            avail_get     = "Yes" if matched.get("is_available_get", True) else "No"
-            avail_post    = "Yes" if matched.get("is_available_post", False) else "No"
-            avail_patch   = "Yes" if matched.get("is_available_patch", False) else "No"
-            is_deprec     = "Yes" if matched.get("is_deprecated", False) else "No"
+            # REST-only attrs — only emit Yes/No if the key was actually populated
+            # by the standard objects API extractor. Custom XML fields will not
+            # carry these keys, so we fall back to "-" to avoid false data.
+            avail_get  = ("-" if "is_available_get"  not in matched else
+                          "Yes" if matched["is_available_get"]  else "No")
+            avail_post = ("-" if "is_available_post" not in matched else
+                          "Yes" if matched["is_available_post"] else "No")
+            avail_patch = ("-" if "is_available_patch" not in matched else
+                           "Yes" if matched["is_available_patch"] else "No")
+            is_deprec  = ("-" if "is_deprecated" not in matched else
+                          "Yes" if matched["is_deprecated"] else "No")
 
             is_enum_val = matched.get("isEnumerable")
-            if isinstance(is_enum_val, bool):
+            if "isEnumerable" not in matched:
+                is_enum_str = "-"
+            elif isinstance(is_enum_val, bool):
                 is_enum_str = "Yes" if is_enum_val else "No"
             else:
                 is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
 
-            minimum     = str(matched.get("minimum", "-"))
-            maximum     = str(matched.get("maximum", "-"))
-            ref_val     = str(matched.get("$ref") or matched.get("ref") or matched.get("ref_url") or "-")
-            items_val   = matched.get("items")
-            if isinstance(items_val, (dict, list)):
+            minimum   = "-" if "minimum" not in matched else str(matched["minimum"])
+            maximum   = "-" if "maximum" not in matched else str(matched["maximum"])
+            ref_val   = str(matched.get("$ref") or matched.get("ref") or matched.get("ref_url") or "-")
+            items_val = matched.get("items")
+            if "items" not in matched and not matched.get("is_list"):
+                items_str = "-"
+            elif isinstance(items_val, (dict, list)):
                 items_str = str(items_val)
             elif matched.get("is_list"):
                 items_str = "IsList: Yes"
@@ -568,10 +579,10 @@ def write_objects_excel(objects_map, output_path):
                 "Yes" if of.get("is_readonly") else "No",
                 str(of.get("max_length", "-")),
                 of.get("description", ""),
-                "Yes" if of.get("is_available_get", True) else "No",
-                "Yes" if of.get("is_available_post", False) else "No",
-                "Yes" if of.get("is_available_patch", False) else "No",
-                "Yes" if of.get("is_deprecated", False) else "No",
+                ("-" if "is_available_get"   not in of else "Yes" if of["is_available_get"]   else "No"),
+                ("-" if "is_available_post"  not in of else "Yes" if of["is_available_post"]  else "No"),
+                ("-" if "is_available_patch" not in of else "Yes" if of["is_available_patch"] else "No"),
+                ("-" if "is_deprecated"      not in of else "Yes" if of["is_deprecated"]      else "No"),
                 is_enum_str,
                 str(of.get("minimum", "-")),
                 str(of.get("maximum", "-")),
