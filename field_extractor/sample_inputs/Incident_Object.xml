@@ -15,5 +15,7 @@
         <Field Id="11" Label="Priority Override" Name="priority_override" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
         <Field Id="12" Label="SLA Breach Flag" Name="sla_breach_flag" DataTypeName="Yes/No" DataType="3" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
         <Field Id="13" Label="Resolution Code" Name="resolution_code" DataTypeName="Menu" DataType="6" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" Description="Object field NOT present in Incident Workspace Layout" />
+        <Field Id="14" Label="Login" Name="Login" DataTypeName="Text" DataType="2" IsNullable="False" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="True" MaxLength="80" />
+        <Field Id="15" Label="User Login" Name="user_login" DataTypeName="Text" DataType="2" IsNullable="True" IsList="False" IsLookup="False" IsCoReadOnly="False" IsSystemField="False" PackageName="c" MaxLength="80" Description="Custom User Login field" />
     </Fields>
 </CustomObject>

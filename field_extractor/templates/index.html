@@ -1093,21 +1093,35 @@
                         <th>Object Field Name</th>
                         <th>Field Label</th>
                         <th>Workspace Tab</th>
-                        <th>Required</th>
-                        <th>Read Only</th>
+                        <th>Required (In Layout)</th>
+                        <th>Read Only (In Layout)</th>
                         <th>Data Type</th>
                         <th>Field Type</th>
+                        <th>Is System Field</th>
+                        <th>Package Name</th>
                         <th>Is Nullable</th>
                         <th>Is Lookup</th>
+                        <th>Is Read Only (Schema)</th>
+                        <th>Max Length</th>
+                        <th>Description</th>
+                        <th>Is Available GET</th>
+                        <th>Is Available POST</th>
+                        <th>Is Available PATCH</th>
+                        <th>Is Deprecated</th>
+                        <th>Is Enumerable</th>
+                        <th>Minimum</th>
+                        <th>Maximum</th>
+                        <th>$Ref</th>
+                        <th>Items</th>
+                        <th>Pattern</th>
                         <th>Is List</th>
                         <th>Is Auto Update</th>
-                        <th>Max Length</th>
                         <th>In Workspace Layout</th>
                     </tr>
                 `;
                 rows.forEach(r => {
                     const tr = document.createElement('tr');
-                    const isCustom = r.field_type.includes('Custom');
+                    const isCustom = (r.field_type || '').includes('Custom');
                     tr.innerHTML = `
                         <td><strong>${r.bound_object}</strong></td>
                         <td>${r.target_object}</td>
@@ -1118,11 +1132,25 @@
                         <td>${r.readonly}</td>
                         <td>${r.data_type}</td>
                         <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
+                        <td><span class="badge ${r.is_system_field === 'Yes' ? 'badge-system' : 'badge-custom'}">${r.is_system_field || 'No'}</span></td>
+                        <td>${r.package_name || '-'}</td>
                         <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
                         <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td><span class="badge ${r.is_readonly_schema === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly_schema || 'No'}</span></td>
+                        <td>${r.max_length}</td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
+                        <td><span class="badge ${r.avail_get === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_get || 'Yes'}</span></td>
+                        <td><span class="badge ${r.avail_post === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_post || 'No'}</span></td>
+                        <td><span class="badge ${r.avail_patch === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_patch || 'No'}</span></td>
+                        <td><span class="badge ${r.is_deprecated === 'Yes' ? 'badge-no' : 'badge-yes'}">${r.is_deprecated || 'No'}</span></td>
+                        <td>${r.is_enumerable || '-'}</td>
+                        <td>${r.minimum || '-'}</td>
+                        <td>${r.maximum || '-'}</td>
+                        <td>${r.ref || '-'}</td>
+                        <td>${r.items || '-'}</td>
+                        <td>${r.pattern || '-'}</td>
                         <td><span class="badge ${r.is_list === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_list || 'No'}</span></td>
                         <td><span class="badge ${r.is_autoupdate === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_autoupdate || 'No'}</span></td>
-                        <td>${r.max_length}</td>
                         <td><span class="badge badge-yes">Yes</span></td>
                     `;
                     body.appendChild(tr);

@@ -351,8 +351,11 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
         if matched:
             data_type     = matched.get("data_type", "Text")
             ftype         = _field_type_from_obj(matched)
+            is_sys        = "Yes" if matched.get("is_system_field") else "No"
+            pkg           = (matched.get("package_name") or "").strip()
             is_nullable   = "Yes" if matched.get("is_nullable") else "No"
             is_lookup     = "Yes" if matched.get("is_lookup")   else "No"
+            is_readonly_s = "Yes" if matched.get("is_readonly") else "No"
             is_list       = "Yes" if matched.get("is_list")     else "No"
             is_autoupdate = "Yes" if matched.get("is_autoupdate") else "No"
             is_sequence   = "Yes" if matched.get("is_sequence")   else "No"
@@ -363,7 +366,24 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             avail_patch   = "Yes" if matched.get("is_available_patch", False) else "No"
             is_deprec     = "Yes" if matched.get("is_deprecated", False) else "No"
 
-            pkg   = (matched.get("package_name") or "").strip()
+            is_enum_val = matched.get("isEnumerable")
+            if isinstance(is_enum_val, bool):
+                is_enum_str = "Yes" if is_enum_val else "No"
+            else:
+                is_enum_str = str(is_enum_val) if is_enum_val is not None else "-"
+
+            minimum     = str(matched.get("minimum", "-"))
+            maximum     = str(matched.get("maximum", "-"))
+            ref_val     = str(matched.get("$ref") or matched.get("ref") or matched.get("ref_url") or "-")
+            items_val   = matched.get("items")
+            if isinstance(items_val, (dict, list)):
+                items_str = str(items_val)
+            elif matched.get("is_list"):
+                items_str = "IsList: Yes"
+            else:
+                items_str = str(items_val) if items_val is not None else "-"
+            pattern     = str(matched.get("pattern", "-"))
+
             fname = matched.get("field_name", "")
             if pkg.lower() in _SYSTEM_PACKAGES:
                 obj_field_key = fname
@@ -372,8 +392,11 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
         else:
             data_type     = "Standard Data Field"
             ftype         = _field_type_from_ws_id(raw_id or f_code)
+            is_sys        = "No" if "Custom" in ftype else "Yes"
+            pkg           = ftype.split("(")[1].rstrip(")") if "Custom (" in ftype else ""
             is_nullable   = "Yes"
             is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
+            is_readonly_s = "No"
             is_list       = "No"
             is_autoupdate = "No"
             is_sequence   = "No"
@@ -383,27 +406,42 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             avail_post    = "No"
             avail_patch   = "No"
             is_deprec     = "No"
+            is_enum_str   = "-"
+            minimum       = "-"
+            maximum       = "-"
+            ref_val       = "-"
+            items_str     = "-"
+            pattern       = "-"
             obj_field_key = raw_id
 
         item = dict(wf)
         item.update({
-            "target_object":  target_obj,
-            "obj_field_key":  obj_field_key,
-            "data_type":      data_type,
-            "field_type":     ftype,
-            "is_nullable":    is_nullable,
-            "is_lookup":      is_lookup,
-            "is_list":        is_list,
-            "is_autoupdate":  is_autoupdate,
-            "is_sequence":    is_sequence,
-            "max_length":     max_len,
-            "description":    desc,
-            "avail_get":      avail_get,
-            "avail_post":     avail_post,
-            "avail_patch":    avail_patch,
-            "is_deprecated":  is_deprec,
-            "required_fmt":   _format_option(wf.get("required_option", "")),
-            "readonly_fmt":   _format_option(wf.get("readonly_option", "")),
+            "target_object":      target_obj,
+            "obj_field_key":      obj_field_key,
+            "data_type":          data_type,
+            "field_type":         ftype,
+            "is_system_field":    is_sys,
+            "package_name":       pkg,
+            "is_nullable":        is_nullable,
+            "is_lookup":          is_lookup,
+            "is_readonly_schema": is_readonly_s,
+            "is_list":            is_list,
+            "is_autoupdate":      is_autoupdate,
+            "is_sequence":        is_sequence,
+            "max_length":         max_len,
+            "description":        desc,
+            "avail_get":          avail_get,
+            "avail_post":         avail_post,
+            "avail_patch":        avail_patch,
+            "is_deprecated":      is_deprec,
+            "is_enumerable":      is_enum_str,
+            "minimum":            minimum,
+            "maximum":            maximum,
+            "ref":                ref_val,
+            "items":              items_str,
+            "pattern":            pattern,
+            "required_fmt":       _format_option(wf.get("required_option", "")),
+            "readonly_fmt":       _format_option(wf.get("readonly_option", "")),
         })
         enriched.append(item)
 
@@ -552,17 +590,19 @@ def write_objects_excel(objects_map, output_path):
 def write_combined_excel(parsed_workspaces, objects_map, output_path):
     """
     combined.xlsx — one tab per workspace.
-    Tab name = workspace name. Fields enriched with object schema data.
+    Tab name = workspace name. Fields enriched with all workspace + object schema metadata (Standard & Custom).
     """
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
     headers = [
-        "Bound Object", "Target Object", "Object Field Name",
-        "Field Label", "Workspace Tab", "Required", "Read Only",
-        "Data Type", "Field Type", "Is Nullable",
-        "Is Lookup", "Is List", "Is Auto Update", "Max Length", "Is Available GET", "Is Available POST",
-        "Is Available PATCH", "Is Deprecated", "Description", "In Workspace Layout"
+        "Bound Object", "Target Object", "Object Field Name", "Field Label",
+        "Workspace Tab", "Required (In Layout)", "Read Only (In Layout)",
+        "Data Type", "Field Type", "Is System Field", "Package Name",
+        "Is Nullable", "Is Lookup", "Is Read Only (Schema)", "Max Length",
+        "Description", "Is Available GET", "Is Available POST", "Is Available PATCH",
+        "Is Deprecated", "Is Enumerable", "Minimum", "Maximum", "$Ref", "Items",
+        "Pattern", "Is List", "Is Auto Update", "In Workspace Layout"
     ]
 
     for ws_data in parsed_workspaces:
@@ -585,16 +625,25 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
                 item["readonly_fmt"],
                 item["data_type"],
                 item["field_type"],
+                item["is_system_field"],
+                item["package_name"],
                 item["is_nullable"],
                 item["is_lookup"],
+                item["is_readonly_schema"],
+                item["max_length"],
+                item["description"],
+                item["avail_get"],
+                item["avail_post"],
+                item["avail_patch"],
+                item["is_deprecated"],
+                item["is_enumerable"],
+                item["minimum"],
+                item["maximum"],
+                item["ref"],
+                item["items"],
+                item["pattern"],
                 item["is_list"],
                 item["is_autoupdate"],
-                item["max_length"],
-                item.get("avail_get", "Yes"),
-                item.get("avail_post", "No"),
-                item.get("avail_patch", "No"),
-                item.get("is_deprecated", "No"),
-                item.get("description", ""),
                 "Yes",
             ])
 

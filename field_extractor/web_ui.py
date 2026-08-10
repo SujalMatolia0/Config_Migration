@@ -4,6 +4,7 @@ import tempfile
 import zipfile
 import io
 import traceback
+import openpyxl
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_file
 from werkzeug.utils import secure_filename
@@ -41,31 +42,64 @@ except ImportError:
 app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
 
-CACHE_FILE = os.path.join(CURRENT_DIR, "results", "standard_objects_cache.json")
-
-def _load_std_cache():
-    if os.path.exists(CACHE_FILE):
-        try:
-            with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {}
-
-def _save_std_cache(std_map):
-    if std_map:
-        try:
-            out_d = os.path.join(CURRENT_DIR, "results")
-            os.makedirs(out_d, exist_ok=True)
-            with open(CACHE_FILE, "w", encoding="utf-8") as f:
-                json.dump(std_map, f)
-        except Exception:
-            pass
+def load_standard_objects_from_excel():
+    """Loads extracted standard objects directly from standard_objects.xlsx if present."""
+    xlsx_path = os.path.join(CURRENT_DIR, "results", "standard_objects.xlsx")
+    if not os.path.exists(xlsx_path):
+        add_log(f"standard_objects.xlsx not found at {xlsx_path}", "WARNING")
+        return {}
+    try:
+        wb = openpyxl.load_workbook(xlsx_path, data_only=True)
+        std_map = {}
+        for sheet_name in wb.sheetnames:
+            sheet = wb[sheet_name]
+            rows = list(sheet.iter_rows(values_only=True))
+            if not rows:
+                continue
+            headers = [str(h or '') for h in rows[0]]
+            fields = []
+            for r in rows[1:]:
+                if not any(r):
+                    continue
+                r_dict = dict(zip(headers, r))
+                fk = str(r_dict.get('Field Key', '') or '')
+                fn = fk.split('$')[-1] if '$' in fk else fk
+                fields.append({
+                    'field_id': fn,
+                    'field_name': fn,
+                    'field_label': r_dict.get('Field Label', ''),
+                    'data_type': r_dict.get('Data Type', ''),
+                    'is_system_field': r_dict.get('Is System Field') == 'Yes',
+                    'package_name': r_dict.get('Package Name', ''),
+                    'is_nullable': r_dict.get('Is Nullable') == 'Yes',
+                    'is_lookup': r_dict.get('Is Lookup') == 'Yes',
+                    'is_readonly': r_dict.get('Is Read Only') == 'Yes',
+                    'max_length': r_dict.get('Max Length', '-'),
+                    'description': r_dict.get('Description', ''),
+                    'is_available_get': r_dict.get('Is Available GET') == 'Yes',
+                    'is_available_post': r_dict.get('Is Available POST') == 'Yes',
+                    'is_available_patch': r_dict.get('Is Available PATCH') == 'Yes',
+                    'is_deprecated': r_dict.get('Is Deprecated') == 'Yes',
+                    'isEnumerable': r_dict.get('Is Enumerable'),
+                    'minimum': r_dict.get('Minimum'),
+                    'maximum': r_dict.get('Maximum'),
+                    '$ref': r_dict.get('$Ref'),
+                    'items': r_dict.get('Items'),
+                    'pattern': r_dict.get('Pattern'),
+                })
+            std_map[sheet_name.lower()] = {
+                'object_name': sheet_name,
+                'fields': fields
+            }
+        return std_map
+    except Exception as e:
+        add_log(f"Error reading standard_objects.xlsx: {e}", "ERROR")
+        return {}
 
 # Global store for current session outputs
 RESULTS_CACHE = {
     "workspaces": [],
-    "standard_objects_map": _load_std_cache(),
+    "standard_objects_map": {},
     "custom_objects_map": {},
     "combined_objects_map": {},
     "output_dir": None,
@@ -404,12 +438,10 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             "success": False,
             "error": "Failed to parse any valid Workspace or Object XML files."
         }), 400
-
     out_dir = os.path.join(CURRENT_DIR, "results")
     os.makedirs(out_dir, exist_ok=True)
 
-    RESULTS_CACHE["custom_objects_map"] = parsed_objects
-    std_map = RESULTS_CACHE.get("standard_objects_map") or {}
+    std_map = RESULTS_CACHE.get("standard_objects_map") or load_standard_objects_from_excel() or {}
 
     if not std_map and auto_fetch_rest:
         host_to_use = _cfg_host or BASE_URL
@@ -425,57 +457,25 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
                     include_custom=True,
                     log_cb=add_log
                 )
-                RESULTS_CACHE["standard_objects_map"] = std_map
             except Exception as err:
                 add_log(f"Auto-fetch REST schemas warning: {err}", "WARNING")
+
+    if std_map:
+        RESULTS_CACHE["standard_objects_map"] = std_map
 
     combined_map = merge_objects_maps(std_map, parsed_objects)
     RESULTS_CACHE["combined_objects_map"] = combined_map
 
-    std_xlsx_path  = os.path.join(out_dir, "standard_objects.xlsx")
-    cst_xlsx_path  = os.path.join(out_dir, "custom_objects.xlsx")
-    ws_xlsx_path   = os.path.join(out_dir, "workspaces.xlsx")
+    std_xlsx_path = os.path.join(out_dir, "standard_objects.xlsx")
+    cst_xlsx_path = os.path.join(out_dir, "custom_objects.xlsx")
+    ws_xlsx_path  = os.path.join(out_dir, "workspaces.xlsx")
     comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
 
     if std_map:
         write_objects_excel(std_map, std_xlsx_path)
     write_objects_excel(parsed_objects, cst_xlsx_path)
-
     write_workspaces_excel(parsed_workspaces, combined_map, ws_xlsx_path)
     write_combined_excel(parsed_workspaces, combined_map, comb_xlsx_path)
-
-    RESULTS_CACHE["workspaces"] = parsed_workspaces
-    RESULTS_CACHE["output_dir"] = out_dir
-
-    add_log("Generated Excel files: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
-
-    # Build JSON preview payload for the UI
-    preview_workspaces = []
-    for ws_data in parsed_workspaces:
-        bound_obj = ws_data.get("bound_object", "Contact")
-        enriched = _enrich_workspace_fields(ws_data.get("fields", []), combined_map, bound_obj)
-        rows = []
-        for item in enriched:
-            rows.append({
-                "bound_object": item["bound_object"],
-                "target_object": item["target_object"],
-                "object_field_name": item["obj_field_key"],
-                "field_label": item["field_label"],
-                "location_tab": item["location_tab"],
-                "required": item["required_fmt"],
-                "readonly": item["readonly_fmt"],
-                "data_type": item["data_type"],
-                "field_type": item["field_type"],
-                "is_nullable": item["is_nullable"],
-                "is_lookup": item["is_lookup"],
-                "max_length": item["max_length"],
-            })
-        preview_workspaces.append({
-            "workspace_name": ws_data["workspace_name"],
-            "bound_object": bound_obj,
-            "field_count": len(rows),
-            "rows": rows
-        })
 
     def _build_obj_preview(objs_dict):
         lst = []
@@ -512,9 +512,9 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
                     "max_length": str(of.get("max_length", "-")),
                     "description": of.get("description", ""),
                     "is_available_get": "Yes" if of.get("is_available_get", True) else "No",
-                    "is_available_post": "Yes" if of.get("is_available_post", False) else "No",
-                    "is_available_patch": "Yes" if of.get("is_available_patch", False) else "No",
-                    "is_deprecated": "Yes" if of.get("is_deprecated", False) else "No",
+                    "is_available_post": "Yes" if of.get("is_available_post") else "No",
+                    "is_available_patch": "Yes" if of.get("is_available_patch") else "No",
+                    "is_deprecated": "Yes" if of.get("is_deprecated") else "No",
                     "is_enumerable": is_enum_str,
                     "minimum": str(of.get("minimum", "-")),
                     "maximum": str(of.get("maximum", "-")),
@@ -529,31 +529,41 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             })
         return lst
 
-    _STANDARD_OBJECT_NAMES = {
-        "contact", "contacts", "incident", "incidents", "account", "accounts",
-        "answer", "answers", "asset", "assets", "opportunity", "opportunities",
-        "organization", "organizations", "task", "tasks", "accountgroups",
-        "analyticsreports", "answerversions", "bulkextracts", "bulkextractresults",
-        "campaigns", "channeltypes", "chats", "configurations",
-        "contactmarketingrosters", "countries", "eventsubscriptions", "holidays",
-        "mailboxes", "marketingmailboxes", "messagebases", "purchasedproducts",
-        "salesproducts", "salesterritories", "servicecategories",
-        "servicedispositions", "servicemailboxes", "serviceproducts",
-        "siteinterfaces", "ssotokenreferences", "standardcontents", "variables"
-    }
+    RESULTS_CACHE["workspaces"] = parsed_workspaces
+    RESULTS_CACHE["output_dir"] = out_dir
 
-    std_map_all = dict(std_map or RESULTS_CACHE.get("standard_objects_map") or {})
-    cst_map_all = {}
+    add_log("Generated Excel files: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
 
-    for o_k, o_v in (parsed_objects or {}).items():
-        if o_k.lower() in _STANDARD_OBJECT_NAMES:
-            if o_k not in std_map_all:
-                std_map_all[o_k] = o_v
-        else:
-            cst_map_all[o_k] = o_v
+    # Build JSON preview payload for UI (1-to-1 match with generated Excel files)
+    preview_std_objects = _build_obj_preview(std_map)
+    preview_cst_objects = _build_obj_preview(parsed_objects)
 
-    preview_std_objects = _build_obj_preview(std_map_all)
-    preview_cst_objects = _build_obj_preview(cst_map_all)
+    preview_workspaces = []
+    for ws_data in parsed_workspaces:
+        bound_obj = ws_data.get("bound_object", "Contact")
+        enriched = _enrich_workspace_fields(ws_data.get("fields", []), combined_map, bound_obj)
+        rows = []
+        for item in enriched:
+            rows.append({
+                "bound_object": item["bound_object"],
+                "target_object": item["target_object"],
+                "object_field_name": item["obj_field_key"],
+                "field_label": item["field_label"],
+                "location_tab": item["location_tab"],
+                "required": item["required_fmt"],
+                "readonly": item["readonly_fmt"],
+                "data_type": item["data_type"],
+                "field_type": item["field_type"],
+                "is_nullable": item["is_nullable"],
+                "is_lookup": item["is_lookup"],
+                "max_length": item["max_length"],
+            })
+        preview_workspaces.append({
+            "workspace_name": ws_data["workspace_name"],
+            "bound_object": bound_obj,
+            "field_count": len(rows),
+            "rows": rows
+        })
 
     preview_combined = []
     for ws_data in parsed_workspaces:
@@ -572,11 +582,25 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
                 "readonly": item["readonly_fmt"],
                 "data_type": item["data_type"],
                 "field_type": item["field_type"],
+                "is_system_field": item.get("is_system_field", "No"),
+                "package_name": item.get("package_name", ""),
                 "is_nullable": item["is_nullable"],
                 "is_lookup": item["is_lookup"],
+                "is_readonly_schema": item.get("is_readonly_schema", "No"),
+                "max_length": item["max_length"],
+                "description": item.get("description", ""),
+                "avail_get": item.get("avail_get", "Yes"),
+                "avail_post": item.get("avail_post", "No"),
+                "avail_patch": item.get("avail_patch", "No"),
+                "is_deprecated": item.get("is_deprecated", "No"),
+                "is_enumerable": item.get("is_enumerable", "-"),
+                "minimum": item.get("minimum", "-"),
+                "maximum": item.get("maximum", "-"),
+                "ref": item.get("ref", "-"),
+                "items": item.get("items", "-"),
+                "pattern": item.get("pattern", "-"),
                 "is_list": item.get("is_list", "No"),
                 "is_autoupdate": item.get("is_autoupdate", "No"),
-                "max_length": item["max_length"],
                 "in_layout": "Yes"
             })
         preview_combined.append({
@@ -588,8 +612,8 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
 
     summary = {
         "workspace_count": len(parsed_workspaces),
-        "std_object_count": len(std_map_all),
-        "cst_object_count": len(cst_map_all),
+        "std_object_count": len(std_map),
+        "cst_object_count": len(parsed_objects),
         "object_count": len(combined_map),
         "total_workspace_fields": sum(len(w.get("fields", [])) for w in parsed_workspaces),
         "total_object_fields": sum(len(o.get("fields", [])) for o in combined_map.values()),

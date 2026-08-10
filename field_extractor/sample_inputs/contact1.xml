@@ -1,2 +1,154 @@
-<Workspace xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit" ServerVersion="Oracle Service Cloud 26B SP1 (Build 293 - 06/29/2026 09:45)&#xD;&#xA; CE Version: rnw-release-26-5-0-1-sp1 PL: " ClientVersion="26.5.0.293" Type="Contact" UIType="Contact" IsMultiEdit="False" SpellCheckOnSave="False" SpellCheckAllowCancel="False" BrowserCompatibilityMode="False"><RecordTypes><RecordType Id="6" Name="Contact" /><RecordType Id="7" Name="Org" /><RecordType Id="1" Name="Incident" /><RecordType Id="5" Name="Opportunity" /><RecordType Id="8" Name="Task" /><RecordType Id="49" Name="Chat" /><RecordType Id="126" Name="Asset" /><RecordType Id="152" Name="Interaction" /></RecordTypes><Ribbon><RibbonTab TextLabelName="HOME_LBL"><RibbonGroup TextLabelName="SAVE_CMD"><RibbonButtonItem ItemId="Save" ButtonSize="Large" /><RibbonButtonItem ItemId="SaveAndClose" ButtonSize="Large" /></RibbonGroup><RibbonGroup TextLabelName="ACTIONS_LBL"><RibbonButtonItem ItemId="New" ButtonSize="Large" /><RibbonButtonItem ItemId="Refresh" ButtonSize="Large" /><RibbonButtonItem ItemId="Appointment" ButtonSize="Large" /><RibbonButtonItem ItemId="Print" ButtonSize="Small" /><RibbonButtonItem ItemId="Copy" ButtonSize="Small" /><RibbonButtonItem ItemId="Delete" ButtonSize="Small" /><RibbonButtonItem ItemId="Separator" /><RibbonButtonItem ItemId="ResetPassword" ButtonSize="Large" /></RibbonGroup><RibbonGroup TextLabelName="PROOFING_LBL"><RibbonButtonItem ItemId="SpellCheck" ButtonSize="Large" /></RibbonGroup><RibbonGroup TextLabelName="LINKS_AND_INFO_LBL"><RibbonButtonItem ItemId="EditorLinks" ButtonSize="Large"><Links><LinkItem Title="RightNow" Url="www.rightnow.com" /></Links></RibbonButtonItem><RibbonButtonItem ItemId="Separator" /><RibbonButtonItem ItemId="Info" ButtonSize="Large" /></RibbonGroup></RibbonTab></Ribbon><QuickAccessToolbar><QuickAccessToolbarItem ItemId="New" /><QuickAccessToolbarItem ItemId="Save" /><QuickAccessToolbarItem ItemId="SaveAndClose" /><QuickAccessToolbarItem ItemId="Print" /><QuickAccessToolbarItem ItemId="Bookmark" /></QuickAccessToolbar><Flag /><Info><InfoItem ObjectId="Contact" FieldId="CId" /><InfoItem ObjectId="Contact" FieldId="Created" /><InfoItem ObjectId="Contact" FieldId="Updated" /><InfoItem ObjectId="Contact" FieldId="RuleState" /></Info><Rules><Rule Name="me.chat default contact" Notes="" Active="True"><Triggers><Trigger Type="EditorLoaded" /></Triggers><Conditions LogicalExpression="0"><Condition><Source Type="Field" TableNode="True">Contact.CId</Source><Property>Value</Property><Operator>EQ</Operator><Value>6969157</Value></Condition></Conditions><Then><Action Type="Standard"><Object Type="MessageBox"></Object><Operation>Show</Operation><Value Title="do not change" Icon="Warning">This is a default contact DTS Chat customer do not modify this contact record.  Close this message and the contact record.  From the workspace, click the filter button to search for your customer.</Value></Action><Action Type="Standard"><Object Type="Field" TableNode="True">Contact.Name.First</Object><Operation>ReadOnly</Operation><Value>True</Value></Action><Action Type="Standard"><Object Type="Field" TableNode="True">Contact.Name.Last</Object><Operation>ReadOnly</Operation><Value>True</Value></Action></Then><Else /></Rule></Rules><TabSet Margin="0, 0, 0, 0" TabIndex="3" CanReorderTabs="True" WrapTabs="True" SummaryPanelAlignment="FirstTab" ThresholdHeight="400" SummaryPanelHeight="300" Id="635170824442799219" SummaryTab="0"><Tab TextColor="" Text="Summary"><Table ColumnCount="2" RowCount="9" BackColor="White" ForeColor="ControlText" AutoScroll="True"><Field Row="0" Column="0" ObjectId="Contact" FieldId="Name.First" TabIndex="1" ReadOnlyOption="OnEdit:~any~" RequiredOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847826729655860" /><Field Row="0" Column="1" ObjectId="Contact" FieldId="State" TabIndex="7" ReadOnlyOption="OnEdit:~any~" Id="634847827169030860" /><Field Row="1" Column="0" ObjectId="Contact" FieldId="Name.Last" TabIndex="2" ReadOnlyOption="OnEdit:~any~" RequiredOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847826786530860" /><Field Row="1" Column="1" ObjectId="Contact" FieldId="OrgId" TabIndex="8" ReportId="8001" /><Field Row="2" Column="0" ObjectId="Contact" FieldId="Email" TabIndex="3" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Id="634847826856843360" /><Field Row="2" Column="1" ObjectId="Contact" FieldId="SalesAcctId" TabIndex="9" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" DefaultValue="" Id="634847827221530860" /><Field Row="3" Column="0" ObjectId="Contact" FieldId="PhOffice" TabIndex="4" DefaultPhoneType="0" Id="634847813510066016" /><Field Row="3" Column="1" ObjectId="Contact" FieldId="C$PhoneExt" TabIndex="14" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170824817642969" /><Field Row="4" Column="0" ObjectId="Contact" FieldId="C$DsnPhone" TabIndex="13" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170824897828516" /><Field Row="4" Column="1" ObjectId="Contact" FieldId="C$DsnPhoneExt" TabIndex="16" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" /><Field Row="5" Column="0" ObjectId="Contact" FieldId="C$International" TabIndex="15" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170825437213281" /><Field Row="5" Column="1" ObjectId="Contact" FieldId="C$IntPhoneExt" TabIndex="17" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" /><Field Row="6" Column="0" ObjectId="Contact" FieldId="Addr" TabIndex="5" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Height="50" Id="634832089650067969" /><Field Row="6" Column="1" ObjectId="Contact" FieldId="Title" TabIndex="10" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847827278718360" /><Field Row="7" Column="0" ObjectId="Contact" FieldId="CtypeId" TabIndex="6" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Id="634847827096374610" /><Field Row="7" Column="1" ObjectId="Contact" FieldId="Login" TabIndex="11" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847827338718360" /><Field Row="8" Column="0" ObjectId="Contact" FieldId="MaOptIn" TabIndex="12" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" BooleanRenderView="Dropdown" Id="634847827402780860" /><RelationshipItem ItemType="SlaContainer" Row="8" Column="1" LayoutLabelAlignment="Right" LayoutLabelPosition="Left" TabIndex="12" /></Table></Tab><Tab TextColor="Black" Text="Opportunities"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="OpportunitiesView" Row="0" Column="0" AcId="9030" ShowRowCount="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" SearchReportId="0" ExecuteOnNew="False" DelayReportExecution="True" /></Table></Tab><Tab TextColor="Black" Text="Notes"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="ContactNotes" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" DefaultChannelForNote="NoDefault" TabIndex="0" /></Table></Tab><Tab TextColor="" Text="Tasks"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText" Margin="0, 0, 0, 0"><RelationshipItem ItemType="Tasks" Row="0" Column="0" AcId="9016" SearchReportId="8012" ShowRowCount="True" FilterOnPrimaryKeyOnly="True" TabIndex="0" ExecuteOnNew="False" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" /></Table></Tab><Tab TextColor="Black" Text="Tickets"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="IncidentView" Row="0" Column="0" AcId="103889" ShowRowCount="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" SearchReportId="0" ExecuteOnNew="False" DelayReportExecution="True" Id="634776933288952500" /></Table></Tab><Tab TextColor="Black" Text="Feedback"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="SurveyHistoryView" Row="0" Column="0" AcId="10012" ShowRowCount="True" HideReportCommands="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" ExecuteOnNew="False" TabIndex="0" DelayReportExecution="True" /></Table></Tab><Tab TextColor="Black" Text="Marketing Activity"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="MarketingActivityView" Row="0" Column="0" AcId="10009" ShowRowCount="True" HideReportCommands="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" ExecuteOnNew="False" TabIndex="0" DelayReportExecution="True" /></Table></Tab><Tab TextColor="Black" Text="Attachments"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="FileAttachments" Row="0" Column="0" TabIndex="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" /></Table></Tab><Tab TextColor="Black" Text="Audit Log"><Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText"><RelationshipItem ItemType="ContactAuditLog" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" ShowReadTransactions="False" AcId="9050" ExecuteOnNew="False" /></Table></Tab></TabSet></Workspace>
+<Workspace xmlns:dbaudit="http://www.rightnow.com/schemas/dbaudit" ServerVersion="Oracle Service Cloud 26B SP1 (Build 293 - 06/29/2026 09:45)&#xD;&#xA; CE Version: rnw-release-26-5-0-1-sp1 PL: " ClientVersion="26.5.0.293" Type="Contact" UIType="Contact" IsMultiEdit="False" SpellCheckOnSave="False" SpellCheckAllowCancel="False" BrowserCompatibilityMode="False">
+    <RecordTypes>
+        <RecordType Id="6" Name="Contact" />
+        <RecordType Id="7" Name="Org" />
+        <RecordType Id="1" Name="Incident" />
+        <RecordType Id="5" Name="Opportunity" />
+        <RecordType Id="8" Name="Task" />
+        <RecordType Id="49" Name="Chat" />
+        <RecordType Id="126" Name="Asset" />
+        <RecordType Id="152" Name="Interaction" />
+    </RecordTypes>
+    <Ribbon>
+        <RibbonTab TextLabelName="HOME_LBL">
+            <RibbonGroup TextLabelName="SAVE_CMD">
+                <RibbonButtonItem ItemId="Save" ButtonSize="Large" />
+                <RibbonButtonItem ItemId="SaveAndClose" ButtonSize="Large" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="ACTIONS_LBL">
+                <RibbonButtonItem ItemId="New" ButtonSize="Large" />
+                <RibbonButtonItem ItemId="Refresh" ButtonSize="Large" />
+                <RibbonButtonItem ItemId="Appointment" ButtonSize="Large" />
+                <RibbonButtonItem ItemId="Print" ButtonSize="Small" />
+                <RibbonButtonItem ItemId="Copy" ButtonSize="Small" />
+                <RibbonButtonItem ItemId="Delete" ButtonSize="Small" />
+                <RibbonButtonItem ItemId="Separator" />
+                <RibbonButtonItem ItemId="ResetPassword" ButtonSize="Large" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="PROOFING_LBL">
+                <RibbonButtonItem ItemId="SpellCheck" ButtonSize="Large" />
+            </RibbonGroup>
+            <RibbonGroup TextLabelName="LINKS_AND_INFO_LBL">
+                <RibbonButtonItem ItemId="EditorLinks" ButtonSize="Large">
+                    <Links>
+                        <LinkItem Title="RightNow" Url="www.rightnow.com" />
+                    </Links>
+                </RibbonButtonItem>
+                <RibbonButtonItem ItemId="Separator" />
+                <RibbonButtonItem ItemId="Info" ButtonSize="Large" />
+            </RibbonGroup>
+        </RibbonTab>
+    </Ribbon>
+    <QuickAccessToolbar>
+        <QuickAccessToolbarItem ItemId="New" />
+        <QuickAccessToolbarItem ItemId="Save" />
+        <QuickAccessToolbarItem ItemId="SaveAndClose" />
+        <QuickAccessToolbarItem ItemId="Print" />
+        <QuickAccessToolbarItem ItemId="Bookmark" />
+    </QuickAccessToolbar>
+    <Flag />
+    <Info>
+        <InfoItem ObjectId="Contact" FieldId="CId" />
+        <InfoItem ObjectId="Contact" FieldId="Created" />
+        <InfoItem ObjectId="Contact" FieldId="Updated" />
+        <InfoItem ObjectId="Contact" FieldId="RuleState" />
+    </Info>
+    <Rules>
+        <Rule Name="me.chat default contact" Notes="" Active="True">
+            <Triggers>
+                <Trigger Type="EditorLoaded" />
+            </Triggers>
+            <Conditions LogicalExpression="0">
+                <Condition>
+                    <Source Type="Field" TableNode="True">Contact.CId</Source>
+                    <Property>Value</Property>
+                    <Operator>EQ</Operator>
+                    <Value>6969157</Value>
+                </Condition>
+            </Conditions>
+            <Then>
+                <Action Type="Standard">
+                    <Object Type="MessageBox"></Object>
+                    <Operation>Show</Operation>
+                    <Value Title="do not change" Icon="Warning">This is a default contact DTS Chat customer do not modify this contact record.  Close this message and the contact record.  From the workspace, click the filter button to search for your customer.</Value>
+                </Action>
+                <Action Type="Standard">
+                    <Object Type="Field" TableNode="True">Contact.Name.First</Object>
+                    <Operation>ReadOnly</Operation>
+                    <Value>True</Value>
+                </Action>
+                <Action Type="Standard">
+                    <Object Type="Field" TableNode="True">Contact.Name.Last</Object>
+                    <Operation>ReadOnly</Operation>
+                    <Value>True</Value>
+                </Action>
+            </Then>
+            <Else />
+        </Rule>
+    </Rules>
+    <TabSet Margin="0, 0, 0, 0" TabIndex="3" CanReorderTabs="True" WrapTabs="True" SummaryPanelAlignment="FirstTab" ThresholdHeight="400" SummaryPanelHeight="300" Id="635170824442799219" SummaryTab="0">
+        <Tab TextColor="" Text="Summary">
+            <Table ColumnCount="2" RowCount="9" BackColor="White" ForeColor="ControlText" AutoScroll="True">
+                <Field Row="0" Column="0" ObjectId="Contact" FieldId="Name.First" TabIndex="1" ReadOnlyOption="OnEdit:~any~" RequiredOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847826729655860" />
+                <Field Row="0" Column="1" ObjectId="Contact" FieldId="State" TabIndex="7" ReadOnlyOption="OnEdit:~any~" Id="634847827169030860" />
+                <Field Row="1" Column="0" ObjectId="Contact" FieldId="Name.Last" TabIndex="2" ReadOnlyOption="OnEdit:~any~" RequiredOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847826786530860" />
+                <Field Row="1" Column="1" ObjectId="Contact" FieldId="OrgId" TabIndex="8" ReportId="8001" />
+                <Field Row="2" Column="0" ObjectId="Contact" FieldId="Email" TabIndex="3" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Id="634847826856843360" />
+                <Field Row="2" Column="1" ObjectId="Contact" FieldId="SalesAcctId" TabIndex="9" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" DefaultValue="" Id="634847827221530860" />
+                <Field Row="3" Column="0" ObjectId="Contact" FieldId="PhOffice" TabIndex="4" DefaultPhoneType="0" Id="634847813510066016" />
+                <Field Row="3" Column="1" ObjectId="Contact" FieldId="C$PhoneExt" TabIndex="14" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170824817642969" />
+                <Field Row="4" Column="0" ObjectId="Contact" FieldId="C$DsnPhone" TabIndex="13" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170824897828516" />
+                <Field Row="4" Column="1" ObjectId="Contact" FieldId="C$DsnPhoneExt" TabIndex="16" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" />
+                <Field Row="5" Column="0" ObjectId="Contact" FieldId="C$International" TabIndex="15" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="635170825437213281" />
+                <Field Row="5" Column="1" ObjectId="Contact" FieldId="C$IntPhoneExt" TabIndex="17" ReadOnlyOption="" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" />
+                <Field Row="6" Column="0" ObjectId="Contact" FieldId="Addr" TabIndex="5" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Height="50" Id="634832089650067969" />
+                <Field Row="6" Column="1" ObjectId="Contact" FieldId="Title" TabIndex="10" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847827278718360" />
+                <Field Row="7" Column="0" ObjectId="Contact" FieldId="CtypeId" TabIndex="6" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" Id="634847827096374610" />
+                <Field Row="7" Column="1" ObjectId="Contact" FieldId="Login" TabIndex="11" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" RequiredOption="" TrimTextWhitespace="True" SpellCheck="False" Multiline="False" AcceptsReturn="False" Id="634847827338718360" />
+                <Field Row="8" Column="0" ObjectId="Contact" FieldId="MaOptIn" TabIndex="12" ReadOnlyOption="OnNew:~any~;OnEdit:~any~" BooleanRenderView="Dropdown" Id="634847827402780860" />
+                <RelationshipItem ItemType="SlaContainer" Row="8" Column="1" LayoutLabelAlignment="Right" LayoutLabelPosition="Left" TabIndex="12" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Opportunities">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="OpportunitiesView" Row="0" Column="0" AcId="9030" ShowRowCount="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" SearchReportId="0" ExecuteOnNew="False" DelayReportExecution="True" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Notes">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="ContactNotes" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" DefaultChannelForNote="NoDefault" TabIndex="0" />
+            </Table>
+        </Tab>
+        <Tab TextColor="" Text="Tasks">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText" Margin="0, 0, 0, 0">
+                <RelationshipItem ItemType="Tasks" Row="0" Column="0" AcId="9016" SearchReportId="8012" ShowRowCount="True" FilterOnPrimaryKeyOnly="True" TabIndex="0" ExecuteOnNew="False" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Tickets">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="IncidentView" Row="0" Column="0" AcId="103889" ShowRowCount="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" SearchReportId="0" ExecuteOnNew="False" DelayReportExecution="True" Id="634776933288952500" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Feedback">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="SurveyHistoryView" Row="0" Column="0" AcId="10012" ShowRowCount="True" HideReportCommands="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" ExecuteOnNew="False" TabIndex="0" DelayReportExecution="True" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Marketing Activity">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="MarketingActivityView" Row="0" Column="0" AcId="10009" ShowRowCount="True" HideReportCommands="True" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" ExecuteOnNew="False" TabIndex="0" DelayReportExecution="True" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Attachments">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="FileAttachments" Row="0" Column="0" TabIndex="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" />
+            </Table>
+        </Tab>
+        <Tab TextColor="Black" Text="Audit Log">
+            <Table ColumnCount="0" RowCount="1" BackColor="Transparent" ForeColor="ControlText">
+                <RelationshipItem ItemType="ContactAuditLog" Row="0" Column="0" Margin="0, 0, 0, 0" Padding="6, 3, 6, 0" TabIndex="0" ShowReadTransactions="False" AcId="9050" ExecuteOnNew="False" />
+            </Table>
+        </Tab>
+    </TabSet>
+</Workspace>
 <!--2.7ESusWEmt+1UflmEW67YqYnHpvCywMSaLjycQYBfKwkqeghPtw==-->
