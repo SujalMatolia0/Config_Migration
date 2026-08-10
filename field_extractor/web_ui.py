@@ -338,7 +338,7 @@ def extract_files():
     return _process_xml_files(ws_temp_paths, obj_temp_paths)
 
 
-def _process_xml_files(ws_file_paths, obj_file_paths):
+def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
     """Processes workspace and object XML file paths, generates Excel files, and returns preview data."""
     parsed_objects = {}
     for o_path in obj_file_paths:
@@ -377,8 +377,7 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     RESULTS_CACHE["custom_objects_map"] = parsed_objects
     std_map = RESULTS_CACHE.get("standard_objects_map") or {}
 
-    # Always auto-fetch ALL 37+ standard object schemas via REST API if not yet loaded
-    if not std_map:
+    if not std_map and auto_fetch_rest:
         host_to_use = _cfg_host or BASE_URL
         user_to_use = _cfg_user or USERNAME
         pass_to_use = _cfg_pass or PASSWORD

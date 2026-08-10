@@ -814,15 +814,23 @@
         let logInterval = setInterval(fetchLogs, 2000);
 
         async function loadSampleData() {
+            const btn = document.querySelector('.btn-sample');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = 'Loading Samples...';
+            btn.disabled = true;
             try {
                 const res = await fetch('/api/load_sample', { method: 'POST' });
                 const data = await res.json();
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
                 if (data.success) {
                     renderExtractedData(data);
                 } else {
                     alert('Error: ' + data.error);
                 }
             } catch (err) {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
                 alert('Failed to load sample data.');
             }
         }
