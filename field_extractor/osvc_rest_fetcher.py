@@ -135,7 +135,11 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
     is_custom = field_name.startswith("c$") or "customFields" in full_name
     pkg_name = "c" if is_custom else "OracleServiceCloud"
 
-    field_dict = {
+    # Start with ALL raw schema attributes from REST JSON Schema field_info to prevent data loss
+    field_dict = dict(field_info)
+
+    # Standardize domain metadata keys
+    field_dict.update({
         "field_id": field_name,
         "field_name": full_name,
         "field_label": label,
@@ -150,8 +154,9 @@ def _resolve_property_field(field_name, field_info, session, auth, base_url, log
         "is_available_get": field_info.get("isAvailableForGET", True),
         "is_available_post": field_info.get("isAvailableForPOST", False),
         "is_available_patch": field_info.get("isAvailableForPATCH", False),
-        "is_deprecated": field_info.get("isDeprecated", False)
-    }
+        "is_deprecated": field_info.get("isDeprecated", False),
+        "raw_schema_attributes": dict(field_info)
+    })
 
     return [field_dict]
 
