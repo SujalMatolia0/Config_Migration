@@ -43,10 +43,12 @@ app = Flask(__name__, template_folder=os.path.join(CURRENT_DIR, "templates"))
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB max upload limit
 
 def load_standard_objects_from_excel():
-    """Loads extracted standard objects directly from standard_objects.xlsx if present."""
-    xlsx_path = os.path.join(CURRENT_DIR, "results", "standard_objects.xlsx")
+    """Loads extracted standard objects directly from Standard_Objects.xlsx if present."""
+    xlsx_path = os.path.join(CURRENT_DIR, "results", "Standard_Objects.xlsx")
     if not os.path.exists(xlsx_path):
-        add_log(f"standard_objects.xlsx not found at {xlsx_path}", "WARNING")
+        xlsx_path = os.path.join(CURRENT_DIR, "results", "standard_objects.xlsx")
+    if not os.path.exists(xlsx_path):
+        add_log(f"Standard_Objects.xlsx not found at {xlsx_path}", "WARNING")
         return {}
     try:
         wb = openpyxl.load_workbook(xlsx_path, data_only=True)
@@ -256,10 +258,10 @@ def fetch_rest_schemas():
         out_dir = os.path.join(CURRENT_DIR, "results")
         os.makedirs(out_dir, exist_ok=True)
 
-        std_xlsx_path = os.path.join(out_dir, "standard_objects.xlsx")
-        cst_xlsx_path = os.path.join(out_dir, "custom_objects.xlsx")
-        ws_xlsx_path  = os.path.join(out_dir, "workspaces.xlsx")
-        comb_xlsx_path = os.path.join(out_dir, "field_catalog.xlsx")
+        ws_xlsx_path   = os.path.join(out_dir, "Workspaces.xlsx")
+        std_xlsx_path  = os.path.join(out_dir, "Standard_Objects.xlsx")
+        cst_xlsx_path  = os.path.join(out_dir, "Custom_Objects.xlsx")
+        comb_xlsx_path = os.path.join(out_dir, "Field_Catalog.xlsx")
 
         write_objects_excel(fetched_objects, std_xlsx_path)
         if custom_map:
@@ -271,7 +273,7 @@ def fetch_rest_schemas():
         RESULTS_CACHE["workspaces"] = existing_ws
         RESULTS_CACHE["output_dir"] = out_dir
 
-        add_log(f"Generated Excel workbooks: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, field_catalog.xlsx", "SUCCESS")
+        add_log(f"Generated Excel workbooks: Standard_Objects.xlsx, Custom_Objects.xlsx, Workspaces.xlsx, Field_Catalog.xlsx", "SUCCESS")
 
         # Build JSON preview for UI (separate Standard Objects and Custom Objects)
         def _build_obj_preview(objs_dict):
@@ -466,10 +468,10 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
     combined_map = merge_objects_maps(std_map, parsed_objects)
     RESULTS_CACHE["combined_objects_map"] = combined_map
 
-    std_xlsx_path = os.path.join(out_dir, "standard_objects.xlsx")
-    cst_xlsx_path = os.path.join(out_dir, "custom_objects.xlsx")
-    ws_xlsx_path  = os.path.join(out_dir, "workspaces.xlsx")
-    comb_xlsx_path = os.path.join(out_dir, "field_catalog.xlsx")
+    std_xlsx_path  = os.path.join(out_dir, "Standard_Objects.xlsx")
+    cst_xlsx_path  = os.path.join(out_dir, "Custom_Objects.xlsx")
+    ws_xlsx_path   = os.path.join(out_dir, "Workspaces.xlsx")
+    comb_xlsx_path = os.path.join(out_dir, "Field_Catalog.xlsx")
 
     if std_map:
         write_objects_excel(std_map, std_xlsx_path)
@@ -538,7 +540,7 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
     RESULTS_CACHE["workspaces"] = parsed_workspaces
     RESULTS_CACHE["output_dir"] = out_dir
 
-    add_log("Generated Excel files: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, field_catalog.xlsx", "SUCCESS")
+    add_log("Generated Excel files: Standard_Objects.xlsx, Custom_Objects.xlsx, Workspaces.xlsx, Field_Catalog.xlsx", "SUCCESS")
 
     # Build JSON preview payload for UI (1-to-1 match with generated Excel files)
     preview_std_objects = _build_obj_preview(std_map)
@@ -644,9 +646,18 @@ def download_file(filename):
     """Downloads generated Excel files or ZIP package."""
     out_dir = RESULTS_CACHE.get("output_dir") or os.path.join(CURRENT_DIR, "results")
 
-    valid_files = ["standard_objects.xlsx", "custom_objects.xlsx", "workspaces.xlsx", "field_catalog.xlsx", "combined.xlsx"]
+    valid_files = [
+        "Standard_Objects.xlsx", "Custom_Objects.xlsx", "Workspaces.xlsx", "Field_Catalog.xlsx",
+        "standard_objects.xlsx", "custom_objects.xlsx", "workspaces.xlsx", "field_catalog.xlsx", "combined.xlsx"
+    ]
     if filename in valid_files:
         file_path = os.path.join(out_dir, filename)
+        if not os.path.exists(file_path):
+            # Try case-insensitive / legacy match
+            for existing in os.listdir(out_dir) if os.path.exists(out_dir) else []:
+                if existing.lower() == filename.lower():
+                    file_path = os.path.join(out_dir, existing)
+                    break
         if os.path.exists(file_path):
             return send_file(file_path, as_attachment=True)
         return jsonify({"error": f"File {filename} not found."}), 404

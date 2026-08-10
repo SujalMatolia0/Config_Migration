@@ -467,7 +467,7 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
 
 def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     """
-    workspaces.xlsx — one tab per workspace.
+    Workspaces.xlsx — one tab per workspace.
     Tab name = workspace name. No 'Workspace Name' column.
     """
     wb = openpyxl.Workbook()
@@ -520,7 +520,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
 def write_objects_excel(objects_map, output_path):
     """
-    objects.xlsx / standard_objects.xlsx / custom_objects.xlsx — one tab per object.
+    Objects.xlsx / Standard_Objects.xlsx / Custom_Objects.xlsx — one tab per object.
     Tab name = object name. Field key shown as PackageName$Name.
     Outputs STRICTLY the 21 requested columns in exact order.
     """
