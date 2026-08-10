@@ -35,7 +35,7 @@ def main():
             host=args.rest_host,
             username=args.rest_user,
             password=args.rest_pass,
-            include_custom=False
+            include_custom=True
         )
 
     # 2. Option B: Parse Object XML files
@@ -52,13 +52,26 @@ def main():
 
         for o_file in obj_files:
             try:
-                o_data = parse_object_xml(o_file)
-                obj_n  = o_data.get("object_name", "")
-                if obj_n:
-                    objects_map[obj_n.lower()] = o_data
-                    print(f"[OK] Object loaded from XML: {obj_n} ({len(o_data.get('fields', []))} fields)")
+                res = parse_object_xml(o_file)
+                o_items = res if isinstance(res, list) else ([res] if res else [])
+                for o_data in o_items:
+                    obj_n = o_data.get("object_name", "")
+                    if obj_n:
+                        objects_map[obj_n.lower()] = o_data
+                        print(f"[OK] Object loaded from XML: {obj_n} ({len(o_data.get('fields', []))} fields)")
             except Exception:
                 pass
+
+    if not objects_map:
+        from config import BASE_URL, USERNAME, PASSWORD
+        if BASE_URL and USERNAME and PASSWORD:
+            print("[INFO] Auto-fetching ALL 37+ standard object schemas via REST API using config.py credentials...")
+            objects_map = fetch_standard_objects_via_rest(
+                host=BASE_URL,
+                username=USERNAME,
+                password=PASSWORD,
+                include_custom=True
+            )
 
     if not objects_map:
         print("[ERROR] No valid Object schemas loaded from REST or XML files. Exiting.")
