@@ -481,8 +481,28 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             })
         return lst
 
-    std_map_all = std_map or RESULTS_CACHE.get("standard_objects_map") or {}
-    cst_map_all = parsed_objects or RESULTS_CACHE.get("custom_objects_map") or {}
+    _STANDARD_OBJECT_NAMES = {
+        "contact", "contacts", "incident", "incidents", "account", "accounts",
+        "answer", "answers", "asset", "assets", "opportunity", "opportunities",
+        "organization", "organizations", "task", "tasks", "accountgroups",
+        "analyticsreports", "answerversions", "bulkextracts", "bulkextractresults",
+        "campaigns", "channeltypes", "chats", "configurations",
+        "contactmarketingrosters", "countries", "eventsubscriptions", "holidays",
+        "mailboxes", "marketingmailboxes", "messagebases", "purchasedproducts",
+        "salesproducts", "salesterritories", "servicecategories",
+        "servicedispositions", "servicemailboxes", "serviceproducts",
+        "siteinterfaces", "ssotokenreferences", "standardcontents", "variables"
+    }
+
+    std_map_all = dict(std_map or RESULTS_CACHE.get("standard_objects_map") or {})
+    cst_map_all = {}
+
+    for o_k, o_v in (parsed_objects or {}).items():
+        if o_k.lower() in _STANDARD_OBJECT_NAMES:
+            if o_k not in std_map_all:
+                std_map_all[o_k] = o_v
+        else:
+            cst_map_all[o_k] = o_v
 
     preview_std_objects = _build_obj_preview(std_map_all)
     preview_cst_objects = _build_obj_preview(cst_map_all)

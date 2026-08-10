@@ -976,7 +976,19 @@
             }
 
             if (!list || list.length === 0 || !list[activeSubTabIdx]) {
-                body.innerHTML = '<tr><td colspan="13" class="empty-state">No items available</td></tr>';
+                let msg = 'No items available';
+                let sub = 'Upload XML files or click Load Sample Input to view field mappings.';
+                if (activeMainTab === 'std_objects') {
+                    msg = 'No Standard Objects Loaded Yet';
+                    sub = 'Click "Fetch Standard Objects via Live OSVC REST API" below to extract all 38+ standard objects live from your OSVC instance!';
+                } else if (activeMainTab === 'cst_objects') {
+                    msg = 'No Custom Objects XML files loaded';
+                    sub = 'Upload Custom Object schema XML files to view custom entity field definitions.';
+                } else if (activeMainTab === 'workspaces') {
+                    msg = 'No Workspace XML files loaded';
+                    sub = 'Upload Workspace layout export XML files to view field mappings.';
+                }
+                body.innerHTML = `<tr><td colspan="15"><div class="empty-state"><p style="font-weight: 600; color: var(--text-primary); font-size: 1.05rem;">${msg}</p><p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">${sub}</p></div></td></tr>`;
                 return;
             }
 
