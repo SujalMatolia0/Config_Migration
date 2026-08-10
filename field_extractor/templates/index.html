@@ -699,7 +699,8 @@
             <div class="tabs-header">
                 <div class="tab-buttons">
                     <button class="tab-btn active" onclick="switchMainTab('workspaces')">Workspaces Preview</button>
-                    <button class="tab-btn" onclick="switchMainTab('objects')">Objects Preview</button>
+                    <button class="tab-btn" onclick="switchMainTab('std_objects')">Standard Objects Preview</button>
+                    <button class="tab-btn" onclick="switchMainTab('cst_objects')">Custom Objects Preview</button>
                     <button class="tab-btn" onclick="switchMainTab('combined')">Combined Preview</button>
                 </div>
                 <div class="search-box">
@@ -932,8 +933,10 @@
             let list = [];
             if (activeMainTab === 'workspaces') {
                 list = extractedData.workspaces || [];
-            } else if (activeMainTab === 'objects') {
-                list = extractedData.objects || [];
+            } else if (activeMainTab === 'std_objects') {
+                list = extractedData.std_objects || extractedData.objects || [];
+            } else if (activeMainTab === 'cst_objects') {
+                list = extractedData.cst_objects || [];
             } else if (activeMainTab === 'combined') {
                 list = extractedData.combined || [];
             }
@@ -964,8 +967,10 @@
             let list = [];
             if (activeMainTab === 'workspaces') {
                 list = extractedData.workspaces || [];
-            } else if (activeMainTab === 'objects') {
-                list = extractedData.objects || [];
+            } else if (activeMainTab === 'std_objects') {
+                list = extractedData.std_objects || extractedData.objects || [];
+            } else if (activeMainTab === 'cst_objects') {
+                list = extractedData.cst_objects || [];
             } else if (activeMainTab === 'combined') {
                 list = extractedData.combined || [];
             }
@@ -1014,7 +1019,7 @@
                     `;
                     body.appendChild(tr);
                 });
-            } else if (activeMainTab === 'objects') {
+            } else if (activeMainTab === 'std_objects' || activeMainTab === 'cst_objects' || activeMainTab === 'objects') {
                 head.innerHTML = `
                     <tr>
                         <th>Field Key (Package$Name)</th>

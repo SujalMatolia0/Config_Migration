@@ -217,30 +217,38 @@ def fetch_rest_schemas():
 
         add_log(f"Generated Excel workbooks: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
 
-        # Build JSON preview for UI (all standard + custom objects)
-        preview_objects = []
-        for o_name, o_data in combined_map.items():
-            disp_name = o_data.get("object_name", o_name)
-            rows = []
-            for of in o_data.get("fields", []):
-                rows.append({
-                    "field_key": _obj_field_key(of),
-                    "field_label": of.get("field_label", ""),
-                    "data_type": of.get("data_type", ""),
-                    "field_type": _field_type_from_obj(of),
-                    "is_nullable": "Yes" if of.get("is_nullable") else "No",
-                    "is_lookup": "Yes" if of.get("is_lookup") else "No",
-                    "is_list": "Yes" if of.get("is_list") else "No",
-                    "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
-                    "is_readonly": "Yes" if of.get("is_readonly") else "No",
-                    "max_length": str(of.get("max_length", "-")),
-                    "description": of.get("description", "")
+        # Build JSON preview for UI (separate Standard Objects and Custom Objects)
+        def _build_obj_preview(objs_dict):
+            lst = []
+            for o_name, o_data in (objs_dict or {}).items():
+                disp_name = o_data.get("object_name", o_name)
+                rows = []
+                for of in o_data.get("fields", []):
+                    rows.append({
+                        "field_key": _obj_field_key(of),
+                        "field_label": of.get("field_label", ""),
+                        "data_type": of.get("data_type", ""),
+                        "field_type": _field_type_from_obj(of),
+                        "is_nullable": "Yes" if of.get("is_nullable") else "No",
+                        "is_lookup": "Yes" if of.get("is_lookup") else "No",
+                        "is_list": "Yes" if of.get("is_list") else "No",
+                        "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
+                        "is_readonly": "Yes" if of.get("is_readonly") else "No",
+                        "max_length": str(of.get("max_length", "-")),
+                        "description": of.get("description", "")
+                    })
+                lst.append({
+                    "object_name": disp_name,
+                    "field_count": len(rows),
+                    "rows": rows
                 })
-            preview_objects.append({
-                "object_name": disp_name,
-                "field_count": len(rows),
-                "rows": rows
-            })
+            return lst
+
+        std_map_all = fetched_objects or RESULTS_CACHE.get("standard_objects_map") or {}
+        cst_map_all = custom_map or RESULTS_CACHE.get("custom_objects_map") or {}
+
+        preview_std_objects = _build_obj_preview(std_map_all)
+        preview_cst_objects = _build_obj_preview(cst_map_all)
 
         preview_workspaces = []
         preview_combined = []
@@ -282,6 +290,8 @@ def fetch_rest_schemas():
 
         summary = {
             "workspace_count": len(existing_ws),
+            "std_object_count": len(std_map_all),
+            "cst_object_count": len(cst_map_all),
             "object_count": len(combined_map),
             "total_workspace_fields": sum(len(w.get("fields", [])) for w in existing_ws),
             "total_object_fields": sum(len(o.get("fields", [])) for o in combined_map.values()),
@@ -293,7 +303,9 @@ def fetch_rest_schemas():
             "success": True,
             "summary": summary,
             "workspaces": preview_workspaces,
-            "objects": preview_objects,
+            "std_objects": preview_std_objects,
+            "cst_objects": preview_cst_objects,
+            "objects": preview_std_objects + preview_cst_objects,
             "combined": preview_combined
         })
 
@@ -443,29 +455,37 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
             "rows": rows
         })
 
-    preview_objects = []
-    for o_name, o_data in combined_map.items():
-        disp_name = o_data.get("object_name", o_name)
-        rows = []
-        for of in o_data.get("fields", []):
-            rows.append({
-                "field_key": _obj_field_key(of),
-                "field_label": of.get("field_label", ""),
-                "data_type": of.get("data_type", ""),
-                "field_type": _field_type_from_obj(of),
-                "is_nullable": "Yes" if of.get("is_nullable") else "No",
-                "is_lookup": "Yes" if of.get("is_lookup") else "No",
-                "is_list": "Yes" if of.get("is_list") else "No",
-                "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
-                "is_readonly": "Yes" if of.get("is_readonly") else "No",
-                "max_length": str(of.get("max_length", "-")),
-                "description": of.get("description", "")
+    def _build_obj_preview(objs_dict):
+        lst = []
+        for o_name, o_data in (objs_dict or {}).items():
+            disp_name = o_data.get("object_name", o_name)
+            rows = []
+            for of in o_data.get("fields", []):
+                rows.append({
+                    "field_key": _obj_field_key(of),
+                    "field_label": of.get("field_label", ""),
+                    "data_type": of.get("data_type", ""),
+                    "field_type": _field_type_from_obj(of),
+                    "is_nullable": "Yes" if of.get("is_nullable") else "No",
+                    "is_lookup": "Yes" if of.get("is_lookup") else "No",
+                    "is_list": "Yes" if of.get("is_list") else "No",
+                    "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
+                    "is_readonly": "Yes" if of.get("is_readonly") else "No",
+                    "max_length": str(of.get("max_length", "-")),
+                    "description": of.get("description", "")
+                })
+            lst.append({
+                "object_name": disp_name,
+                "field_count": len(rows),
+                "rows": rows
             })
-        preview_objects.append({
-            "object_name": disp_name,
-            "field_count": len(rows),
-            "rows": rows
-        })
+        return lst
+
+    std_map_all = std_map or RESULTS_CACHE.get("standard_objects_map") or {}
+    cst_map_all = parsed_objects or RESULTS_CACHE.get("custom_objects_map") or {}
+
+    preview_std_objects = _build_obj_preview(std_map_all)
+    preview_cst_objects = _build_obj_preview(cst_map_all)
 
     preview_combined = []
     for ws_data in parsed_workspaces:
@@ -500,18 +520,24 @@ def _process_xml_files(ws_file_paths, obj_file_paths, auto_fetch_rest=False):
 
     summary = {
         "workspace_count": len(parsed_workspaces),
-        "object_count": len(parsed_objects),
+        "std_object_count": len(std_map_all),
+        "cst_object_count": len(cst_map_all),
+        "object_count": len(combined_map),
         "total_workspace_fields": sum(len(w.get("fields", [])) for w in parsed_workspaces),
-        "total_object_fields": sum(len(o.get("fields", [])) for o in parsed_objects.values()),
+        "total_object_fields": sum(len(o.get("fields", [])) for o in combined_map.values()),
         "skipped_files": skipped_count
     }
     RESULTS_CACHE["summary"] = summary
+
+    add_log("Processing completed successfully.", "SUCCESS")
 
     return jsonify({
         "success": True,
         "summary": summary,
         "workspaces": preview_workspaces,
-        "objects": preview_objects,
+        "std_objects": preview_std_objects,
+        "cst_objects": preview_cst_objects,
+        "objects": preview_std_objects + preview_cst_objects,
         "combined": preview_combined
     })
 
