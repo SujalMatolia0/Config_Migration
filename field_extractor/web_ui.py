@@ -203,13 +203,11 @@ def fetch_rest_schemas():
         std_xlsx_path = os.path.join(out_dir, "standard_objects.xlsx")
         cst_xlsx_path = os.path.join(out_dir, "custom_objects.xlsx")
         ws_xlsx_path  = os.path.join(out_dir, "workspaces.xlsx")
-        obj_xlsx_path = os.path.join(out_dir, "objects.xlsx")
         comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
 
         write_objects_excel(fetched_objects, std_xlsx_path)
         if custom_map:
             write_objects_excel(custom_map, cst_xlsx_path)
-        write_objects_excel(combined_map, obj_xlsx_path)
 
         write_workspaces_excel(existing_ws, combined_map, ws_xlsx_path)
         write_combined_excel(existing_ws, combined_map, comb_xlsx_path)
@@ -217,7 +215,7 @@ def fetch_rest_schemas():
         RESULTS_CACHE["workspaces"] = existing_ws
         RESULTS_CACHE["output_dir"] = out_dir
 
-        add_log(f"Generated Excel workbooks in: {out_dir} (standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx)", "SUCCESS")
+        add_log(f"Generated Excel workbooks: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
 
         # Build JSON preview
         preview_objects = []
@@ -378,13 +376,11 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     std_xlsx_path  = os.path.join(out_dir, "standard_objects.xlsx")
     cst_xlsx_path  = os.path.join(out_dir, "custom_objects.xlsx")
     ws_xlsx_path   = os.path.join(out_dir, "workspaces.xlsx")
-    obj_xlsx_path  = os.path.join(out_dir, "objects.xlsx")
     comb_xlsx_path = os.path.join(out_dir, "combined.xlsx")
 
     if std_map:
         write_objects_excel(std_map, std_xlsx_path)
     write_objects_excel(parsed_objects, cst_xlsx_path)
-    write_objects_excel(combined_map, obj_xlsx_path)
 
     write_workspaces_excel(parsed_workspaces, combined_map, ws_xlsx_path)
     write_combined_excel(parsed_workspaces, combined_map, comb_xlsx_path)
@@ -494,7 +490,7 @@ def download_file(filename):
     """Downloads generated Excel files or ZIP package."""
     out_dir = RESULTS_CACHE.get("output_dir") or os.path.join(CURRENT_DIR, "results")
 
-    valid_files = ["standard_objects.xlsx", "custom_objects.xlsx", "workspaces.xlsx", "objects.xlsx", "combined.xlsx"]
+    valid_files = ["standard_objects.xlsx", "custom_objects.xlsx", "workspaces.xlsx", "combined.xlsx"]
     if filename in valid_files:
         file_path = os.path.join(out_dir, filename)
         if os.path.exists(file_path):

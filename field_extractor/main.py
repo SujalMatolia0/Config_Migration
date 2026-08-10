@@ -94,21 +94,31 @@ def main():
     print("--------------------------------------------------------------------------")
 
     # 4. Write Excel files
+    std_xlsx  = os.path.join(output_dir, "standard_objects.xlsx")
+    cst_xlsx  = os.path.join(output_dir, "custom_objects.xlsx")
     ws_xlsx   = os.path.join(output_dir, "workspaces.xlsx")
-    obj_xlsx  = os.path.join(output_dir, "objects.xlsx")
     comb_xlsx = os.path.join(output_dir, "combined.xlsx")
 
-    write_workspaces_excel(parsed_workspaces, objects_map, ws_xlsx)
-    print(f"[SUCCESS] workspaces.xlsx  -> {ws_xlsx}")
+    # Separate standard objects and custom objects maps
+    std_map = {k: v for k, v in objects_map.items() if '.' not in k}
+    cst_map = {k: v for k, v in objects_map.items() if '.' in k or any(f.get("is_system_field") is False for f in v.get("fields", []))}
 
-    write_objects_excel(objects_map, obj_xlsx)
-    print(f"[SUCCESS] objects.xlsx     -> {obj_xlsx}")
+    if std_map:
+        write_objects_excel(std_map, std_xlsx)
+        print(f"[SUCCESS] standard_objects.xlsx -> {std_xlsx}")
+
+    if cst_map:
+        write_objects_excel(cst_map, cst_xlsx)
+        print(f"[SUCCESS] custom_objects.xlsx   -> {cst_xlsx}")
+
+    write_workspaces_excel(parsed_workspaces, objects_map, ws_xlsx)
+    print(f"[SUCCESS] workspaces.xlsx       -> {ws_xlsx}")
 
     write_combined_excel(parsed_workspaces, objects_map, comb_xlsx)
-    print(f"[SUCCESS] combined.xlsx    -> {comb_xlsx}")
+    print(f"[SUCCESS] combined.xlsx         -> {comb_xlsx}")
 
     print("==========================================================================")
-    print(f"Done. 3 Excel files written to: {output_dir}")
+    print(f"Done. Reports written to: {output_dir}")
     print("==========================================================================")
 
 if __name__ == "__main__":
