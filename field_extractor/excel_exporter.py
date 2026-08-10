@@ -477,7 +477,10 @@ def write_objects_excel(objects_map, output_path):
         "field_id", "field_name", "field_label", "data_type", "is_system_field",
         "package_name", "is_nullable", "is_lookup", "is_readonly", "max_length",
         "description", "is_available_get", "is_available_post", "is_available_patch",
-        "is_deprecated", "raw_schema_attributes", "object_name"
+        "is_deprecated", "raw_schema_attributes", "object_name",
+        # Ignore redundant raw JSON Schema camelCase aliases that map to standard columns
+        "isAvailableForGET", "isAvailableForPOST", "isAvailableForPATCH",
+        "isDeprecated", "nullable", "label", "type", "title", "maxLength", "maxLengthBytes"
     }
 
     extra_keys = []
