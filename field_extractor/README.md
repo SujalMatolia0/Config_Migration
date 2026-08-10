@@ -9,6 +9,8 @@ A high-performance extraction and reporting engine for **Oracle Service Cloud (O
 - **Live Standard Object Schema Extraction**: Connects directly to OSVC Connect REST API (`/services/rest/connect/v1.4/metadata-catalog`) via HTTP GET to extract complete standard object field metadata.
 - **Strict Read-Only REST Guarantee**: Executes **HTTP GET ONLY**. Zero POST, PATCH, DELETE, or data-mutating requests.
 - **Workspace XML Layout Parsing**: Parses OSVC Workspace export XML files to catalog all layout controls, fields, tab locations, and UI rules.
+- **Workspace Field ID to REST API Mapping**: Automatically translates legacy workspace control IDs (e.g. `RefNo`, `CId`, `ProdId`, `OrgId`, `SeverityId`) to OSVC REST API metadata catalog field keys (`referenceNumber`, `primaryContact.id`, `product.id`, `organization.id`, `severity`).
+- **Ignored & Unmapped Controls Manifest**: Generates an explicit `Ignored_Fields` sheet cataloging all non-schema workspace elements (UI controls, validation flags, business rule context variables, and unmapped legacy fields).
 - **Custom Object XML Schema Parsing**: Parses OSVC Custom Object XML exports to extract system and custom fields (`c$`), data types, nullability, lookups, and constraints.
 - **Unified Field Catalog**: Generates `Field_Catalog.xlsx`, merging workspace layout positions with full schema metadata (Data Types, REST Availability, Nullability, System vs Custom badges, Max Length, etc.).
 - **Interactive Web UI Studio**: Modern web application built on Flask serving a live dashboard at `http://localhost:5055` with real-time log stream, file drag-and-drop, sample data preview, and instant downloads.
@@ -24,8 +26,21 @@ The extractor generates 4 dedicated Excel reports in the `./results` directory:
 |---|---|---|
 | `Standard_Objects.xlsx` | Standard object schemas fetched via Live REST API | 1 tab per Standard Object |
 | `Custom_Objects.xlsx` | Custom object schemas parsed from XML exports | 1 tab per Custom Object |
-| `Workspaces.xlsx` | Workspace layout controls and field tab placements | 1 tab per Workspace |
-| `Field_Catalog.xlsx` | Combined master report merging workspace layouts with object schema metadata | 1 tab per Workspace |
+| `Workspaces.xlsx` | Workspace layout controls, field tab placements, and `Ignored_Fields` manifest | 1 tab per Workspace + `Ignored_Fields` |
+| `Field_Catalog.xlsx` | Combined master report merging workspace layouts with object schema metadata and `Ignored_Fields` manifest | 1 tab per Workspace + `Ignored_Fields` |
+
+---
+
+## Ignored & Unmapped Fields Manifest (`Ignored_Fields` Tab)
+
+Workspace layout XMLs contain UI display controls and Business Rules variables that do not map to underlying database object schemas. To ensure zero silent data loss, these are cataloged into an `Ignored_Fields` sheet with full context:
+
+| Category | Description | Example Field IDs |
+|---|---|---|
+| **Workspace UI Control** | UI layout indicators, grid display controls, search inputs | `Dormant`, `LinesPerPage`, `SearchText`, `SearchType`, `State`, `PasswordEncrypt` |
+| **UI Validation Control** | Checkbox/dropdown indicators for field validity | `Email.Invalid`, `EmailAlt1.Invalid`, `EmailAlt2.Invalid` |
+| **Business Rule Context Variable** | Runtime Business Rules escalation levels and state variables | `RuleCtx.Escllevel`, `RuleCtx.State`, `RuleState` |
+| **Legacy Workspace Field** | Deprecated or legacy marketing fields | `MaMailType`, `MaOrgName`, `TotRev` |
 
 ---
 
@@ -36,6 +51,7 @@ field_extractor/
 ├── main.py                 # Standalone CLI entry point
 ├── web_ui.py               # Flask Web Application & REST API Server (Port 5055)
 ├── excel_exporter.py       # OpenPyXL Excel generation engine
+├── field_id_mapping.py     # Workspace Field ID to REST API Schema Translation
 ├── osvc_rest_fetcher.py    # Strict HTTP GET REST API schema extractor
 ├── object_parser.py        # XML parser for OSVC Custom Objects
 ├── workspace_parser.py     # XML parser for OSVC Workspace layouts
