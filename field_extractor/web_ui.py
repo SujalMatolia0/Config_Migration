@@ -217,7 +217,7 @@ def fetch_rest_schemas():
 
         add_log(f"Generated Excel workbooks: standard_objects.xlsx, custom_objects.xlsx, workspaces.xlsx, combined.xlsx", "SUCCESS")
 
-        # Build JSON preview
+        # Build JSON preview for UI (all standard + custom objects)
         preview_objects = []
         for o_name, o_data in combined_map.items():
             disp_name = o_data.get("object_name", o_name)
@@ -230,8 +230,10 @@ def fetch_rest_schemas():
                     "field_type": _field_type_from_obj(of),
                     "is_nullable": "Yes" if of.get("is_nullable") else "No",
                     "is_lookup": "Yes" if of.get("is_lookup") else "No",
+                    "is_list": "Yes" if of.get("is_list") else "No",
+                    "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
                     "is_readonly": "Yes" if of.get("is_readonly") else "No",
-                    "max_length": of.get("max_length", "-"),
+                    "max_length": str(of.get("max_length", "-")),
                     "description": of.get("description", "")
                 })
             preview_objects.append({
@@ -260,6 +262,8 @@ def fetch_rest_schemas():
                     "field_type": item["field_type"],
                     "is_nullable": item["is_nullable"],
                     "is_lookup": item["is_lookup"],
+                    "is_list": item.get("is_list", "No"),
+                    "is_autoupdate": item.get("is_autoupdate", "No"),
                     "max_length": item["max_length"],
                     "in_layout": "Yes"
                 })
@@ -441,7 +445,7 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
         })
 
     preview_objects = []
-    for o_name, o_data in parsed_objects.items():
+    for o_name, o_data in combined_map.items():
         disp_name = o_data.get("object_name", o_name)
         rows = []
         for of in o_data.get("fields", []):
@@ -452,8 +456,10 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
                 "field_type": _field_type_from_obj(of),
                 "is_nullable": "Yes" if of.get("is_nullable") else "No",
                 "is_lookup": "Yes" if of.get("is_lookup") else "No",
+                "is_list": "Yes" if of.get("is_list") else "No",
+                "is_autoupdate": "Yes" if of.get("is_autoupdate") else "No",
                 "is_readonly": "Yes" if of.get("is_readonly") else "No",
-                "max_length": of.get("max_length", "-"),
+                "max_length": str(of.get("max_length", "-")),
                 "description": of.get("description", "")
             })
         preview_objects.append({
@@ -465,7 +471,7 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
     preview_combined = []
     for ws_data in parsed_workspaces:
         bound_obj = ws_data.get("bound_object", "Contact")
-        enriched = _enrich_workspace_fields(ws_data.get("fields", []), parsed_objects, bound_obj)
+        enriched = _enrich_workspace_fields(ws_data.get("fields", []), combined_map, bound_obj)
         rows = []
         for item in enriched:
             rows.append({
@@ -473,6 +479,7 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
                 "target_object": item["target_object"],
                 "object_field_name": item["obj_field_key"],
                 "field_label": item["field_label"],
+                "location_tab": item["location_tab"],
                 "workspace_tab": item["location_tab"],
                 "required": item["required_fmt"],
                 "readonly": item["readonly_fmt"],
@@ -480,6 +487,8 @@ def _process_xml_files(ws_file_paths, obj_file_paths):
                 "field_type": item["field_type"],
                 "is_nullable": item["is_nullable"],
                 "is_lookup": item["is_lookup"],
+                "is_list": item.get("is_list", "No"),
+                "is_autoupdate": item.get("is_autoupdate", "No"),
                 "max_length": item["max_length"],
                 "in_layout": "Yes"
             })

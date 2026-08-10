@@ -349,16 +349,19 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             matched = primary_idx.get(bare) or secondary_idx.get(bare) or comb_idx.get(bare)
 
         if matched:
-            data_type   = matched.get("data_type", "Text")
-            ftype       = _field_type_from_obj(matched)
-            is_nullable = "Yes" if matched.get("is_nullable") else "No"
-            is_lookup   = "Yes" if matched.get("is_lookup")   else "No"
-            max_len     = str(matched.get("max_length", "-"))
-            desc        = matched.get("description", "")
-            avail_get   = "Yes" if matched.get("is_available_get", True) else "No"
-            avail_post  = "Yes" if matched.get("is_available_post", False) else "No"
-            avail_patch = "Yes" if matched.get("is_available_patch", False) else "No"
-            is_deprec   = "Yes" if matched.get("is_deprecated", False) else "No"
+            data_type     = matched.get("data_type", "Text")
+            ftype         = _field_type_from_obj(matched)
+            is_nullable   = "Yes" if matched.get("is_nullable") else "No"
+            is_lookup     = "Yes" if matched.get("is_lookup")   else "No"
+            is_list       = "Yes" if matched.get("is_list")     else "No"
+            is_autoupdate = "Yes" if matched.get("is_autoupdate") else "No"
+            is_sequence   = "Yes" if matched.get("is_sequence")   else "No"
+            max_len       = str(matched.get("max_length", "-"))
+            desc          = matched.get("description", "")
+            avail_get     = "Yes" if matched.get("is_available_get", True) else "No"
+            avail_post    = "Yes" if matched.get("is_available_post", False) else "No"
+            avail_patch   = "Yes" if matched.get("is_available_patch", False) else "No"
+            is_deprec     = "Yes" if matched.get("is_deprecated", False) else "No"
 
             pkg   = (matched.get("package_name") or "").strip()
             fname = matched.get("field_name", "")
@@ -371,6 +374,9 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             ftype         = _field_type_from_ws_id(raw_id or f_code)
             is_nullable   = "Yes"
             is_lookup     = "Yes" if ("Name" in f_code or "Id" in f_code) else "No"
+            is_list       = "No"
+            is_autoupdate = "No"
+            is_sequence   = "No"
             max_len       = "-"
             desc          = ""
             avail_get     = "Yes"
@@ -387,6 +393,9 @@ def _enrich_workspace_fields(ws_fields, objects_map, bound_object, standard_obje
             "field_type":     ftype,
             "is_nullable":    is_nullable,
             "is_lookup":      is_lookup,
+            "is_list":        is_list,
+            "is_autoupdate":  is_autoupdate,
+            "is_sequence":    is_sequence,
             "max_length":     max_len,
             "description":    desc,
             "avail_get":      avail_get,
@@ -416,7 +425,7 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
     headers = [
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Location / Tab", "Required", "Read Only",
-        "Data Type", "Field Type", "Is Nullable", "Is Lookup", "Max Length",
+        "Data Type", "Field Type", "Is Nullable", "Is Lookup", "Is List", "Is Auto Update", "Max Length",
         "Is Available GET", "Is Available POST", "Is Available PATCH", "Is Deprecated", "Description"
     ]
 
@@ -442,6 +451,8 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
                 item["field_type"],
                 item["is_nullable"],
                 item["is_lookup"],
+                item["is_list"],
+                item["is_autoupdate"],
                 item["max_length"],
                 item.get("avail_get", "Yes"),
                 item.get("avail_post", "No"),
@@ -500,6 +511,8 @@ def write_objects_excel(objects_map, output_path):
             items_val = of.get("items")
             if isinstance(items_val, (dict, list)):
                 items_str = str(items_val)
+            elif of.get("is_list"):
+                items_str = "IsList: Yes"
             else:
                 items_str = str(items_val) if items_val is not None else "-"
 
@@ -548,7 +561,7 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
         "Bound Object", "Target Object", "Object Field Name",
         "Field Label", "Workspace Tab", "Required", "Read Only",
         "Data Type", "Field Type", "Is Nullable",
-        "Is Lookup", "Max Length", "Is Available GET", "Is Available POST",
+        "Is Lookup", "Is List", "Is Auto Update", "Max Length", "Is Available GET", "Is Available POST",
         "Is Available PATCH", "Is Deprecated", "Description", "In Workspace Layout"
     ]
 
@@ -574,6 +587,8 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
                 item["field_type"],
                 item["is_nullable"],
                 item["is_lookup"],
+                item["is_list"],
+                item["is_autoupdate"],
                 item["max_length"],
                 item.get("avail_get", "Yes"),
                 item.get("avail_post", "No"),

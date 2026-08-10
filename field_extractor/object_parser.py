@@ -33,8 +33,11 @@ def parse_object_xml(file_path):
             f_label = f.get("Label") or f_name
             data_type = f.get("DataTypeName") or f.get("DataType") or "Text"
             is_nullable = f.get("IsNullable", "True").lower() in ("true", "1")
+            is_list = f.get("IsList", "False").lower() in ("true", "1")
             is_lookup = f.get("IsLookup", "False").lower() in ("true", "1")
             is_readonly = f.get("IsCoReadOnly", "False").lower() in ("true", "1")
+            is_autoupdate = f.get("IsAutoUpdate", "False").lower() in ("true", "1")
+            is_sequence = f.get("IsSequence", "False").lower() in ("true", "1")
             is_system = f.get("IsSystemField", "False").lower() in ("true", "1")
             max_len_val = (
                 f.get("MaxLength") or f.get("Size") or f.get("MaxLen") or f.get("Length") or
@@ -45,6 +48,8 @@ def parse_object_xml(file_path):
 
             f_pkg = f.get("PackageName") or f.get("Package") or package_name
             desc = f.get("Description") or ""
+            pattern = f.get("Pattern") or "-"
+            usage = f.get("Usage") or "-"
 
             fields.append({
                 "object_name": obj_name,
@@ -55,10 +60,15 @@ def parse_object_xml(file_path):
                 "data_type": data_type,
                 "is_system_field": is_system,
                 "is_nullable": is_nullable,
+                "is_list": is_list,
                 "is_lookup": is_lookup,
                 "is_readonly": is_readonly,
+                "is_autoupdate": is_autoupdate,
+                "is_sequence": is_sequence,
                 "max_length": max_len_val,
-                "description": desc
+                "description": desc,
+                "pattern": pattern,
+                "usage": usage
             })
 
         results.append({

@@ -1015,6 +1015,8 @@
                         <th>Field Type</th>
                         <th>Is Nullable</th>
                         <th>Is Lookup</th>
+                        <th>Is List</th>
+                        <th>Is Auto Update</th>
                         <th>Is Read Only</th>
                         <th>Max Length</th>
                         <th>Description</th>
@@ -1030,6 +1032,8 @@
                         <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
                         <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
                         <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td><span class="badge ${r.is_list === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_list || 'No'}</span></td>
+                        <td><span class="badge ${r.is_autoupdate === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_autoupdate || 'No'}</span></td>
                         <td><span class="badge ${r.is_readonly === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly}</span></td>
                         <td>${r.max_length}</td>
                         <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
@@ -1050,6 +1054,8 @@
                         <th>Field Type</th>
                         <th>Is Nullable</th>
                         <th>Is Lookup</th>
+                        <th>Is List</th>
+                        <th>Is Auto Update</th>
                         <th>Max Length</th>
                         <th>In Workspace Layout</th>
                     </tr>
@@ -1069,6 +1075,8 @@
                         <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
                         <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
                         <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
+                        <td><span class="badge ${r.is_list === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_list || 'No'}</span></td>
+                        <td><span class="badge ${r.is_autoupdate === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_autoupdate || 'No'}</span></td>
                         <td>${r.max_length}</td>
                         <td><span class="badge badge-yes">Yes</span></td>
                     `;
