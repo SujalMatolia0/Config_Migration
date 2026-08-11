@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script performs **Active Telephony Call Verification**. It validates agent session tokens, queries an external telephony REST API (`http://209.91.135.228/api/listactivecalls/`), and matches active caller numbers against OSVC Contact accounts for screen-pop automation.
+> Server-side PHP script (`callcheck.php`) that executes 4 internal OSVC database/Connect PHP operation(s), integrates with 1 external REST HTTP service(s). Primary entity target(s): Account, Configuration.
 
 ## Script Overview & Attributes
 

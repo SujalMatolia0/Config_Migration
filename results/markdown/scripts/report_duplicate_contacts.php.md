@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script performs **Duplicate Contact Detection** for OSVC Agent Console. It parses incoming search parameters (`f_name`, `l_name`, `email`, `h_phone`, `m_phone`, `house_num`, `street_name`, `city`), validates the agent session via `AgentAuthenticator::authenticateSessionID()`, and executes 4 ROQL queries against `Contact` and `CO.PotentialDuplicate` custom object tables to return candidate duplicate contact matches for agent review.
+> Server-side PHP script (`duplicate_contacts.php`) that executes 9 internal OSVC database/Connect PHP operation(s). Primary entity target(s): AnalyticsReport, CO, ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 

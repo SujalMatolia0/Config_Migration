@@ -1,7 +1,7 @@
 {
   "file_name": "duplicate_contacts.php",
   "script_type": "Server-side Utility",
-  "summary": "This script performs **Duplicate Contact Detection** for OSVC Agent Console. It parses incoming search parameters (`f_name`, `l_name`, `email`, `h_phone`, `m_phone`, `house_num`, `street_name`, `city`), validates the agent session via `AgentAuthenticator::authenticateSessionID()`, and executes 4 ROQL queries against `Contact` and `CO.PotentialDuplicate` custom object tables to return candidate duplicate contact matches for agent review.",
+  "summary": "Server-side PHP script (`duplicate_contacts.php`) that executes 9 internal OSVC database/Connect PHP operation(s). Primary entity target(s): AnalyticsReport, CO, ConnectAPIErrorBase.",
   "imports": [
     "address_validation.php"
   ],
@@ -15,9 +15,9 @@
   ],
   "external_calls": [],
   "urls": [
-    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
+    "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
     "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
-    "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
+    "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"
   ],
   "exposed_routes": [],
   "risk_flags": [],

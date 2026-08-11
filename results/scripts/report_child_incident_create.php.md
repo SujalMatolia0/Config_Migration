@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script automates **Child Incident Creation & Linking**. It instantiates new `RNCPHP\Incident` records, copies parent incident parameters, establishes parent-child relationships, and commits new records to the database.
+> Server-side PHP script (`child_incident_create.php`) that executes 1 internal OSVC database/Connect PHP operation(s). Primary entity target(s): Banner, GroupAccount, Incident.
 
 ## Script Overview & Attributes
 

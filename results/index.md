@@ -1,6 +1,6 @@
 # OSVC Configuration Master Index
 
-**Generated**: 2026-08-07 14:21:46  
+**Generated**: 2026-08-11 10:28:38  
 **Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  
 
 > [!NOTE]
@@ -99,9 +99,12 @@
 | `child_incident_create.php` | `CustomScript` | 0 | `—` | [report_child_incident_create.php.md](scripts/report_child_incident_create.php.md) |
 | `cityworksapicall.php` | `CustomScript` | 0 | `—` | [report_cityworksapicall.php.md](scripts/report_cityworksapicall.php.md) |
 | `closing_notes.php` | `CustomScript` | 0 | `—` | [report_closing_notes.php.md](scripts/report_closing_notes.php.md) |
+| `daily_dupe_detection_0584.php` | `CustomScript` | 0 | `—` | [report_daily_dupe_detection_0584.php.md](scripts/report_daily_dupe_detection_0584.php.md) |
+| `dupe_detection_8366.php` | `CustomScript` | 0 | `—` | [report_dupe_detection_8366.php.md](scripts/report_dupe_detection_8366.php.md) |
 | `duplicate_contacts.php` | `CustomScript` | 0 | `—` | [report_duplicate_contacts.php.md](scripts/report_duplicate_contacts.php.md) |
 | `duplicate_incidents.php` | `CustomScript` | 0 | `—` | [report_duplicate_incidents.php.md](scripts/report_duplicate_incidents.php.md) |
 | `eventclock.php` | `CustomScript` | 0 | `—` | [report_eventclock.php.md](scripts/report_eventclock.php.md) |
+| `header.inc_4778.php` | `CustomScript` | 0 | `—` | [report_header.inc_4778.php.md](scripts/report_header.inc_4778.php.md) |
 | `sms_integration 1.php` | `CustomScript` | 0 | `—` | [report_sms_integration 1.php.md](scripts/report_sms_integration 1.php.md) |
 
 ## BUIs
@@ -296,6 +299,14 @@ The following shared reports and resources are referenced across multiple worksp
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `CustomScript: header.inc.php` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `CustomScript: header.inc.php` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: AnalyticsReport` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: CO` | Cross-Component Mapping |
@@ -303,6 +314,7 @@ The following shared reports and resources are referenced across multiple worksp
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CustomScript: duplicate_incidents.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
 | **CustomScript: eventclock.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: header.inc_4778.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |

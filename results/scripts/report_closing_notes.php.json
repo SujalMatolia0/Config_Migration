@@ -1,7 +1,7 @@
 {
   "file_name": "closing_notes.php",
   "script_type": "Server-side Utility",
-  "summary": "This script performs **Incident Closing Notes Management**. It retrieves Incident records via Connect PHP API, instantiates `RNCPHP\\Note` objects, appends resolution notes, and updates incident statuses upon closure.",
+  "summary": "Server-side PHP script (`closing_notes.php`) that executes 2 internal OSVC database/Connect PHP operation(s). Primary entity target(s): Account, ConnectAPIErrorBase.",
   "imports": [],
   "report_ids": [],
   "osvc_objects": [

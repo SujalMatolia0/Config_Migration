@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.
+> Server-side PHP script (`bluebox_greencart_validation.php`) that executes 1 internal OSVC database/Connect PHP operation(s). Primary entity target(s): ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 

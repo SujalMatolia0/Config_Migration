@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script performs **Incident Closing Notes Management**. It retrieves Incident records via Connect PHP API, instantiates `RNCPHP\Note` objects, appends resolution notes, and updates incident statuses upon closure.
+> Server-side PHP script (`closing_notes.php`) that executes 2 internal OSVC database/Connect PHP operation(s). Primary entity target(s): Account, ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 

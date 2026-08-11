@@ -1,7 +1,7 @@
 {
   "file_name": "bluebox_greencart_validation.php",
   "script_type": "Server-side Utility",
-  "summary": "This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.",
+  "summary": "Server-side PHP script (`bluebox_greencart_validation.php`) that executes 1 internal OSVC database/Connect PHP operation(s). Primary entity target(s): ConnectAPIErrorBase.",
   "imports": [],
   "report_ids": [],
   "osvc_objects": [

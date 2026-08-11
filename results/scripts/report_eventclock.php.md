@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script calculates **Incident SLA Clocks & Response Timers**. It calculates elapsed handling times, monitors response deadlines, and updates SLA milestone tracking fields.
+> Server-side PHP script (`eventclock.php`) that executes 2 internal OSVC database/Connect PHP operation(s). Primary entity target(s): ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 

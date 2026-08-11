@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script handles **Duplicate Incident Detection**. It validates agent session ID, parses support ticket parameters (`subject`, `contact_id`, `category`), and executes ROQL queries against `Incident` and `CO.PotentialDuplicate` tables to identify matching open or historical support tickets.
+> Server-side PHP script (`duplicate_incidents.php`) that executes 3 internal OSVC database/Connect PHP operation(s). Primary entity target(s): ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 

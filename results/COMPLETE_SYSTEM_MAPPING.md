@@ -1,5 +1,5 @@
 # Complete System Architecture & Component Mapping
-**Generated**: 2026-08-07 14:21:46  
+**Generated**: 2026-08-11 10:28:38  
 **Source Data Path**: `input`  
 
 ## Executive System Summary & Risk Overview
@@ -13,7 +13,7 @@
 | Analytics Reports | 18 | Parsed & Mapped |
 | Business Rules Sets | 1 (1209 Rules) | Parsed & Policy Mapped |
 | CPM Procedures & Handlers | 8 | Parsed & Event Mapped |
-| PHP Custom Scripts | 13 | Analyzed |
+| PHP Custom Scripts | 17 | Analyzed |
 | BUI Add-Ins | 2 | Archive Extracted |
 | Custom Objects & Entities | 6 | Schema Mapped |
 | External Integration Endpoints | 20 | Endpoint Extracted |
@@ -31,7 +31,7 @@
 
 ## Consolidated Entity Module Inventory
 
-### Entity Module: Contact (26 Mapped Components)
+### Entity Module: Contact (28 Mapped Components)
 
 #### Module Flowchart: Contact
 
@@ -64,6 +64,8 @@ flowchart LR
 | `ContactAsync` | `asynccpm` | `4 in -> 1 out` | Trigger: `Update` | Async Execution | Entry: `ObjectProcedure::apply` |
 | `callcheck.php` | `customscript` | `0 in -> 0 out` | PHP Script: `callcheck.php` | 0 functions |
 | `cityworksapicall.php` | `customscript` | `0 in -> 1 out` | PHP Script: `cityworksapicall.php` | 0 functions |
+| `daily_dupe_detection_0584.php` | `customscript` | `0 in -> 1 out` | PHP Script: `daily_dupe_detection_0584.php` | 0 functions |
+| `dupe_detection_8366.php` | `customscript` | `0 in -> 1 out` | PHP Script: `dupe_detection_8366.php` | 0 functions |
 | `duplicate_contacts.php` | `customscript` | `6 in -> 1 out` | PHP Script: `duplicate_contacts.php` | 0 functions |
 | `sms_integration 1.php` | `customscript` | `0 in -> 0 out` | PHP Script: `sms_integration 1.php` | 0 functions |
 | `ContactOrgLookupBUIAddin` | `buiaddin` | `4 in -> 10 out` | BUI Extension: `ContactOrgLookupBUIAddin` | Entry: `init.html` | Reads: 6, Writes: 5 |
@@ -77,18 +79,18 @@ flowchart LR
 | `SOAP: RegisterContact` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:soap: registercontact` |
 | `urn:soap:RegisterContact via CUSTOM_CFG_SIEBEL_URL` | `externalendpoint` | `2 in -> 0 out` | OSVC Component ID: `externalendpoint:urn:soap:registercontact via custom_cfg_siebel_url` |
 
-### Entity Module: General / Unassigned (32 Mapped Components)
+### Entity Module: General / Unassigned (34 Mapped Components)
 
 #### Module Flowchart: General / Unassigned
 
 ```mermaid
 flowchart LR
   subgraph MOD_General___Unassigned ["Module: General / Unassigned"]
+    N_customscript_header_inc_4778_php["header.inc_4778.php (customscript)"]
     N_cpmmappings_mappings_xml["Mappings.xml (cpmmappings)"]
     N_externalendpoint_http___cloud_oracle_com_service["http://cloud.oracle.com/service (externalendpoint)"]
     N_externalendpoint_https___gcb_custhelp_com_cgi_bin_gcb_cfg_php_custom_gcb_flex_php["https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/gcb_flex.php (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_esri_themes_light_main_css["https://js.arcgis.com/4.20/esri/themes/light/main.css (externalendpoint)"]
-    N_externalendpoint_https___ajax_googleapis_com_ajax_libs_jquery_3_4_1_jquery_min_js["https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js (externalendpoint)"]
     N_externalendpoint_https___js_arcgis_com_4_20_["https://js.arcgis.com/4.20/ (externalendpoint)"]
   end
 ```
@@ -115,6 +117,8 @@ flowchart LR
 | `Report 9050` | `report` | `3 in -> 0 out` | Report AC_ID: `-` | 0 columns, 0 tables joined |
 | `../../AuthLibraryExtn/AuthLibraryExtn.js` | `customscript` | `2 in -> 0 out` | PHP Script: `../../AuthLibraryExtn/AuthLibraryExtn.js` | 0 functions |
 | `gcb_flex.php` | `customscript` | `3 in -> 0 out` | PHP Script: `gcb_flex.php` | 0 functions |
+| `header.inc.php` | `customscript` | `2 in -> 0 out` | PHP Script: `header.inc.php` | 0 functions |
+| `header.inc_4778.php` | `customscript` | `0 in -> 0 out` | PHP Script: `header.inc_4778.php` | 0 functions |
 | `include/init.phph` | `customscript` | `2 in -> 0 out` | PHP Script: `include/init.phph` | 0 functions |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `externalendpoint` | `0 in -> 0 out` | OSVC Component ID: `externalendpoint:connect/v1.3/analyticsreportresults (report id 100407)` |
 | `http://cloud.oracle.com/service` | `externalendpoint` | `3 in -> 0 out` | OSVC Component ID: `externalendpoint:http://cloud.oracle.com/service` |
@@ -371,12 +375,12 @@ flowchart LR
 | `http://www.siebel.com/xml/Account` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `urn:soap:GetAccounts via CUSTOM_CFG_SIEBEL_URL` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://js.arcgis.com/4.20/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `http://209.91.135.228/api/listactivecalls/` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
-| `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `https://use.fontawesome.com/releases/v5.1.1/css/all.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
+| `https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/analyticsReportResults (Report ID 100407)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `connect/v1.3/queryResults (Organizations)` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
 | `/cc/ajaxCustom/addSrToSiebel` | `Unknown Script` | `REST API / HTTP Call` | cURL Outbound Request |
@@ -542,6 +546,14 @@ flowchart LR
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
 | **CustomScript: closing_notes.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `CustomScript: header.inc.php` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: daily_dupe_detection_0584.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `CustomScript: header.inc.php` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: Incident` | Cross-Component Mapping |
+| **CustomScript: dupe_detection_8366.php** | `Linkage` | `OSVCObject: RNObject` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: AnalyticsReport` | Cross-Component Mapping |
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: CO` | Cross-Component Mapping |
@@ -549,6 +561,7 @@ flowchart LR
 | **CustomScript: duplicate_contacts.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CustomScript: duplicate_incidents.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
 | **CustomScript: eventclock.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: header.inc_4778.php** | `Linkage` | `OSVCObject: ConnectAPI` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
 | **CustomScript: sms_integration 1.php** | `Linkage` | `OSVCObject: NamedIDLabel` | Cross-Component Mapping |

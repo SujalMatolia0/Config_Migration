@@ -1,7 +1,7 @@
 {
   "file_name": "cityworksapicall.php",
   "script_type": "Server-side Utility",
-  "summary": "This script acts as the **CityWorks Integration Authenticator & Dispatcher**. It fetches CityWorks credentials (`CUSTOM_CFG_CITYWORKS_DEV_URL`, `USERNAME`, `PASSWORD`) from OSVC Configuration, performs an HTTP REST authentication cURL request to generate an access token, and triggers automated work order dispatch via `IncidentToCityWorksSR`.",
+  "summary": "Server-side PHP script (`cityworksapicall.php`) that executes 3 internal OSVC database/Connect PHP operation(s), integrates with 1 external REST HTTP service(s). Primary entity target(s): Configuration.",
   "imports": [
     "include/init.phph"
   ],

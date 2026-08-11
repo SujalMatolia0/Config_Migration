@@ -218,44 +218,33 @@ def parse_script_file(file_path):
 
 def generate_script_summary(script_name, content, internal_apis, soap_apis, rest_apis, osvc_objects, flow_steps):
     """
-    Generates an executive functional summary explaining what this custom script does,
-    its inputs/parameters, authentication requirements, and end-to-end execution flow.
+    Generates a purely dynamic, data-driven summary based on static code metrics
+    and parsed API operations. Zero hardcoded script names.
     """
-    name_lower = script_name.lower()
-    summary_parts = []
+    _, ext = os.path.splitext(script_name.lower())
+    script_kind = "Client-side JavaScript file" if ext == ".js" else "Server-side PHP script"
 
-    if "duplicate_contacts" in name_lower:
-        summary_parts.append("This script performs **Duplicate Contact Detection** for OSVC Agent Console. It parses incoming search parameters (`f_name`, `l_name`, `email`, `h_phone`, `m_phone`, `house_num`, `street_name`, `city`), validates the agent session via `AgentAuthenticator::authenticateSessionID()`, and executes 4 ROQL queries against `Contact` and `CO.PotentialDuplicate` custom object tables to return candidate duplicate contact matches for agent review.")
-    elif "duplicate_incidents" in name_lower:
-        summary_parts.append("This script handles **Duplicate Incident Detection**. It validates agent session ID, parses support ticket parameters (`subject`, `contact_id`, `category`), and executes ROQL queries against `Incident` and `CO.PotentialDuplicate` tables to identify matching open or historical support tickets.")
-    elif "cityworks" in name_lower:
-        summary_parts.append("This script acts as the **CityWorks Integration Authenticator & Dispatcher**. It fetches CityWorks credentials (`CUSTOM_CFG_CITYWORKS_DEV_URL`, `USERNAME`, `PASSWORD`) from OSVC Configuration, performs an HTTP REST authentication cURL request to generate an access token, and triggers automated work order dispatch via `IncidentToCityWorksSR`.")
-    elif "sms_integration" in name_lower:
-        summary_parts.append("This script handles **SMS Webhook Integration**. It receives XML POST payloads (`php://input`), authenticates integration agent credentials via `AgentAuthenticator::authenticateCredentials()`, parses customer response keywords (`YES` / `OUI`), updates Contact preferred language custom fields, and dispatches SMS subscription confirmations.")
-    elif "callcheck" in name_lower:
-        summary_parts.append("This script performs **Active Telephony Call Verification**. It validates agent session tokens, queries an external telephony REST API (`http://209.91.135.228/api/listactivecalls/`), and matches active caller numbers against OSVC Contact accounts for screen-pop automation.")
-    elif "address_validation" in name_lower:
-        summary_parts.append("This script provides **Address Validation & Geocoding Service**. It interacts with external REST APIs (ArcGIS / CityWorks Geocoding Service), queries OSVC Configuration settings, and validates customer street address inputs.")
-    elif "child_incident_create" in name_lower:
-        summary_parts.append("This script automates **Child Incident Creation & Linking**. It instantiates new `RNCPHP\\Incident` records, copies parent incident parameters, establishes parent-child relationships, and commits new records to the database.")
-    elif "closing_notes" in name_lower:
-        summary_parts.append("This script performs **Incident Closing Notes Management**. It retrieves Incident records via Connect PHP API, instantiates `RNCPHP\\Note` objects, appends resolution notes, and updates incident statuses upon closure.")
-    elif "bluebox_greencart" in name_lower:
-        summary_parts.append("This script validates **Municipal Waste & Recycling Collection Schedules (Blue Box / Green Cart)**. It queries address custom fields, checks collection calendars, and returns schedule lookup responses.")
-    elif "eventclock" in name_lower:
-        summary_parts.append("This script calculates **Incident SLA Clocks & Response Timers**. It calculates elapsed handling times, monitors response deadlines, and updates SLA milestone tracking fields.")
+    desc = f"{script_kind} (`{script_name}`)"
+
+    details = []
+    if internal_apis:
+        details.append(f"executes {len(internal_apis)} internal OSVC database/Connect PHP operation(s)")
+    if rest_apis:
+        details.append(f"integrates with {len(rest_apis)} external REST HTTP service(s)")
+    if soap_apis:
+        details.append(f"integrates with {len(soap_apis)} external SOAP web service(s)")
+
+    if details:
+        desc += " that " + ", ".join(details) + "."
     else:
-        desc = f"Server-side utility script (`{script_name}`)"
-        if internal_apis:
-            desc += f" that executes {len(internal_apis)} internal OSVC Connect PHP / ROQL database operations"
-        if rest_apis:
-            desc += f" and integrates with {len(rest_apis)} external REST HTTP services"
-        if soap_apis:
-            desc += f" and integrates with {len(soap_apis)} external SOAP web services"
-        desc += "."
-        summary_parts.append(desc)
+        desc += " providing utility helper functions."
 
-    return " ".join(summary_parts)
+    if osvc_objects:
+        clean_objs = [o for o in osvc_objects if o not in ("ROQL", "RNObject", "ConnectAPI", "RightNow Client Framework")]
+        if clean_objs:
+            desc += f" Primary entity target(s): {', '.join(clean_objs[:3])}."
+
+    return desc
 
 
 def parse_script_file(file_path):
@@ -454,16 +443,26 @@ def parse_script_file(file_path):
 
     # Hardcoded credentials check
     cred_patterns = [
-        r'(?:password|passwd|pwd|secret|key|api_key|token|auth)\s*[:=]\s*["\']([^"\'\$]+)["\']',
+        (r'initConnectAPI\s*\(\s*["\']([^"\'\$]+)["\']\s*,\s*["\']([^"\'\$]+)["\']\s*\)', "Hardcoded ConnectAPI Credentials"),
+        (r'CURLOPT_USERPWD\s*,\s*["\']([^"\'\$]+)["\']', "Hardcoded cURL Basic Auth Credentials"),
+        (r'(?:password|passwd|pwd|secret|key|api_key|token|auth)\s*[:=]\s*["\']([^"\'\$]+)["\']', "Hardcoded Variable Credentials")
     ]
-    for pattern in cred_patterns:
+    for pattern, cred_label in cred_patterns:
         matches = re.findall(pattern, content, re.IGNORECASE)
-        valid_creds = [m for m in matches if len(m.strip()) > 3]
-        if valid_creds:
-            risk_flags.append({
-                "type": "Hardcoded Credential",
-                "detail": f"Potential credentials found in variable assignments (count: {len(valid_creds)})"
-            })
+        if matches:
+            for match in matches:
+                if isinstance(match, tuple):
+                    user_val, pass_val = match[0], match[1]
+                    risk_flags.append({
+                        "type": "Hardcoded Credential",
+                        "detail": f"{cred_label}: User '{user_val}' with plaintext password"
+                    })
+                else:
+                    if len(match.strip()) > 3:
+                        risk_flags.append({
+                            "type": "Hardcoded Credential",
+                            "detail": f"{cred_label}: '{match.strip()}'"
+                        })
 
     # ── HTML & JavaScript Extraction for Live Previews ─────────────────────
     has_html = False

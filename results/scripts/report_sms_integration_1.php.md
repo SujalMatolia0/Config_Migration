@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script handles **SMS Webhook Integration**. It receives XML POST payloads (`php://input`), authenticates integration agent credentials via `AgentAuthenticator::authenticateCredentials()`, parses customer response keywords (`YES` / `OUI`), updates Contact preferred language custom fields, and dispatches SMS subscription confirmations.
+> Server-side PHP script (`sms_integration 1.php`) that executes 5 internal OSVC database/Connect PHP operation(s), integrates with 1 external REST HTTP service(s), integrates with 1 external SOAP web service(s). Primary entity target(s): Configuration, ConnectAPIErrorBase, NamedIDLabel.
 
 ## Script Overview & Attributes
 

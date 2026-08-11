@@ -2,7 +2,7 @@
 ## Executive Functional Summary
 
 > [!NOTE]
-> This script provides **Address Validation & Geocoding Service**. It interacts with external REST APIs (ArcGIS / CityWorks Geocoding Service), queries OSVC Configuration settings, and validates customer street address inputs.
+> Server-side PHP script (`address_validation.php`) that executes 9 internal OSVC database/Connect PHP operation(s), integrates with 3 external REST HTTP service(s). Primary entity target(s): Configuration, ConnectAPIErrorBase.
 
 ## Script Overview & Attributes
 
@@ -60,8 +60,8 @@
 | Protocol | HTTP Method | Endpoint URL | Details |
 | --- | --- | --- | --- |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | cURL POST/GET request |
-| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/` | cURL POST/GET request |
+| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 
 ## Security & Risk Analysis
 
@@ -97,9 +97,9 @@ sequenceDiagram
   OSVC-->>Script: Return Data / Context
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css
   REST-->>Script: Return REST Response Payload
-  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
-  REST-->>Script: Return REST Response Payload
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/
+  REST-->>Script: Return REST Response Payload
+  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
   REST-->>Script: Return REST Response Payload
   Script-->>Client: Return Script Execution Response
 ```
