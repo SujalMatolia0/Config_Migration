@@ -2921,16 +2921,6 @@ def build_business_rules_multi_stage_flowchart(rules, obj_name=None):
     flow_lines.append("  classDef actFunc fill:#ec4899,stroke:#be185d,color:#fff;")
     flow_lines.append("  classDef actOther fill:#64748b,stroke:#334155,color:#fff;")
 
-    # Color Map Legend Subgraph on the LEFT SIDE (no lines between items)
-    flow_lines.append('  subgraph Legend ["Color Map Legend"]')
-    flow_lines.append('    LEG_ST["Blue: Rule States"]:::stateNode')
-    flow_lines.append('    LEG_FN["Purple: Functions & Rules"]:::funcNode')
-    flow_lines.append('    LEG_SET["Green: Set Field"]:::actSetField')
-    flow_lines.append('    LEG_TR["Sky Blue: State Trans"]:::actStateTrans')
-    flow_lines.append('    LEG_CPM["Orange: Execute CPM"]:::actCpm')
-    flow_lines.append('    LEG_FUNC["Pink: Call Function"]:::actFunc')
-    flow_lines.append('    LEG_OTH["Slate: Other Actions"]:::actOther')
-    flow_lines.append('  end')
     flow_lines.append("")
 
     state_nodes = set()

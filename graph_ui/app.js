@@ -1513,8 +1513,34 @@ function extractMermaidCode(markdown, node) {
   return blocks[blocks.length - 1] || blocks[0];
 }
 
-function attachDiagramLegendOverlay(container, isModal = false) {
-  if (!container || container.querySelector(".diagram-vertical-legend")) return;
+function attachDiagramLegendOverlay(container, isModal = false, mermaidCode = "") {
+  if (!container) return;
+
+  // Clean up any existing legend in container
+  const existing = container.querySelector(".diagram-vertical-legend");
+  if (existing) existing.remove();
+
+  // Inspect container or mermaid code to detect if this is a Business Rules diagram
+  const svgEl = container.querySelector("svg") || (container.tagName && container.tagName.toLowerCase() === "svg" ? container : null);
+  const codeStr = (mermaidCode || "").toLowerCase().trim();
+
+  const isBusinessRuleDiagram = codeStr.includes("statenode") ||
+                                codeStr.includes("funcnode") ||
+                                codeStr.includes("actsetfield") ||
+                                codeStr.includes("actstatetrans") ||
+                                codeStr.includes("actcpm") ||
+                                (svgEl && (
+                                  svgEl.querySelector(".stateNode") !== null ||
+                                  svgEl.querySelector(".funcNode") !== null ||
+                                  svgEl.querySelector(".actSetField") !== null ||
+                                  svgEl.querySelector(".actStateTrans") !== null ||
+                                  svgEl.querySelector(".actCpm") !== null
+                                ));
+
+  // Only Business Rules diagrams use rule action color tokens; suppress legend for all other diagram types
+  if (!isBusinessRuleDiagram) {
+    return;
+  }
 
   const legend = document.createElement("div");
   legend.className = "diagram-vertical-legend";
@@ -1565,7 +1591,7 @@ async function renderMermaidDiagram(container, mermaidCode) {
     const uniqueId = `mermaid-svg-${++mermaidCount}`;
     const { svg } = await mermaid.render(uniqueId, mermaidCode);
     container.innerHTML = `<div class="mermaid" style="position:relative;">${svg}</div>`;
-    attachDiagramLegendOverlay(container.querySelector(".mermaid"));
+    attachDiagramLegendOverlay(container.querySelector(".mermaid"), false, mermaidCode);
   } catch (err) {
     console.error("Mermaid Render Error:", err);
     container.innerHTML = `<div style="color:#DC2626; padding: 12px; font-size: 12px; border:1px solid rgba(220,38,38,0.2); border-radius:6px; background:#FFF5F5;">
@@ -1621,10 +1647,12 @@ async function renderMermaidBlocksInContainer(container) {
         clone.style.transformOrigin = "center center";
         clone.style.cursor = "inherit";
         modalViewport.appendChild(clone);
+        attachDiagramLegendOverlay(diagramModal, true, mermaidCode);
         modalView = { x: 0, y: 0, k: 0.85 };
         updateModalTransform();
         diagramModal.classList.add("open");
       });
+      attachDiagramLegendOverlay(div, false, mermaidCode);
       div.appendChild(fsBtn);
       placeholder.replaceWith(div);
     } catch (err) {

@@ -28,15 +28,6 @@ graph LR
   classDef actCpm fill:#d97706,stroke:#b45309,color:#fff,font-weight:bold;
   classDef actFunc fill:#ec4899,stroke:#be185d,color:#fff;
   classDef actOther fill:#64748b,stroke:#334155,color:#fff;
-  subgraph Legend ["Color Map Legend"]
-    LEG_ST["Blue: Rule States"]:::stateNode
-    LEG_FN["Purple: Functions & Rules"]:::funcNode
-    LEG_SET["Green: Set Field"]:::actSetField
-    LEG_TR["Sky Blue: State Trans"]:::actStateTrans
-    LEG_CPM["Orange: Execute CPM"]:::actCpm
-    LEG_FUNC["Pink: Call Function"]:::actFunc
-    LEG_OTH["Slate: Other Actions"]:::actOther
-  end
 
   subgraph Tier1_States ["1. States (Start)"]
     ST_01_Initial_State["State: 01-Initial State"]:::stateNode

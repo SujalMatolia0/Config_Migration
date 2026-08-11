@@ -4,7 +4,7 @@
     "serverVersion": "Oracle Service Cloud Unknown",
     "totalComponents": 40,
     "useAiSummary": true,
-    "generatedAt": "2026-08-11T10:28:37.994288"
+    "generatedAt": "2026-08-11T10:47:33.023298"
   },
   "objects": {
     "Contact": {
@@ -243,29 +243,29 @@
         "type": "cpm",
         "name": "contact_update_internal",
         "objects": [
-          "Organization",
-          "Contact"
+          "Contact",
+          "Organization"
         ],
-        "reason": "Component references multiple objects: Organization, Contact"
+        "reason": "Component references multiple objects: Contact, Organization"
       },
       {
         "type": "cpm",
         "name": "incident_routing",
         "objects": [
-          "Organization",
+          "Incident",
           "Contact",
-          "Incident"
+          "Organization"
         ],
-        "reason": "Component references multiple objects: Organization, Contact, Incident"
+        "reason": "Component references multiple objects: Incident, Contact, Organization"
       },
       {
         "type": "BUIAddin",
         "name": "ContactOrgLookupBUIAddin",
         "objects": [
-          "Contact",
-          "Incident"
+          "Incident",
+          "Contact"
         ],
-        "reason": "Component references multiple objects: Contact, Incident"
+        "reason": "Component references multiple objects: Incident, Contact"
       }
     ]
   },
@@ -322,7 +322,7 @@
       "risk": "External API Call"
     },
     {
-      "url": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+      "url": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -332,7 +332,7 @@
       "risk": "External API Call"
     },
     {
-      "url": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+      "url": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
       "referencedBy": [],
       "risk": "External API Call"
     },
@@ -2918,13 +2918,13 @@
         }
       },
       {
-        "id": "externalendpoint:https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "id": "externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
         "type": "externalendpoint",
-        "label": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "label": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
         "isOrphan": false,
         "orphanReason": null,
         "data": {
-          "name": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+          "name": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
           "type": "CustomScript",
           "id": null,
           "object_type": null,
@@ -2934,7 +2934,7 @@
           "operations_label": null,
           "entry_point": null,
           "module": "Other",
-          "detailsPath": "details/externalendpoint_https___js.arcgis.com_4.20_esri_themes_light_main.css.json"
+          "detailsPath": "details/externalendpoint_https___ajax.googleapis.com_ajax_libs_jquery_3.4.1_jquery.min.js.json"
         }
       },
       {
@@ -2958,13 +2958,13 @@
         }
       },
       {
-        "id": "externalendpoint:https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "id": "externalendpoint:https://js.arcgis.com/4.20/esri/themes/light/main.css",
         "type": "externalendpoint",
-        "label": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+        "label": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
         "isOrphan": false,
         "orphanReason": null,
         "data": {
-          "name": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
+          "name": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
           "type": "CustomScript",
           "id": null,
           "object_type": null,
@@ -2974,7 +2974,7 @@
           "operations_label": null,
           "entry_point": null,
           "module": "Other",
-          "detailsPath": "details/externalendpoint_https___ajax.googleapis.com_ajax_libs_jquery_3.4.1_jquery.min.js.json"
+          "detailsPath": "details/externalendpoint_https___js.arcgis.com_4.20_esri_themes_light_main.css.json"
         }
       },
       {
