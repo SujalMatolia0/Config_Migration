@@ -1,6 +1,6 @@
 # OSVC Business Rules Report — Object: Contact
 
-_Source: Object Analysis — 143 Business Rules for Object `Contact`_
+_Source: Object Analysis — 156 Business Rules for Object `Contact`_
 
 > [!NOTE]
 > **Entity Focus**: Dedicated report for OSVC Object **`Contact`**. Contains active action type sub-groups, sub-field lifecycle flowcharts, and detailed rule definitions.
@@ -10,10 +10,10 @@ _Source: Object Analysis — 143 Business Rules for Object `Contact`_
 | Metric | Value |
 |---|---|
 | Target Object | **Contact** |
-| Total Rules | 143 |
-| Active Rules | 123 |
+| Total Rules | 156 |
+| Active Rules | 136 |
 | Disabled Rules | 20 |
-| Action Breakdown | SetField: 355, TransitionState_Stop: 80, Other: 20, CPMCall: 12, FunctionCall: 7, StopProcessing: 7, AppendTemplate: 6, SendEmail: 2, SendMarketingEmail: 1 |
+| Action Breakdown | SetField: 367, TransitionState_Stop: 81, Other: 20, CPMCall: 12, AppendTemplate: 10, FunctionCall: 7, StopProcessing: 7, SendEmail: 6, Escalation: 4, SendMarketingEmail: 1 |
 | CSV Exports | `results/csv/rules/Contact_*.csv` |
 
 ## 2. Contact Business Rules Architecture Flowchart
@@ -32,10 +32,11 @@ graph LR
   subgraph Tier1_States ["1. States (Start)"]
     ST_01_Initial_State["State: 01-Initial State"]:::stateNode
     ST_02_Updated_State["State: 02-Updated State"]:::stateNode
-    ST_03_Vet_Diet_State["State: 03-Vet Diet State"]:::stateNode
-    ST_04_Pharmacy_State["State: 04-Pharmacy State"]:::stateNode
-    ST_05_Chewy_Vet_Care["State: 05-Chewy Vet Care"]:::stateNode
-    ST_F01_Email_Routing["State: F01-Email Routing"]:::stateNode
+    ST_11_Unresolved_Contact["State: 11-Unresolved Contact"]:::stateNode
+    ST_1_New["State: 1 - New"]:::stateNode
+    ST_2_In_Progress["State: 2 - In Progress"]:::stateNode
+    ST_3_Routing_Incidents_Self_Service_["State: 3 - Routing Incidents (Self-Service)"]:::stateNode
+    ST_6_Queue_Assignment["State: 6 - Queue Assignment"]:::stateNode
   end
 
   subgraph Tier2_Functions ["2. Functions & Rules"]
@@ -51,19 +52,19 @@ graph LR
     FN_02_Updated_State_02_Post_OCR_Verbals_Processing["Rule/Func: 02-Post OCR Verbals Processing"]:::funcNode
     FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing["Rule/Func: 02-Vet Diet Post OCR Processing"]:::funcNode
     FN_02_Updated_State_02g_FedEx_Exception["Rule/Func: 02g-FedEx Exception"]:::funcNode
-    FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing["Rule/Func: 03- Vet Diet Post OCR2 Processing"]:::funcNode
-    FN_04_Pharmacy_State_04_Post_OCR_Processing_Rx_Order["Rule/Func: 04- Post OCR Processing Rx Order"]:::funcNode
-    FN_05_Chewy_Vet_Care_05_00b_Assign_PMR_to_agent_on_blank_email["Rule/Func: 05-00b Assign PMR to agent on blank email"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Pro_Routing["Rule/Func: 01-Chewy Pro Routing"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing["Rule/Func: 01- Chewy Rx Pharmacy Fax Routing"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba["Rule/Func: 01- Chewy Rx Pharmacy Fax Routing - Gaba"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing["Rule/Func: 01- Chewy Rx Pharmacy Mailin Routing"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA["Rule/Func: 01- Chewy Rx Pharmacy Verbal Rout -GABA"]:::funcNode
-    FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing["Rule/Func: 01- Chewy Rx Pharmacy Verbal Routing"]:::funcNode
-    FN_F01_Email_Routing_01_Route_OnTrac["Rule/Func: 01-Route OnTrac"]:::funcNode
-    FN_F01_Email_Routing_01_Route_Personalization_Update["Rule/Func: 01-Route Personalization Update"]:::funcNode
-    FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing["Rule/Func: 01- Vet Diet Fax Routing"]:::funcNode
-    FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking["Rule/Func: F01 - Rx FC Overnight Tracking"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_1["Rule/Func: Unresolved Contact 1"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_1_Action["Rule/Func: Unresolved Contact 1 Action"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_2["Rule/Func: Unresolved Contact 2"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_2_Action["Rule/Func: Unresolved Contact 2 Action"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_3["Rule/Func: Unresolved Contact 3"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_3_Action["Rule/Func: Unresolved Contact 3 Action"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_4["Rule/Func: Unresolved Contact 4"]:::funcNode
+    FN_11_Unresolved_Contact_Unresolved_Contact_4_Action["Rule/Func: Unresolved Contact 4 Action"]:::funcNode
+    FN_1_New_CBA_email_In_Rule["Rule/Func: CBA email In Rule"]:::funcNode
+    FN_1_New_New_email_In_Rule["Rule/Func: New email In Rule"]:::funcNode
+    FN_2_In_Progress_VIP_Contact["Rule/Func: VIP Contact"]:::funcNode
+    FN_3_Routing_Incidents_Self_Service__Answer_Feedback_2["Rule/Func: Answer Feedback 2"]:::funcNode
+    FN_6_Queue_Assignment_Assigned_Queue_TAC_RA_2["Rule/Func: Assigned Queue - TAC-RA 2"]:::funcNode
   end
 
   subgraph Tier3_Actions ["3. Related Action Types"]
@@ -87,38 +88,28 @@ graph LR
     ACT_FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing_SetField["SetField: Set Field Incidents > Q... (3x)"]:::actSetField
     ACT_FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
     ACT_FN_02_Updated_State_02g_FedEx_Exception_FunctionCall["FunctionCall: Call Function F01-G Ema..."]:::actFunc
-    ACT_FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing_FunctionCall["FunctionCall: Call Function F28-Vet D..."]:::actFunc
-    ACT_FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing_StopProcessing["StopProcessing: Stop Processing"]:::actOther
-    ACT_FN_04_Pharmacy_State_04_Post_OCR_Processing_Rx_Order_FunctionCall["FunctionCall: Call Function F19-Parse..."]:::actFunc
-    ACT_FN_05_Chewy_Vet_Care_05_00b_Assign_PMR_to_agent_on_blank_email_SetField["SetField: Set Field Incidents > Q... (6x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Pro_Routing_SetField["SetField: Set Field Incidents > Q... (3x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Pro_Routing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_SetField["SetField: Set Field Incidents > Q... (4x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_SetField["SetField: Set Field Incidents > Q... (5x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing_SetField["SetField: Set Field Incidents > Q... (5x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_SetField["SetField: Set Field Incidents > Q... (5x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_SetField["SetField: Set Field Incidents > Q... (5x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Route_OnTrac_SetField["SetField: Set Field Incidents > Q... (2x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Route_OnTrac_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Route_Personalization_Update_SetField["SetField: Set Field Incidents > Q... (4x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Route_Personalization_Update_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_SetField["SetField: Set Field Incidents > Q... (5x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking_SetField["SetField: Set Field Custom Field ... (3x)"]:::actSetField
-    ACT_FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Action_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Escalation["Escalation: Escalate to Unresolved ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Action_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Escalation["Escalation: Escalate to Unresolved ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Action_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Escalation["Escalation: Escalate to Unresolved ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_SetField["SetField: Set Field Incidents > S..."]:::actSetField
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
+    ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Escalation["Escalation: Escalate to Unresolved ..."]:::actOther
+    ACT_FN_1_New_CBA_email_In_Rule_SetField["SetField: Set Field Custom Field ... (5x)"]:::actSetField
+    ACT_FN_1_New_New_email_In_Rule_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_2_In_Progress_VIP_Contact_SetField["SetField: Set Field Incidents > B..."]:::actSetField
+    ACT_FN_3_Routing_Incidents_Self_Service__Answer_Feedback_2_SetField["SetField: Set Field Incidents > Q... (2x)"]:::actSetField
+    ACT_FN_6_Queue_Assignment_Assigned_Queue_TAC_RA_2_SetField["SetField: Set Field Incidents > Q... (2x)"]:::actSetField
   end
 
-  LEG_ST ~~~ ST_01_Initial_State
+  LEG_ST ~~~ ST_1_New
   ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_Blocked_Contact
   ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_FedEx_discard_Emails
   ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_G_Inbound_FedEx_Routing
@@ -131,19 +122,19 @@ graph LR
   ST_02_Updated_State -->|"contains"| FN_02_Updated_State_02_Post_OCR_Verbals_Processing
   ST_02_Updated_State -->|"contains"| FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing
   ST_02_Updated_State -->|"contains"| FN_02_Updated_State_02g_FedEx_Exception
-  ST_03_Vet_Diet_State -->|"contains"| FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing
-  ST_04_Pharmacy_State -->|"contains"| FN_04_Pharmacy_State_04_Post_OCR_Processing_Rx_Order
-  ST_05_Chewy_Vet_Care -->|"contains"| FN_05_Chewy_Vet_Care_05_00b_Assign_PMR_to_agent_on_blank_email
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Pro_Routing
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Route_OnTrac
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Route_Personalization_Update
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing
-  ST_F01_Email_Routing -->|"contains"| FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_1
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_1_Action
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_2
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_2_Action
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_3
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_3_Action
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_4
+  ST_11_Unresolved_Contact -->|"contains"| FN_11_Unresolved_Contact_Unresolved_Contact_4_Action
+  ST_1_New -->|"contains"| FN_1_New_CBA_email_In_Rule
+  ST_1_New -->|"contains"| FN_1_New_New_email_In_Rule
+  ST_2_In_Progress -->|"contains"| FN_2_In_Progress_VIP_Contact
+  ST_3_Routing_Incidents_Self_Service_ -->|"contains"| FN_3_Routing_Incidents_Self_Service__Answer_Feedback_2
+  ST_6_Queue_Assignment -->|"contains"| FN_6_Queue_Assignment_Assigned_Queue_TAC_RA_2
   FN_01_Initial_State_01_Blocked_Contact -->|"action"| ACT_FN_01_Initial_State_01_Blocked_Contact_Other
   FN_01_Initial_State_01_FedEx_discard_Emails -->|"action"| ACT_FN_01_Initial_State_01_FedEx_discard_Emails_SetField
   FN_01_Initial_State_01_G_Inbound_FedEx_Routing -->|"action"| ACT_FN_01_Initial_State_01_G_Inbound_FedEx_Routing_FunctionCall
@@ -164,35 +155,25 @@ graph LR
   FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing -->|"action"| ACT_FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing_SetField
   FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing -->|"action"| ACT_FN_02_Updated_State_02_Vet_Diet_Post_OCR_Processing_TransitionState_Stop
   FN_02_Updated_State_02g_FedEx_Exception -->|"action"| ACT_FN_02_Updated_State_02g_FedEx_Exception_FunctionCall
-  FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing -->|"action"| ACT_FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing_FunctionCall
-  FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing -->|"action"| ACT_FN_03_Vet_Diet_State_03_Vet_Diet_Post_OCR2_Processing_StopProcessing
-  FN_04_Pharmacy_State_04_Post_OCR_Processing_Rx_Order -->|"action"| ACT_FN_04_Pharmacy_State_04_Post_OCR_Processing_Rx_Order_FunctionCall
-  FN_05_Chewy_Vet_Care_05_00b_Assign_PMR_to_agent_on_blank_email -->|"action"| ACT_FN_05_Chewy_Vet_Care_05_00b_Assign_PMR_to_agent_on_blank_email_SetField
-  FN_F01_Email_Routing_01_Chewy_Pro_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Pro_Routing_SetField
-  FN_F01_Email_Routing_01_Chewy_Pro_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Pro_Routing_TransitionState_Stop
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_CPMCall
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_SetField
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_TransitionState_Stop
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_CPMCall
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_SetField
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Fax_Routing_Gaba_TransitionState_Stop
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing_SetField
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Mailin_Routing_TransitionState_Stop
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_CPMCall
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_SetField
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Rout_GABA_TransitionState_Stop
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_CPMCall
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_SetField
-  FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Chewy_Rx_Pharmacy_Verbal_Routing_TransitionState_Stop
-  FN_F01_Email_Routing_01_Route_OnTrac -->|"action"| ACT_FN_F01_Email_Routing_01_Route_OnTrac_SetField
-  FN_F01_Email_Routing_01_Route_OnTrac -->|"action"| ACT_FN_F01_Email_Routing_01_Route_OnTrac_TransitionState_Stop
-  FN_F01_Email_Routing_01_Route_Personalization_Update -->|"action"| ACT_FN_F01_Email_Routing_01_Route_Personalization_Update_SetField
-  FN_F01_Email_Routing_01_Route_Personalization_Update -->|"action"| ACT_FN_F01_Email_Routing_01_Route_Personalization_Update_TransitionState_Stop
-  FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_CPMCall
-  FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_SetField
-  FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing -->|"action"| ACT_FN_F01_Email_Routing_01_Vet_Diet_Fax_Routing_TransitionState_Stop
-  FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking -->|"action"| ACT_FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking_SetField
-  FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking -->|"action"| ACT_FN_F01_Email_Routing_F01_Rx_FC_Overnight_Tracking_TransitionState_Stop
+  FN_11_Unresolved_Contact_Unresolved_Contact_1 -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Escalation
+  FN_11_Unresolved_Contact_Unresolved_Contact_1_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Action_AppendTemplate
+  FN_11_Unresolved_Contact_Unresolved_Contact_1_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_1_Action_SendEmail
+  FN_11_Unresolved_Contact_Unresolved_Contact_2 -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Escalation
+  FN_11_Unresolved_Contact_Unresolved_Contact_2_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Action_AppendTemplate
+  FN_11_Unresolved_Contact_Unresolved_Contact_2_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_2_Action_SendEmail
+  FN_11_Unresolved_Contact_Unresolved_Contact_3 -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Escalation
+  FN_11_Unresolved_Contact_Unresolved_Contact_3_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Action_AppendTemplate
+  FN_11_Unresolved_Contact_Unresolved_Contact_3_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_3_Action_SendEmail
+  FN_11_Unresolved_Contact_Unresolved_Contact_4 -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Escalation
+  FN_11_Unresolved_Contact_Unresolved_Contact_4_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_AppendTemplate
+  FN_11_Unresolved_Contact_Unresolved_Contact_4_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_SendEmail
+  FN_11_Unresolved_Contact_Unresolved_Contact_4_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_SetField
+  FN_11_Unresolved_Contact_Unresolved_Contact_4_Action -->|"action"| ACT_FN_11_Unresolved_Contact_Unresolved_Contact_4_Action_TransitionState_Stop
+  FN_1_New_CBA_email_In_Rule -->|"action"| ACT_FN_1_New_CBA_email_In_Rule_SetField
+  FN_1_New_New_email_In_Rule -->|"action"| ACT_FN_1_New_New_email_In_Rule_SetField
+  FN_2_In_Progress_VIP_Contact -->|"action"| ACT_FN_2_In_Progress_VIP_Contact_SetField
+  FN_3_Routing_Incidents_Self_Service__Answer_Feedback_2 -->|"action"| ACT_FN_3_Routing_Incidents_Self_Service__Answer_Feedback_2_SetField
+  FN_6_Queue_Assignment_Assigned_Queue_TAC_RA_2 -->|"action"| ACT_FN_6_Queue_Assignment_Assigned_Queue_TAC_RA_2_SetField
 ```
 
 ## 3. Business Rules Breakdown by Action Type
@@ -203,12 +184,18 @@ graph LR
 </div>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SetField (98 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SetField (104 Active Rules)</summary>
 
 Export CSV: `Contact_SetField.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | CBA email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND (  Contacts > Email - Primary  equals  progress@defensetravel.osd.mil  OR  Contacts > Email - Primary  equals  arthur.l.briggs2.civ@mail.mil  OR  Contacts > Email - Primary  equals  progress@dtsproext01.defensetravel.osd.mil )  AND  Incidents > Subject  contains  CBA Detector Log) | Set Field Custom Field > Incident Type assign as Email \| Set Field Incidents > Subject assign as CBA Detector \| Set Field Incidents > Assigned assign as Ron D \| Set Field Incidents > Queue assign as TAC-CBA \| Set Field Incidents > Severity assign as Minor |
+| 1 - New | New email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND (  Contacts > Email - Primary  equals  progress@dtsproext01.defensetravel.osd.mil  OR  Contacts > Email - Primary  equals  progress@defensetravel.osd.mil )) | Set Field Custom Field > Incident Type assign as Email |
+| 2 - In Progress | VIP Contact | Active | If (Custom Field > VIP  equals  Yes  AND  Contacts > Contact Type  equals  VIP  AND  Incidents > Banner Flag  is not modified this edit    AND  Incidents > Banner Flag  not equals  Medium, High) | Set Field Incidents > Banner Flag assign as Low & Banner Note assign as VIP Customer |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Set Field Incidents > Status assign as Closed |
+| 3 - Routing Incidents (Self-Service) | Answer Feedback 2 | Active | If (Incidents > Subject  equals  Answer Feedback  AND  Contacts > Last Name  equals  Feedback  AND  Contacts > First Name  equals  Answer) | Set Field Incidents > Queue assign as Answer Feedback \| Set Field Incidents > Severity assign as Minor |
+| 6 - Queue Assignment | Assigned Queue - TAC-RA 2 | Active | If (Incidents > Subject  equals  Recruit Assist Program  AND  Contacts > Last Name  equals  Assist  AND  Contacts > First Name  equals  Recruit) | Set Field Incidents > Queue assign as TAC-RA \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
 | 01-Initial State | Temp Rule to set 'ppauto' emails to Solved for UAT | Active | If (Contacts > Email - Primary  contains  ppauto-) | Set Field Incidents > Status assign as Solved |
 | 01-Initial State | 01-FedEx - discard Emails | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Contacts > Email - Primary  contains  @chewy.com  AND (  Incidents > Subject  match regex  FedEx has received your email - Email Reference Number: .  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package has been delivered  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is scheduled for delivery tomorrow  OR  Incidents > Subject  match regex  FedEx Shipment .+ This shipment was tendered to FedEx Ground  OR  Incidents > Subject  match regex  FedEx Shipment .+ Notification  OR  Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages could not be delivered.  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today  OR  Incidents > Subject  match regex  edEx Customer Survey - Email Reference Number .+  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is delayed.  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your packages are now out for delivery  OR  Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages are now out for delivery today  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package delivery has been updated  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today  OR  Incidents > Subject  match regex  FedEx Address Corrections\|FedEx Request\|FedEx Reroute Request\|FedEx Rstatus Reroutes\|FedEx Shipper Complaints\|Shipment Details Needed\|FedEx Values Your Feedback\|FedEx Customer Care Survey  OR  Incidents > Subject  match regex  Tell us about your recently closed FedEx case experience\|FedEx Ground EPDI Reconciliation\|Status of FedEx Case  OR  Incidents > Subject  match regex  FedEx Case Number C .+ Ref .+ for Tracking Number .+ )) | Set Field Incidents > Assigned assign as Kelly Williamson |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Set Field Custom Field > Channel assign as Email \| Set Field Incidents > Status assign as Solved \| Set Field Incidents > Category assign as Automatic Email Reply \| Set Field Incidents > Queue assign as Vendor Specialists |
@@ -311,12 +298,13 @@ Export CSV: `Contact_SetField.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: TransitionState_Stop (80 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: TransitionState_Stop (81 Active Rules)</summary>
 
 Export CSV: `Contact_TransitionState_Stop.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Transition State And Stop 3 - Closed |
 | 01-Initial State | Temp Rule to set 'ppauto' emails to Solved for UAT | Active | If (Contacts > Email - Primary  contains  ppauto-) | Transition State And Stop 05-Chewy Vet Care |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Transition State And Stop 02-Updated State |
 | 01-Initial State | 01-G-Inbound Open Methods Training Email | Active | If (Incidents > Incoming Mailbox  equals  Chewy  AND  Contacts > Email - Primary  equals  training@chewy.com  AND  Incidents > Queue  equals  General Email Overflow  AND (  Incidents > Channel  equals  Email  OR  Custom Field > Channel  equals  Email )) | Transition State And Stop 02-Updated State |
@@ -456,12 +444,30 @@ Export CSV: `Contact_StopProcessing.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: AppendTemplate (6 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: Escalation (4 Active Rules)</summary>
+
+Export CSV: `Contact_Escalation.csv`
+
+| Rule Group | Rule Name | Status | Condition | Action Text |
+|---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Escalate to Unresolved Contact 1 +27 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 2 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 1) | Escalate to Unresolved Contact 2 +54 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 3 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 2) | Escalate to Unresolved Contact 3 +81 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 4 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 3) | Escalate to Unresolved Contact 4 +90 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+
+</details>
+
+<details open>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: AppendTemplate (10 Active Rules)</summary>
 
 Export CSV: `Contact_AppendTemplate.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 1  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact |
+| 11-Unresolved Contact | Unresolved Contact 2 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 2  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact 2 |
+| 11-Unresolved Contact | Unresolved Contact 3 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 3  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact 3 |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Append Response Template to Response CLOSED WITHOUT CONFIRMATION |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Append Response Template to Response Vendor Auto Response |
 | F23-Chewy Contact Us Routing | F23-Route CHIRP Request | Active | If (Incidents > Interface  equals  chewykb  AND  Incidents > Category  equals  Targeted Topics, CHIRP Topics) | Append Response Template to Response CHIRP Request |
 | F23-Chewy Contact Us Routing | F23 - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Orders > OrderId  is not null) | Append Response Template to Notes Cancel Order Note |
@@ -502,12 +508,16 @@ Export CSV: `Contact_Other.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SendEmail (2 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 15px; cursor: pointer; color: #2563eb;">Action Type: SendEmail (6 Active Rules)</summary>
 
 Export CSV: `Contact_SendEmail.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 1  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 2 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 2  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 3 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 3  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Send Email Response to Sender Include incident details |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Send Email Response to Sender |
 | F23-Chewy Contact Us Routing | F23-Route CHIRP Request | Active | If (Incidents > Interface  equals  chewykb  AND  Incidents > Category  equals  Targeted Topics, CHIRP Topics) | Send Email Response to Sender Include question Include incident details |
 

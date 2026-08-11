@@ -23,7 +23,6 @@
 
 | Source Component | Linkage Direction | Target Component | Details / Context |
 | :--- | :---: | :--- | :--- |
-| **Workspace: Contact** | `->` | **CustomScript: duplicate_contacts.php** | Rule 'Check Contact Duplicates' → Action: RunScript |
 | **CustomScript: duplicate_contacts.php** | `->` | **CustomScript: address_validation.php** | import/require: 'address_validation.php' |
 | **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: AnalyticsReport** | Custom Script 'duplicate_contacts.php' operates on entity 'AnalyticsReport' |
 | **CustomScript: duplicate_contacts.php** | `->` | **OSVCObject: CO** | Custom Script 'duplicate_contacts.php' operates on entity 'CO' |

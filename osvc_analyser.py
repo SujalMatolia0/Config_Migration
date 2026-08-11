@@ -723,8 +723,21 @@ def main():
 
     if not args.json_only:
         from src.output.markdown_generator import generate_report_markdown
+        from src.output.excel_workspace_generator import generate_workspaces_excel_report
 
         workspaces = components.get("workspaces", [])
+        if workspaces:
+            try:
+                ws_excel_path = os.path.join(output_dir, "OSVC_Workspaces_Layout_Mapping.xlsx")
+                generate_workspaces_excel_report(workspaces, ws_excel_path, all_components=components, include_overview=True)
+                print(f"Workspaces Excel Layout Mapping report written -> {ws_excel_path}")
+
+                ws_no_overview_path = os.path.join(output_dir, "OSVC_Workspaces_Layout_Mapping_No_Overview.xlsx")
+                generate_workspaces_excel_report(workspaces, ws_no_overview_path, all_components=components, include_overview=False)
+                print(f"Workspaces Excel (No Overview) report written -> {ws_no_overview_path}")
+            except Exception as e:
+                print(f"[WARNING] Could not generate Workspaces Excel report: {e}")
+
         multi = len(workspaces) > 1
 
         if not workspaces:

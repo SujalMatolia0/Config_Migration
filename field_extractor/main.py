@@ -115,8 +115,10 @@ def main():
     # 4. Write Excel files
     std_xlsx  = os.path.join(output_dir, "Standard_Objects.xlsx")
     cst_xlsx  = os.path.join(output_dir, "Custom_Objects.xlsx")
-    ws_xlsx   = os.path.join(output_dir, "Workspaces.xlsx")
-    comb_xlsx = os.path.join(output_dir, "Field_Catalog.xlsx")
+    ws_xlsx             = os.path.join(output_dir, "Workspaces.xlsx")
+    ws_no_ignored_xlsx  = os.path.join(output_dir, "Workspaces_No_Ignored.xlsx")
+    comb_xlsx           = os.path.join(output_dir, "Field_Catalog.xlsx")
+    comb_no_ignored_xlsx= os.path.join(output_dir, "Field_Catalog_No_Ignored.xlsx")
 
     # Separate standard objects and custom objects maps
     std_map = {k: v for k, v in objects_map.items() if '.' not in k}
@@ -124,17 +126,23 @@ def main():
 
     if std_map:
         write_objects_excel(std_map, std_xlsx)
-        print(f"[SUCCESS] Standard_Objects.xlsx -> {std_xlsx}")
+        print(f"[SUCCESS] Standard_Objects.xlsx          -> {std_xlsx}")
 
     if cst_map:
         write_objects_excel(cst_map, cst_xlsx)
-        print(f"[SUCCESS] Custom_Objects.xlsx   -> {cst_xlsx}")
+        print(f"[SUCCESS] Custom_Objects.xlsx            -> {cst_xlsx}")
 
-    write_workspaces_excel(parsed_workspaces, objects_map, ws_xlsx)
-    print(f"[SUCCESS] Workspaces.xlsx       -> {ws_xlsx}")
+    write_workspaces_excel(parsed_workspaces, objects_map, ws_xlsx, include_ignored_tab=True)
+    print(f"[SUCCESS] Workspaces.xlsx                -> {ws_xlsx}")
 
-    write_combined_excel(parsed_workspaces, objects_map, comb_xlsx)
-    print(f"[SUCCESS] Field_Catalog.xlsx    -> {comb_xlsx}")
+    write_workspaces_excel(parsed_workspaces, objects_map, ws_no_ignored_xlsx, include_ignored_tab=False)
+    print(f"[SUCCESS] Workspaces_No_Ignored.xlsx     -> {ws_no_ignored_xlsx}")
+
+    write_combined_excel(parsed_workspaces, objects_map, comb_xlsx, include_ignored_tab=True)
+    print(f"[SUCCESS] Field_Catalog.xlsx             -> {comb_xlsx}")
+
+    write_combined_excel(parsed_workspaces, objects_map, comb_no_ignored_xlsx, include_ignored_tab=False)
+    print(f"[SUCCESS] Field_Catalog_No_Ignored.xlsx  -> {comb_no_ignored_xlsx}")
 
     print("==========================================================================")
     print(f"Done. Reports written to: {output_dir}")

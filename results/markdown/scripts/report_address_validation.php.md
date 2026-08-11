@@ -23,7 +23,6 @@
 
 | Source Component | Linkage Direction | Target Component | Details / Context |
 | :--- | :---: | :--- | :--- |
-| **Workspace: Contact** | `->` | **CustomScript: address_validation.php** | Tab 'Address Validation' → Browser → Custom PHP Script (https://gcb.custhelp.com/cgi-bin/gcb.cfg/php/custom/address_validation.php) |
 | **CustomScript: address_validation.php** | `->` | **OSVCObject: Configuration** | Custom Script 'address_validation.php' operates on entity 'Configuration' |
 | **CustomScript: address_validation.php** | `->` | **OSVCObject: ConnectAPIErrorBase** | Custom Script 'address_validation.php' operates on entity 'ConnectAPIErrorBase' |
 | **CustomScript: duplicate_contacts.php** | `->` | **CustomScript: address_validation.php** | import/require: 'address_validation.php' |
@@ -59,9 +58,9 @@
 
 | Protocol | HTTP Method | Endpoint URL | Details |
 | --- | --- | --- | --- |
-| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/` | cURL POST/GET request |
 | REST / HTTP | `POST/GET` | `https://js.arcgis.com/4.20/esri/themes/light/main.css` | cURL POST/GET request |
+| REST / HTTP | `POST/GET` | `https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js` | cURL POST/GET request |
 
 ## Security & Risk Analysis
 
@@ -95,11 +94,11 @@ sequenceDiagram
   OSVC-->>Script: Return Data / Context
   Script->>OSVC: Validate Agent Session ID
   OSVC-->>Script: Return Data / Context
-  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
-  REST-->>Script: Return REST Response Payload
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/
   REST-->>Script: Return REST Response Payload
   Script->>REST: cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css
+  REST-->>Script: Return REST Response Payload
+  Script->>REST: cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
   REST-->>Script: Return REST Response Payload
   Script-->>Client: Return Script Execution Response
 ```

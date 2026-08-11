@@ -137,9 +137,11 @@ def parse_workspace_file(file_path, strict=False):
         for trigger in rule.findall(".//Trigger"):
             trig_type = trigger.get("Type")
             if trig_type:
-                trig_field = trigger.get("Field")  # e.g. on FieldValueChanged
+                trig_obj   = trigger.get("ObjectName")
+                trig_field = trigger.get("FieldName") or trigger.get("Field")
                 if trig_field:
-                    triggers.append(f"{trig_type} (Field: {trig_field})")
+                    full_field = f"{trig_obj}.{trig_field}" if trig_obj else trig_field
+                    triggers.append(f"{trig_type} ({full_field})")
                 else:
                     triggers.append(trig_type)
                 
@@ -303,20 +305,23 @@ def parse_workspace_file(file_path, strict=False):
                     "thumbnails_threshold": ri.get("ThumbnailsThreshold")
                 })
             
+        reports = []
         for rep in tab_elem.findall(".//Report"):
             if get_closest_tab(rep) == tab_elem:
                 rep_unk = capture_unknown(rep, KNOWN_RELATIONSHIP_ATTRS, KNOWN_RELATIONSHIP_CHILDREN, f"Tab: {tab_text} Report: {rep.get('AcId')}")
                 record_unknown(f"Tab: {tab_text} Report: {rep.get('AcId')}", rep_unk)
-                relationship_items.append({
-                    "item_type": "Report",
+                rep_id = rep.get("AcId") or rep.get("Id") or rep.get("SearchReportId") or ""
+                reports.append({
+                    "id": rep_id,
                     "ac_id": rep.get("AcId"),
-                    "id": rep.get("Id"),
+                    "search_report_id": rep.get("SearchReportId"),
+                    "show_row_count": rep.get("ShowRowCount"),
+                    "execute_on_new": rep.get("ExecuteOnNew", "False").lower() == "true",
+                    "delay_report_execution": rep.get("DelayReportExecution"),
+                    "filter_on_primary_key_only": rep.get("FilterOnPrimaryKeyOnly"),
+                    "refresh_report_on_data_change": rep.get("RefreshReportOnDataChange"),
                     "row": int(rep.get("Row", 0)) if rep.get("Row") else 0,
-                    "column": int(rep.get("Column", 0)) if rep.get("Column") else 0,
-                    "execute_on_new": rep.get("ExecuteOnNew", "True").lower() == "true",
-                    "show_read_transactions": True,
-                    "default_channel": None,
-                    "search_report_id": rep.get("SearchReportId")
+                    "column": int(rep.get("Column", 0)) if rep.get("Column") else 0
                 })
             
         browsers = []
@@ -421,8 +426,11 @@ def parse_workspace_file(file_path, strict=False):
                 })
 
         return {
+            "name": tab_text,
+            "label": tab_text,
             "text": tab_text,
             "id": tab_id,
+            "reports": reports,
             "relationship_items": relationship_items,
             "browsers": browsers,
             "add_in_items": add_in_items,

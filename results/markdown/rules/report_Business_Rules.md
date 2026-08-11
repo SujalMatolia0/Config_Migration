@@ -1,6 +1,6 @@
 # OSVC Business Rules Report (Object & Action-Type Reorganization)
 
-_Source: `Business_Rules.csv` — 1209 Business Rules organized across 2 Primary OSVC Objects_
+_Source: `Business_Rules.csv` — 1525 Business Rules organized across 2 Primary OSVC Objects_
 
 > [!NOTE]
 > **Object & Action-Type Architecture**: Rules are categorized **by Primary OSVC Object first** (`Incident`, `Contact`, `Organization`), then **sub-grouped by Action Type** (`SetField`, `TransitionState_Stop`, `CPMCall`, `FunctionCall`, etc.). Expand each object accordion below for sub-field flowcharts and rule tables.
@@ -9,8 +9,8 @@ _Source: `Business_Rules.csv` — 1209 Business Rules organized across 2 Primary
 
 | OSVC Object | Total Rules | Enabled | Disabled | Primary Action Breakdown | CSV Summary Export |
 |---|---|---|---|---|---|
-| **Incident** | 1066 | 934 | 132 | SetField: 2384, TransitionState_Stop: 385, CPMCall: 185, FunctionCall: 179 | `results/csv/rules/Incident_*.csv` |
-| **Contact** | 143 | 123 | 20 | SetField: 399, TransitionState_Stop: 90, Other: 21, CPMCall: 15 | `results/csv/rules/Contact_*.csv` |
+| **Incident** | 1369 | 1166 | 203 | SetField: 2795, TransitionState_Stop: 387, FunctionCall: 195, SendEmail: 189 | `results/csv/rules/Incident_*.csv` |
+| **Contact** | 156 | 136 | 20 | SetField: 411, TransitionState_Stop: 91, Other: 21, CPMCall: 15 | `results/csv/rules/Contact_*.csv` |
 
 ## 2. Business Rules System Architecture Flowchart
 The multi-tier architecture diagram below displays all Active Business Rule States at start, mapped to contained Functions & Rules, and their executed Action Types (with Color Coding Map Legend on the side):
@@ -26,178 +26,144 @@ graph LR
   classDef actOther fill:#64748b,stroke:#334155,color:#fff;
 
   subgraph Tier1_States ["1. States (Start)"]
-    ST_01_Initial_State["State: 01-Initial State"]:::stateNode
+    ST_01_Answer_Review["State: 01. Answer Review"]:::stateNode
+    ST_01_FAQ["State: 01. FAQ"]:::stateNode
+    ST_1_New["State: 1 - New"]:::stateNode
   end
 
   subgraph Tier2_Functions ["2. Functions & Rules"]
-    FN_01_Initial_State_01_CA_24hr_Auto_assign_Escalation["Rule/Func: 01-CA 24hr Auto assign Escalation"]:::funcNode
-    FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action["Rule/Func: 01-CA-Cancel my Order Call to Action"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_AAQ["Rule/Func: 01-CA-Inbound AAQ"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm["Rule/Func: 01-CA-Inbound Central Scheduling Cofirm"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord["Rule/Func: 01-CA-Inbound Central Scheduling New ord"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_General_Email["Rule/Func: 01-CA-Inbound General Email"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_VC_Disputes["Rule/Func: 01-CA-Inbound VC Disputes"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ["Rule/Func: 01-CA-Inbound Vendor Portal AAQ"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba["Rule/Func: 01-CA-Inbound Vendor Portal AAQ - Feedba"]:::funcNode
-    FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email["Rule/Func: 01-CA-Inbound Vendor Portal AAQ - Send Email"]:::funcNode
-    FN_01_Initial_State_01_CA_Pricing["Rule/Func: 01-CA- Pricing"]:::funcNode
-    FN_01_Initial_State_01_CA_Q_A_Import["Rule/Func: 01-CA-Q&A Import"]:::funcNode
-    FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action["Rule/Func: 01-CA-Ship my Order Call to Action"]:::funcNode
-    FN_01_Initial_State_01_CA_WOW_Case["Rule/Func: 01-CA-WOW Case"]:::funcNode
-    FN_01_Initial_State_01_G_CA_Auto_Reply["Rule/Func: 01-G-CA-Auto Reply"]:::funcNode
-    FN_01_Initial_State_01_G_CA_Inbound_Call["Rule/Func: 01-G-CA-Inbound Call"]:::funcNode
-    FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM["Rule/Func: 01-G -PracticeHub - Vet Support Email VM"]:::funcNode
-    FN_01_Initial_State_01_G_Rx_Voicemail["Rule/Func: 01-G -Rx Voicemail"]:::funcNode
-    FN_01_Initial_State_01_Object_Detail_Logging["Rule/Func: 01-Object Detail Logging"]:::funcNode
-    FN_01_Initial_State_01_RxCS_Follow_Up_new_["Rule/Func: 01-RxCS Follow-Up [new]"]:::funcNode
-    FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing["Rule/Func: 01-Rx Pharmacy Initial Routing"]:::funcNode
-    FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_new_["Rule/Func: 01-Rx Pharmacy Initial Routing [new]"]:::funcNode
-    FN_01_Initial_State_01_Validate_Deprecated_Mailboxes["Rule/Func: 01 - Validate Deprecated Mailboxes"]:::funcNode
-    FN_01_Initial_State_Nick_test["Rule/Func: Nick test"]:::funcNode
-    FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT["Rule/Func: Temp Rule to set 'ppauto' emails to Solved for UAT"]:::funcNode
+    FN_01_Answer_Review_Answer_Review_30["Rule/Func: Answer Review 30"]:::funcNode
+    FN_01_Answer_Review_Answer_Review_30_action["Rule/Func: Answer Review 30 action"]:::funcNode
+    FN_01_Answer_Review_Answer_Review_60["Rule/Func: Answer Review 60"]:::funcNode
+    FN_01_Answer_Review_Answer_Review_60_action["Rule/Func: Answer Review 60 action"]:::funcNode
+    FN_01_FAQ_Approved_Content_for_DTMO["Rule/Func: Approved Content for DTMO"]:::funcNode
+    FN_01_FAQ_Approved_Content_for_TAC["Rule/Func: Approved Content for TAC"]:::funcNode
+    FN_01_FAQ_Proposed_Content_for_TAC["Rule/Func: Proposed Content for TAC"]:::funcNode
+    FN_01_FAQ_Review_Notice_trigger["Rule/Func: Review Notice trigger"]:::funcNode
+    FN_01_FAQ_Review_Proposed_Content_for_DTMO["Rule/Func: Review Proposed Content for DTMO"]:::funcNode
+    FN_01_FAQ_Set_60_day_notice["Rule/Func: Set 60 day notice"]:::funcNode
+    FN_01_FAQ_Subject_and_Category_not_set["Rule/Func: Subject and Category not set"]:::funcNode
+    FN_01_FAQ_TAC_Analyst_View["Rule/Func: TAC Analyst View"]:::funcNode
+    FN_01_FAQ_TAC_FAQ_Public["Rule/Func: TAC FAQ  Public"]:::funcNode
+    FN_01_FAQ_TAC_Review_FAQ["Rule/Func: TAC Review FAQ"]:::funcNode
+    FN_1_New_Answer_Feedback["Rule/Func: Answer Feedback"]:::funcNode
+    FN_1_New_CBA_email_In_Rule["Rule/Func: CBA email In Rule"]:::funcNode
+    FN_1_New_Incident_Type_CHAT["Rule/Func: Incident Type = CHAT"]:::funcNode
+    FN_1_New_Incident_Type_Self_Support["Rule/Func: Incident Type = Self Support"]:::funcNode
+    FN_1_New_New_email_In_Rule["Rule/Func: New email In Rule"]:::funcNode
+    FN_1_New_No_Email_In_Rule["Rule/Func: No Email In Rule"]:::funcNode
+    FN_1_New_Notification_for_Tickets["Rule/Func: Notification for Tickets"]:::funcNode
+    FN_1_New_Notification_for_Tickets_CHAT["Rule/Func: Notification for Tickets CHAT"]:::funcNode
+    FN_1_New_Send_Email_Response["Rule/Func: Send Email Response"]:::funcNode
+    FN_1_New_Send_Email_Response2["Rule/Func: Send Email Response2"]:::funcNode
+    FN_1_New_Set_Subject_for_CHAT_Tickets["Rule/Func: Set Subject for CHAT Tickets"]:::funcNode
   end
 
   subgraph Tier3_Actions ["3. Related Action Types"]
-    ACT_FN_01_Initial_State_01_CA_24hr_Auto_assign_Escalation_FunctionCall["FunctionCall: Call Function F67-CA 24..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_SetField["SetField: Set Field Incidents > C... (5x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_CA_Inbound_AAQ_FunctionCall["FunctionCall: Call Function F56-CA-Ch..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_AAQ_SetField["SetField: Set Field Custom Field ... (2x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_Escalation["Escalation: Escalate to CA-Carrier ..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_FunctionCall["FunctionCall: Call Function F55-CA-Ce..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_SetField["SetField: Set Field Incidents > Q... (4x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_FunctionCall["FunctionCall: Call Function F55-CA-Ce..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_SetField["SetField: Set Field Incidents > Q... (3x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_General_Email_FunctionCall["FunctionCall: Call Function F50-CA-Em..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_General_Email_SetField["SetField: Set Field Custom Field ..."]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_VC_Disputes_SetField["SetField: Set Field Custom Field ... (5x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_VC_Disputes_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_FunctionCall["FunctionCall: Call Function F57-CA-Ve..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_SetField["SetField: Set Field Incidents > M..."]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_FunctionCall["FunctionCall: Call Function F57-CA-Ve..."]:::actFunc
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_SetField["SetField: Set Field Incidents > M..."]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Pricing_SetField["SetField: Set Field Incidents > Q... (2x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Pricing_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_CA_Q_A_Import_SetField["SetField: Set Field Custom Field ... (3x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Q_A_Import_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
-    ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_SetField["SetField: Set Field Incidents > C... (6x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_CA_WOW_Case_SetField["SetField: Set Field Incidents > A..."]:::actSetField
-    ACT_FN_01_Initial_State_01_CA_WOW_Case_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_G_CA_Auto_Reply_SetField["SetField: Set Field Custom Field ... (7x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_G_CA_Auto_Reply_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_G_CA_Inbound_Call_FunctionCall["FunctionCall: Call Function F51-CA-Ca..."]:::actFunc
-    ACT_FN_01_Initial_State_01_G_CA_Inbound_Call_SetField["SetField: Set Field Incidents > I..."]:::actSetField
-    ACT_FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM_SetField["SetField: Set Field Incidents > Q..."]:::actSetField
-    ACT_FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_G_Rx_Voicemail_SetField["SetField: Set Field Incidents > Q..."]:::actSetField
-    ACT_FN_01_Initial_State_01_G_Rx_Voicemail_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_Object_Detail_Logging_FunctionCall["FunctionCall: Call Function F34-US & ..."]:::actFunc
-    ACT_FN_01_Initial_State_01_RxCS_Follow_Up_new__SetField["SetField: Set Field Incidents > Q... (6x)"]:::actSetField
-    ACT_FN_01_Initial_State_01_RxCS_Follow_Up_new__TransitionState_Continue["TransitionState_Continue: Transition State And Co..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_TransitionState_Continue["TransitionState_Continue: Transition State And Co..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_new__TransitionState_Continue["TransitionState_Continue: Transition State And Co..."]:::actStateTrans
-    ACT_FN_01_Initial_State_01_Validate_Deprecated_Mailboxes_CPMCall["CPMCall: Execute Object Event Ha..."]:::actCpm
-    ACT_FN_01_Initial_State_01_Validate_Deprecated_Mailboxes_StopProcessing["StopProcessing: Stop Processing"]:::actOther
-    ACT_FN_01_Initial_State_Nick_test_SendMarketingEmail["SendMarketingEmail: Send Marketing Email CV..."]:::actOther
-    ACT_FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT_SetField["SetField: Set Field Incidents > S..."]:::actSetField
-    ACT_FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT_TransitionState_Stop["TransitionState_Stop: Transition State And St..."]:::actStateTrans
+    ACT_FN_01_Answer_Review_Answer_Review_30_Escalation["Escalation: Escalate to 30 day noti..."]:::actOther
+    ACT_FN_01_Answer_Review_Answer_Review_30_action_ClearEscalation["ClearEscalation: Clear Escalation"]:::actOther
+    ACT_FN_01_Answer_Review_Answer_Review_30_action_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_Answer_Review_Answer_Review_60_Escalation["Escalation: Escalate to 60 day noti..."]:::actOther
+    ACT_FN_01_Answer_Review_Answer_Review_60_action_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_Answer_Review_Answer_Review_60_action_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_01_FAQ_Approved_Content_for_DTMO_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_Approved_Content_for_TAC_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_Proposed_Content_for_TAC_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_Review_Notice_trigger_FunctionCall["FunctionCall: Call Function"]:::actFunc
+    ACT_FN_01_FAQ_Review_Notice_trigger_Other["Other: Answer Review"]:::actOther
+    ACT_FN_01_FAQ_Review_Proposed_Content_for_DTMO_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_Set_60_day_notice_ClearEscalation["ClearEscalation: Clear Escalation"]:::actOther
+    ACT_FN_01_FAQ_Set_60_day_notice_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_01_FAQ_Subject_and_Category_not_set_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_Subject_and_Category_not_set_SetField["SetField: Set Field Answers > Sta..."]:::actSetField
+    ACT_FN_01_FAQ_TAC_Analyst_View_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_TAC_FAQ_Public_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_01_FAQ_TAC_FAQ_Public_Other["Other: Send Notification to An..."]:::actOther
+    ACT_FN_01_FAQ_TAC_Review_FAQ_Escalation["Escalation: Send Escalation Notific..."]:::actOther
+    ACT_FN_1_New_Answer_Feedback_Other["Other: Assign Incident To Staf..."]:::actOther
+    ACT_FN_1_New_Answer_Feedback_SetField["SetField: Set Field Incidents > S... (2x)"]:::actSetField
+    ACT_FN_1_New_CBA_email_In_Rule_SetField["SetField: Set Field Custom Field ... (5x)"]:::actSetField
+    ACT_FN_1_New_Incident_Type_CHAT_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_1_New_Incident_Type_Self_Support_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_1_New_New_email_In_Rule_SetField["SetField: Set Field Custom Field ..."]:::actSetField
+    ACT_FN_1_New_No_Email_In_Rule_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_1_New_No_Email_In_Rule_Other["Other: Do Not Create Incident"]:::actOther
+    ACT_FN_1_New_No_Email_In_Rule_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_1_New_No_Email_In_Rule_StopProcessing["StopProcessing: Stop Processing"]:::actOther
+    ACT_FN_1_New_Notification_for_Tickets_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_1_New_Notification_for_Tickets_CHAT_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_1_New_Notification_for_Tickets_CHAT_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_1_New_Notification_for_Tickets_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_1_New_Send_Email_Response2_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_1_New_Send_Email_Response2_SendEmail["SendEmail: Send Email Response to ..."]:::actOther
+    ACT_FN_1_New_Send_Email_Response_AppendTemplate["AppendTemplate: Append Response Templat..."]:::actOther
+    ACT_FN_1_New_Set_Subject_for_CHAT_Tickets_SetField["SetField: Set Field Custom Field ... (2x)"]:::actSetField
   end
 
-  LEG_ST ~~~ ST_01_Initial_State
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_24hr_Auto_assign_Escalation
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_AAQ
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_General_Email
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_VC_Disputes
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Pricing
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Q_A_Import
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_CA_WOW_Case
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_G_CA_Auto_Reply
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_G_CA_Inbound_Call
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_G_Rx_Voicemail
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_Object_Detail_Logging
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_RxCS_Follow_Up_new_
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_new_
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_01_Validate_Deprecated_Mailboxes
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_Nick_test
-  ST_01_Initial_State -->|"contains"| FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT
-  FN_01_Initial_State_01_CA_24hr_Auto_assign_Escalation -->|"action"| ACT_FN_01_Initial_State_01_CA_24hr_Auto_assign_Escalation_FunctionCall
-  FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_AppendTemplate
-  FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_CPMCall
-  FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_SetField
-  FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Cancel_my_Order_Call_to_Action_TransitionState_Stop
-  FN_01_Initial_State_01_CA_Inbound_AAQ -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_AAQ_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_AAQ -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_AAQ_SetField
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_Escalation
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_SendEmail
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_Cofirm_SetField
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_AppendTemplate
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_SendEmail
-  FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Central_Scheduling_New_ord_SetField
-  FN_01_Initial_State_01_CA_Inbound_General_Email -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_General_Email_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_General_Email -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_General_Email_SetField
-  FN_01_Initial_State_01_CA_Inbound_VC_Disputes -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_VC_Disputes_SetField
-  FN_01_Initial_State_01_CA_Inbound_VC_Disputes -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_VC_Disputes_TransitionState_Stop
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_CPMCall
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_SetField
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_AppendTemplate
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_FunctionCall
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_SendEmail
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Feedba_SetField
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email_AppendTemplate
-  FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email -->|"action"| ACT_FN_01_Initial_State_01_CA_Inbound_Vendor_Portal_AAQ_Send_Email_SendEmail
-  FN_01_Initial_State_01_CA_Pricing -->|"action"| ACT_FN_01_Initial_State_01_CA_Pricing_SetField
-  FN_01_Initial_State_01_CA_Pricing -->|"action"| ACT_FN_01_Initial_State_01_CA_Pricing_TransitionState_Stop
-  FN_01_Initial_State_01_CA_Q_A_Import -->|"action"| ACT_FN_01_Initial_State_01_CA_Q_A_Import_SetField
-  FN_01_Initial_State_01_CA_Q_A_Import -->|"action"| ACT_FN_01_Initial_State_01_CA_Q_A_Import_TransitionState_Stop
-  FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_AppendTemplate
-  FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_CPMCall
-  FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_SetField
-  FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action -->|"action"| ACT_FN_01_Initial_State_01_CA_Ship_my_Order_Call_to_Action_TransitionState_Stop
-  FN_01_Initial_State_01_CA_WOW_Case -->|"action"| ACT_FN_01_Initial_State_01_CA_WOW_Case_SetField
-  FN_01_Initial_State_01_CA_WOW_Case -->|"action"| ACT_FN_01_Initial_State_01_CA_WOW_Case_TransitionState_Stop
-  FN_01_Initial_State_01_G_CA_Auto_Reply -->|"action"| ACT_FN_01_Initial_State_01_G_CA_Auto_Reply_SetField
-  FN_01_Initial_State_01_G_CA_Auto_Reply -->|"action"| ACT_FN_01_Initial_State_01_G_CA_Auto_Reply_TransitionState_Stop
-  FN_01_Initial_State_01_G_CA_Inbound_Call -->|"action"| ACT_FN_01_Initial_State_01_G_CA_Inbound_Call_FunctionCall
-  FN_01_Initial_State_01_G_CA_Inbound_Call -->|"action"| ACT_FN_01_Initial_State_01_G_CA_Inbound_Call_SetField
-  FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM -->|"action"| ACT_FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM_SetField
-  FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM -->|"action"| ACT_FN_01_Initial_State_01_G_PracticeHub_Vet_Support_Email_VM_TransitionState_Stop
-  FN_01_Initial_State_01_G_Rx_Voicemail -->|"action"| ACT_FN_01_Initial_State_01_G_Rx_Voicemail_SetField
-  FN_01_Initial_State_01_G_Rx_Voicemail -->|"action"| ACT_FN_01_Initial_State_01_G_Rx_Voicemail_TransitionState_Stop
-  FN_01_Initial_State_01_Object_Detail_Logging -->|"action"| ACT_FN_01_Initial_State_01_Object_Detail_Logging_FunctionCall
-  FN_01_Initial_State_01_RxCS_Follow_Up_new_ -->|"action"| ACT_FN_01_Initial_State_01_RxCS_Follow_Up_new__SetField
-  FN_01_Initial_State_01_RxCS_Follow_Up_new_ -->|"action"| ACT_FN_01_Initial_State_01_RxCS_Follow_Up_new__TransitionState_Continue
-  FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing -->|"action"| ACT_FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_TransitionState_Continue
-  FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_new_ -->|"action"| ACT_FN_01_Initial_State_01_Rx_Pharmacy_Initial_Routing_new__TransitionState_Continue
-  FN_01_Initial_State_01_Validate_Deprecated_Mailboxes -->|"action"| ACT_FN_01_Initial_State_01_Validate_Deprecated_Mailboxes_CPMCall
-  FN_01_Initial_State_01_Validate_Deprecated_Mailboxes -->|"action"| ACT_FN_01_Initial_State_01_Validate_Deprecated_Mailboxes_StopProcessing
-  FN_01_Initial_State_Nick_test -->|"action"| ACT_FN_01_Initial_State_Nick_test_SendMarketingEmail
-  FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT -->|"action"| ACT_FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT_SetField
-  FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT -->|"action"| ACT_FN_01_Initial_State_Temp_Rule_to_set_ppauto_emails_to_Solved_for_UAT_TransitionState_Stop
+  LEG_ST ~~~ ST_01_FAQ
+  ST_01_Answer_Review -->|"contains"| FN_01_Answer_Review_Answer_Review_30
+  ST_01_Answer_Review -->|"contains"| FN_01_Answer_Review_Answer_Review_30_action
+  ST_01_Answer_Review -->|"contains"| FN_01_Answer_Review_Answer_Review_60
+  ST_01_Answer_Review -->|"contains"| FN_01_Answer_Review_Answer_Review_60_action
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Approved_Content_for_DTMO
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Approved_Content_for_TAC
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Proposed_Content_for_TAC
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Review_Notice_trigger
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Review_Proposed_Content_for_DTMO
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Set_60_day_notice
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_Subject_and_Category_not_set
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_TAC_Analyst_View
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_TAC_FAQ_Public
+  ST_01_FAQ -->|"contains"| FN_01_FAQ_TAC_Review_FAQ
+  ST_1_New -->|"contains"| FN_1_New_Answer_Feedback
+  ST_1_New -->|"contains"| FN_1_New_CBA_email_In_Rule
+  ST_1_New -->|"contains"| FN_1_New_Incident_Type_CHAT
+  ST_1_New -->|"contains"| FN_1_New_Incident_Type_Self_Support
+  ST_1_New -->|"contains"| FN_1_New_New_email_In_Rule
+  ST_1_New -->|"contains"| FN_1_New_No_Email_In_Rule
+  ST_1_New -->|"contains"| FN_1_New_Notification_for_Tickets
+  ST_1_New -->|"contains"| FN_1_New_Notification_for_Tickets_CHAT
+  ST_1_New -->|"contains"| FN_1_New_Send_Email_Response
+  ST_1_New -->|"contains"| FN_1_New_Send_Email_Response2
+  ST_1_New -->|"contains"| FN_1_New_Set_Subject_for_CHAT_Tickets
+  FN_01_Answer_Review_Answer_Review_30 -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_30_Escalation
+  FN_01_Answer_Review_Answer_Review_30_action -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_30_action_ClearEscalation
+  FN_01_Answer_Review_Answer_Review_30_action -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_30_action_Escalation
+  FN_01_Answer_Review_Answer_Review_60 -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_60_Escalation
+  FN_01_Answer_Review_Answer_Review_60_action -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_60_action_Escalation
+  FN_01_Answer_Review_Answer_Review_60_action -->|"action"| ACT_FN_01_Answer_Review_Answer_Review_60_action_SetField
+  FN_01_FAQ_Approved_Content_for_DTMO -->|"action"| ACT_FN_01_FAQ_Approved_Content_for_DTMO_Escalation
+  FN_01_FAQ_Approved_Content_for_TAC -->|"action"| ACT_FN_01_FAQ_Approved_Content_for_TAC_Escalation
+  FN_01_FAQ_Proposed_Content_for_TAC -->|"action"| ACT_FN_01_FAQ_Proposed_Content_for_TAC_Escalation
+  FN_01_FAQ_Review_Notice_trigger -->|"action"| ACT_FN_01_FAQ_Review_Notice_trigger_FunctionCall
+  FN_01_FAQ_Review_Notice_trigger -->|"action"| ACT_FN_01_FAQ_Review_Notice_trigger_Other
+  FN_01_FAQ_Review_Proposed_Content_for_DTMO -->|"action"| ACT_FN_01_FAQ_Review_Proposed_Content_for_DTMO_Escalation
+  FN_01_FAQ_Set_60_day_notice -->|"action"| ACT_FN_01_FAQ_Set_60_day_notice_ClearEscalation
+  FN_01_FAQ_Set_60_day_notice -->|"action"| ACT_FN_01_FAQ_Set_60_day_notice_SetField
+  FN_01_FAQ_Subject_and_Category_not_set -->|"action"| ACT_FN_01_FAQ_Subject_and_Category_not_set_Escalation
+  FN_01_FAQ_Subject_and_Category_not_set -->|"action"| ACT_FN_01_FAQ_Subject_and_Category_not_set_SetField
+  FN_01_FAQ_TAC_Analyst_View -->|"action"| ACT_FN_01_FAQ_TAC_Analyst_View_Escalation
+  FN_01_FAQ_TAC_FAQ_Public -->|"action"| ACT_FN_01_FAQ_TAC_FAQ_Public_Escalation
+  FN_01_FAQ_TAC_FAQ_Public -->|"action"| ACT_FN_01_FAQ_TAC_FAQ_Public_Other
+  FN_01_FAQ_TAC_Review_FAQ -->|"action"| ACT_FN_01_FAQ_TAC_Review_FAQ_Escalation
+  FN_1_New_Answer_Feedback -->|"action"| ACT_FN_1_New_Answer_Feedback_Other
+  FN_1_New_Answer_Feedback -->|"action"| ACT_FN_1_New_Answer_Feedback_SetField
+  FN_1_New_CBA_email_In_Rule -->|"action"| ACT_FN_1_New_CBA_email_In_Rule_SetField
+  FN_1_New_Incident_Type_CHAT -->|"action"| ACT_FN_1_New_Incident_Type_CHAT_SetField
+  FN_1_New_Incident_Type_Self_Support -->|"action"| ACT_FN_1_New_Incident_Type_Self_Support_SetField
+  FN_1_New_New_email_In_Rule -->|"action"| ACT_FN_1_New_New_email_In_Rule_SetField
+  FN_1_New_No_Email_In_Rule -->|"action"| ACT_FN_1_New_No_Email_In_Rule_AppendTemplate
+  FN_1_New_No_Email_In_Rule -->|"action"| ACT_FN_1_New_No_Email_In_Rule_Other
+  FN_1_New_No_Email_In_Rule -->|"action"| ACT_FN_1_New_No_Email_In_Rule_SendEmail
+  FN_1_New_No_Email_In_Rule -->|"action"| ACT_FN_1_New_No_Email_In_Rule_StopProcessing
+  FN_1_New_Notification_for_Tickets -->|"action"| ACT_FN_1_New_Notification_for_Tickets_AppendTemplate
+  FN_1_New_Notification_for_Tickets -->|"action"| ACT_FN_1_New_Notification_for_Tickets_SendEmail
+  FN_1_New_Notification_for_Tickets_CHAT -->|"action"| ACT_FN_1_New_Notification_for_Tickets_CHAT_AppendTemplate
+  FN_1_New_Notification_for_Tickets_CHAT -->|"action"| ACT_FN_1_New_Notification_for_Tickets_CHAT_SendEmail
+  FN_1_New_Send_Email_Response -->|"action"| ACT_FN_1_New_Send_Email_Response_AppendTemplate
+  FN_1_New_Send_Email_Response2 -->|"action"| ACT_FN_1_New_Send_Email_Response2_AppendTemplate
+  FN_1_New_Send_Email_Response2 -->|"action"| ACT_FN_1_New_Send_Email_Response2_SendEmail
+  FN_1_New_Set_Subject_for_CHAT_Tickets -->|"action"| ACT_FN_1_New_Set_Subject_for_CHAT_Tickets_SetField
 ```
 
 ## 3. Business Rules Breakdown by Object & Action Type
@@ -208,7 +174,7 @@ graph LR
 </div>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;">Object: Incident (934 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;">Object: Incident (1166 Active Rules)</summary>
 
 #### Incident Sub-Field Lifecycle Flowchart
 ```mermaid
@@ -230,12 +196,171 @@ graph LR
 ```
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SetField (670 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SetField (829 Active Rules)</summary>
 
 Export CSV: `Incident_SetField.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 01. FAQ | Set 60 day notice | Active | If (Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Set Field Custom Field > Review Notification date increment by +305 Days Exactly |
+| 01. FAQ | Subject and Category not set | Active | If (Answers > Subject  equals  Unspecified  AND  Answers > Category  equals  Unspecified  AND  Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Set Field Answers > Status assign as Review |
+| 01. Answer Review | Answer Review 60 action | Active | If (Answers > Escalation Level  equals  60 day notice  AND  Answers > Previous Escalation Level  not equals  30 day notice, 60 day notice) | Set Field Custom Field > Review Notification date increment by +30 Days Exactly |
+| 1 - New | Incident Type = Self Support | Active | If (Incidents > Source  equals  Create a Ticket, Feedback on Answers, SmartAssistant on Ask A Question) | Set Field Custom Field > Incident Type assign as Self-Support |
+| 1 - New | Incident Type = CHAT | Active | If (Incidents > Source  equals  Live Chat, Web Console Live Chat) | Set Field Custom Field > Incident Type assign as Chat |
+| 1 - New | Answer Feedback | Active | If (Incidents > Source  equals  Feedback on Answers) | Set Field Incidents > Subject assign as Answer Feedback \| Set Field Custom Field > Incident Type assign as WebFeedback |
+| 1 - New | Set Subject for CHAT Tickets | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Custom Field > Are you the Traveler  equals  Yes) | Set Field Custom Field > Traveler Last Name equal to the value of Custom Field > Chat Last Name \| Set Field Custom Field > Traveler First Name equal to the value of Custom Field > Chat First Name |
+| 2 - In Progress | Severity Check on Updates | Active | If (Incidents > Severity  equals  Serious, Critical  AND  Incidents > Severity  is modified this edit    AND  Incidents > Queue  not equals  TAC-MGR) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 2 - In Progress | Severity 1 Notification | Active | If (Incidents > Severity  equals  Critical  AND  Incidents > Severity  is modified this edit    AND  Incidents > Status  equals  New, Reassigned, Client Update, Unresolved Contact, Unresolved TAC, Unresolved DTMO, Unresolved PMO, Unresolved O&S, Unresolved CTO, Unresolved DFAS/GEX, Unresolved Other, Unresolved PPT, Unresolved SPR, Unresolved CIR, Unresolved SCR, Resolved SCR/SPR , CTO Verify, Waiting Confirmation, Closed, Unspecified) | Set Field Custom Field > Severity Hold assign as Critical |
+| 2 - In Progress | Severity 1 Notification down Graded mino | Active | If (Incidents > Severity  equals  Minor, Training, Other, Unspecified  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Set Field Custom Field > Severity Hold assign as |
+| 2 - In Progress | Severity 1 Notification down Graded Mode | Active | If (Incidents > Severity  equals  Moderate  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Set Field Custom Field > Severity Hold assign as |
+| 2 - In Progress | Severity 1 Notification down Graded Seri | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Set Field Custom Field > Severity Hold assign as |
+| 2 - In Progress | Severity 2 Notification down Graded Mino | Active | If (Incidents > Severity  equals  Minor, Training, Other, Unspecified  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Serious) | Set Field Custom Field > Severity Hold assign as |
+| 2 - In Progress | Severity 2 Notification down Graded Mode | Active | If (Incidents > Severity  equals  Moderate  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Serious) | Set Field Custom Field > Severity Hold assign as |
+| 2 - In Progress | Severity 2 Notification | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Severity  is modified this edit    AND  Incidents > Status  equals  New, Reassigned, Client Update, Unresolved Contact, Unresolved TAC, Unresolved DTMO, Unresolved PMO, Unresolved O&S, Unresolved CTO, Unresolved DFAS/GEX, Unresolved Other, Unresolved PPT, Unresolved SPR, Unresolved CIR, Unresolved SCR, Resolved SCR/SPR , CTO Verify, Waiting Confirmation, Closed, Unspecified) | Set Field Custom Field > Severity Hold assign as Serious |
+| 2 - In Progress | TAC Created ticket | Active | If (Custom Field > First Assign TAC  is null    AND  Incidents > Created By  equals  Ali D, Amy Garcia, Angela N, null, null, null, Arihanna G, null, null, Ashton F, Billy T, null, null, null, Carolina R, null, null, Daniel B, null, null, null, null, null, null, Eddie M, Elaine R, null, Erin T, Evan T, Ernest S, null, Frank P, null, Greg T, Janice Young, null, null, Joann S, null, Jonette P, null, Keith M, Kelly G, null, Kiera F, Kim S, Kimberly B, null, null, null, Luis M, null, Mari A, Maricel M, Mary C, null, null, null, null, Mike S, null, Patti S, null, Ron D, Rory Jones, Sandy L, Soyini L, null, null, null, Tamika B, null, Unique T, Yevgeniy P, null) | Set Field Custom Field > First Assign TAC equal to the value of Now |
+| 2 - In Progress | PPT to related tickte | Active | If (Custom Field > PPT Number  is modified this edit    AND  Custom Field > PPT Number  is not null) | Set Field Custom Field > Related Ticket equal to the value of Custom Field > PPT Number |
+| 2 - In Progress | O&S-APP queue email | Active | If (Incidents > Queue  equals  O and S-APP  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | O&S-CTO queue email | Active | If (Incidents > Queue  equals  O and S-CTO  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | O&S-Reports queue email | Active | If (Incidents > Queue  equals  O and S-REPORTS  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | O&S-Sustainment queue email | Active | If (Incidents > Queue  equals  O and S-SUSTAINMENT  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | O&S-Inbound queue email | Active | If (Incidents > Queue  equals  O and S-Inbound  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | O&S-Soft Launch queue email | Active | If (Incidents > Queue  equals  O and S-SOFT LAUNCH  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | PMO queue email | Active | If (Incidents > Queue  equals  PMO-DTS  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | PMO-Release | Active | If (Incidents > Queue  equals  PMO-Release Verify  AND  Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | DTMO-Travel Certificate | Active | If (Incidents > Queue  equals  DTMO - Travel Certificate  AND  Incidents > Queue  is modified this edit) | Set Field Incidents > Assigned assign as John Schrader |
+| 2 - In Progress | TMS-Outage queue email | Active | If (Incidents > Queue  equals  TMS Outage  AND  Incidents > Queue  is modified this edit) | Set Field Incidents > Assigned assign as Larry Briggs |
+| 2 - In Progress | Set Assigned Date | Active | If (Incidents > Queue  is modified this edit) | Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 2 - In Progress | Response Date | Active | If (Incidents > Staff thread  is not null) | Set Field Custom Field > Response assign as Yes |
+| 2 - In Progress | Ticket Due Date | Active | If (Incidents > Severity  equals  Minor, Moderate, Serious, Critical, Training, Unspecified) | Set Field Custom Field > Ticket Due Date equal to the value of Incidents > Time Created \| Set Field Custom Field > Response Due Date equal to the value of Incidents > Time Created |
+| 2 - In Progress | Incident Site | Active | If (Custom Field > Incident Site  is null) | Set Field Custom Field > Incident Site equal to the value of Custom Field > Client Site |
+| 2 - In Progress | Incident Service/Agency | Active | If (Custom Field > Incident S/A  is null) | Set Field Custom Field > Incident S/A equal to the value of Custom Field > Service/Agency |
+| 2 - In Progress | DTMO Group Assign New | Active | If (Incidents > Group  equals  Unspecified  AND  Custom Field > First Assign DTMO  is null    AND  Incidents > Queue  equals  DTMO-GEN, DTMO-TASK, DTMO-POLICY, DTMO-INITIATIVES, DTMO-TRAVEL CARD, DTMO-FIN, DTMO-CBA, DTMO-CTO, DTMO-Debit Memo, DTMO-TRAINING, DTMO-Release Verify, DTMO-REPORTS, DTMO-CAR/TRUCK/BUS, DTMO-WEB, DTMO-TMS, DTMO-ROA) | Set Field Incidents > Assigned assign as DTMO |
+| 2 - In Progress | O&S Group Assign New | Active | If (Incidents > Group  equals  Unspecified  AND  Incidents > Queue  equals  O and S-APP, O and S-CTO, O and S-REPORTS, O and S-SOFT LAUNCH, O and S-SUSTAINMENT, O and S-Inbound) | Set Field Incidents > Assigned assign as DTMO |
+| 2 - In Progress | PMO Group Assign New | Active | If (Incidents > Group  equals  Unspecified  AND  Incidents > Queue  equals  PMO-DTS, PMO-Release Verify) | Set Field Incidents > Assigned assign as DTMO |
+| 2 - In Progress | Escalated - DTMO | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Testing) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated DTMO equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > First Assign DTMO equal to the value of Now |
+| 2 - In Progress | Escalated - DTMO Test Queue | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Subject  equals  Testing) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated DTMO equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > First Assign DTMO equal to the value of Now |
+| 2 - In Progress | Escalated - DTMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved DTMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Group  is not modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated DTMO equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - DTMO - TAC analyst | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  Yes  AND  Incidents > Status  equals  Unresolved DTMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Group  is not modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated DTMO equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - DTMO analyst reponse | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  Yes) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated DTMO equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > First Assign DTMO equal to the value of Now |
+| 2 - In Progress | Re-Escalated - DTMO | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  Yes) | Set Field Custom Field > Escalated DTMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > Last Escalate DTMO  equal to the value of Now \| Set Field Incidents > Disposition assign as DTMO \| Set Field Custom Field > Reassign DTMO equal to the value of Now |
+| 2 - In Progress | Escalated - O&S | Active | If (Incidents > Group  equals  O&S  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is modified this edit    AND  Incidents > Response Sent  equals  No) | Set Field Custom Field > Escalated OS assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalate OS equal to the value of Now \| Set Field Incidents > Disposition assign as O&S \| Set Field Custom Field > First Assign OS equal to the value of Now |
+| 2 - In Progress | Escalated - O&S -TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is not modified this edit    AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved O&S  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated OS assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalate OS equal to the value of Now \| Set Field Incidents > Disposition assign as O&S \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - O&S -TAC analyst | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is not modified this edit    AND  Incidents > Response Sent  equals  Yes  AND  Incidents > Status  equals  Unresolved O&S  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated OS assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalate OS equal to the value of Now \| Set Field Incidents > Disposition assign as O&S \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - O&S analyst response | Active | If (Incidents > Group  equals  O&S  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is modified this edit    AND  Incidents > Response Sent  equals  Yes) | Set Field Custom Field > Escalated OS assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalate OS equal to the value of Now \| Set Field Incidents > Disposition assign as O&S \| Set Field Custom Field > First Assign OS equal to the value of Now |
+| 2 - In Progress | Re-Escalated - O&S | Active | If (Incidents > Group  equals  O&S  AND  Custom Field > Escalated OS  equals  Yes  AND  Incidents > Group  is modified this edit    AND  Incidents > Previous Group  not equals  O&S  AND  Custom Field > First Assign OS  is not modified this edit) | Set Field Custom Field > Escalated OS assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > Last Ecalated OS equal to the value of Now \| Set Field Incidents > Disposition assign as O&S \| Set Field Custom Field > Reassign OS equal to the value of Now |
+| 2 - In Progress | Escalated - PMO | Active | If (Incidents > Group  equals  PMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No) | Set Field Custom Field > Escalated PMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated PMO equal to the value of Now \| Set Field Incidents > Disposition assign as PMO \| Set Field Custom Field > First Assign PMO equal to the value of Now |
+| 2 - In Progress | Escalated - PMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved PMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated PMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated PMO equal to the value of Now \| Set Field Incidents > Disposition assign as PMO \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - PMO - TAC analyst | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  Yes  AND  Incidents > Status  equals  Unresolved PMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated PMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated PMO equal to the value of Now \| Set Field Incidents > Disposition assign as PMO \| Set Field Custom Field > Escalated Left at TAC assign as Yes |
+| 2 - In Progress | Escalated - Partner - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved CTO, Unresolved DFAS/GEX  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated assign as Yes \| Set Field Incidents > Disposition assign as Partner System \| Set Field Custom Field > Escalated Left at TAC assign as Yes \| Set Field Custom Field > Escalated Partner assign as Yes \| Set Field Custom Field > First Escalated Partner equal to the value of Now |
+| 2 - In Progress | Escalated - Partner - TAC analyst | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  Yes  AND  Incidents > Status  equals  Unresolved CTO, Unresolved DFAS/GEX  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > Escalated assign as Yes \| Set Field Incidents > Disposition assign as Partner System \| Set Field Custom Field > Escalated Left at TAC assign as Yes \| Set Field Custom Field > Escalated Partner assign as Yes \| Set Field Custom Field > First Escalated Partner equal to the value of Now |
+| 2 - In Progress | Escalated - PMO - analyst response | Active | If (Incidents > Group  equals  PMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  Yes) | Set Field Custom Field > Escalated PMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > First Escalated PMO equal to the value of Now \| Set Field Incidents > Disposition assign as PMO \| Set Field Custom Field > First Assign PMO equal to the value of Now |
+| 2 - In Progress | Re-Escalated - PMO | Active | If (Incidents > Group  equals  PMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated PMO  equals  Yes) | Set Field Custom Field > Escalated PMO assign as Yes \| Set Field Custom Field > Escalated assign as Yes \| Set Field Custom Field > Last Escalated PMO equal to the value of Now \| Set Field Incidents > Disposition assign as PMO \| Set Field Custom Field > Reassign PMO equal to the value of Now |
+| 2 - In Progress | TAC Group Re-Assign | Active | If (Incidents > Group  is modified this edit    AND  Incidents > Group  equals  TAC  AND  Custom Field > First Assign TAC  is not null    AND  Incidents > Previous Group  not equals  TAC, Unspecified) | Set Field Custom Field > Reassign TAC equal to the value of Now |
+| 2 - In Progress | TAC Group Assign | Active | If (Incidents > Group  is modified this edit    AND  Incidents > Group  equals  TAC  AND  Custom Field > First Assign TAC  is null) | Set Field Custom Field > First Assign TAC equal to the value of Now |
+| 2 - In Progress | TAC Group Assign New | Active | If (Incidents > Group  equals  Unspecified  AND  Custom Field > First Assign TAC  is null    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CBA, TAC-PII, TAC-PPT, TAC-RA) | Set Field Custom Field > First Assign TAC equal to the value of Now |
+| 2 - In Progress | Soft Launch Rule | Active | If (Incidents > Queue  is modified this edit    AND  Incidents > Queue  equals  O and S-SOFT LAUNCH) | Set Field Custom Field > Version assign as Soft Launch |
+| 2 - In Progress | TAC internal Escalate Management | Active | If (Incidents > Disposition  equals  Unspecified  AND  Incidents > Assigned  equals  Dan Greene) | Set Field Incidents > Disposition assign as TAC Management |
+| 2 - In Progress | TAC internal Escalate GEN Lead | Active | If (Incidents > Disposition  equals  Unspecified  AND  Incidents > Assigned  equals  Ernest S, Frank P, Joe R, Keith M) | Set Field Incidents > Disposition assign as TAC GEN Lead |
+| 2 - In Progress | TAC internal Escalate TECH Lead | Active | If (Incidents > Disposition  equals  Unspecified  AND  Incidents > Assigned  equals  Dan Greene) | Set Field Incidents > Disposition assign as TAC TECH Lead |
+| 2 - In Progress | TAC internal Escalate FIN Lead | Active | If (Incidents > Disposition  equals  Unspecified  AND  Incidents > Assigned  equals  Anthony H) | Set Field Incidents > Disposition assign as TAC FIN Lead |
+| 2 - In Progress | Banner Flag Reset | Active | If (Incidents > Banner Flag  is modified this edit    AND  Custom Field > Banner Flag First   is not null) | Set Field Custom Field > Banner Flag Date equal to the value of Now |
+| 2 - In Progress | Banner Flag Set | Active | If (Incidents > Banner Flag  is modified this edit    AND  Custom Field > Banner Flag First   is null) | Set Field Custom Field > Banner Flag Date equal to the value of Now \| Set Field Custom Field > Banner Flag First  equal to the value of Now |
+| 2 - In Progress | Closed By User | Active | If (Incidents > Status  equals  Closed  AND  Incidents > Status  is modified this edit    AND  Incidents > Updated from  equals  End-User Pages, WAP) | Set Field Custom Field > Closed By User assign as Yes |
+| 2 - In Progress | Re-Opened | Active | If (Incidents > Previous Status  equals  Closed  AND  Incidents > Status  not equals  Closed) | Set Field Custom Field > Re-Opened assign as Yes \| Set Field Custom Field > 1st Call Resolution assign as No \| Set Field Custom Field > Closed By User assign as No |
+| 1 - Awaiting Confirmation | Awaiting Confirmation-Action | Active | If (Incidents > Escalation Level  equals  Awaiting Confirmation) | Set Field Incidents > Status assign as Closed |
+| 12-Set Chat Subject | Set Subject Passport Login | Active | If (Custom Field > Chat Issues  equals  DTMO Passport-Profile/Login) | Set Field Incidents > Subject assign as Password |
+| 12-Set Chat Subject | Set Subject DTS Account Not found | Active | If (Custom Field > Chat Issues  equals  DTS Account cannot be found or is locked) | Set Field Incidents > Subject assign as Account Not Found or is Locked |
+| 12-Set Chat Subject | Set Subject DTS No matching SSN | Active | If (Custom Field > Chat Issues  equals  DTS No matching SSN can be found) | Set Field Incidents > Subject assign as Failed To Activate Account |
+| 12-Set Chat Subject | Set Subject DTS Technical Difficulties | Active | If (Custom Field > Chat Issues  equals  DTS DBSign 305 Error (Technical Diff)) | Set Field Incidents > Subject assign as Site Experiencing Technical Difficulties |
+| 12-Set Chat Subject | Set Subject DTS cannot display web page | Active | If (Custom Field > Chat Issues  equals  DTS Cannot display the Webpage) | Set Field Incidents > Subject assign as Cannot Display Webpage |
+| 12-Set Chat Subject | Set Subject DTS Self Registration | Active | If (Custom Field > Chat Issues  equals  DTS Self Registration) | Set Field Incidents > Subject assign as Accept/Update Self-Registration |
+| 12-Set Chat Subject | Set Subject DTS login other | Active | If (Custom Field > Chat Issues  equals  DTS Other Login Error) | Set Field Incidents > Subject assign as Other |
+| 12-Set Chat Subject | Subject DTS Returns to Login | Active | If (Custom Field > Chat Issues  equals  DTS Returns me to the Homepage) | Set Field Incidents > Subject assign as null |
+| 2 - Level 3 Routing | DTS-Site Only Outage (New) | Active | If (Incidents > Subject  equals  DTS Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 2 - Level 3 Routing | Severity Check | Active | If (Incidents > Severity  equals  Serious, Critical) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 2 - Level 3 Routing | TAC-GEN Severity = Minor (New) | Active | If (Incidents > Subject  equals  Payment Totals, Lines of Accounting, Audit Fail, TMC Request Assistance, Post Payment Audit, Audit Trail Request, Other, No GOVCC, Pending Routing Actions, Doc Sig OK, CTO/Travel Related Reports, Reservation, At Pay Process Ignore, At Pay Process Ignore, Funding/Expenses, DoD Travel Passport, Email Notification Not Received, Self-Registration Administration, Doc Sig OK, TMC Fee Questions, Adjusting Reservation Cost, Authorization, ROA Administration, Local Voucher, Other, Email Notification Not Received, No GOVCC, Routing Reports, Hotel, At POS ACK, At POS ACK, Pre-Voucher Payments, Profile/Login, At Pay Process Ignore, Budget Maintenance, No GOVCC, Other, Funding/Expenses, Create/Edit/Amend/Cancel, Document Retrieval, Create/Edit/Amend, DFAS De-obligation, At Pay Process Ignore, Other, Status Reports, BQ/Military Lodging, Other, Other, Scheduling Advances, Other, At POS ACK, Organization & Group Administration, Other, Pre-Voucher Payments, Payment Status/Routing, DoD Lodging, DTS Login, Funding/Expenses, DTS Administration (DTA), At POS ACK, Post Payment Audit, Individual Reports, Car, Approval Failure, Approval Failure, Scheduling Partial Payments, Other, Other, Site Set-up Administration, Group Authorization, Status/Routing, Payment Totals, TMC Request Assistance, Other, Payment Status/Routing, Personnel Profiles (People), Other, Rail, Voucher, MIS Reports, Audit Fail, Audit Fail, Other, Unspecified, Approval Failure, Reports, Create/Edit/Amend/Cancel, Pending Routing Action, Pending Routing Actions, Changing/Canceling Existing Reservations, DoD Travel Policy, Pending Routing Actions, Routing Lists, Approval Failure, Other Transportation, Create/Edit/Amend, Ad Hoc Report Request, Doc Sig OK, Doc Sig OK, Status/Routing Questions, Audit Fail, Budget Reports, Funding/Expenses, Email Notification Not Received, Email Notification Not Received, TMC Fee Questions, Feedback / Improvements) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 2 - Level 3 Routing | TAC-GEN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Creating Account Assistance, Payment Not Received, Updating Account Assistance Required, Payment Not Received, Payment Not Received, CIR Workaround, Password, Email Address Changed or is Incorrect) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-GEN |
+| 2 - Level 3 Routing | TAC-TECH Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Login Error Message, System Messages) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-TECH |
+| 2 - Level 3 Routing | TAC-CTO Severity = Minor (New) | Active | If (Incidents > Subject  equals  Pricing Error, Ticketing, TMC Customer Service, Other, CTO Submit, Pricing Error, Ticketing, CTO Customer Service, Other) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-CTO |
+| 2 - Level 3 Routing | TAC-CTO Severity = Moderate (New) | Active | If (Incidents > Subject  equals  TMC Email, Changing/Canceling Existing Reservations) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-CTO |
+| 2 - Level 3 Routing | TAC-FIN Severity = Minor (New) | Active | If (Incidents > Subject  equals  Accounting System, At Paylink, Debt Management, Paper Check Return, Reject Email Received, At Obligation Submitted, At Approved, At SPP Submitted, Advance Reject, Accounting System, At AR Submitted, FSN/ADSN/AAA, Out of Balance (003), At SPP Submitted, At AR Submitted, At Voucher Submitted, Advance Reject, At Debt Satisfied, At Approved, Other, GEX, FSN/ADSN/AAA, FSN/ADSN/AAA, GEX, At Paylink, Reject Email Received, At Obligation Submit, At Debt Satisfied, At Paylink, At Approved, At Obligation Submitted, Citi Paper Check Return, FSN/ADSN/AAA, At Advance Submitted, At Paylink, At Approved, At Voucher Submitted, Other, At Advance Submitted, Out of Balance (003)) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-FIN |
+| 2 - Level 3 Routing | TAC-FIN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Over Payments (Due US), Reject Email Received, SPP Reject, SPP Reject, Reject Email Received, Over Payments (Due US)) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-FIN |
+| 2 - Level 3 Routing | TAC-CBA Severity = Minor (New) | Active | If (Incidents > Subject  equals  Reconciliation, Load Request, Account, Reports, Users, CBA Reconciliation Module) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-CBA |
+| 2 - Level 3 Routing | TAC-SIM Severity = Minor (New) | Active | If (Incidents > Subject  equals  SIM Access) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN \| Set Field Incidents > Assigned assign as Dan Greene |
+| 2 - Level 3 Routing | TAC-CBA Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Out of Balance, Rejected Invoice) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-CBA |
+| 2 - Level 3 Routing | TAC-RA Severity = Minor (New) | Active | If (Incidents > Subject  equals  Recruit Assist Program) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-RA |
+| 2 - Level 3 Routing | DTMO-GEN Severity = Minor (New) | Active | If (Incidents > Subject  equals  MIS Administration, TAC Ticket Escalation, CTO Escalation Issues) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-GEN |
+| 2 - Level 3 Routing | DTMO-TMS Accounts Severity = Minor (New) | Active | If (Incidents > Subject  equals  TMS Accounts) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TMS Accounts \| Set Field Incidents > Assigned assign as Mike Yohannes \| Set Field Custom Field > Leave in Queue assign as Yes |
+| 2 - Level 3 Routing | DTMO-REPORTS Severity = Minor (New) | Active | If (Incidents > Subject  equals  Ad Hoc Reports) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-REPORTS |
+| 2 - Level 3 Routing | DTMO-GEN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Complete DTS Outage, GEX Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-GEN |
+| 2 - Level 3 Routing | DTMO-FIN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  XML Requests, X-Reject Documents, Payment Module Diverts) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-FIN |
+| 2 - Level 3 Routing | DTMO-TMS Severity = Moderate (New) | Active | If (Incidents > Subject  equals  TMS Console & Reports, Profile Administration, GUI Change Requests, New/Change Report Requests, Report/Analytic Anomalies) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-TMS |
+| 2 - Level 3 Routing | DTMO-ROA Severity = MInor (New) | Active | If (Incidents > Subject  equals  Read Only Access (ROA)) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-ROA |
+| 2 - Level 3 Routing | TAC-MGR Severity = Moderate (New) | Active | If (Incidents > Subject  equals  DTS Outage, Partial System Outage, Passport Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 2 - Level 3 Routing | DTMO-Training Severity = Minor (New) | Active | If (Incidents > Subject  equals  Training) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 2 - Level 3 Routing | TAC-Lodging (New) | Active | If (Incidents > Subject  equals  Lodging Not Used, DoD Lodging Not Used, Preferred Lodging Not Used, Gov't Safety Non-Compliant, ADJ LDG Amt Exceeds Booked, DoD Lodging, Preferred Lodging, Fire Safety Lodging, Privatized Lodging, Other Lodging, Hotel, BQ/Military Lodging, Lodging Not Used, DoD Lodging Not Used, Preferred Lodging Not Used, Government Safety Non-Compliant, Lodging, Per Diem Entitlements, Integrated Lodging Program, Lodging) | Set Field Incidents > Queue assign as TAC-Lodging |
+| 2 - Level 3 Routing | DTMO-Travel Certificate | Active | If (Incidents > Subject  equals  TCP) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO - Travel Certificate |
+| 2 - Level 3 Routing | Catch All Rule | Active | If (Incidents > Queue  equals  Unspecified) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 3 - Routing Incidents (Self-Service) | DTS-Site Only Outage (New) | Active | If (Incidents > Subject  equals  DTS Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 3 - Routing Incidents (Self-Service) | TAC-GEN Severity = Minor (New) | Active | If (Incidents > Subject  equals  Payment Totals, TMC Request Assistance, Status/Routing, Routing Lists, Other, Payment Status/Routing, DoD Travel Passport, Rail, Voucher, Audit Fail, Other, Audit Fail, ROA Administration, Create/Edit/Amend/Cancel, Approval Failure, Pending Routing Actions, Changing/Canceling Existing Reservations, Pending Routing Action, Lines of Accounting, Approval Failure, Pending Routing Actions, Profile/Login, Other Transportation, Create/Edit/Amend, Doc Sig OK, Status/Routing Questions, Doc Sig OK, Document Retrieval, Funding/Expenses, Audit Fail, Email Notification Not Received, TMC Fee Questions, Email Notification Not Received, Self-Registration Administration, Audit Fail, Payment Totals, Other, TMC Request Assistance, Post Payment Audit, No GOVCC, Pending Routing Actions, Other, DTS Login, Reservation, Doc Sig OK, At Pay Process Ignore, Funding/Expenses, At Pay Process Ignore, Budget Maintenance, Doc Sig OK, Email Notification Not Received, Authorization, Other, TMC Fee Questions, Adjusting Reservation Cost, Other, Email Notification Not Received, Local Voucher, Other, Hotel, No GOVCC, At POS ACK, Pre-Voucher Payments, At POS ACK, Organization & Group Administration, No GOVCC, At Pay Process Ignore, Funding/Expenses, Create/Edit/Amend/Cancel, Unspecified, Other, DTS Administration (DTA), At Pay Process Ignore, Create/Edit/Amend, DoD Travel Policy, BQ/Military Lodging, Other, Other, Scheduling Advances, Other, Site Set-up Administration, Other, At POS ACK, Payment Status/Routing, DoD Lodging, Pre-Voucher Payments, Personnel Profiles (People), At POS ACK, Funding/Expenses, Feedback / Improvements, Car, Post Payment Audit, Approval Failure, Scheduling Partial Payments, Approval Failure, Reports, Group Authorization, Other) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 3 - Routing Incidents (Self-Service) | TAC-GEN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Email Address Changed or is Incorrect, Creating Account Assistance, Payment Not Received, Updating Account Assistance Required, Payment Not Received, Payment Not Received, CIR Workaround, Password) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-GEN |
+| 3 - Routing Incidents (Self-Service) | TAC-TECH Severity - Moderate (New) | Active | If (Incidents > Subject  equals  Login Error Message, System Messages) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-TECH |
+| 3 - Routing Incidents (Self-Service) | TAC-CTO Severity = Minor (New) | Active | If (Incidents > Subject  equals  Pricing Error, Ticketing, TMC Customer Service, Other, CTO Submit, Pricing Error, Ticketing, CTO Customer Service, Other) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-CTO |
+| 3 - Routing Incidents (Self-Service) | TAC-CTO Severity = Moderate (New) | Active | If (Incidents > Subject  equals  TMC Email, Changing/Canceling Existing Reservations) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-CTO |
+| 3 - Routing Incidents (Self-Service) | TAC-FIN Severity = Minor (New) | Active | If (Incidents > Subject  equals  Advance Reject, At Approved, GEX, At Advance Submitted, At AR Submitted, At Voucher Submitted, Accounting System, Out of Balance (003), Citi Paper Check Return, At Oblig Submitted, At SPP Submitted, At SPP Submitted, FSN/ADSN/AAA, FSN/ADSN/AAA, Debt Management, FSN/ADSN/AAA, At Obligation Submitted, Reject Email Received, At Debt Satisfied, At AR Submitted, At Paylink, At Approved, GEX, At Paylink, Advance Reject, Reject Email Received, At Paylink, At Advance Submitted, At Obligation Submitted, At Debt Satisfied, Other, At Approved, At Paylink, Paper Check Return, FSN/ADSN/AAA, At Obligation Submit, At Approved, Accounting System, Other, Out of Balance (003), At Voucher Submitted) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-FIN |
+| 3 - Routing Incidents (Self-Service) | TAC-FIN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Reject Email Received, Over Payments (Due US), Over Payments (Due US), Reject Email Received, SPP Reject, SPP Reject) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-FIN |
+| 3 - Routing Incidents (Self-Service) | TAC-CBA Severity = Minor (New) | Active | If (Incidents > Subject  equals  CBA Reconciliation Module, Reconciliation, Load Request, Account, Reports, Users, CBA Detector) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-CBA |
+| 3 - Routing Incidents (Self-Service) | TAC-CBA Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Out of Balance, Rejected Invoice) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-CBA |
+| 3 - Routing Incidents (Self-Service) | TAC-IMs Severity = Minor (New | Active | If (Incidents > Subject  equals  SIM Access) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN \| Set Field Incidents > Assigned assign as Dan Greene |
+| 3 - Routing Incidents (Self-Service) | TAC-RA Severity = Minor (New) | Active | If (Incidents > Subject  equals  Recruit Assist Program) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-RA |
+| 3 - Routing Incidents (Self-Service) | DTMO-GEN Severity = Minor (New) | Active | If (Incidents > Subject  equals  MIS Administration, TAC Ticket Escalation, CTO Escalation Issues) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-GEN |
+| 3 - Routing Incidents (Self-Service) | DTMO-REPORTS Severity = Minor (New) | Active | If (Incidents > Subject  equals  Ad Hoc Reports) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-REPORTS |
+| 3 - Routing Incidents (Self-Service) | DTMO-GEN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  Complete DTS Outage, GEX Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-GEN |
+| 3 - Routing Incidents (Self-Service) | DTMO-FIN Severity = Moderate (New) | Active | If (Incidents > Subject  equals  X-Reject Documents, Payment Module Diverts, XML Requests) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-FIN |
+| 3 - Routing Incidents (Self-Service) | DTMO-ROA Severity = MInor (Ne | Active | If (Incidents > Subject  equals  Read Only Access (ROA)) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-ROA |
+| 3 - Routing Incidents (Self-Service) | DTMO-TMS Accounts Severity = Min | Active | If (Incidents > Subject  equals  TMS Accounts) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TMS Accounts \| Set Field Incidents > Assigned assign as Mike Yohannes |
+| 3 - Routing Incidents (Self-Service) | DTMO-TMS Severity = Moderate (New) | Active | If (Incidents > Subject  equals  TMS Console & Reports, Profile Administration, GUI Change Requests, New/Change Report Requests, Report/Analytic Anomalies) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as DTMO-TMS |
+| 3 - Routing Incidents (Self-Service) | TAC-MGR Severity = Moderate (New) | Active | If (Incidents > Subject  equals  DTS Outage, Partial System Outage, Passport Outage) | Set Field Incidents > Severity assign as Moderate \| Set Field Incidents > Queue assign as TAC-MGR |
+| 3 - Routing Incidents (Self-Service) | DTMO-Training Severity = Minor (New) | Active | If (Incidents > Subject  equals  Training) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO-TRAINING \| Set Field Custom Field > Leave in Queue assign as Yes |
+| 3 - Routing Incidents (Self-Service) | DTMO-Travel Certificate Program | Active | If (Incidents > Subject  equals  TCP) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as DTMO - Travel Certificate |
+| 3 - Routing Incidents (Self-Service) | Audit Trail | Active | If (Incidents > Subject  equals  Audit Trail Request, Audit Trail) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 3 - Routing Incidents (Self-Service) | Catch All Rule | Active | If (Incidents > Queue  equals  Unspecified) | Set Field Incidents > Severity assign as Minor \| Set Field Incidents > Queue assign as TAC-GEN |
+| 4 - Due Date | Minor | Active | If (Incidents > Severity  equals  Minor) | Set Field Custom Field > Ticket Due Date increment by +168 Hours Exactly \| Set Field Custom Field > Response Due Date increment by +8 Hours Exactly |
+| 4 - Due Date | Moderate | Active | If (Incidents > Severity  equals  Moderate) | Set Field Custom Field > Ticket Due Date increment by +48 Hours Exactly \| Set Field Custom Field > Response Due Date increment by +4 Hours Exactly |
+| 4 - Due Date | Serious | Active | If (Incidents > Severity  equals  Serious) | Set Field Custom Field > Ticket Due Date increment by +8 Hours Exactly \| Set Field Custom Field > Response Due Date increment by +2 Hours Exactly |
+| 4 - Due Date | Critical | Active | If (Incidents > Severity  equals  Critical) | Set Field Custom Field > Ticket Due Date increment by +4 Hours Exactly \| Set Field Custom Field > Response Due Date increment by +1 Hours Exactly |
+| 4 - Due Date | Training | Active | If (Incidents > Severity  equals  Training) | Set Field Custom Field > Ticket Due Date increment by +168 Hours Exactly \| Set Field Custom Field > Response Due Date increment by +24 Hours Exactly |
+| 6 - Queue Assignment | Assigned Queue - TAC-GEN | Active | If (Incidents > Assigned  equals  Angela N, Ann M, Arihanna G, Ashley Cruz, Ashton F, Brian T, Carolina R, Cheri B, Dan Greene, Dean F, Devin B, Ed E, Eddie M, Elaine R, Ernest S, Frank P, Frank R, Joann S, Joe R, Jonette P, Joshua H, Khadijah W, Kiera F, Krystle C, KTifane C, Laketia W, Mari A, null, Nuchy G, Patti S, Rosie A, Sandy L  OR (  Incidents > Assigned  equals  Unspecified  AND  Incidents > Group  equals  TAC, Unspecified )) | Set Field Incidents > Queue assign as TAC-GEN \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-CBA | Active | If (Incidents > Assigned  equals  Ron D) | Set Field Incidents > Queue assign as TAC-CBA \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-CTO | Active | If (Incidents > Assigned  equals  Cheryl T, Deborah L, Ericka F, Kelly G, Maricel M, Mary C, Mike S, Soyini L) | Set Field Incidents > Queue assign as TAC-CTO \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-FIN | Active | If (Incidents > Assigned  equals  Anthony H, Billy T, Evan T, Tamika B) | Set Field Incidents > Queue assign as TAC-FIN \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-MGR | Active | If (Incidents > Assigned  equals  Dan Greene, Jason P) | Set Field Incidents > Queue assign as TAC-MGR \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-RA | Active | If (Incidents > Assigned  equals  Rory Jones, Janice Young, Luis M) | Set Field Incidents > Queue assign as TAC-RA \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - TAC-TECH | Active | If (Incidents > Assigned  equals  Amy Garcia, Ashley R, Erin T, Greg T, Kim S) | Set Field Incidents > Queue assign as TAC-TECH \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - PMO | Active | If (Incidents > Assigned  equals  Julie Niswonger  OR (  Incidents > Assigned  equals  Unspecified  AND  Incidents > Group  equals  PMO )) | Set Field Incidents > Queue assign as PMO-DTS \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-GEN | Active | If (Incidents > Assigned  equals  Brian Hodge, Charles Connors, Chris Mazur, Terry Koob  OR (  Incidents > Assigned  equals  Unspecified  AND  Incidents > Group  equals  DTMO )) | Set Field Incidents > Queue assign as DTMO-GEN \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-TMS | Active | If (Incidents > Assigned  equals  Larry Briggs, Romael Boyd) | Set Field Incidents > Queue assign as DTMO-TMS \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-CTO | Active | If (Incidents > Assigned  equals  Shameka Sheppard) | Set Field Incidents > Queue assign as DTMO-CTO \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-ROA | Active | If (Incidents > Assigned  equals  Ursula Loy) | Set Field Incidents > Queue assign as DTMO-ROA \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-CAR/TRUCK/BUS | Active | If (Incidents > Assigned  equals  Beth Carver, Donna Johnson) | Set Field Incidents > Queue assign as DTMO-CAR/TRUCK/BUS \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue - DTMO-TRAINING | Active | If (Incidents > Assigned  equals  Dana Whitis, John Schrader, Raymond Wall) | Set Field Incidents > Queue assign as DTMO-TRAINING \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 6 - Queue Assignment | Assigned Queue DTMO-Compliance | Active | If (Incidents > Assigned  equals  Eric Parmiter, Scott Laws) | Set Field Incidents > Queue assign as DTMO -Compliance Tool \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
+| 7 - Recruit | Army Bases | Active | If (Custom Field > Which base are you heading to?  equals  Fort Moore, Fort Jackson, Fort Leonard Wood, Fort Sill) | Set Field Custom Field > Service assign as Army |
+| 7 - Recruit | Navy Bases | Active | If (Custom Field > Which base are you heading to?  equals   Great Lakes Recruit Training Command) | Set Field Custom Field > Service assign as Navy |
+| 7 - Recruit | Marine Corps Bases | Active | If (Custom Field > Which base are you heading to?  equals  Marine Corps Recruit Depot Parris Island, Marine Corps Recruit Depot San Diego) | Set Field Custom Field > Service assign as Marine Corps |
+| 7 - Recruit | Air Force Bases | Active | If (Custom Field > Which base are you heading to?  equals  Lackland Air Force Base) | Set Field Custom Field > Service assign as Air Force |
+| 7 - Recruit | Coast Guard Bases | Active | If (Custom Field > Which base are you heading to?  equals  Coast Guard Training Center) | Set Field Custom Field > Service assign as Coast Guard |
+| 7 - Recruit | FT Jackson | Active | If (Custom Field > Which base are you heading to?  equals  Fort Jackson  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 803-751-5595 |
+| 7 - Recruit | FT Benning | Active | If (Custom Field > Which base are you heading to?  equals  Fort Moore  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 706-544-0118 |
+| 7 - Recruit | FT Sill | Active | If (Custom Field > Which base are you heading to?  equals  Fort Sill  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 580-442-3121 |
+| 7 - Recruit | FT Leonard Wood | Active | If (Custom Field > Which base are you heading to?  equals  Fort Leonard Wood  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 573-528-4751 |
+| 7 - Recruit | Lackland | Active | If (Custom Field > Which base are you heading to?  equals  Lackland Air Force Base  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 210-671-4142 |
+| 7 - Recruit | Great Lakes | Active | If (Custom Field > Which base are you heading to?  equals   Great Lakes Recruit Training Command  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 847-688-3185 |
+| 7 - Recruit | Parris Island | Active | If (Custom Field > Which base are you heading to?  equals  Marine Corps Recruit Depot Parris Island  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 843-321-6255 |
+| 7 - Recruit | San Diego | Active | If (Custom Field > Which base are you heading to?  equals  Marine Corps Recruit Depot San Diego  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 619-524-6304 |
+| 7 - Recruit | Cape May | Active | If (Custom Field > Which base are you heading to?  equals  Coast Guard Training Center  AND  Custom Field > POC Type  equals  Reception) | Set Field Custom Field > Base Phone Number assign as 609-898-6971 |
+| 8 - Response Date | Response Date | Active | If (Incidents > Staff thread  is not null) | Set Field Custom Field > Response assign as Yes |
+| 8 - Response Date | Response Date 2 | Active | If (Custom Field > Response  equals  Yes  AND  Custom Field > Response  is modified this edit  None) | Set Field Custom Field > Response Date equal to the value of Now |
 | 01-Initial State | 01-CA-WOW Case | Active | If (Incidents > Queue  equals  CA - WOW  AND  Incidents > Interface  equals  chewyca) | Set Field Incidents > Assigned assign as Unspecified |
 | 01-Initial State | 01-G -Rx Voicemail | Active | If (Incidents > Subject  contains  Genesys-US-Pharm-Gabapentin-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-Nevada-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-RPhGeneral-VM) | Set Field Incidents > Queue assign as Rx Voicemail |
 | 01-Initial State | 01-G -PracticeHub - Vet Support Email VM | Active | If (Incidents > Subject  contains  Genesys-US-Pharm-DigitalClinic-VM) | Set Field Incidents > Queue assign as PracticeHub - Vet Support Email |
@@ -910,12 +1035,13 @@ Export CSV: `Incident_SetField.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Stop (339 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Stop (340 Active Rules)</summary>
 
 Export CSV: `Incident_TransitionState_Stop.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - Awaiting Confirmation | Awaiting Confirmation-Action | Active | If (Incidents > Escalation Level  equals  Awaiting Confirmation) | Transition State And Stop 3 - Closed |
 | 01-Initial State | 01-CA-WOW Case | Active | If (Incidents > Queue  equals  CA - WOW  AND  Incidents > Interface  equals  chewyca) | Transition State And Stop 50-Chewy CA State |
 | 01-Initial State | 01-G -Rx Voicemail | Active | If (Incidents > Subject  contains  Genesys-US-Pharm-Gabapentin-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-Nevada-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-RPhGeneral-VM) | Transition State And Stop 04-Pharmacy State |
 | 01-Initial State | 01-G -PracticeHub - Vet Support Email VM | Active | If (Incidents > Subject  contains  Genesys-US-Pharm-DigitalClinic-VM) | Transition State And Stop 04-Pharmacy State |
@@ -1437,12 +1563,24 @@ Export CSV: `Incident_CPMCall.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: FunctionCall (150 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: FunctionCall (162 Active Rules)</summary>
 
 Export CSV: `Incident_FunctionCall.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 01. FAQ | Review Notice trigger | Active | If (Answers > Status  equals  Public) | Call Function |
+| 1 - New | Subject Tree Routing - End User | Active | If (Incidents > Source  equals  Create a Ticket, Feedback on Answers, SmartAssistant on Ask A Question) | Call Function 3 - Routing Incidents (Self-Service) |
+| 1 - New | Subject Tree Routing - All Other | Active | If (Incidents > Source  equals  Management & Config, CX Console, Thin Client, End-User Pages, My Tickets, My Tickets Profiles Contact Update, Pass-Through Authentication, Feedback on Answers, Site Feedback, Feedback Response, Create Login, Marketing Unsubscribe, Feedback Unsubscribe, WAP, Utilities, Public API, Outlook Synch Tools, Import Tools, Process Flow, Web Console, Unspecified  AND  Custom Field > Leave in Queue  not equals  Yes) | Call Function 2 - Level 3 Routing |
+| 2 - In Progress | Queue Assignment | Active | If (Incidents > Assigned  is modified this edit    AND  Custom Field > Leave in Queue  not equals  Yes) | Call Function 6 - Queue Assignment |
+| 2 - In Progress | Response Date | Active | If (Incidents > Staff thread  is not null) | Call Function 8 - Response Date |
+| 2 - In Progress | Ticket Due Date | Active | If (Incidents > Severity  equals  Minor, Moderate, Serious, Critical, Training, Unspecified) | Call Function 4 - Due Date |
+| 2 - In Progress | Awaiting Confirmation - Trigger | Active | If (Incidents > Status  equals  Waiting Confirmation) | Call Function 1 - Awaiting Confirmation |
+| 2 - In Progress | DTMO-PMB queues email | Active | If (Incidents > Queue  equals  DTMO-PMB-BUS, DTMO-PMB-GEN, DTMO-PMB-CPP, DTMO-PMB-Car/Truck, DTMO-PMB-CTO, DTMO-PMB-Recruit  AND  Incidents > Queue  is modified this edit) | Call Function 13-PMB notices |
+| 2 - In Progress | Unresolved Contact - Trigger | Active | If (Incidents > Status  equals  Unresolved Contact) | Call Function 11-Unresolved Contact |
+| 2 - In Progress | Recruit Service | Active | If (Custom Field > Which base are you heading to?  not equals  Unspecified) | Call Function 7 - Recruit |
+| 2 - In Progress | RA Problem Field | Active | If (Custom Field > Problem Detail  equals  Airport Closed - Security Issue, Airport Closed - Unknown, Arrived After RTC Bus Departed, Breakfast, Breakfast / Lunch / Dinner, Lunch, Lunch / Dinner, Dinner, Cancelled - Bus Issues, Cancelled - Mechanical, Cancelled - Weather, Cancelled - Unknown, Crew Delay) | Call Function 7 - Recruit |
+| 2 - In Progress | Closed | Active | If (Incidents > Status  equals  Closed  AND  Incidents > Status  is modified this edit) | Call Function 9 - Closed |
 | 01-Initial State | 01-Object Detail Logging | Active | If () | Call Function F34-US & CA-Object Detail Logging*** |
 | 01-Initial State | 01-CA-Inbound General Email | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Incidents > Mailbox  equals  chewyca@custhelp.com) | Call Function F50-CA-Email Routing |
 | 01-Initial State | 01-CA-Inbound AAQ | Active | If (Incidents > Source  equals  Ask A Question  AND  Custom Field > Request Type  equals  Unspecified  AND  Incidents > Interface  equals  chewyca) | Call Function F56-CA-Chewy Contact Us Routing |
@@ -1597,12 +1735,14 @@ Export CSV: `Incident_FunctionCall.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: StopProcessing (139 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: StopProcessing (141 Active Rules)</summary>
 
 Export CSV: `Incident_StopProcessing.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | No Email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Custom Field > Incident Type  not equals  Email) | Stop Processing |
+| 2 - In Progress | No Email In Rule update | Active | If (Incidents > Source  equals  Techmail - Service Mailbox) | Stop Processing |
 | 01-Initial State | 01 - Validate Deprecated Mailboxes | Active | If (Incidents > Source  equals  Techmail - Service Mailbox, Techmail - Outreach Mailbox, Techmail - Incoming Auto-Reply Message  AND  Incidents > Incoming Mailbox  equals  vendorgrowthpartners@custhelp.com, Chewy Vendor Care) | Stop Processing |
 | 01-Initial State | 01-Innovation Form Submission | Active | If (Incidents > Source  equals  Ask A Question  AND  Incidents > Category  equals  Bug, Enhancement, Design, Training, General  AND  Incidents > Subject  equals  Innovation Tracker Submission  AND  Incidents > Updated from  equals  Ask A Question) | Stop Processing |
 | 02-Updated State | 02-Northstar NSP Hold State | Active | If (Incidents > Queue  equals  Rx Northstar Holding  AND  Incidents > Category  not equals  Approval) | Stop Processing |
@@ -1746,12 +1886,17 @@ Export CSV: `Incident_StopProcessing.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: ClearEscalation (116 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: ClearEscalation (121 Active Rules)</summary>
 
 Export CSV: `Incident_ClearEscalation.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 01. FAQ | Set 60 day notice | Active | If (Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Clear Escalation |
+| 01. Answer Review | Answer Review 30 action | Active | If (Answers > Escalation Level  equals  30 day notice  AND  Answers > Previous Escalation Level  not equals  30 day notice) | Clear Escalation |
+| 2 - In Progress | Remove Awaiting Confirmation Escalation | Active | If (Incidents > Previous Status  equals  Waiting Confirmation  AND  Incidents > Status  not equals  Waiting Confirmation) | Clear Escalation |
+| 2 - In Progress | Remove Unresolved Contact Esc | Active | If (Incidents > Previous Status  equals  Unresolved Contact  AND  Incidents > Status  not equals  Unresolved Contact) | Clear Escalation |
+| 3 - Closed | Process Reopened Tickets | Active | If (Incidents > Status  not equals  Closed) | Clear Escalation |
 | 01-Initial State | 01- Pharmacy Follow Up Dispo | Active | If (Incidents > Disposition  is modified this edit    AND  Incidents > Disposition  equals  Pharmacist Follow-Up - Pending 1st Touch, Pharmacist Follow-Up - Pending 2nd Touch, Pharmacist Follow-Up - Pending Tech Follow-Up, Clinic Email - Pending 1st Touch, Clinic Email - Pending 2nd Touch, Clinic Email - Pending Tech Follow-Up, Rx Pharm Follow Up, Rx Technician Follow Up, Rx Lead Follow-Up  AND  Incidents > Status  not equals  Solved) | Clear Escalation |
 | 02-Updated State | 02-Q&A Updated | Active | If (Incidents > Mailbox  equals  Chewy  AND  Incidents > Queue  equals  Q&A  AND  Incidents > Updated from  equals  Techmail - Service Mailbox) | Clear Escalation |
 | 02-Updated State | 02-Trupanion Updated | Active | If (Incidents > Mailbox  equals  Chewy  AND  Incidents > Queue  equals  Insurance Email  AND  Incidents > Updated from  equals  Techmail - Service Mailbox) | Clear Escalation |
@@ -1872,12 +2017,25 @@ Export CSV: `Incident_ClearEscalation.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: Escalation (44 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: Escalation (57 Active Rules)</summary>
 
 Export CSV: `Incident_Escalation.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 01. FAQ | Proposed Content for TAC | Active | If (Answers > Status  equals  Proposed  AND  Answers > Group  equals  TAC  AND  Answers > Status  is modified this edit) | Send Escalation Notification to assignee  with Subject line Proposed FAQ Staff Member/Group  Brian Hodge, Dan Greene, Sandy L |
+| 01. FAQ | Review Proposed Content for DTMO | Active | If (Answers > Status  equals  Review  AND  Answers > Group  equals  DTMO) | Send Escalation Notification to assignee  with Subject line Review Proposed FAQ Staff Member/Group  Beth Carver, John Schrader |
+| 01. FAQ | TAC Review FAQ | Active | If (Answers > Status  equals  Review  AND  Answers > Group  equals  TAC  AND  Answers > Status  is modified this edit) | Send Escalation Notification to assignee  with Subject line Review FAQ Staff Member/Group  Dan Greene, Sandy L |
+| 01. FAQ | Approved Content for DTMO | Active | If (Answers > Status  equals  Approved  AND  Answers > Group  equals  DTMO) | Send Escalation Notification to assignee  with Subject line Approved FAQ Staff Member/Group  Beth Carver, Brian Hodge, John Schrader |
+| 01. FAQ | Approved Content for TAC | Active | If (Answers > Status  equals  Approved  AND  Answers > Status  is modified this edit    AND  Answers > Group  equals  TAC) | Send Escalation Notification to assignee  with Subject line Approved FAQ Staff Member/Group  Dan Greene, Sandy L |
+| 01. FAQ | TAC Analyst View | Active | If (Answers > Status  equals  Analyst  View  AND  Answers > Status  is modified this edit) | Send Escalation Notification to assignee  with Subject line FAQ set to Analyst View Staff Member/Group  TAC Distribution List null |
+| 01. FAQ | TAC FAQ  Public | Active | If (Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Send Escalation Notification to assignee  with Subject line FAQ set to Public Staff Member/Group  TAC Distribution List null |
+| 01. FAQ | Subject and Category not set | Active | If (Answers > Subject  equals  Unspecified  AND  Answers > Category  equals  Unspecified  AND  Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Send Escalation Notification to assignee  with Subject line Subject and Catagory Must be set Staff Member/Group |
+| 01. Answer Review | Answer Review 60 | Active | If (Answers > Status  equals  Public  AND  Answers > Escalation Level  not equals  30 day notice, 60 day notice) | Escalate to 60 day notice +24 Hours Exactly From Custom Field > Review Notification date Use Response Interval Revalidate |
+| 01. Answer Review | Answer Review 30 | Active | If (Answers > Status  equals  Public  AND  Answers > Escalation Level  equals  60 day notice) | Escalate to 30 day notice +1 Hours Exactly From Custom Field > Review Notification date Use Response Interval Revalidate |
+| 01. Answer Review | Answer Review 60 action | Active | If (Answers > Escalation Level  equals  60 day notice  AND  Answers > Previous Escalation Level  not equals  30 day notice, 60 day notice) | Send Escalation Notification to assignee  with Subject line 60 day notice of review Staff Member/Group  Dan Greene |
+| 01. Answer Review | Answer Review 30 action | Active | If (Answers > Escalation Level  equals  30 day notice  AND  Answers > Previous Escalation Level  not equals  30 day notice) | Send Escalation Notification to assignee  with Subject line 30 day notice of review Staff Member/Group  Dan Greene |
+| 1 - Awaiting Confirmation | Awaiting Confirmation-Timer | Active | If (Incidents > Status  equals  Waiting Confirmation) | Escalate to Awaiting Confirmation +72 Hours Exactly From Incidents > Date Last Updated Use Response Interval Revalidate Recalculate |
 | 01-Initial State | 01-CA-Inbound Central Scheduling Cofirm | Active | If (Incidents > Source  equals  Ask A Question  AND  Custom Field > Request Type  equals  Create or Modify Appointment, Reschedule Appt  AND  Incidents > Interface  equals  chewyca) | Escalate to CA-Carrier Portal Confirmation +1 Minutes Exactly From Incidents > Time Created Use Response Interval Revalidate |
 | 01-Initial State | 01-Inbound Central Scheduling Confirm | Active | If (Incidents > Source  equals  Ask A Question  AND  Custom Field > Request Type  equals  Create or Modify Appointment, Reschedule Appt) | Escalate to Carrier Portal Confirmation +1 Minutes Exactly From Incidents > Time Created Use Response Interval Revalidate |
 | 02-Updated State | 02-Vendor Portal Updated | Active | If (Incidents > Updated from  equals  Techmail - Service Mailbox  AND  Incidents > Mailbox  equals  vendorgrowthpartners@custhelp.com, Chewy Vendor Care, null, null, null, Chewy Vendor Service Portal, null) | Send Escalation Notification to assignee  with Subject line You have a new updated incident Staff Member/Group |
@@ -1926,12 +2084,33 @@ Export CSV: `Incident_Escalation.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: AppendTemplate (77 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: AppendTemplate (98 Active Rules)</summary>
 
 Export CSV: `Incident_AppendTemplate.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | No Email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Custom Field > Incident Type  not equals  Email) | Append Response Template to Response No Email After May 4th |
+| 1 - New | Send Email Response | Active | If (Incidents > Source  equals  SmartAssistant on Ask A Question) | Append Response Template to Response Smart Assistant only |
+| 1 - New | Send Email Response2 | Active | If (Incidents > Source  equals  Create a Ticket) | Append Response Template to Response Smart Assistant |
+| 1 - New | Notification for Tickets | Active | If (Incidents > Source  equals  Management & Config, CX Console, Ticket Editor, Contact Editor, Org Editor, Opportunity Editor, Task Ins Editor, Answer Editor, Mailing Editor, Feedback Editor, Campaign Editor, Document Editor, Mailing Format Editor, Segment Editor, Contact List Editor, Answer propose from Ticket Editor, Opportunity create from Ticket Editor, Analytics Report, Answer Move, Explorer, Ticket multi update, Contact Multi Update, Org Multi Update, Opportunity Multi Update, Task Ins Multi Update, Answer Multi Update, Communication Center Notifications, Custom Object Editor, Custom Object Multi Update, Thin Client, End-User Pages, My Tickets, My Tickets Profiles Contact Update, Pass-Through Authentication, Site Feedback, Feedback Response, Create Login, Marketing Unsubscribe, Feedback Unsubscribe, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console, Web Console Incident Editor, Web Console Contact Editor, Web Console Org Editor, Web Console Asset Editor, Web Console Opportunity Editor, Web Console Task Editor, Web Console Answer Editor, Web Console Contact List Editor, Web Console Opportunity Create from Incident Editor, Web Console Workflow, Web Console Analytics Report, Web Console Incident Multi Update, Web Console Contact Multi Update, Web Console Org Multi Update, Web Console Opportunity Multi Update, Web Console Task Ins Multi Update, Web Console Answer Multi Update, Web Console Asset Multi Update, Web Console Notification, Web Console Custom Object Editor, Web Console Custom Object Multi Update, Web Console Standard Report, Web Console Workspace, Web Console Search, Web Console Preview, Web Console Reset Password, Web Console Integrations Editor, Element Manager Editor, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Testing, Training) | Append Response Template to Response New Ticket Email1 |
+| 1 - New | Notification for Tickets CHAT | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  New, CTO Verify) | Append Response Template to Response Ticket Email CHAT new |
+| 1 - New | Notification for Tickets CHAT Wait | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  Waiting Confirmation) | Append Response Template to Response Ticket Email CHAT Waiting |
+| 1 - New | Notification for Tickets CHAT solved | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  Closed) | Append Response Template to Response Ticket Email CHAT Solved |
+| 2 - In Progress | No Email In Rule update | Active | If (Incidents > Source  equals  Techmail - Service Mailbox) | Append Response Template to Response No Email After May 4th |
+| 2 - In Progress | Escalated - DTMO | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Testing) | Append Response Template to Response Escalate to DTMO |
+| 2 - In Progress | Escalated - DTMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved DTMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Group  is not modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC-PII, TAC-PPT, TAC-RA) | Append Response Template to Response Escalate to DTMO |
+| 2 - In Progress | Escalated - O&S | Active | If (Incidents > Group  equals  O&S  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is modified this edit    AND  Incidents > Response Sent  equals  No) | Append Response Template to Response Escalate to O and S |
+| 2 - In Progress | Escalated - O&S -TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is not modified this edit    AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved O&S  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Append Response Template to Response Escalate to O and S |
+| 2 - In Progress | Escalated - PMO | Active | If (Incidents > Group  equals  PMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No) | Append Response Template to Response Escalate to PMO |
+| 2 - In Progress | Escalated - PMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved PMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Append Response Template to Response Escalate to PMO |
+| 2 - In Progress | Escalated - Partner - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved CTO, Unresolved DFAS/GEX  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Append Response Template to Response Escalate to Partner |
+| 1 - Awaiting Confirmation | Awaiting Confirmation-Action | Active | If (Incidents > Escalation Level  equals  Awaiting Confirmation) | Append Response Template to Response CLOSED WITHOUT CONFIRMATION |
+| 3 - Routing Incidents (Self-Service) | Audit Trail | Active | If (Incidents > Subject  equals  Audit Trail Request, Audit Trail) | Append Response Template to Response AUDIT TRAIL |
+| 9 - Closed | Closed - Self-Service | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Self-Support  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes) | Append Response Template to Response Closed Email |
+| 9 - Closed | Closed -  By User | Active | If (Incidents > Status  equals  Closed  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  equals  Yes) | Append Response Template to Response Closed By User Email |
+| 9 - Closed | Closed - Phone | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Phone, Voicemail, Voicemail – Unreturnable, TAC Entered  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes) | Append Response Template to Response Closed Email |
+| 9 - Closed | Closed - Chat | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  not equals  Phone, Voicemail, Voicemail – Unreturnable, Self-Support, TAC Entered, Email, WebFeedback, Fax, Survey  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes  AND  Custom Field > Chat Issues  is not modified this edit) | Append Response Template to Response Closed Email |
 | 01-Initial State | 01-CA-Cancel my Order Call to Action | Active | If (Incidents > Subject  match regex  ^\[Please(\s\|\+)cancel(\s\|\+)my(\s\|\+)order(\s\|\+)-([0-9]{9,10})-\]$  AND  Incidents > Mailbox  equals  chewyca@custhelp.com) | Append Response Template to Notes Dup Order Call to Action -Confirm Cancel |
 | 01-Initial State | 01-CA-Ship my Order Call to Action | Active | If (Incidents > Subject  match regex  ^\[Please(\s\|\+)ship(\s\|\+)my(\s\|\+)order(\s\|\+)-([0-9]{9,10})-\]$  AND  Incidents > Mailbox  equals  chewyca@custhelp.com) | Append Response Template to Notes Dup Order Call to Action -Confirm Order |
 | 01-Initial State | 01-CA-Inbound Vendor Portal AAQ - Send Email | Active | If (Incidents > Source  equals  Ask A Question  AND  Incidents > Interface  equals  chewyca  AND  Custom Field > Request Type  equals  Create or modify Appointment, Dropship Vendor Performance Appeal, DSCO Questions/Issues, Marketing Request, New Vendor Follow-up, Setup EDI Account, Playbook Questions, Dropship Shipping or Ordering Questions, Shipping or Ordering Questions, Vendor Account Information Update, Vendor Performance Scorecard Questions, Collect Vendor Creating New OTM Profile, Technical Questions for RTS, Transportation Escalations, Accessorial Request, Contact Follow-Up, Report Technical Issue, New International Vendor Submission, Contact and Address Update, Banking Information Update, Certificate of Insurance Renewal, Vendor Merger & Acquisition) | Append Response Template to Response Vendor Communication Portal - Initial |
@@ -2013,12 +2192,21 @@ Export CSV: `Incident_AppendTemplate.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: Other (75 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: Other (84 Active Rules)</summary>
 
 Export CSV: `Incident_Other.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 01. FAQ | TAC FAQ  Public | Active | If (Answers > Status  equals  Public  AND  Answers > Status  is modified this edit) | Send Notification to Answer Sibling Assignee(s) |
+| 01. FAQ | Review Notice trigger | Active | If (Answers > Status  equals  Public) | Answer Review |
+| 1 - New | No Email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Custom Field > Incident Type  not equals  Email) | Do Not Create Incident |
+| 1 - New | Answer Feedback | Active | If (Incidents > Source  equals  Feedback on Answers) | Assign Incident To Staff Member Assigned The Answer |
+| 2 - In Progress | No Email In Rule update | Active | If (Incidents > Source  equals  Techmail - Service Mailbox) | Do Not Create Incident |
+| 9 - Closed | Closed - Self-Service Feedack | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Self-Support) | Send Transactional Feedback Selfsupport After +1 Minutes Exactly |
+| 9 - Closed | Closed - Phone Feedback | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  not equals  Self-Support, Email, WebFeedback, Survey, Chat) | Send Transactional Feedback TAC Phone 20181220 After +1 Minutes Exactly |
+| 9 - Closed | Closed - Chat Feedback | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Chat) | Send Transactional Feedback Chat TAC After +1 Minutes Exactly |
+| score | Rule | Active | If () | — |
 | 01-Initial State | 01-Inbound Pharmacy New Order | Active | If (Incidents > Source  equals  Public API  AND  Incidents > Queue  equals  Rx First Contact, Rx New Order) | Escalate to PharmacyNewOrder +5 Minutes Exactly From Now |
 | 02-Updated State | 02-Cancel Order On Call To Action Update | Active | If (Incidents > Updated from  equals  Custom Process, Data Import  AND  Incidents > Subject  match regex  ^\[Please(\s\|\+)cancel(\s\|\+)my(\s\|\+)order(\s\|\+)-([0-9]{9,10})-\]$  AND  Orders > OrderId  is modified this edit) | Escalate to Cancel Order Process 2 +15 Minutes Exactly From Now |
 | 02-Updated State | 02-Vendor Portal Solved | Active | If (Incidents > Updated from  equals  CX Console, Incident Editor, Techmail - Service Mailbox, Data Import, Web Console Incident Editor  AND  Incidents > Status  equals  Solved  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  Accounting - AP Inventory, Accounting - AP Holds, Accounting - AR/Vendor Rebate Billing, CA - Accounting - AP Inventory, CA - Accounting - AP Holds, CA - Central Scheduling, CA - EDI, CA - MSS - Catalog, CA - MSS - Content, CA - MSS - Feedback, CA - MSS - Pricing, CA - MSS Ops, CA - Supply Planning, CA - VC Disputes, CA - Vendor Compliance, CA - Vendor Outreach, CA - Vendor Specialist, CA - VSP - Routing, Dropship - Appeal, Drop Ship - Merchandising, Drop Ship - Supply Chain - Operations, Drop Ship - Supply Chain - Packaging, EDI, MSS - Catalog, MSS - Content, MSS - Feedback, MSS Ops, MSS Ops Escalation, MSS - Pricing, Prepaid Vendor Going Collect, Supply Planning, TRANSPORTATION – Accesorials, TRANSPORTATION - CPU, TRANSPORTATION - RTS & Inbound Freight, VC Disputes, Vendor Specialists, Vendor Care, Vendor Compliance, Vendor Growth Partners, Vendor Outreach, VSP - Routing  AND  Custom Field > Sign Off  is null    AND  Incidents > Source  equals  Ask A Question  AND  Incidents > Disposition  not equals  OOTO Reply, Auto-Reopened - System Email Loop) | Send Transactional Survey Chewy Vendor Service Satisfaction Survey After +1 Hours Exactly |
@@ -2098,12 +2286,81 @@ Export CSV: `Incident_Other.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SendEmail (90 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SendEmail (159 Active Rules)</summary>
 
 Export CSV: `Incident_SendEmail.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | No Email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Custom Field > Incident Type  not equals  Email) | Send Email Response to Sender Include incident details |
+| 1 - New | Send Email Response2 | Active | If (Incidents > Source  equals  Create a Ticket) | Send Email Response to Sender Include incident details |
+| 1 - New | Notification for Tickets | Active | If (Incidents > Source  equals  Management & Config, CX Console, Ticket Editor, Contact Editor, Org Editor, Opportunity Editor, Task Ins Editor, Answer Editor, Mailing Editor, Feedback Editor, Campaign Editor, Document Editor, Mailing Format Editor, Segment Editor, Contact List Editor, Answer propose from Ticket Editor, Opportunity create from Ticket Editor, Analytics Report, Answer Move, Explorer, Ticket multi update, Contact Multi Update, Org Multi Update, Opportunity Multi Update, Task Ins Multi Update, Answer Multi Update, Communication Center Notifications, Custom Object Editor, Custom Object Multi Update, Thin Client, End-User Pages, My Tickets, My Tickets Profiles Contact Update, Pass-Through Authentication, Site Feedback, Feedback Response, Create Login, Marketing Unsubscribe, Feedback Unsubscribe, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console, Web Console Incident Editor, Web Console Contact Editor, Web Console Org Editor, Web Console Asset Editor, Web Console Opportunity Editor, Web Console Task Editor, Web Console Answer Editor, Web Console Contact List Editor, Web Console Opportunity Create from Incident Editor, Web Console Workflow, Web Console Analytics Report, Web Console Incident Multi Update, Web Console Contact Multi Update, Web Console Org Multi Update, Web Console Opportunity Multi Update, Web Console Task Ins Multi Update, Web Console Answer Multi Update, Web Console Asset Multi Update, Web Console Notification, Web Console Custom Object Editor, Web Console Custom Object Multi Update, Web Console Standard Report, Web Console Workspace, Web Console Search, Web Console Preview, Web Console Reset Password, Web Console Integrations Editor, Element Manager Editor, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Testing, Training) | Send Email Response to Sender Include incident details |
+| 1 - New | Notification for Tickets CHAT | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  New, CTO Verify) | Send Email Response to Sender Include incident details |
+| 1 - New | Notification for Tickets CHAT Wait | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  Waiting Confirmation) | Send Email Response to Sender Include incident details |
+| 1 - New | Notification for Tickets CHAT solved | Active | If (Incidents > Source  equals  Live Chat, WAP, Utilities, Techmail - Outreach Mailbox, Agedatabase - Close waiting tickets, Agedatabase - Answer Review, Agedatabase - Answer Publish, Agedatabase - Answer Decay, Rule Escalations, MA RNMD Daemon, Public API, Outlook Synch Tools, Import Tools, KImport (if source not provided), SalesNet Integration, Process Flow, Web Console Live Chat, Unspecified  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Knowledge Center (FAQ), Recruit Assist Program, Testing  AND  Incidents > Status  equals  Closed) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | No Email In Rule update | Active | If (Incidents > Source  equals  Techmail - Service Mailbox) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Severity 1 Notification | Active | If (Incidents > Severity  equals  Critical  AND  Incidents > Severity  is modified this edit    AND  Incidents > Status  equals  New, Reassigned, Client Update, Unresolved Contact, Unresolved TAC, Unresolved DTMO, Unresolved PMO, Unresolved O&S, Unresolved CTO, Unresolved DFAS/GEX, Unresolved Other, Unresolved PPT, Unresolved SPR, Unresolved CIR, Unresolved SCR, Resolved SCR/SPR , CTO Verify, Waiting Confirmation, Closed, Unspecified) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Notification Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 1 Notification down Graded mino | Active | If (Incidents > Severity  equals  Minor, Training, Other, Unspecified  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Notification Down Graded to Minor Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 1 Notification down Graded Mode | Active | If (Incidents > Severity  equals  Moderate  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Notification Down Graded to Moderate Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 1 Notification down Graded Seri | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Critical) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Notification Down Graded to Severity 2 Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 2 Notification down Graded Mino | Active | If (Incidents > Severity  equals  Minor, Training, Other, Unspecified  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Serious) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 2 Incident Notification Down Graded to Minor Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 2 Notification down Graded Mode | Active | If (Incidents > Severity  equals  Moderate  AND  Incidents > Severity  is modified this edit    AND  Custom Field > Severity Hold  equals  Serious) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 2 Incident Notification Down Graded to Moderate Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 1 Notification Closed | Active | If (Incidents > Severity  equals  Critical  AND  Incidents > Status  equals  Closed  AND  Incidents > Status  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Notification Closed Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 2 Notification | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Severity  is modified this edit    AND  Incidents > Status  equals  New, Reassigned, Client Update, Unresolved Contact, Unresolved TAC, Unresolved DTMO, Unresolved PMO, Unresolved O&S, Unresolved CTO, Unresolved DFAS/GEX, Unresolved Other, Unresolved PPT, Unresolved SPR, Unresolved CIR, Unresolved SCR, Resolved SCR/SPR , CTO Verify, Waiting Confirmation, Closed, Unspecified) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 2 Incident Notification Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 2 Notification Closed | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Status  equals  Closed  AND  Incidents > Status  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 2 Incident Notification Closed Staff Member/Group   Distribution List Severity 1 & 2 Distro |
+| 2 - In Progress | Severity 2 Sent Back to TAC | Active | If (Incidents > Severity  equals  Serious  AND  Incidents > Queue  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-LOCK, TAC-CBA, TAC-PII, TAC-PPT, TAC-RA) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 2 Incident Returned to TAC Notification Staff Member/Group   Distribution List Severity 1 & 2 Returned to TAC |
+| 2 - In Progress | Severity 1 Sent Back to TAC | Active | If (Incidents > Severity  equals  Critical  AND  Incidents > Queue  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Email Incident Information to assignee  Email Address .invalid with Subject line Severity 1 Incident Returned to TAC Notification Staff Member/Group   Distribution List Severity 1 & 2 Returned to TAC |
+| 2 - In Progress | O&S-APP queue email | Active | If (Incidents > Queue  equals  O and S-APP  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-APP Queue Ticket Notification Staff Member/Group   Distribution List O&S-APP Distro |
+| 2 - In Progress | O&S-CTO queue email | Active | If (Incidents > Queue  equals  O and S-CTO  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-CTO Queue Ticket Notification Staff Member/Group   Distribution List O&S-CTO Distro |
+| 2 - In Progress | O&S-Reports queue email | Active | If (Incidents > Queue  equals  O and S-REPORTS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-Reports Queue Ticket Notification Staff Member/Group   Distribution List O&S-Reports Distro |
+| 2 - In Progress | O&S-Sustainment queue email | Active | If (Incidents > Queue  equals  O and S-SUSTAINMENT  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-Sustainment Queue Ticket Notification Staff Member/Group   Distribution List O&S-Sustainment Distro |
+| 2 - In Progress | O&S-Inbound queue email | Active | If (Incidents > Queue  equals  O and S-Inbound  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-Inbound Queue Ticket Notification Staff Member/Group   Distribution List O&S Indound |
+| 2 - In Progress | O&S-Soft Launch queue email | Active | If (Incidents > Queue  equals  O and S-SOFT LAUNCH  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line O&S-SOFT LAUNCH Queue Ticket Notification Staff Member/Group   Distribution List O&S Soft Launch Distro |
+| 2 - In Progress | PMO queue email | Active | If (Incidents > Queue  equals  PMO-DTS  AND  Incidents > Queue  is modified this edit) | Email Incident Information including administration fields to assignee  Email Address .invalid with Subject line PMO Queue Ticket Notification Staff Member/Group   Distribution List PMO Distro |
+| 2 - In Progress | PMO-Release | Active | If (Incidents > Queue  equals  PMO-Release Verify  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line PMO-Release Verify Ticket Notification Staff Member/Group   Distribution List PMO-Release Verify |
+| 2 - In Progress | DTMO-GEN queue email | Active | If (Incidents > Queue  equals  DTMO-GEN  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Gen Queue Ticket Notification Staff Member/Group   Distribution List DTMO-GEN Distro |
+| 2 - In Progress | DTMO-TMS access queue email | Active | If (Incidents > Queue  equals  TMS Accounts  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-TMS Access Queue Ticket Notification Staff Member/Group   Distribution List null, null |
+| 2 - In Progress | DTMO-Test queue | Active | If (Incidents > Queue  equals  DTMO-Test  AND  Incidents > Queue  is modified this edit) | Email Incident Information  Email Address .invalid with Subject line CAT Testing Staff Member/Group null  Distribution List DTMO Test Queue Distro |
+| 2 - In Progress | DTMO-POLICY queue email | Active | If (Incidents > Queue  equals  DTMO-POLICY  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Policy Queue Ticket Notification Staff Member/Group   Distribution List DTMO-POLICY Distro |
+| 2 - In Progress | DTMO-REPORTS queue email | Active | If (Incidents > Queue  equals  DTMO-REPORTS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Reports Queue Ticket Notification Staff Member/Group   Distribution List DTMO-REPORTS Distro |
+| 2 - In Progress | DTMO-Initiatives queue email | Active | If (Incidents > Queue  equals  DTMO-INITIATIVES  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Initiatives Queue Ticket Notification Staff Member/Group   Distribution List DTMO-INITIATIVES |
+| 2 - In Progress | DTMO-WEB queue email | Active | If (Incidents > Queue  equals  DTMO-WEB  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Web Queue Ticket Notification Staff Member/Group   Distribution List DTMO-WEB Distro |
+| 2 - In Progress | DTMO-ROA queue email | Active | If (Incidents > Queue  equals  DTMO-ROA  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Web Queue Ticket Notification Staff Member/Group   Distribution List DTMO-ROA Distro |
+| 2 - In Progress | DTMO-TRAVEL CARD queue email | Active | If (Incidents > Queue  equals  DTMO-TRAVEL CARD  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Travel Card Queue Ticket Notification Staff Member/Group   Distribution List DTMO-TRAVEL CARD Distro |
+| 2 - In Progress | DTMO-TRAVEL CARD Tree email | Active | If (Incidents > Subject  equals  Government Travel Charge Card (GTCC)  AND  Incidents > Queue  not equals  DTMO-TRAVEL CARD  AND  Incidents > Queue  is modified this edit    AND  Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Travel Card Subject Tree Ticket Notification Staff Member/Group   Distribution List DTMO-TRAVEL CARD Distro |
+| 2 - In Progress | DTMO-Car/Truck/Bus/Lodging queue email | Active | If (Incidents > Queue  equals  DTMO-CAR/TRUCK/BUS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Car/Truck/Bus/Lodging Queue Ticket Notification Staff Member/Group   Distribution List DTMO-Car/Truck/Bus |
+| 2 - In Progress | DTMO-TRAINING queue email | Active | If (Incidents > Queue  equals  DTMO-TRAINING  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Training Queue Ticket Notification Staff Member/Group   Distribution List DTMO-Training Distro |
+| 2 - In Progress | DTMO-Travel Certificate | Active | If (Incidents > Queue  equals  DTMO - Travel Certificate  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Travel Certificate Queue Ticket Notification Staff Member/Group   Distribution List DTMO - Travel Certificate |
+| 2 - In Progress | DTMO-Compliance | Active | If (Incidents > Queue  equals  DTMO -Compliance Tool  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO- Compliance Tool Queue Ticket Notification Staff Member/Group   Distribution List DTMO - Compliance Distro |
+| 2 - In Progress | DTMO-TMS queue email | Active | If (Incidents > Queue  equals  DTMO-TMS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-TMS Queue Ticket Notification Staff Member/Group   Distribution List DTMO-TMS |
+| 2 - In Progress | DTMO-CTO queue email | Active | If (Incidents > Queue  equals  DTMO-CTO  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-CTO Queue Ticket Notification Staff Member/Group   Distribution List DTMO-CTO Distro |
+| 2 - In Progress | DTMO-CBA queue email | Active | If (Incidents > Queue  equals  DTMO-CBA  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-CBA Queue Ticket Notification Staff Member/Group   Distribution List DTMO-CBA Distro |
+| 2 - In Progress | DTMO-FIN queue email | Active | If (Incidents > Queue  equals  DTMO-FIN  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-FIN/CBA Queue Ticket Notification Staff Member/Group   Distribution List DTMO-FIN Distro |
+| 2 - In Progress | DFAS CCV | Active | If (Incidents > Subject  equals  Cash Collection Voucher  AND  Custom Field > Contact ID  equals  8399072) | Email Incident Information  Email Address .invalid with Subject line Cash Collection Vouchers Staff Member/Group   Distribution List DFAS |
+| 2 - In Progress | DTMO-RA/GROUP MOVES/BUS queue email | Active | If (Incidents > Queue  equals  DTMO-CAR/TRUCK/BUS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Travel Management Queue Ticket Notification Staff Member/Group   Distribution List DTMO-Travel Management Distro |
+| 2 - In Progress | DTMO-Lodging queue em | Active | If (Incidents > Queue  equals  DTMO-Lodging  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-Lodging Queue Ticket Notification Staff Member/Group   Distribution List DTMO-Lodging |
+| 2 - In Progress | TAC-RA queue email | Active | If (Incidents > Queue  equals  TAC-RA  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line TAC-RA Queue Ticket Notification Staff Member/Group   Distribution List TAC-RA Distro |
+| 2 - In Progress | TMS-Outage queue email | Active | If (Incidents > Queue  equals  TMS Outage  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line TMS-Outage Queue Ticket Notification Staff Member/Group   Distribution List TMS outage |
+| 2 - In Progress | Answer Feedback queue email | Active | If (Incidents > Queue  equals  Answer Feedback  AND  Incidents > Queue  is modified this edit    AND  Incidents > Source  equals  Feedback on Answers) | Email Incident Information to assignee  Email Address .invalid with Subject line Answer Feedback Queue Staff Member/Group |
+| 2 - In Progress | Escalated - DTMO | Active | If (Incidents > Group  equals  DTMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Subject  not equals  Testing) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - DTMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated DTMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved DTMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Group  is not modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC-PII, TAC-PPT, TAC-RA) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - O&S | Active | If (Incidents > Group  equals  O&S  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is modified this edit    AND  Incidents > Response Sent  equals  No) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - O&S -TAC | Active | If (Incidents > Group  equals  TAC  AND  Custom Field > Escalated OS  equals  None  AND  Incidents > Group  is not modified this edit    AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved O&S  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - PMO | Active | If (Incidents > Group  equals  PMO  AND  Incidents > Group  is modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - PMO - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved PMO  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Send Email Response to Sender Include incident details |
+| 2 - In Progress | Escalated - Partner - TAC | Active | If (Incidents > Group  equals  TAC  AND  Incidents > Group  is not modified this edit    AND  Custom Field > Escalated PMO  equals  None  AND  Incidents > Response Sent  equals  No  AND  Incidents > Status  equals  Unresolved CTO, Unresolved DFAS/GEX  AND  Incidents > Status  is modified this edit    AND  Incidents > Queue  equals  TAC-TECH, TAC-MGR, TAC-FIN, TAC-CTO, TAC-GEN, TAC-CCV, TAC-LOCK, TAC-Lodging, TAC-CBA, TAC - Partner Systems, TAC-PII, TAC-PPT, TAC-RA) | Send Email Response to Sender Include incident details |
+| 1 - Awaiting Confirmation | Awaiting Confirmation-Action | Active | If (Incidents > Escalation Level  equals  Awaiting Confirmation) | Send Email Response to Sender Include question Include incident details |
+| 13-PMB notices | DTMO-PMB-Car/Truck | Active | If (Incidents > Queue  equals  DTMO-PMB-Car/Truck  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-Car/Truck Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-Car/Truck |
+| 13-PMB notices | DTMO-PMB-Bus | Active | If (Incidents > Queue  equals  DTMO-PMB-BUS  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-Bus Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-Bus |
+| 13-PMB notices | DTMO-PMB-Gen | Active | If (Incidents > Queue  equals  DTMO-PMB-GEN  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-Gen Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-Gen |
+| 13-PMB notices | DTMO-PMB-CPP | Active | If (Incidents > Queue  equals  DTMO-PMB-CPP  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-CPP Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-CPP |
+| 13-PMB notices | DTMO-PMB-CTO | Active | If (Incidents > Queue  equals  DTMO-PMB-CTO  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-CTO Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-CTO |
+| 13-PMB notices | Copy of DTMO-PMB-Recruit | Active | If (Incidents > Queue  equals  DTMO-PMB-Recruit  AND  Incidents > Queue  is modified this edit) | Email Incident Information to assignee  Email Address .invalid with Subject line DTMO-PMB-Recruit Queue Ticket Notification Staff Member/Group   Distribution List DTMO-PMB-Recruit |
+| 3 - Routing Incidents (Self-Service) | Audit Trail | Active | If (Incidents > Subject  equals  Audit Trail Request, Audit Trail) | Send Email Response to Sender |
+| 9 - Closed | Closed - Self-Service | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Self-Support  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes) | Send Email Response to Sender Include incident details |
+| 9 - Closed | Closed -  By User | Active | If (Incidents > Status  equals  Closed  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  equals  Yes) | Send Email Response to Sender Include incident details |
+| 9 - Closed | Closed - Phone | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  equals  Phone, Voicemail, Voicemail – Unreturnable, TAC Entered  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes) | Send Email Response to Sender Include incident details |
+| 9 - Closed | Closed - Chat | Active | If (Incidents > Status  equals  Closed  AND  Custom Field > Incident Type  not equals  Phone, Voicemail, Voicemail – Unreturnable, Self-Support, TAC Entered, Email, WebFeedback, Fax, Survey  AND  Incidents > Response Sent  equals  No  AND  Custom Field > Closed By User  not equals  Yes  AND  Custom Field > Chat Issues  is not modified this edit) | Send Email Response to Sender Include incident details |
 | 01-Initial State | 01-CA-Inbound Vendor Portal AAQ - Send Email | Active | If (Incidents > Source  equals  Ask A Question  AND  Incidents > Interface  equals  chewyca  AND  Custom Field > Request Type  equals  Create or modify Appointment, Dropship Vendor Performance Appeal, DSCO Questions/Issues, Marketing Request, New Vendor Follow-up, Setup EDI Account, Playbook Questions, Dropship Shipping or Ordering Questions, Shipping or Ordering Questions, Vendor Account Information Update, Vendor Performance Scorecard Questions, Collect Vendor Creating New OTM Profile, Technical Questions for RTS, Transportation Escalations, Accessorial Request, Contact Follow-Up, Report Technical Issue, New International Vendor Submission, Contact and Address Update, Banking Information Update, Certificate of Insurance Renewal, Vendor Merger & Acquisition) | Send Email Response to Sender |
 | 01-Initial State | 01-CA-Inbound Vendor Portal AAQ - Feedba | Active | If (Incidents > Source  equals  Ask A Question  AND  Custom Field > Request Type  equals  Feedback or Suggestions  AND  Incidents > Interface  equals  chewyca) | Send Email Response to Sender |
 | 01-Initial State | 01-CA-Inbound Central Scheduling Cofirm | Active | If (Incidents > Source  equals  Ask A Question  AND  Custom Field > Request Type  equals  Create or Modify Appointment, Reschedule Appt  AND  Incidents > Interface  equals  chewyca) | Send Email Response to Sender |
@@ -2219,12 +2476,17 @@ Export CSV: `Incident_SendMarketingEmail.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Continue (16 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Continue (21 Active Rules)</summary>
 
 Export CSV: `Incident_TransitionState_Continue.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | Subject Tree Routing - End User | Active | If (Incidents > Source  equals  Create a Ticket, Feedback on Answers, SmartAssistant on Ask A Question) | Transition State And Continue 2 - In Progress |
+| 1 - New | Subject Tree Routing - All Other | Active | If (Incidents > Source  equals  Management & Config, CX Console, Thin Client, End-User Pages, My Tickets, My Tickets Profiles Contact Update, Pass-Through Authentication, Feedback on Answers, Site Feedback, Feedback Response, Create Login, Marketing Unsubscribe, Feedback Unsubscribe, WAP, Utilities, Public API, Outlook Synch Tools, Import Tools, Process Flow, Web Console, Unspecified  AND  Custom Field > Leave in Queue  not equals  Yes) | Transition State And Continue 2 - In Progress |
+| 1 - New | Transition to In Progress | Active | If () | Transition State And Continue 2 - In Progress |
+| 3 - Closed | Process Reopened Tickets | Active | If (Incidents > Status  not equals  Closed) | Transition State And Continue 2 - In Progress |
+| 3 - Routing Incidents (Self-Service) | Catch All Rule | Active | If (Incidents > Queue  equals  Unspecified) | Transition State And Continue 2 - In Progress |
 | 01-Initial State | 01-RxCS Follow-Up [new] | Active | If (Custom Field > Routing Tags  contains  [new]  AND  Custom Field > Routing Tags  contains  [rxcs]  AND  Custom Field > Routing Tags  contains  [nsfu]  AND  Custom Field > Routing Tags  contains  [digi]) | Transition State And Continue 04-Pharmacy State |
 | 01-Initial State | 01-Rx Pharmacy Initial Routing [new] | Active | If (Custom Field > Routing Tags  contains  [new]  OR  Custom Field > Routing Tags  contains  [de]  OR  Custom Field > Routing Tags  contains  [nsfu]  OR  Custom Field > Routing Tags  contains  [pof]) | Transition State And Continue 04-Pharmacy State |
 | 01-Initial State | 01-Rx Pharmacy Initial Routing | Active | If ((  Custom Field > Routing Tags  contains  [gaba]  OR  Custom Field > Routing Tags  contains  [hipr]  OR  Custom Field > Routing Tags  contains  [dur]  OR  Custom Field > Routing Tags  contains  [pfu]  OR  Custom Field > Routing Tags  contains  [ncno]  OR  Custom Field > Routing Tags  contains  [snl]  OR  Custom Field > Routing Tags  contains  [dverb] )  AND (  Custom Field > Channel  not equals  Fax )) | Transition State And Continue 06-Rx Pharmacy Initial Routing |
@@ -2247,7 +2509,7 @@ Export CSV: `Incident_TransitionState_Continue.csv`
 </details>
 
 <details open>
-  <summary style="font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;">Object: Contact (123 Active Rules)</summary>
+  <summary style="font-weight: 700; font-size: 18px; cursor: pointer; color: #2563eb;">Object: Contact (136 Active Rules)</summary>
 
 #### Contact Sub-Field Lifecycle Flowchart
 ```mermaid
@@ -2268,12 +2530,18 @@ graph LR
 ```
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SetField (98 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SetField (104 Active Rules)</summary>
 
 Export CSV: `Contact_SetField.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 1 - New | CBA email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND (  Contacts > Email - Primary  equals  progress@defensetravel.osd.mil  OR  Contacts > Email - Primary  equals  arthur.l.briggs2.civ@mail.mil  OR  Contacts > Email - Primary  equals  progress@dtsproext01.defensetravel.osd.mil )  AND  Incidents > Subject  contains  CBA Detector Log) | Set Field Custom Field > Incident Type assign as Email \| Set Field Incidents > Subject assign as CBA Detector \| Set Field Incidents > Assigned assign as Ron D \| Set Field Incidents > Queue assign as TAC-CBA \| Set Field Incidents > Severity assign as Minor |
+| 1 - New | New email In Rule | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND (  Contacts > Email - Primary  equals  progress@dtsproext01.defensetravel.osd.mil  OR  Contacts > Email - Primary  equals  progress@defensetravel.osd.mil )) | Set Field Custom Field > Incident Type assign as Email |
+| 2 - In Progress | VIP Contact | Active | If (Custom Field > VIP  equals  Yes  AND  Contacts > Contact Type  equals  VIP  AND  Incidents > Banner Flag  is not modified this edit    AND  Incidents > Banner Flag  not equals  Medium, High) | Set Field Incidents > Banner Flag assign as Low & Banner Note assign as VIP Customer |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Set Field Incidents > Status assign as Closed |
+| 3 - Routing Incidents (Self-Service) | Answer Feedback 2 | Active | If (Incidents > Subject  equals  Answer Feedback  AND  Contacts > Last Name  equals  Feedback  AND  Contacts > First Name  equals  Answer) | Set Field Incidents > Queue assign as Answer Feedback \| Set Field Incidents > Severity assign as Minor |
+| 6 - Queue Assignment | Assigned Queue - TAC-RA 2 | Active | If (Incidents > Subject  equals  Recruit Assist Program  AND  Contacts > Last Name  equals  Assist  AND  Contacts > First Name  equals  Recruit) | Set Field Incidents > Queue assign as TAC-RA \| Set Field Custom Field > Last Assigned Date equal to the value of Now |
 | 01-Initial State | Temp Rule to set 'ppauto' emails to Solved for UAT | Active | If (Contacts > Email - Primary  contains  ppauto-) | Set Field Incidents > Status assign as Solved |
 | 01-Initial State | 01-FedEx - discard Emails | Active | If (Incidents > Source  equals  Techmail - Service Mailbox  AND  Contacts > Email - Primary  contains  @chewy.com  AND (  Incidents > Subject  match regex  FedEx has received your email - Email Reference Number: .  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package has been delivered  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is scheduled for delivery tomorrow  OR  Incidents > Subject  match regex  FedEx Shipment .+ This shipment was tendered to FedEx Ground  OR  Incidents > Subject  match regex  FedEx Shipment .+ Notification  OR  Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages could not be delivered.  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today  OR  Incidents > Subject  match regex  edEx Customer Survey - Email Reference Number .+  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is delayed.  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your packages are now out for delivery  OR  Incidents > Subject  match regex  FedEx Shipment .+ Some of your packages are now out for delivery today  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package delivery has been updated  OR  Incidents > Subject  match regex  FedEx Shipment .+ Your package is now out for delivery today  OR  Incidents > Subject  match regex  FedEx Address Corrections\|FedEx Request\|FedEx Reroute Request\|FedEx Rstatus Reroutes\|FedEx Shipper Complaints\|Shipment Details Needed\|FedEx Values Your Feedback\|FedEx Customer Care Survey  OR  Incidents > Subject  match regex  Tell us about your recently closed FedEx case experience\|FedEx Ground EPDI Reconciliation\|Status of FedEx Case  OR  Incidents > Subject  match regex  FedEx Case Number C .+ Ref .+ for Tracking Number .+ )) | Set Field Incidents > Assigned assign as Kelly Williamson |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Set Field Custom Field > Channel assign as Email \| Set Field Incidents > Status assign as Solved \| Set Field Incidents > Category assign as Automatic Email Reply \| Set Field Incidents > Queue assign as Vendor Specialists |
@@ -2376,12 +2644,13 @@ Export CSV: `Contact_SetField.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Stop (80 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: TransitionState_Stop (81 Active Rules)</summary>
 
 Export CSV: `Contact_TransitionState_Stop.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Transition State And Stop 3 - Closed |
 | 01-Initial State | Temp Rule to set 'ppauto' emails to Solved for UAT | Active | If (Contacts > Email - Primary  contains  ppauto-) | Transition State And Stop 05-Chewy Vet Care |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Transition State And Stop 02-Updated State |
 | 01-Initial State | 01-G-Inbound Open Methods Training Email | Active | If (Incidents > Incoming Mailbox  equals  Chewy  AND  Contacts > Email - Primary  equals  training@chewy.com  AND  Incidents > Queue  equals  General Email Overflow  AND (  Incidents > Channel  equals  Email  OR  Custom Field > Channel  equals  Email )) | Transition State And Stop 02-Updated State |
@@ -2521,12 +2790,30 @@ Export CSV: `Contact_StopProcessing.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: AppendTemplate (6 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: Escalation (4 Active Rules)</summary>
+
+Export CSV: `Contact_Escalation.csv`
+
+| Rule Group | Rule Name | Status | Condition | Action Text |
+|---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Escalate to Unresolved Contact 1 +27 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 2 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 1) | Escalate to Unresolved Contact 2 +54 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 3 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 2) | Escalate to Unresolved Contact 3 +81 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+| 11-Unresolved Contact | Unresolved Contact 4 | Active | If (Incidents > Status  equals  Unresolved Contact  AND  Incidents > Escalation Level  equals  Unresolved Contact 3) | Escalate to Unresolved Contact 4 +90 Hours Exactly From Incidents > Date Last Responded Use Response Interval Revalidate Recalculate |
+
+  </details>
+
+  <details open>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: AppendTemplate (10 Active Rules)</summary>
 
 Export CSV: `Contact_AppendTemplate.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 1  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact |
+| 11-Unresolved Contact | Unresolved Contact 2 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 2  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact 2 |
+| 11-Unresolved Contact | Unresolved Contact 3 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 3  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 3, Unresolved Contact 4) | Append Response Template to Response Unresolved Contact 3 |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Append Response Template to Response CLOSED WITHOUT CONFIRMATION |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Append Response Template to Response Vendor Auto Response |
 | F23-Chewy Contact Us Routing | F23-Route CHIRP Request | Active | If (Incidents > Interface  equals  chewykb  AND  Incidents > Category  equals  Targeted Topics, CHIRP Topics) | Append Response Template to Response CHIRP Request |
 | F23-Chewy Contact Us Routing | F23 - AAQ Cancel Order | Active | If (Incidents > Category  equals  Cancel Order  AND  Orders > OrderId  is not null) | Append Response Template to Notes Cancel Order Note |
@@ -2567,12 +2854,16 @@ Export CSV: `Contact_Other.csv`
   </details>
 
   <details open>
-    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SendEmail (2 Active Rules)</summary>
+    <summary style="font-weight: 600; font-size: 15px; cursor: pointer;">Action Type: SendEmail (6 Active Rules)</summary>
 
 Export CSV: `Contact_SendEmail.csv`
 
 | Rule Group | Rule Name | Status | Condition | Action Text |
 |---|---|---|---|---|
+| 11-Unresolved Contact | Unresolved Contact 1 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 1  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 1, Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 2 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 2  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 2, Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 3 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 3  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 3, Unresolved Contact 4) | Send Email Response to Sender Include incident details |
+| 11-Unresolved Contact | Unresolved Contact 4 Action | Active | If (Incidents > Escalation Level  equals  Unresolved Contact 4  AND  Incidents > Previous Escalation Level  not equals  Unresolved Contact 4) | Send Email Response to Sender Include incident details |
 | 01-Initial State | 01- Vendor Portal Auto Reply | Active | If (Incidents > Source  equals  Utilities  AND  Incidents > Incoming Mailbox  equals  Chewy Merch, Chewy Accounting, Chewy EDI, Chewy Vendor Service Portal, Chewy Transportation  AND  Contacts > Email - Primary  does not contain  @sps.com  AND  Contacts > Email - Primary  does not contain  @ibm.com) | Send Email Response to Sender |
 | F23-Chewy Contact Us Routing | F23-Route CHIRP Request | Active | If (Incidents > Interface  equals  chewykb  AND  Incidents > Category  equals  Targeted Topics, CHIRP Topics) | Send Email Response to Sender Include question Include incident details |
 
@@ -2595,18 +2886,18 @@ Export CSV: `Contact_SendMarketingEmail.csv`
 
 | Action Type | Global Count | Percentage |
 |---|---|---|
-| **SetField** | 2783 | 63.3% |
-| **TransitionState_Stop** | 475 | 10.8% |
-| **CPMCall** | 200 | 4.6% |
-| **FunctionCall** | 191 | 4.3% |
-| **StopProcessing** | 170 | 3.9% |
-| **ClearEscalation** | 145 | 3.3% |
-| **Escalation** | 49 | 1.1% |
-| **AppendTemplate** | 123 | 2.8% |
-| **Other** | 109 | 2.5% |
-| **SendEmail** | 116 | 2.6% |
+| **SetField** | 3206 | 64.0% |
+| **TransitionState_Stop** | 478 | 9.5% |
+| **CPMCall** | 200 | 4.0% |
+| **FunctionCall** | 207 | 4.1% |
+| **StopProcessing** | 180 | 3.6% |
+| **ClearEscalation** | 150 | 3.0% |
+| **Escalation** | 68 | 1.4% |
+| **AppendTemplate** | 158 | 3.2% |
+| **Other** | 126 | 2.5% |
+| **SendEmail** | 198 | 4.0% |
 | **SendMarketingEmail** | 18 | 0.4% |
-| **TransitionState_Continue** | 16 | 0.4% |
+| **TransitionState_Continue** | 21 | 0.4% |
 
 ## 5. Disabled & Inactive Business Rules
 
@@ -2614,6 +2905,77 @@ The following business rules are currently **disabled or inactive** in the OSVC 
 
 | OSVC Object | Rule Group | Rule Name | Description | Status |
 |---|---|---|---|---|
+| Incident | 01. FAQ | Put in by TAC | This is an email notice to all TAC employee of new or updated FAQ | Inactive |
+| Incident | 01. FAQ | Updated by TAC | This is an email notice to all TAC employee of new or updated FAQ | Inactive |
+| Incident | 1 - New | Send Receipt Email | — | Inactive |
+| Incident | 1 - New | Out of Office Reply | If someone has an out of office reply on, and an email (non ticket) is sent to an analyst (i.e. for the monthly reports) a ticket will not be created from their out of office response. | Inactive |
+| Incident | 1 - New | PII SSN - Ask a Question locked | This rule will detect patterns of characters *********** OR *********** that could potentially represent Personally Identifiable Information (SSN) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII SSN - Ask a Question | This rule will detect patterns of characters *********** OR *********** that could potentially represent Personally Identifiable Information (SSN) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII SSN4 - Ask a Question | This rule will detect patterns of characters *********** OR *********** that could potentially represent Personally Identifiable Information (SSN) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII CC 15 - Ask a Question | This rule will detect patterns of characters that have a 15 digit number #### ###### ##### OR ############### OR ####-######-##### that could potentially represent Personally Identifiable Information (CC#) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII CC 16 - Ask a Question | This rule will detect patterns of characters 16 digit number #### #### #### #### OR ############### OR ####-####-####-####  that could potentially represent Personally Identifiable Information (CC#) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII CC 16 - Ask a Question locked | This rule will detect patterns of characters 16 digit number #### #### #### #### OR ############### OR ####-####-####-####  that could potentially represent Personally Identifiable Information (CC#) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | PII CC 15 - Ask a Question locked | This rule will detect patterns of characters that have a 15 digit number #### ###### ##### OR ############### OR ####-######-##### that could potentially represent Personally Identifiable Information (CC#) and route end-user-generated incidents containing such a pattern to the TAC-PII queue and give the user a message to that effect - Khurram | Inactive |
+| Incident | 1 - New | Smart Assistant - Standard Text | — | Inactive |
+| Incident | 1 - New | Notification for Training Tickets | This rule is intended to generate an email to the end user when a ticket is created. | Inactive |
+| Incident | 1 - New | Copy of Set Subject for CHAT Tickets | This rule is intended to generate an email to the end user when a ticket is created. | Inactive |
+| Incident | 1 - New | Set traveler names for CHAT Tickets | This rule is intended to generate an email to the end user when a ticket is created. | Inactive |
+| Incident | 2 - In Progress | PII Check on Updates | — | Inactive |
+| Incident | 2 - In Progress | Severity 1 Notification down Graded | — | Inactive |
+| Incident | 2 - In Progress | Severity 2 Notification down Graded | — | Inactive |
+| Incident | 2 - In Progress | TAC-Urgent Check | — | Inactive |
+| Incident | 2 - In Progress | TAC-Urgent queue email | — | Inactive |
+| Incident | 2 - In Progress | TAC-Soft Launch queue email | — | Inactive |
+| Incident | 2 - In Progress | TAC-Cognos queue email | — | Inactive |
+| Incident | 2 - In Progress | Modified Subject | — | Inactive |
+| Incident | 2 - In Progress | O&S Group Re-Assign | — | Inactive |
+| Incident | 2 - In Progress | PMO Group Re-Assign | — | Inactive |
+| Incident | 2 - In Progress | DTMO Group Re-Assign | — | Inactive |
+| Incident | 2 - In Progress | DTMO Group Assign | — | Inactive |
+| Incident | 2 - In Progress | O&S Group Assign | — | Inactive |
+| Incident | 2 - In Progress | PMO Group Assign | — | Inactive |
+| Incident | 2 - In Progress | TAC internal Escalate CTO Lead | To be used by the TAC to track internal Escalations | Inactive |
+| Incident | 2 - In Progress | Closed Email | This is the standard email which will be sent once a ticket has been closed. | Inactive |
+| Incident | 2 - In Progress | Prepend SPR | — | Inactive |
+| Incident | 10 - Edit Check | Rule 161 | — | Inactive |
+| Incident | 2 - Level 3 Routing | Portal Outage | — | Inactive |
+| Incident | 2 - Level 3 Routing | DTS-Complete Outage | — | Inactive |
+| Incident | 2 - Level 3 Routing | DTS-Site Only Outage | — | Inactive |
+| Incident | 2 - Level 3 Routing | DTMO-GEN Severity = Minor | — | Inactive |
+| Incident | 2 - Level 3 Routing | DTMO-Training Severity = Minor | — | Inactive |
+| Incident | 2 - Level 3 Routing | TAC-Import Expor Severity = Moderate (Ne | — | Inactive |
+| Incident | 2 - Level 3 Routing | TAC-Cognos Severity = Minor (New) | — | Inactive |
+| Incident | 2 - Level 3 Routing | TAC-Urgent = Moderate (New) | — | Inactive |
+| Incident | 2 - Level 3 Routing | TAC-IMP Severity = Other (New) | — | Inactive |
+| Incident | 2 - Level 3 Routing | PMO-DTS severity = minor | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | DTMO-GEN Severity = Minor | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | DTMO-Training Severity = Minor | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | TAC-Import Expor Severity - Moderate (Ne | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | TAC-Cognos  Severity = Minor (New) | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | TAC-ISE Severity = Minor (New) | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | TAC-Urgent = Moderate (New) | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | TAC-IMP Severity = Other (New) | — | Inactive |
+| Incident | 3 - Routing Incidents (Self-Service) | PMO-DTS severity = minor | — | Inactive |
+| Incident | 5 - Smart Sense | Angry Caller | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-Initiatives | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - PMO-Release | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-CBA | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-FIN | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-POLICY | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-REPORTS | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-TRAVEL CARD | — | Inactive |
+| Incident | 6 - Queue Assignment | Assigned Queue - DTMO-WEB | — | Inactive |
+| Incident | 7 - Recruit | Maxwell | — | Inactive |
+| Incident | 7 - Recruit | Airline Issue | — | Inactive |
+| Incident | 7 - Recruit | Weather | — | Inactive |
+| Incident | 7 - Recruit | Information Request | — | Inactive |
+| Incident | 7 - Recruit | Traveler Error | — | Inactive |
+| Incident | 7 - Recruit | Bus | — | Inactive |
+| Incident | 7 - Recruit | CTO Error | — | Inactive |
+| Incident | 7 - Recruit | MEPS Error | — | Inactive |
+| Incident | 7 - Recruit | Other Rollup | — | Inactive |
+| Incident | 7 - Recruit | Meals | — | Inactive |
+| Incident | 9 - Closed | Closed - Urgent | — | Inactive |
 | Contact | 01-Initial State | Esimon test | — | Inactive |
 | Incident | 01-Initial State | 01-Check Global Association | Checks association of a contact | Inactive |
 | Incident | 01-Initial State | 01-CA-Auto Reply | — | Inactive |
@@ -2684,7 +3046,7 @@ The following business rules are currently **disabled or inactive** in the OSVC 
 | Incident | 04-Pharmacy State | 04- Rx Pharmacy Waiting | — | Inactive |
 | Incident | 04-Pharmacy State | 04- Rx Pharmacy Email Updated | Oracle Rule | Inactive |
 | Incident | 05-Chewy Vet Care | 05.05 Call CVC 48hr Escalation Functi | — | Inactive |
-| Incident | testevent | Rule 460 | — | Inactive |
+| Incident | testevent | Rule 776 | — | Inactive |
 | Incident | F01-Email Routing | 01-Vet Diet Approval needed for Vet Rec | Routes emails with subject line "approval needed for vet recommended items | Inactive |
 | Contact | F01-Email Routing | 01-Route to Andrew Stein | — | Inactive |
 | Contact | F01-Email Routing | 01-Route to Elliot Basner | — | Inactive |

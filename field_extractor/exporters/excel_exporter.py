@@ -439,7 +439,7 @@ def _write_ignored_fields_tab(wb, unmapped_records):
     _write_rows(sheet, rows, headers)
 
 
-def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
+def write_workspaces_excel(parsed_workspaces, objects_map, output_path, include_ignored_tab=True):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
@@ -490,7 +490,8 @@ def write_workspaces_excel(parsed_workspaces, objects_map, output_path):
 
         _write_rows(sheet, rows, headers)
 
-    _write_ignored_fields_tab(wb, all_unmapped)
+    if include_ignored_tab:
+        _write_ignored_fields_tab(wb, all_unmapped)
     wb.save(output_path)
     return output_path
 
@@ -572,7 +573,7 @@ def write_objects_excel(objects_map, output_path):
     return output_path
 
 
-def write_combined_excel(parsed_workspaces, objects_map, output_path):
+def write_combined_excel(parsed_workspaces, objects_map, output_path, include_ignored_tab=True):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
@@ -636,9 +637,11 @@ def write_combined_excel(parsed_workspaces, objects_map, output_path):
 
         _write_rows(sheet, rows, headers)
 
-    _write_ignored_fields_tab(wb, all_unmapped)
+    if include_ignored_tab:
+        _write_ignored_fields_tab(wb, all_unmapped)
     wb.save(output_path)
     return output_path
 
 
-write_field_catalog_excel = write_combined_excel
+def write_field_catalog_excel(parsed_workspaces, objects_map, output_path, include_ignored_tab=True):
+    return write_combined_excel(parsed_workspaces, objects_map, output_path, include_ignored_tab=include_ignored_tab)

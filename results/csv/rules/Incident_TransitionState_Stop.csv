@@ -1,4 +1,6 @@
 ﻿Object,Action Type,Rule Group,Rule Name,Status,Condition,Actions
+Incident,TransitionState_Stop,2 - In Progress,Closed Email,Disabled,If (Incidents > Previous Status  not equals  Closed  AND  Incidents > Status  equals  Closed),Transition State And Stop 3 - Closed
+Incident,TransitionState_Stop,1 - Awaiting Confirmation,Awaiting Confirmation-Action,Enabled,If (Incidents > Escalation Level  equals  Awaiting Confirmation),Transition State And Stop 3 - Closed
 Incident,TransitionState_Stop,01-Initial State,01-CA-WOW Case,Enabled,If (Incidents > Queue  equals  CA - WOW  AND  Incidents > Interface  equals  chewyca),Transition State And Stop 50-Chewy CA State
 Incident,TransitionState_Stop,01-Initial State,01-G -Rx Voicemail,Enabled,If (Incidents > Subject  contains  Genesys-US-Pharm-Gabapentin-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-Nevada-VM  OR  Incidents > Subject  contains  Genesys-US-Pharm-RPhGeneral-VM),Transition State And Stop 04-Pharmacy State
 Incident,TransitionState_Stop,01-Initial State,01-G -PracticeHub - Vet Support Email VM,Enabled,If (Incidents > Subject  contains  Genesys-US-Pharm-DigitalClinic-VM),Transition State And Stop 04-Pharmacy State

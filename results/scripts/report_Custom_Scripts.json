@@ -1,6 +1,110 @@
 {
-  "custom_script_count": 13,
+  "custom_script_count": 26,
   "items": [
+    {
+      "file_name": "ExtendedSample.php",
+      "script_type": "Controller Endpoint",
+      "summary": "Server-side PHP script (`ExtendedSample.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "MySocialSearch.php",
+      "script_type": "Controller Endpoint",
+      "summary": "Server-side PHP script (`MySocialSearch.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "ParameterTrimSample.php",
+      "script_type": "Server-side Utility",
+      "summary": "Server-side PHP script (`ParameterTrimSample.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "Sample.php",
+      "script_type": "Controller Endpoint",
+      "summary": "Server-side PHP script (`Sample.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
     {
       "file_name": "address_validation.php",
       "script_type": "Server-side Utility",
@@ -13,14 +117,14 @@
         "ROQL"
       ],
       "external_calls": [
-        "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
         "REST cURL POST/GET: https://js.arcgis.com/4.20/",
-        "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css"
+        "REST cURL POST/GET: https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "REST cURL POST/GET: https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       ],
       "urls": [
-        "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
         "https://js.arcgis.com/4.20/",
-        "https://js.arcgis.com/4.20/esri/themes/light/main.css"
+        "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+        "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
       ],
       "exposed_routes": [],
       "risk_flags": [
@@ -81,12 +185,6 @@
         {
           "protocol": "REST / HTTP",
           "method": "POST/GET",
-          "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
-          "details": "cURL POST/GET request"
-        },
-        {
-          "protocol": "REST / HTTP",
-          "method": "POST/GET",
           "endpoint": "https://js.arcgis.com/4.20/",
           "details": "cURL POST/GET request"
         },
@@ -94,6 +192,12 @@
           "protocol": "REST / HTTP",
           "method": "POST/GET",
           "endpoint": "https://js.arcgis.com/4.20/esri/themes/light/main.css",
+          "details": "cURL POST/GET request"
+        },
+        {
+          "protocol": "REST / HTTP",
+          "method": "POST/GET",
+          "endpoint": "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js",
           "details": "cURL POST/GET request"
         }
       ],
@@ -136,15 +240,15 @@
         },
         {
           "stage": "External REST",
-          "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
-        },
-        {
-          "stage": "External REST",
           "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/"
         },
         {
           "stage": "External REST",
           "action": "cURL POST/GET call -> https://js.arcgis.com/4.20/esri/themes/light/main.css"
+        },
+        {
+          "stage": "External REST",
+          "action": "cURL POST/GET call -> https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"
         }
       ],
       "has_html": true,
@@ -155,6 +259,195 @@
       ],
       "html_content": "﻿\n\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\" >\n  <meta name=\"viewport\" content=\"initial-scale=1, maximum-scale=1, user-scalable=no\">\n\n  <style>\n    html, body {\n      padding: 0;\n      margin: 0;\n      height: 100%;\n      width: 100%;\n      overflow-x:hidden;\n      \n    }\n\t.esri-search\n\t{\n\t\twidth: 95% !important;\n\t}\n\t.esri-search--show-suggestions .esri-search__suggestions-menu, .esri-search--sources .esri-search__sources-menu {\n\t    overflow: scroll !important;\n\t    visibility: visible;\n\t    max-height: 90px !important;\n\t    animation: esri-fade-in 250ms ease-out;\n\t}\t\n\t.esri_map_only\n\t{\n\t\theight:98%;\n\t\tborder: 1px solid black;\n\t}\n\t.esri_map\n\t{\n\t\theight:58%;\n\t\tborder: 1px solid black;\n\t}\n\t\n\t.rn_PageContent {\n\t\tpadding-top: 2em;\n\t}\n    .esri-search__input{\n\t\tmargin-bottom:0 !important;\n\t}\n\t.esri-menu__header{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__sources-button{\n\t\tdisplay: none !important;\n\t}\n\t.esri-search__suggestions-list{\t\n\t\tborder-top: solid 1px rgba(110,110,110,0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t    border-top-width: 1px;\n\t    border-top-style: solid;\n\t    border-top-color: rgba(110, 110, 110, 0.3);\n\t}\n\t.esri-view-height-less-than-medium .esri-popup__main-container {\n\t\tmax-height: 150px !important;\n\t}\n  </style>\n  <link rel=\"stylesheet\" href=\"https://js.arcgis.com/4.20/esri/themes/light/main.css\">\n  <script src=\"https://js.arcgis.com/4.20/\"></script>\n  <script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script>\n\n  <script>  \n\t//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"\";\n    \tlet token = \"\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = ;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set th",
       "js_content": "//GISPARAMETER - Geocode Server\t& Custom Search Options\t\n    require([\n      \"esri/widgets/Search/LocatorSearchSource\",\n      \"esri/tasks/Locator\",\n      \"esri/widgets/Search\",\n      \"esri/request\",\n\t  \"esri/identity/IdentityManager\"\n    ], function(LocatorSearchSource, Locator, Search, esriRequest, IdentityManager) \n    {     \n\t\t//GISPARAMETER - REST/SERVICES\n    \tlet serverURL =\"<?php echo $serverURL; ?>\";\n    \tlet token = \"<?php echo $sessionToken; ?>\";\n\n\t\t\t\t/****** Add Authentication ******/\n\t\tIdentityManager.registerToken({\n\t\t\t\t'server': serverURL,\n\t\t\t\t'token': token\n\t\t\t});\n\t\t/****** End of Add Authentication ******/\n\n\t\tvar featureLayers = <?php echo json_encode($featureLayers); ?>;\n    \tlet locatorURL = featureLayers.locator.API;\n\n\t\t\t\t\n\t\t/****** Add Custom Search ******/\n\t\t\tvar customSearchSource = new LocatorSearchSource({\n\t\t\t\tlocator: new Locator({ url: locatorURL }),\n\t\t\t\tgetSuggestions: function (params) {\n\t\t\t\t\t// You can request data from a\n\t\t\t\t\t// third-party source to find some\n\t\t\t\t\t// suggestions with provided suggestTerm\n\t\t\t\t\t// the user types in the Search widget\n\t\t\t\t\treturn esriRequest(locatorURL + \"/findAddressCandidates\", {\n\t\t\t\t\t\tquery: {\n\t\t\t\t\t\t\tSingleLine: params.suggestTerm.replace(/ /g, \" \"),\n\t\t\t\t\t\t\tlimit: 6,\n\t\t\t\t\t\t\tf:'pjson'\n\t\t\t\t\t\t},\n\t\t\t\t\t\tresponseType: \"json\"\n\t\t\t\t\t}).then(function (results) {\n\t\t\t\t\t\t// Return Suggestion results to display\n\t\t\t\t\t\t// in the Search widget\n\t\t\t\t\t\treturn results.data.candidates.map(function (candidate) {\n\t\t\t\t\t\t\treturn {\n\t\t\t\t\t\t\t\tkey: \"name\",\n\t\t\t\t\t\t\t\ttext: candidate.address,\n\t\t\t\t\t\t\t\tsourceIndex: params.sourceIndex\n\t\t\t\t\t\t\t};\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t},\n\t\t\t\tgetResults: (params) => {\n\t\t\t\t\tsetWsFields(params.suggestResult.text);\n\t\t\t\t},\n\t\t\t\tsingleLineFieldName: \"SingleLine\",\n\t\t\t\tname: \"Custom Geocoding Service\",\n\t\t\t\tplaceholder: \"Search Geocoder\",\n\t\t\t\tmaxResults: 3,\n\t\t\t\tmaxSuggestions: 6,\n\t\t\t\tsuggestionsEnabled: true,\n\t\t\t\tminSuggestCharacters: 0//,\n\t\t\t\t//withinViewEnabled:true\n\t\t\t});\n\t\t\n\t\t\n\t\t\tvar search = new Search({\n\t\t\t\tcontainer:\"searchDiv\",\n\t\t\t\tsources: [customSearchSource],\n\t\t\t\tincludeDefaultSources: false\t\t\t\t\t\t\t\n\t\t\t});\n\t\t\t\n\t\t/****** End of Add Custom Search ******/\t\n\t\t\t\t\n  \t\t\n    });\n    \n    var c = window.external.Contact;\n    var addressModified = false; // Flag to store if Map was used to fetch the address.\n\t//If opened through Destop Console then use Javascript Extension\n\tif(c !== undefined)\n\t{\n\t}\n\telse\n\t{\n\t\tvar theWorkspaceRecord;\n\t\tvar script = document.createElement('script');                \n\t\tscript.type = 'text/javascript';\n\t\tscript.async = true;\n\t\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\t\tscript.onload = function() {\t\t\t\n\t\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"AddressValidationExtionsion\", \"1\")\n\t\t\t.then(function(extensionProvider)\n\t\t\t{\n\t\t    \textensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    \t{\n\t    \t\t\ttheWorkspaceRecord = workspaceRecord;    \t\t\t   \n\t\t    \t});\n\t\t\t});\n\t\t};\t\n\t\tdocument.head.appendChild(script);\t\t\t\t\n\t\t\t\n\t\tfunction setWsFields(address)\n\t\t{\n\t\t\tlet adrInfo = address.trim().split(\",\");\n\t\t\tlet postalCode =' ';\n\t\t\tlet city = '';\n\t\t\tlet unitNum = '';\n\t\t\t\n\t\t\tif(adrInfo.length == 2)\n\t\t\t{\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 3)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[2].trim();\t\t\t\n\t\t\t\tcity = adrInfo[1].trim();//ex: Sudbury\n\t\t\t}\n\t\t\telse if(adrInfo.length == 4)\n\t\t\t{\n\t\t\t\tpostalCode = adrInfo[3].trim();\t\t\t\n\t\t\t\tcity = adrInfo[2].trim();//ex: Sudbury\t\t\n\t\t\t\tunitNum = adrInfo[1].trim().split(' ')[1].trim();//Unit 3..get #\t\n\t\t\t}\n\t\t\t\n\t\t\tlet streetInfo = adrInfo[0].trim().split(\" \");\t\t\t\n\t\t\tlet houseNumber = streetInfo[0].trim();// ex: \"23\"\n\t\t\tlet streetName = \"\";\t\t\t\n\n\t\t\tif(typeof streetInfo[1] === 'number' || streetInfo[1].length == 1)//Check if unit number if provided, it will either in interger or A-Z\n\t\t\t{\n\t\t\t\thouseNumber = houseNumber +' '+streetInfo[1].trim();\n\t\t\t\tstreetName = streetInfo.slice(2, streetInfo.length).join(\" \");\t\t\t\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tstreetName = streetInfo.slice(1, streetInfo.length).join(\" \");\n\t\t\t}\n\t        let recordType = theWorkspaceRecord.getWorkspaceRecordType();\n\t\t\tif(recordType == 'Contact')\n\t\t\t{\n\t\t\t\trecordType = recordType + '.CO$';\t\t\t\t\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'State', 'Ontario');\n\t\t\t\ttheWorkspaceRecord.updateFieldByLabel(recordType+'Country', 'CA');\t\n\t\t\t\t\n\t\t\t}\n\t\t\telse//case of custom object CO$Address\n\t\t\t\trecordType = recordType + '.';\n\t\t\t\t\n\t\t\t// Set the fields in Service Cloud/B2C. \n\t\t\ttheWorkspaceRecord.updateField(recordType+'HouseNumber', houseNumber);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'StreetName', streetName);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'City', city);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'PostalCode', postalCode);\n\t\t\ttheWorkspaceRecord.updateField(recordType+'Unit', unitNum);\t\t\t\n\t\t}\n\t}\n\n/*\n\tConfigure observation of ArcGIS to handle the 'renderNoResultsWarning'function\n\tThis function creates a warning message that says no results have been found even\n\tif they were. This is rendered from the search when no *exact* results have been found.\n\n\tIf there were a new property, if the layer wasn't exact, or for any other reason,\n\tthis could be shown be misleading:\n\ttherefor -> observe the dom object and update to a proper message.\n\t\n\tAttempted to overload the search.renderNoResultsWarning, update Search.messages\n\tto no avail. This is simplest.\n\t*/\n\n\t// Options for the esri observer\n\tconst config = { attributes: true, childList: true, subtree: true };\n\n\t// Callback function for when esri warning div is modified\n\tconst callback = (mutationList, observer) => {\n\t\tfor (const mutation of mutationList) {\n\t\t\tif (mutation.type === \"childList\") {\n\t\t\t\t// take copy of the text in the warning div\n\t\t\t\tlet warningText = mutation.target.lastChild.textContent;\n\t\t\t\tif(warningText.includes(\"There were no results found for\")){\n\t\t\t\t\t// remove the header\n\t\t\t\t\tmutation.target.parentNode.firstChild.textContent = \"\";\n\n\t\t\t\t\tconst textCommaCount = (warningText.split(",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "answer_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`answer_model.php`) that executes 11 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 1)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "select a.a_id, a.m_id, a.dt_id, a.type, a.lang_id, a.summary, a.description, a.solution, a.created, a.updated, a.access_mask, l.label, a.url, f.file_id $customFieldColumns from answers a left outer join labels l on (a.status_id = l.label_id) and (%d = l.tbl) and (a.lang_id = l.lang_id) left outer join fattach f on (f.id=$answerID and f.tbl=%d) where (a.a_id = $answerID)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT l.to_a_id, fto.created, fto.summary, %s FROM links l, answers fto, interfaces i",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT DISTINCT c.context1, c.context2 FROM clickstreams c, cs_actions a WHERE c.cs_session_id=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT DISTINCT a_id, summary FROM answers WHERE a_id in $ids",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT a.type, a.url, a.status_type, f.file_id, f.created, a.updated FROM answers a LEFT OUTER JOIN fattach f ON f.id=%d AND f.tbl = %d WHERE a.a_id = %d",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT COUNT(*) FROM answers WHERE a_id = %d",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT f.file_id, IF (f.name IS NULL, f.userfname, f.name), f.created, f.content_type, f.private, a.m_id, f.sz, f.userfname FROM fattach f LEFT OUTER JOIN answers a ON (a.a_id = %d) WHERE ((f.id = %d AND f.tbl = %d) OR (f.id = a.m_id and f.tbl = %d)) AND (f.private IS NULL OR f.private = 0) ORDER BY f.tbl DESC, f.seq",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select a_id, summary, solution, type, url, description from answers where (a_id in (",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select a.keywords, a.m_id, a.type, a.lang_id, a.summary, a.description, a.solution, a.created, a.updated, a.access_mask, l2.label from answers a left outer join labels l2 on (a.status_id = l2.label_id) and (%d = l2.tbl) and (a.lang_id = l2.lang_id) $from",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT a_id, summary, lang_id, status_type FROM answers WHERE a_id $whereClause",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT t.lang_id, l.label FROM languages t, labels l WHERE l.tbl=%d AND l.label_id=t.lang_id AND l.fld=1 ORDER BY l.label",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select a.a_id, a.m_id, a.dt_id, a.type, a.lang_id, a.summary..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT l.to_a_id, fto.created, fto.summary, %s FROM links l,..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT DISTINCT c.context1, c.context2 FROM clickstreams c, ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT DISTINCT a_id, summary FROM answers WHERE a_id in $id..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT a.type, a.url, a.status_type, f.file_id, f.created, a..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT COUNT(*) FROM answers WHERE a_id = %d..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT f.file_id, IF (f.name IS NULL, f.userfname, f.name), ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select a_id, summary, solution, type, url, description from ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select a.keywords, a.m_id, a.type, a.lang_id, a.summary, a.d..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT a_id, summary, lang_id, status_type FROM answers WHER..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT t.lang_id, l.label FROM languages t, labels l WHERE l..."
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "answerfeedback_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`answerfeedback_model.php`) that executes 3 internal OSVC database/Connect PHP operation(s). Primary entity target(s): Contact.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [
+        "Contact"
+      ],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Contact::fetch(intval($ContactID)",
+          "operation": "Fetch Contact"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Contact::fetch($contactID)",
+          "operation": "Fetch Contact"
+        },
+        {
+          "type": "Connect PHP Fetch",
+          "detail": "RNCPHP\\Contact::fetch($ContactID)",
+          "operation": "Fetch Contact"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal API",
+          "action": "Fetch Contact instance (intval($ContactID)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Contact instance ($contactID)"
+        },
+        {
+          "stage": "Internal API",
+          "action": "Fetch Contact instance ($ContactID)"
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
       "unhandled_elements": [],
       "unknowns": {
         "unknown_attrs": [],
@@ -408,6 +701,52 @@
       }
     },
     {
+      "file_name": "clickstream_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`clickstream_model.php`) that executes 2 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT a.action FROM clickstreams c, cs_actions a WHERE c.action_id = a.action_id AND c.cs_session_id=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT f.type FROM flows f, flow_web_pages fwp WHERE f.flow_id = fwp.flow_id and shortcut=",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT a.action FROM clickstreams c, cs_actions a WHERE c.ac..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT f.type FROM flows f, flow_web_pages fwp WHERE f.flow_..."
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
       "file_name": "closing_notes.php",
       "script_type": "Server-side Utility",
       "summary": "Server-side PHP script (`closing_notes.php`) that executes 2 internal OSVC database/Connect PHP operation(s). Primary entity target(s): Account, ConnectAPIErrorBase.",
@@ -453,6 +792,309 @@
       ],
       "html_content": "",
       "js_content": "var theWorkspaceRecord;\n\tvar script = document.createElement('script');                \n\tscript.type = 'text/javascript';\n\tscript.async = true;\n\tscript.src = '/AgentWeb/module/extensibility/js/client/core/extension_loader.js';\t\n\tscript.onload = function() {\n\t\t\t\n\t\tORACLE_SERVICE_CLOUD.extension_loader.load(\"LoggedInAccount\", \"1\")\n\t\t.then(function(extensionProvider)\n\t\t{\n\t\t\t\t\n\t\t    namedLogger = extensionProvider.getLogger('CGS Logger');\n\t\t    namedLogger.trace('Load CGS Logged In Account');\n\t\t\n\t\t    extensionProvider.registerWorkspaceExtension(function(workspaceRecord)\n\t\t    {\n\n\t    \t\ttheWorkspaceRecord = workspaceRecord;\n\t\t\t\t//List of fields to be prefetch\n\t\t\t\tworkspaceRecord.prefetchWorkspaceFields(['Incident.c$closing_notes','Incident.CO$ClosingNotesUpdatedByUser']);\n\t    \t\t\t\n\t\t\t\t//OOTB Workspace Event\n\t\t\t\tworkspaceRecord.addRecordSavingListener(dataSavingListenerForSR);\n\t                \n\t\t    });\n\t\t});\n\t};\t\n\tdocument.head.appendChild(script);\t\t\t\n\t\t\n\t//Function to call custom form validation on save operation of Incident\n\t//If custom form validation fails then cancel the save operation\t\t\n\tfunction dataSavingListenerForSR(parameter) {\t\t\n\t\tif (parameter.event.fieldObjects[\"Incident.c$closing_notes\"].value)\n\t\t{\n\t\t\tif(parameter.event.fieldObjects[\"Incident.c$closing_notes\"].value.length >= 10)\n\t\t\t{\n\t\t\t\ttheWorkspaceRecord.updateField('Incident.CO$ClosingNotesUpdatedByUser', \"<?php echo $agentName  ?>\");\n\t\t\t}\n\t\t\telse \n\t\t\t{\n\t\t\t\tparameter.getCurrentEvent().cancel();\n\t\t\t\talert(\"Please enter a longer closing note.\");\n\t\t\t}\n\t\t}\n\t}",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "contact_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`contact_model.php`) that executes 23 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "select c.login, c.password_hash, c.email, c.first_name, c.last_name, c.alt_first_name, c.alt_last_name, c.email_alt1, c.email_alt2, c.street, c.city,c.ma_opt_in, c.ma_mail_type, c.postal_code, c.country_id, c.prov_id, c.ph_office, c.ph_mobile, c.ph_fax, c.ph_asst, c.ph_home, c.title, c.ma_state, c.sa_state, c.css_state, c.password_email_exp, c.survey_opt_in, o.login, o.name, c.disabled $customFieldColumns from contacts c LEFT JOIN orgs o ON c.org_id=o.org_id where c.c_id = $contactID",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select c.country_id, lc.label, c.postal_mask, p.prov_id, lp.label, c.phone_mask from labels lc, countries c left outer join provinces p on (p.country_id = c.country_id) left outer join labels lp on ((lp.tbl = %d) and (lp.lang_id = %d) and (p.prov_id = lp.label_id)) where (c.country_id = lc.label_id) and (lc.tbl = %d) and (lc.lang_id = %d) order by c.seq, p.seq, lp.label",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select c.country_id, lc.label, c.postal_mask, c.phone_mask from labels lc, countries c where (c.country_id = lc.label_id) and (lc.tbl = %d) and (lc.lang_id = %d) order by c.seq",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select ct.chan_type_id, l.label from channel_types ct left outer join labels l on l.tbl = %d and l.lang_id = %d and l.label_id = ct.chan_type_id where ct.contact_vis = 1 order by ct.seq",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select ct.chan_type_id, l.label, c.username, c.userid from channel_types ct left outer join labels l on l.tbl = %d and l.lang_id = %d and l.label_id = ct.chan_type_id left outer join contact2channel_type c on c.c_id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT contact.c_id, contact.email FROM openid_accounts openid, contacts contact WHERE openid.openid_url =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT contact.c_id, contact.email FROM contact2channel_type channel, contacts contact WHERE channel.chan_type_id = $providerID AND contact.c_id = channel.c_id AND (channel.userid = $openLoginAccountID $optionalCriteria)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT $openIDDesignator, openid_url, '$openIDDesignator' FROM openid_accounts WHERE c_id = $contactID",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT chan_type_id, username, userid FROM contact2channel_type WHERE c_id = $contactID $optionalCriteria UNION $openIDSelectStatement",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select c.postal_mask, p.prov_id, lp.label, c.phone_mask from labels lc, countries c left outer join provinces p on (p.country_id = c.country_id) left outer join labels lp on ((lp.tbl = %d) and (lp.lang_id = %d) and (p.prov_id = lp.label_id)) where (c.country_id = lc.label_id) and (lc.tbl = %d) and (lc.lang_id = %d) and (c.country_id=%d) order by p.seq, lp.label",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT count(*) FROM ans_notif WHERE (c_id = %d) AND (a_id = %d)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT start_time FROM ans_notif WHERE (c_id = %d) AND (a_id = %d)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id FROM contacts WHERE (email =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id, email, email_invalid FROM contacts WHERE (login =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id FROM contacts WHERE email=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id FROM contacts WHERE login=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id from contacts where c_id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id, 'login', login FROM contacts WHERE login =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT c_id, 'email', email FROM contacts WHERE email in ($emailString) UNION SELECT c_id,",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select org_id, password from orgs where (login =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select password from contacts where (c_id = %d)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select disabled from contacts where (c_id = %d)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select label from labels where tbl=%d and lang_id=%d and fld=1 and label_id in (%s)",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select c.login, c.password_hash, c.email, c.first_name, c.la..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select c.country_id, lc.label, c.postal_mask, p.prov_id, lp...."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select c.country_id, lc.label, c.postal_mask, c.phone_mask f..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select ct.chan_type_id, l.label from channel_types ct left o..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select ct.chan_type_id, l.label, c.username, c.userid from c..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT contact.c_id, contact.email FROM openid_accounts open..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT contact.c_id, contact.email FROM contact2channel_type..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT $openIDDesignator, openid_url, '$openIDDesignator' FR..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT chan_type_id, username, userid FROM contact2channel_t..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select c.postal_mask, p.prov_id, lp.label, c.phone_mask from..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT count(*) FROM ans_notif WHERE (c_id = %d) AND (a_id =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT start_time FROM ans_notif WHERE (c_id = %d) AND (a_id..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id FROM contacts WHERE (email =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id, email, email_invalid FROM contacts WHERE (login..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id FROM contacts WHERE email=..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id FROM contacts WHERE login=..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id from contacts where c_id =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id, 'login', login FROM contacts WHERE login =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT c_id, 'email', email FROM contacts WHERE email in ($e..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select org_id, password from orgs where (login =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select password from contacts where (c_id = %d)..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select disabled from contacts where (c_id = %d)..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select label from labels where tbl=%d and lang_id=%d and fld..."
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "customChat.php",
+      "script_type": "Server-side Utility",
+      "summary": "Server-side PHP script (`customChat.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "customfield_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`customfield_model.php`) that executes 1 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 1)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT m.cf_id, l.label_id, l.label FROM labels l, menu_items m WHERE l.label_id = m.id AND l.tbl = %d AND l.lang_id = %d ORDER BY m.cf_id, m.seq",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT m.cf_id, l.label_id, l.label FROM labels l, menu_item..."
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
       "unhandled_elements": [],
       "unknowns": {
         "unknown_attrs": [],
@@ -669,9 +1311,9 @@
       ],
       "external_calls": [],
       "urls": [
-        "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
-        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"
+        "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
       ],
       "exposed_routes": [],
       "risk_flags": [],
@@ -791,9 +1433,9 @@
       ],
       "external_calls": [],
       "urls": [
-        "https://use.fontawesome.com/releases/v5.1.1/css/all.css",
+        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css",
         "https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js",
-        "https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"
+        "https://use.fontawesome.com/releases/v5.1.1/css/all.css"
       ],
       "exposed_routes": [],
       "risk_flags": [],
@@ -917,6 +1559,224 @@
       "flow_steps": [],
       "has_html": false,
       "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "incident_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`incident_model.php`) that executes 9 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 1)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "select i.subject, i.created, i.updated, i.closed, i.ref_no, s.label, i.c_id, cu.org_id, cu.email, cu.first_name, cu.last_name, slal.label, i.status_id $cols from incidents i left outer join labels s on (i.status_id = s.label_id) and (s.tbl = %d) and (s.lang_id = %d) left outer join contacts cu on (i.c_id = cu.c_id) left outer join sla_instances slai on (slai.slai_id = i.slai_id) left outer join labels slal on (slal.label_id = slai.sla_id) and (slal.tbl = %d) $from where (i.i_id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select t.note, t.entered, a.display_name, t.entry_type, c.first_name, c.last_name, l.label from threads t left outer join accounts a on (a.acct_id = t.acct_id) left outer join contacts c on (c.c_id = t.c_id) left outer join labels l on (l.label_id = t.chan_id and l.lang_id = %d) where (t.i_id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select %s, %s, %s, %s, %s, %s, hm.lvl1_id %s_lvl1_id, hm.lvl2_id %s_lvl2_id, hm.lvl3_id %s_lvl3_id, hm.lvl4_id %s_lvl4_id, hm.lvl5_id %s_lvl5_id, hm.lvl6_id %s_lvl6_id from incidents i left outer join hier_menus hm on (i.%s_id = hm.id) left outer join labels p1 on (hm.lvl1_id = p1.label_id) and (p1.tbl = %d) and (p1.lang_id = $langID) and (p1.fld = 1) left outer join visibility vp1 on (vp1.tbl = %d) and (vp1.interface_id = $interfaceID) and (vp1.id = hm.lvl1_id) left outer join labels p2 on (hm.lvl2_id = p2.label_id) and (p2.tbl = %d) and (p2.lang_id = $langID) and (p2.fld = 1) left outer join visibility vp2 on (vp2.tbl = %d) and (vp2.interface_id = $interfaceID) and (vp2.id = hm.lvl2_id) left outer join labels p3 on (hm.lvl3_id = p3.label_id) and (p3.tbl = %d) and (p3.lang_id = $langID) and (p3.fld = 1) left outer join visibility vp3 on (vp3.tbl = %d) and (vp3.interface_id = $interfaceID) and (vp3.id = hm.lvl3_id) left outer join labels p4 on (hm.lvl4_id = p4.label_id) and (p4.tbl = %d) and (p4.lang_id = $langID) and (p4.fld = 1) left outer join visibility vp4 on (vp4.tbl = %d) and (vp4.interface_id = $interfaceID) and (vp4.id = hm.lvl4_id) left outer join labels p5 on (hm.lvl5_id = p5.label_id) and (p5.tbl = %d) and (p5.lang_id = $langID) and (p5.fld = 1) left outer join visibility vp5 on (vp5.tbl = %d) and (vp5.interface_id = $interfaceID) and (vp5.id = hm.lvl5_id) left outer join labels p6 on (hm.lvl6_id = p6.label_id) and (p6.tbl = %d) and (p6.lang_id = $langID) and (p6.fld = 1) left outer join visibility vp6 on (vp6.tbl = %d) and (vp6.interface_id = $interfaceID) and (vp6.id = hm.lvl6_id) where (i.i_id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT slai_id, label FROM sla_instances, labels WHERE sla_instances.owner_tbl=%d AND sla_instances.owner_id=%d AND labels.tbl=%d AND labels.lang_id=%d AND labels.label_id=sla_instances.sla_id AND ((expiredate IS NULL AND state=%d) OR (expiredate IS NOT NULL AND activedate < %s AND %s < expiredate AND state <= %d)) AND IFNULL(inc_total, 1)>0 AND IFNULL(inc_web, 1)>0 GROUP BY sla_set, slai_id, label, inc_web, inc_email, inc_chat, inc_csr, activedate HAVING MIN(activedate) = activedate ORDER BY activedate asc",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT ref_no FROM incidents WHERE i_id = $ret",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "select o.%s from incidents i join orgs o on i.org_id = o.org_id where (i.i_id = %d) and (i.org_id = o.org_id)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT file_id, userfname, created, content_type, private, sz FROM fattach WHERE id = $incidentID AND tbl =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT count(file_id) FROM fattach WHERE id =",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT closed FROM incidents WHERE i_id = $incidentID",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select i.subject, i.created, i.updated, i.closed, i.ref_no, ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select t.note, t.entered, a.display_name, t.entry_type, c.fi..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select %s, %s, %s, %s, %s, %s, hm.lvl1_id %s_lvl1_id, hm.lvl..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT slai_id, label FROM sla_instances, labels WHERE sla_i..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT ref_no FROM incidents WHERE i_id = $ret..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: select o.%s from incidents i join orgs o on i.org_id = o.org..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT file_id, userfname, created, content_type, private, s..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT count(file_id) FROM fattach WHERE id =..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT closed FROM incidents WHERE i_id = $incidentID..."
+        }
+      ],
+      "has_html": false,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "report_model.php",
+      "script_type": "Controller Endpoint",
+      "summary": "Server-side PHP script (`report_model.php`) that executes 5 internal OSVC database/Connect PHP operation(s).",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [
+        {
+          "type": "Hardcoded Credential",
+          "detail": "Potential credentials found in variable assignments (count: 5)"
+        }
+      ],
+      "internal_apis": [
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT s2.srch FROM similar_searches s1, similar_searches s2, similar_search_links sl WHERE s1.id=sl.to_id AND sl.from_id=s2.id AND s1.stem=",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT DISTINCT t.tw_type, t.a_id, a.summary, t.title, t.text, t.url, a.type, a.url FROM topic_words_phrases ti, topic_words t LEFT OUTER JOIN answers a ON a.a_id=t.a_id WHERE interface_id=%d AND (a.status_type=%d OR a.status_type IS NULL) AND (ti.stem IN (%s) AND t.state = 1 AND ti.tw_id=t.tw_id) UNION SELECT DISTINCT t.tw_type, t.a_id, a.summary, t.title, t.text, t.url, a.type, a.url FROM topic_words_phrases ti, topic_words t LEFT OUTER JOIN answers a ON a.a_id=t.a_id WHERE interface_id=%d AND (a.status_type=%d OR a.status_type IS NULL) AND (t.state = 2)",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT t.tw_type, t.a_id, a.summary, t.title, t.text, t.url, a.type, a.url FROM topic_words t LEFT OUTER JOIN answers a ON a.a_id=t.a_id WHERE interface_id=%d AND (a.status_type=%d OR a.status_type IS NULL) AND t.state = 2",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT l.label, m.lvl1_id, m.lvl2_id, m.lvl3_id, m.lvl4_id, m.lvl5_id, m.lvl6_id FROM labels l, hier_menus m, $keywordTempTable t WHERE l.label_id = t.id AND l.fld = 1 AND l.tbl = %s AND m.hm_type = $type AND m.id = t.id AND t.type = $tempTableType AND l.lang_id=%d ORDER BY t.weight DESC",
+          "operation": "SELECT Query"
+        },
+        {
+          "type": "ROQL Query",
+          "detail": "SELECT a.solution FROM answers a WHERE a.a_id=%d",
+          "operation": "SELECT Query"
+        }
+      ],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT s2.srch FROM similar_searches s1, similar_searches s2..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT DISTINCT t.tw_type, t.a_id, a.summary, t.title, t.tex..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT t.tw_type, t.a_id, a.summary, t.title, t.text, t.url,..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT l.label, m.lvl1_id, m.lvl2_id, m.lvl3_id, m.lvl4_id, ..."
+        },
+        {
+          "stage": "Internal DB",
+          "action": "Execute ROQL Query: SELECT a.solution FROM answers a WHERE a.a_id=%d..."
+        }
+      ],
+      "has_html": true,
+      "has_js": false,
+      "js_behaviors": [],
+      "html_content": "<?php\nclass Report_model extends Model\n{\n    const htSearchOpenOK = 1;\n    protected $isHTDigLoaded;\n    protected $returnData;\n    protected $reportID;\n    protected $appliedFilters;\n    protected $appliedFormats;\n    protected $viewDefinition;\n    protected $viewDataColumnDefinition;\n    protected $reportIsTypeExternalDocument = false;\n    protected $reportIsJoinedOnClusterTree = false;\n    protected $answerTableAlias;\n    protected $incidentTableAlias;\n    protected $answerIDList = array();\n    protected $CI;\n    \n    function __construct()\n    {\n        parent::__construct();\n        $this->CI = get_instance();\n        require_once(DOCROOT . '/views/view_utils.phph');\n    }\n    \n    /**************************************************************************************************\n     * public functions for accessing information about report filters\n     *************************************************************************************************/\n    \n    /**\n     * @param $reportNumber int- the report to check\n     * @returns array of all the runtime filter data\n     */\n    function getRuntimeFilters($reportNumber)\n    {\n        if ($this->isReportWidx($reportNumber))\n            return array();\n        $cacheKey = 'getRuntimeFilters' . $reportNumber;\n        $runtimeFilters = checkCache($cacheKey);\n        if ($runtimeFilters !== null)\n            return $runtimeFilters;\n        $filters = view_get_srch_filters($reportNumber);\n        setCache($cacheKey, $filters);\n        return $filters;\n    }\n    \n     /**\n    * Creates a search filter object.\n    * This should be used if you are adding filters through hooks.  Use this to create the correctly formatted filter and add it to the filter array\n    * @param $reportNumber int Report ID\n    * @param $name String Filter name\n    * @param $filterID Int Filter ID\n    * @param $value Mixed Filter value\n    * @param $rnSearchType (optional) rnSearchType; defaults to 'customName'\n    * @param $operatorID Int Operator ID; defaults to 1\n    * @return Object Filter object\n    */\n     function createSearchFilter($reportNumber, $name, $filterID, $value, $rnSearchType = 'customName', $operatorID = null)\n     {\n         $operatorID = ($operatorID !== null) ? $operatorID : OPER_EQ;\n         $filter->filters->rnSearchType = $rnSearchType;\n         $filter->filters->searchName = $name;\n         $filter->filters->report_id = $reportNumber;\n         $filter->filters->data->val = $value;\n         $filter->filters->oper_id = $operatorID;\n         $filter->filters->fltr_id = $filterID;\n         return $filter;\n     }\n     \n    /**\n    * returns a default search filter.  Filters of type int or text are also included.\n    * @param $reportNumber int - the report to check\n    * @returns a default search type filter array if one exists\n    */\n    function getSearchFilterTypeDefault($reportNumber)\n    {\n        $default = array();\n        if ($this->isReportWidx($reportNumber))\n        {\n            return array('fltr_id' => getConfig(EU_WIDX_SEARCH_BY_DEFAULT));\n        }\n        $rtFilters = $this->getRuntimeFilters($reportNumber);\n        $first = true;\n        if (is_array($rtFilters))\n        {\n            foreach($rtFilters as $key => $value)\n            {\n                if ($value['data_type'] === VDT_INT || $value['data_type'] === VDT_VARCHAR)\n                {\n                    if ($first)\n                    {\n                        $default = $rtFilters[$key];\n                        $first = false;\n                    }\n                    if ($value['default_value'])\n                    {\n                        $default = $rtFilters[$key];\n                    }\n                }\n            }\n        }\n        $default['default_value'] = ($default['default_value']) ? $default['default_value'] : \"\";\n        return $default;        \n    }\n     \n\n    /**\n     * Gets the runtime filter by fltr_id\n     * @param $reportNumber int - the report to check\n     * @param $filterID int - the filter you need\n     * @return array data for a runtime filter\n     */\n    function getFilterById($reportNumber, $filterID)\n    {\n        foreach ($this->getRuntimeFilters($reportNumber) as $value)\n        {\n            if ($value['fltr_id'] == $filterID)\n            {\n                return $value;\n            }\n        }\n        return null;\n    }\n    \n    /**\n    * @param $reportNumber int - the report\n    * @param $filterName string - the name of the filter (i.e. prod_hier)\n    * @return array of the data or null if the filter doesn't exist in the report or if the $filterName is empty.\n    */\n    function getFilterByName($reportNumber, $filterName)\n    {\n        if (strlen($filterName) > 0) {\n            foreach($this->getRuntimeFilters($reportNumber) as $value) {\n                if ($value['name'] === $filterName || stringContains($value['expression1'], $filterName)) {\n                    return $value;\n                }\n            }\n        }\n        return null;  \n    }\n    \n    /**\n    * converts the profile search type to the filter type\n    * @param $reportNumber int - the report to check\n    * @param $searchValue int - the profile value of the search type\n    * @return a default search type filter if one exists\n    */\n    function getSearchTypeFromValue($reportNumber, $searchValue)\n    {\n        switch ($searchValue)\n        {\n        case SRCH_TYPE_NL:\n            $searchName = PSEUDO_SEARCH_NL;\n            break;\n        case SRCH_TYPE_FNL:\n            $searchName = PSEUDO_SEARCH_FNL;\n            break;\n        case SRCH_TYPE_EX:\n            $searchName = PSEUDO_SEARCH_EX;\n            break;\n        case SRCH_TYPE_CPX:\n            $searchName = PSEUDO_SEARCH_CPX;\n            break;\n        default:\n            $searchName = \"\";\n        }\n        return ($this->getFilterByName($reportNumber, $searchName));\n    }\n    \n    /**\n     * gets the runtime filter data for a report id of type int or varchar\n     * @param $reportNumber int - the report to check",
+      "js_content": "",
+      "unhandled_elements": [],
+      "unknowns": {
+        "unknown_attrs": [],
+        "unknown_children": []
+      }
+    },
+    {
+      "file_name": "sample_model.php",
+      "script_type": "Model Helper",
+      "summary": "Server-side PHP script (`sample_model.php`) providing utility helper functions.",
+      "imports": [],
+      "report_ids": [],
+      "osvc_objects": [],
+      "external_calls": [],
+      "urls": [],
+      "exposed_routes": [],
+      "risk_flags": [],
+      "internal_apis": [],
+      "external_soap_apis": [],
+      "external_rest_apis": [],
+      "flow_steps": [],
+      "has_html": false,
+      "has_js": true,
       "js_behaviors": [],
       "html_content": "",
       "js_content": "",

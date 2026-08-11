@@ -378,13 +378,14 @@ def generate_report_markdown(ws):
         
         tab_fields = t.get("fields", [])
         tab_menus = t.get("menus", [])
+        tab_reports = t.get("reports", [])
         tab_relationship_items = t.get("relationship_items", [])
         tab_browsers = t.get("browsers", [])
         tab_addins = t.get("add_in_items", [])
         tab_title_bars = t.get("title_bars", [])
         tab_spacers = t.get("spacers", [])
         
-        total_controls = (len(tab_fields) + len(tab_menus) + 
+        total_controls = (len(tab_fields) + len(tab_menus) + len(tab_reports) +
                           len(tab_relationship_items) + len(tab_browsers) + 
                           len(tab_addins))
 
@@ -402,6 +403,7 @@ def generate_report_markdown(ws):
         distinct_kinds = sum([
             1 if tab_fields else 0,
             1 if tab_menus else 0,
+            1 if tab_reports else 0,
             1 if tab_relationship_items else 0,
             1 if tab_browsers else 0,
             1 if tab_addins else 0
@@ -454,18 +456,24 @@ def generate_report_markdown(ws):
                         lines.append(f"| {el['pos']} | {el['name']} | {el['notes']} |")
                     lines.append("")
 
-                if tab_relationship_items:
-                    lines.append("**2. Related Objects & Direct Reports**")
+                if tab_reports or tab_relationship_items:
+                    lines.append("**2. Analytics Reports & Related Objects**")
                     lines.append("")
-                    lines.append("| Position (Row, Col) | Type | Object / Report | Report IDs | Behavior / Config |")
+                    lines.append("| Position (Row, Col) | Type | Object / Control | Report IDs & References | Behavior / Config |")
                     lines.append("|---|---|---|---|---|")
+                    for rpt in tab_reports:
+                        acid = rpt.get("ac_id") or rpt.get("id") or "—"
+                        srid = rpt.get("search_report_id") or "—"
+                        rep_ids = f"Report ID: **{acid}**" + (f", SearchReportId: **{srid}**" if srid not in ("—", "0", None) else "")
+                        behavior = f"ExecuteOnNew: {rpt.get('execute_on_new', False)}, DelayExecution: {rpt.get('delay_report_execution', False)}"
+                        lines.append(f"| Row {rpt.get('row',0)}, Col {rpt.get('column',0)} | Analytics Report | `Report ({acid})` | {rep_ids} | {behavior} |")
                     for ri in tab_relationship_items:
                         item_type = ri.get("item_type")
                         ac_id = ri.get("ac_id") or "—"
                         search_id = ri.get("search_report_id") or "—"
                         ctrl_type = "Direct Report" if item_type == "Report" else "Related Object"
                         obj_name = "`Report`" if item_type == "Report" else f"`{get_related_object_name(item_type)}`"
-                        report_ids = f"Primary: **{ac_id}**" + (f", Secondary: **{search_id}**" if search_id != "—" else "")
+                        report_ids = f"Primary: **{ac_id}**" + (f", Secondary: **{search_id}**" if search_id not in ("—", "0", None) else "")
                         behavior = "Skips on new records" if not ri.get("execute_on_new") else "Runs on all records"
                         extra = []
                         if ri.get("can_send_on_save") == "True": extra.append("CanSendOnSave")
@@ -561,6 +569,15 @@ def generate_report_markdown(ws):
         else:
             lines.append("> **Single Component Tab**")
             lines.append("")
+            for rpt in tab_reports:
+                acid = rpt.get("ac_id") or rpt.get("id")
+                srid = rpt.get("search_report_id")
+                lines.append(f"- **Control Type:** Analytics Report (`Report {acid}`)")
+                if acid:
+                    lines.append(f"  - **Report ID (AcId):** `{acid}`")
+                if srid and str(srid) not in ("0", "None"):
+                    lines.append(f"  - **Search Report ID:** `{srid}`")
+                lines.append(f"  - **Behavior:** ExecuteOnNew: {rpt.get('execute_on_new', False)}, DelayExecution: {rpt.get('delay_report_execution', False)}")
             for ri in tab_relationship_items:
                 control_type = "Direct Report" if ri.get("item_type") == "Report" else f"Related Object (`{get_related_object_name(ri.get('item_type'))}`)"
                 lines.append(f"- **Control Type:** {control_type}")

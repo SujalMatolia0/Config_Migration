@@ -1,6 +1,6 @@
 # OSVC Configuration Master Index
 
-**Generated**: 2026-08-11 10:47:33  
+**Generated**: 2026-08-11 17:00:26  
 **Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  
 
 > [!NOTE]
@@ -18,22 +18,22 @@
 
 ## Workspaces
 
-### Standard Object Workspaces
-
-| Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- |
-| **Contact** | `Contact` | 8 | 9 | 1 | 0 | `100008`, `9029`, `9050` | [report.md](workspaces/Contact/report.md) |
-| **Incident** | `Incident` | 8 | 0 | 2 | 0 | `125`, `8010`, `8014`, `9011`, `9018`, `9029`, `9041` | [report.md](workspaces/Incident/report.md) |
-
 ### Custom & Edge Layout Workspaces
 
 | Workspace Name | Primary Object | Tabs | Fields | Rules | Unknowns | Referenced Reports | Documentation |
 | :--- | :--- | :---: | :---: | :---: | :--- | :--- | :--- |
-| **Contact test** | `Contact` | 6 | 0 | 3 | 0 | `100015`, `100038`, `10012`, `8001`, `9050` | [report.md](workspaces/Contact_test/report.md) |
-| **New Workspace** | `General` | 5 | 0 | 0 | 0 | `8001`, `8012`, `9016` | [report.md](workspaces/New_Workspace/report.md) |
-| **real_edge_01_nested_tabset** | `General` | 7 | 0 | 2 | 0 | `125`, `8010`, `8014`, `9011`, `9018`, `9029`, `9041` | [report.md](workspaces/real_edge_01_nested_tabset/report.md) |
-| **real_edge_02_new_workspace_patterns** | `General` | 5 | 0 | 1 | 0 | `8001`, `8012`, `9016` | [report.md](workspaces/real_edge_02_new_workspace_patterns/report.md) |
-| **real_edge_03_split_panel_contact** | `Contact` | 5 | 9 | 1 | 0 | `9029`, `9050` | [report.md](workspaces/real_edge_03_split_panel_contact/report.md) |
+| **Contacts Admin** | `Contact` | 9 | 0 | 0 | `1` | `10009`, `10012`, `101245`, `8012`, `9016`, `9030`, `9050` | [report.md](workspaces/Contacts_Admin/report.md) |
+| **Contacts S&A** | `Contact` | 3 | 0 | 0 | `3` | `9029` | [report.md](workspaces/Contacts_S&A/report.md) |
+| **Contacts with Disable** | `Contact` | 9 | 0 | 1 | `2` | `10009`, `10012`, `103889`, `8012`, `9016`, `9030`, `9050` | [report.md](workspaces/Contacts_with_Disable/report.md) |
+| **Incidents - Admin** | `Incident` | 11 | 0 | 11 | `22` | `104201`, `105353`, `8000`, `8010`, `9011`, `9018`, `9041` | [report.md](workspaces/Incidents_-_Admin/report.md) |
+| **Incidents - DTMO** | `Incident` | 15 | 0 | 9 | `22` | `125`, `8000`, `8010`, `9011`, `9018`, `9041` | [report.md](workspaces/Incidents_-_DTMO/report.md) |
+| **Incidents - O&S** | `Incident` | 8 | 0 | 2 | `17` | `8000`, `8010`, `9011`, `9018`, `9041` | [report.md](workspaces/Incidents_-_O&S/report.md) |
+| **Incidents - PMO** | `Incident` | 8 | 0 | 22 | `15` | `102408`, `8000`, `8010`, `9011`, `9018`, `9041` | [report.md](workspaces/Incidents_-_PMO/report.md) |
+| **Incidents - S&A** | `Incident` | 2 | 0 | 0 | `4` | — | [report.md](workspaces/Incidents_-_S&A/report.md) |
+| **Incidents - TAC RA V2** | `Incident` | 11 | 0 | 0 | `6` | `102408`, `8000`, `8010`, `8014`, `9011`, `9018`, `9041` | [report.md](workspaces/Incidents_-_TAC_RA_V2/report.md) |
+| **Incidents-TAC-BUI-new** | `Incident` | 14 | 14 | 62 | `64` | `104201`, `105353`, `8000`, `9011`, `9041` | [report.md](workspaces/Incidents-TAC-BUI-new/report.md) |
+| **TAC Interaction-Chat Sessions** | `General` | 3 | 31 | 23 | `40` | `8014`, `9029` | [report.md](workspaces/TAC_Interaction-Chat_Sessions/report.md) |
+| **contact1** | `Contact` | 9 | 0 | 1 | 0 | `10009`, `10012`, `103889`, `8001`, `8012`, `9016`, `9030`, `9050` | [report.md](workspaces/contact1/report.md) |
 
 ## Reports
 
@@ -41,26 +41,32 @@
 
 | Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `100015` | **Analytics Report 100015** | `Referenced Schema` | — | **Contact test** | — |
-| `100038` | **Analytics Report 100038** | `Referenced Schema` | — | **Contact test** | — |
-| `10012` | **Analytics Report 10012** | `Referenced Schema` | — | **Contact test** | — |
-| `125` | **Analytics Report 125** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `8001` | **Analytics Report 8001** | `Referenced Schema` | — | **Contact test**, **New Workspace**, **real_edge_02_new_workspace_patterns** | — |
-| `8010` | **Analytics Report 8010** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `8012` | **Analytics Report 8012** | `Referenced Schema` | — | **New Workspace**, **real_edge_02_new_workspace_patterns** | — |
-| `8014` | **Analytics Report 8014** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `9011` | **Analytics Report 9011** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `9016` | **Analytics Report 9016** | `Referenced Schema` | — | **New Workspace**, **real_edge_02_new_workspace_patterns** | — |
-| `9018` | **Analytics Report 9018** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `9029` | **Analytics Report 9029** | `Referenced Schema` | — | **Contact**, **Incident**, **real_edge_01_nested_tabset**, **real_edge_03_split_panel_contact** | — |
-| `9041` | **Analytics Report 9041** | `Referenced Schema` | — | **Incident**, **real_edge_01_nested_tabset** | — |
-| `9050` | **Analytics Report 9050** | `Referenced Schema` | — | **Contact test**, **Contact**, **real_edge_03_split_panel_contact** | — |
+| `10009` | **Analytics Report 10009** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
+| `10012` | **Analytics Report 10012** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
+| `101245` | **Analytics Report 101245** | `Referenced Schema` | — | **Contacts Admin** | — |
+| `102408` | **Analytics Report 102408** | `Referenced Schema` | — | **Incidents - PMO**, **Incidents - TAC RA V2** | — |
+| `103889` | **Analytics Report 103889** | `Referenced Schema` | — | **Contacts with Disable**, **contact1** | — |
+| `104201` | **Analytics Report 104201** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents-TAC-BUI-new** | — |
+| `105353` | **Analytics Report 105353** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents-TAC-BUI-new** | — |
+| `125` | **Analytics Report 125** | `Referenced Schema` | — | **Incidents - DTMO** | — |
+| `8000` | **Analytics Report 8000** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** | — |
+| `8001` | **Analytics Report 8001** | `Referenced Schema` | — | **contact1** | — |
+| `8010` | **Analytics Report 8010** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2** | — |
+| `8012` | **Analytics Report 8012** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
+| `8014` | **Analytics Report 8014** | `Referenced Schema` | — | **Incidents - TAC RA V2**, **TAC Interaction-Chat Sessions** | — |
+| `9011` | **Analytics Report 9011** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** | — |
+| `9016` | **Analytics Report 9016** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
+| `9018` | **Analytics Report 9018** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2** | — |
+| `9029` | **Analytics Report 9029** | `Referenced Schema` | — | **Contacts S&A**, **TAC Interaction-Chat Sessions** | — |
+| `9030` | **Analytics Report 9030** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
+| `9041` | **Analytics Report 9041** | `Referenced Schema` | — | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** | — |
+| `9050` | **Analytics Report 9050** | `Referenced Schema` | — | **Contacts Admin**, **Contacts with Disable**, **contact1** | — |
 
 ### Custom Analytics Reports
 
 | Report ID | Report Name | Primary Table / Schema | Columns | Referenced In Workspaces | Documentation |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| `100008` | **Contacts** | `Standard Table` | 13 | **Contact** | — |
+| `100008` | **Contacts** | `Standard Table` | 13 | Global Catalog | — |
 | `122026` | **VSP Routing Table** | `Standard Table` | 10 | Global Catalog | — |
 
 ## CPM
@@ -93,18 +99,31 @@
 
 | Script File Name | Component Type | Functions Count | External Calls / Endpoints | Documentation |
 | :--- | :--- | :---: | :--- | :--- |
+| `ExtendedSample.php` | `CustomScript` | 0 | `—` | [report_ExtendedSample.php.md](scripts/report_ExtendedSample.php.md) |
+| `MySocialSearch.php` | `CustomScript` | 0 | `—` | [report_MySocialSearch.php.md](scripts/report_MySocialSearch.php.md) |
+| `ParameterTrimSample.php` | `CustomScript` | 0 | `—` | [report_ParameterTrimSample.php.md](scripts/report_ParameterTrimSample.php.md) |
+| `Sample.php` | `CustomScript` | 0 | `—` | [report_Sample.php.md](scripts/report_Sample.php.md) |
 | `address_validation.php` | `CustomScript` | 0 | `—` | [report_address_validation.php.md](scripts/report_address_validation.php.md) |
+| `answer_model.php` | `CustomScript` | 0 | `—` | [report_answer_model.php.md](scripts/report_answer_model.php.md) |
+| `answerfeedback_model.php` | `CustomScript` | 0 | `—` | [report_answerfeedback_model.php.md](scripts/report_answerfeedback_model.php.md) |
 | `bluebox_greencart_validation.php` | `CustomScript` | 0 | `—` | [report_bluebox_greencart_validation.php.md](scripts/report_bluebox_greencart_validation.php.md) |
 | `callcheck.php` | `CustomScript` | 0 | `—` | [report_callcheck.php.md](scripts/report_callcheck.php.md) |
 | `child_incident_create.php` | `CustomScript` | 0 | `—` | [report_child_incident_create.php.md](scripts/report_child_incident_create.php.md) |
 | `cityworksapicall.php` | `CustomScript` | 0 | `—` | [report_cityworksapicall.php.md](scripts/report_cityworksapicall.php.md) |
+| `clickstream_model.php` | `CustomScript` | 0 | `—` | [report_clickstream_model.php.md](scripts/report_clickstream_model.php.md) |
 | `closing_notes.php` | `CustomScript` | 0 | `—` | [report_closing_notes.php.md](scripts/report_closing_notes.php.md) |
+| `contact_model.php` | `CustomScript` | 0 | `—` | [report_contact_model.php.md](scripts/report_contact_model.php.md) |
+| `customChat.php` | `CustomScript` | 0 | `—` | [report_customChat.php.md](scripts/report_customChat.php.md) |
+| `customfield_model.php` | `CustomScript` | 0 | `—` | [report_customfield_model.php.md](scripts/report_customfield_model.php.md) |
 | `daily_dupe_detection_0584.php` | `CustomScript` | 0 | `—` | [report_daily_dupe_detection_0584.php.md](scripts/report_daily_dupe_detection_0584.php.md) |
 | `dupe_detection_8366.php` | `CustomScript` | 0 | `—` | [report_dupe_detection_8366.php.md](scripts/report_dupe_detection_8366.php.md) |
 | `duplicate_contacts.php` | `CustomScript` | 0 | `—` | [report_duplicate_contacts.php.md](scripts/report_duplicate_contacts.php.md) |
 | `duplicate_incidents.php` | `CustomScript` | 0 | `—` | [report_duplicate_incidents.php.md](scripts/report_duplicate_incidents.php.md) |
 | `eventclock.php` | `CustomScript` | 0 | `—` | [report_eventclock.php.md](scripts/report_eventclock.php.md) |
 | `header.inc_4778.php` | `CustomScript` | 0 | `—` | [report_header.inc_4778.php.md](scripts/report_header.inc_4778.php.md) |
+| `incident_model.php` | `CustomScript` | 0 | `—` | [report_incident_model.php.md](scripts/report_incident_model.php.md) |
+| `report_model.php` | `CustomScript` | 0 | `—` | [report_report_model.php.md](scripts/report_report_model.php.md) |
+| `sample_model.php` | `CustomScript` | 0 | `—` | [report_sample_model.php.md](scripts/report_sample_model.php.md) |
 | `sms_integration 1.php` | `CustomScript` | 0 | `—` | [report_sms_integration 1.php.md](scripts/report_sms_integration 1.php.md) |
 
 ## BUIs
@@ -118,6 +137,8 @@
 
 | Rule Set / Source File | Format | Total Rules | Enabled Rules | Invoked CPM Handlers | Documentation |
 | :--- | :--- | :---: | :---: | :---: | :--- |
+| `Answer Rules.csv` | `business_rules_csv` | 16 | 14 | 0 | [report_Business_Rules.md](rules/report_Business_Rules.md) |
+| `Business Rules (1).csv` | `business_rules_csv` | 300 | 231 | 0 | [report_Business_Rules.md](rules/report_Business_Rules.md) |
 | `Business_Rules.csv` | `business_rules_csv` | 1209 | 1057 | 47 | [report_Business_Rules.md](rules/report_Business_Rules.md) |
 
 ## Shared Resources
@@ -126,17 +147,23 @@ The following shared reports and resources are referenced across multiple worksp
 
 | Shared Resource / Report ID | Referenced In Workspaces |
 | :--- | :--- |
-| `125` | **Incident**, **real_edge_01_nested_tabset** |
-| `8001` | **Contact test**, **New Workspace**, **real_edge_02_new_workspace_patterns** |
-| `8010` | **Incident**, **real_edge_01_nested_tabset** |
-| `8012` | **New Workspace**, **real_edge_02_new_workspace_patterns** |
-| `8014` | **Incident**, **real_edge_01_nested_tabset** |
-| `9011` | **Incident**, **real_edge_01_nested_tabset** |
-| `9016` | **New Workspace**, **real_edge_02_new_workspace_patterns** |
-| `9018` | **Incident**, **real_edge_01_nested_tabset** |
-| `9029` | **Contact**, **Incident**, **real_edge_01_nested_tabset**, **real_edge_03_split_panel_contact** |
-| `9041` | **Incident**, **real_edge_01_nested_tabset** |
-| `9050` | **Contact test**, **Contact**, **real_edge_03_split_panel_contact** |
+| `10009` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
+| `10012` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
+| `102408` | **Incidents - PMO**, **Incidents - TAC RA V2** |
+| `103889` | **Contacts with Disable**, **contact1** |
+| `104201` | **Incidents - Admin**, **Incidents-TAC-BUI-new** |
+| `105353` | **Incidents - Admin**, **Incidents-TAC-BUI-new** |
+| `8000` | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** |
+| `8010` | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2** |
+| `8012` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
+| `8014` | **Incidents - TAC RA V2**, **TAC Interaction-Chat Sessions** |
+| `9011` | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** |
+| `9016` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
+| `9018` | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2** |
+| `9029` | **Contacts S&A**, **TAC Interaction-Chat Sessions** |
+| `9030` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
+| `9041` | **Incidents - Admin**, **Incidents - DTMO**, **Incidents - O&S**, **Incidents - PMO**, **Incidents - TAC RA V2**, **Incidents-TAC-BUI-new** |
+| `9050` | **Contacts Admin**, **Contacts with Disable**, **contact1** |
 
 ## Component Mappings & Linkages
 
@@ -144,44 +171,68 @@ The following shared reports and resources are referenced across multiple worksp
 
 | Source Component | Relationship / Linkage Type | Target Component | Details / Context |
 | :--- | :--- | :--- | :--- |
-| **Workspace: Contact** | `Linkage` | `CustomScript: address_validation.php` | Cross-Component Mapping |
-| **Workspace: Contact** | `Linkage` | `CustomScript: duplicate_contacts.php` | Cross-Component Mapping |
-| **Workspace: Contact** | `Linkage` | `CustomScript: gcb_flex.php` | Cross-Component Mapping |
-| **Workspace: Contact** | `Linkage` | `Report 100008 (Contacts)` | Cross-Component Mapping |
-| **Workspace: Contact** | `Linkage` | `Report 9029` | Cross-Component Mapping |
-| **Workspace: Contact** | `Linkage` | `Report 9050` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `ExternalEndpoint: http://cloud.oracle.com/service` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `Report 100015` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `Report 100038` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `Report 10012` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `Report 8001` | Cross-Component Mapping |
-| **Workspace: Contact test** | `Linkage` | `Report 9050` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `CustomScript: gcb_flex.php` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 125` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 8010` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 8014` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 9011` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 9018` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 9029` | Cross-Component Mapping |
-| **Workspace: Incident** | `Linkage` | `Report 9041` | Cross-Component Mapping |
-| **Workspace: New Workspace** | `Linkage` | `ExternalEndpoint: http://cloud.oracle.com/service` | Cross-Component Mapping |
-| **Workspace: New Workspace** | `Linkage` | `Report 8001` | Cross-Component Mapping |
-| **Workspace: New Workspace** | `Linkage` | `Report 8012` | Cross-Component Mapping |
-| **Workspace: New Workspace** | `Linkage` | `Report 9016` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 125` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 8010` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 8014` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 9011` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 9018` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 9029` | Cross-Component Mapping |
-| **Workspace: real_edge_01_nested_tabset** | `Linkage` | `Report 9041` | Cross-Component Mapping |
-| **Workspace: real_edge_02_new_workspace_patterns** | `Linkage` | `ExternalEndpoint: http://cloud.oracle.com/service` | Cross-Component Mapping |
-| **Workspace: real_edge_02_new_workspace_patterns** | `Linkage` | `Report 8001` | Cross-Component Mapping |
-| **Workspace: real_edge_02_new_workspace_patterns** | `Linkage` | `Report 8012` | Cross-Component Mapping |
-| **Workspace: real_edge_02_new_workspace_patterns** | `Linkage` | `Report 9016` | Cross-Component Mapping |
-| **Workspace: real_edge_03_split_panel_contact** | `Linkage` | `CustomScript: gcb_flex.php` | Cross-Component Mapping |
-| **Workspace: real_edge_03_split_panel_contact** | `Linkage` | `Report 9029` | Cross-Component Mapping |
-| **Workspace: real_edge_03_split_panel_contact** | `Linkage` | `Report 9050` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 10009` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 10012` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 101245` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 8012` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 9016` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 9030` | Cross-Component Mapping |
+| **Workspace: Contacts Admin** | `Linkage` | `Report 9050` | Cross-Component Mapping |
+| **Workspace: Contacts S&A** | `Linkage` | `Report 9029` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 10009` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 10012` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 103889` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 8012` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 9016` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 9030` | Cross-Component Mapping |
+| **Workspace: Contacts with Disable** | `Linkage` | `Report 9050` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 104201` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 105353` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 8010` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 9018` | Cross-Component Mapping |
+| **Workspace: Incidents - Admin** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 125` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 8010` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 9018` | Cross-Component Mapping |
+| **Workspace: Incidents - DTMO** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: Incidents - O&S** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents - O&S** | `Linkage` | `Report 8010` | Cross-Component Mapping |
+| **Workspace: Incidents - O&S** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents - O&S** | `Linkage` | `Report 9018` | Cross-Component Mapping |
+| **Workspace: Incidents - O&S** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 102408` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 8010` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 9018` | Cross-Component Mapping |
+| **Workspace: Incidents - PMO** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 102408` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 8010` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 8014` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 9018` | Cross-Component Mapping |
+| **Workspace: Incidents - TAC RA V2** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: Incidents-TAC-BUI-new** | `Linkage` | `Report 104201` | Cross-Component Mapping |
+| **Workspace: Incidents-TAC-BUI-new** | `Linkage` | `Report 105353` | Cross-Component Mapping |
+| **Workspace: Incidents-TAC-BUI-new** | `Linkage` | `Report 8000` | Cross-Component Mapping |
+| **Workspace: Incidents-TAC-BUI-new** | `Linkage` | `Report 9011` | Cross-Component Mapping |
+| **Workspace: Incidents-TAC-BUI-new** | `Linkage` | `Report 9041` | Cross-Component Mapping |
+| **Workspace: TAC Interaction-Chat Sessions** | `Linkage` | `Report 8014` | Cross-Component Mapping |
+| **Workspace: TAC Interaction-Chat Sessions** | `Linkage` | `Report 9029` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `ExternalEndpoint: www.rightnow.com` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 10009` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 10012` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 103889` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 8001` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 8012` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 9016` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 9030` | Cross-Component Mapping |
+| **Workspace: contact1** | `Linkage` | `Report 9050` | Cross-Component Mapping |
 
 ### CPM Event Procedures Linkages
 
@@ -281,6 +332,7 @@ The following shared reports and resources are referenced across multiple worksp
 | :--- | :--- | :--- | :--- |
 | **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
 | **CustomScript: address_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
+| **CustomScript: answerfeedback_model.php** | `Linkage` | `OSVCObject: Contact` | Cross-Component Mapping |
 | **CustomScript: bluebox_greencart_validation.php** | `Linkage` | `OSVCObject: ConnectAPIErrorBase` | Cross-Component Mapping |
 | **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Account` | Cross-Component Mapping |
 | **CustomScript: callcheck.php** | `Linkage` | `OSVCObject: Configuration` | Cross-Component Mapping |
