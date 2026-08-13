@@ -43,8 +43,8 @@ _INCIDENT_MAP = {
 
 _CONTACT_MAP = {
     "cid": "id",
-    "name.first": "name",
-    "name.last": "name",
+    "name.first": "name.first",
+    "name.last": "name.last",
     "email": "emails",
     "phoffice": "phones",
     "orgid": "organization.id",
@@ -61,6 +61,7 @@ _CONTACT_MAP = {
     "supersededbycid": "supersededby.id",
     "state": "address",
     "maoptin": "marketingsettings",
+    "mamailtype": "marketingsettings",
     "surveyoptin": "marketingsettings",
     "contactlists": "channelusernames",
     "smuser": "login",

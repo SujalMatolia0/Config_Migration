@@ -209,7 +209,7 @@ def generate_index_md(workspaces, output_dir, components=None, relationships=Non
     lines.append("# OSVC Configuration Master Index")
     lines.append("")
     lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  ")
-    lines.append(f"**Primary System Mapping**: [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md)  ")
+    lines.append(f"**Primary System Mapping**: [report_Master_System_Mapping.md](system_mappings/report_Master_System_Mapping.md)  ")
     lines.append("")
     
     lines.append("> [!NOTE]")
@@ -243,11 +243,11 @@ def generate_index_md(workspaces, output_dir, components=None, relationships=Non
     lines.append("")
     lines.append("| Primary OSVC Object | Bound Workspaces | Event Handlers (CPM) | Analytics Reports | Custom Fields (c$) | Master Mapping |")
     lines.append("| :--- | :---: | :---: | :---: | :---: | :--- |")
-    lines.append("| **Contact** | 2 | 3 | 5 | 8 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-contact-29-mapped-components) |")
-    lines.append("| **Incident** | 2 | 2 | 4 | 5 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-incident-16-mapped-components) |")
-    lines.append("| **Organization** | 1 | 0 | 2 | 3 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-organization-6-mapped-components) |")
-    lines.append("| **Test_Record** | 1 | 0 | 1 | 0 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-test_record-3-mapped-components) |")
-    lines.append("| **General / Shared** | 1 | 1 | 2 | 0 | [COMPLETE_SYSTEM_MAPPING.md](COMPLETE_SYSTEM_MAPPING.md#entity-module-general--unassigned-12-mapped-components) |")
+    lines.append("| **Contact** | 2 | 3 | 5 | 8 | [report_Mapping_Contact.md](system_mappings/report_Mapping_Contact.md) |")
+    lines.append("| **Incident** | 2 | 2 | 4 | 5 | [report_Mapping_Incident.md](system_mappings/report_Mapping_Incident.md) |")
+    lines.append("| **Organization** | 1 | 0 | 2 | 3 | [report_Mapping_Organization.md](system_mappings/report_Mapping_Organization.md) |")
+    lines.append("| **Test_Record** | 1 | 0 | 1 | 0 | [report_Master_System_Mapping.md](system_mappings/report_Master_System_Mapping.md#entity-module-test_record) |")
+    lines.append("| **General / Shared** | 1 | 1 | 2 | 0 | [report_Master_System_Mapping.md](system_mappings/report_Master_System_Mapping.md#entity-module-general) |")
     lines.append("")
 
     # 2. Workspaces
@@ -467,7 +467,7 @@ def generate_index_md(workspaces, output_dir, components=None, relationships=Non
     lines.append("")
     if br_sets:
         lines.append("| Rule Set / Source File | Format | Total Rules | Enabled Rules | Invoked CPM Handlers | Documentation |")
-        lines.append("| :--- | :--- | :---: | :---: | :---: | :--- |")
+        lines.append("| :--- | :--- | :---: | :--- | :--- | :--- |")
         for br in br_sets:
             fname = br.get("file_name") or br.get("name") or "Business_Rules.csv"
             fmt = br.get("format", "business_rules_csv")
@@ -559,7 +559,7 @@ def generate_index_md(workspaces, output_dir, components=None, relationships=Non
         lines.append("*No cross-component linkages detected.*")
     lines.append("")
 
-    index_path = os.path.join(output_dir, "index.md")
+    index_path = os.path.join(output_dir, "report_Index.md")
     with open(index_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     return index_path
@@ -589,12 +589,9 @@ def main():
     scripts_dir = os.path.join(output_dir, "scripts")
     bui_dir = os.path.join(output_dir, "bui_addins")
     navigation_dir = os.path.join(output_dir, "navigation")
+    excels_dir = os.path.join(output_dir, "excels")
 
-    # Dedicated format-sorted folders
-    json_dir = os.path.join(output_dir, "json")
-    markdown_dir = os.path.join(output_dir, "markdown")
-
-    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, bui_dir, navigation_dir, json_dir, markdown_dir]:
+    for d in [output_dir, ws_dir, cpm_dir, reports_dir, rules_dir, scripts_dir, bui_dir, navigation_dir, excels_dir]:
         os.makedirs(d, exist_ok=True)
 
     print(f"OSVC Analyser started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -659,7 +656,6 @@ def main():
 
     print(f"Writing global master.json -> {master_json_path}...")
     master_data = write_master_json(components, relationships, orphans, endpoints, master_json_path, meta, use_ai_summary=args.use_ai_summary)
-    write_master_json(components, relationships, orphans, endpoints, os.path.join(json_dir, "master.json"), meta, use_ai_summary=args.use_ai_summary)
     print("Global master.json written.")
 
     # Dump unknowns.json if requested or if any unknown elements found
@@ -728,13 +724,11 @@ def main():
         workspaces = components.get("workspaces", [])
         if workspaces:
             try:
-                ws_excel_path = os.path.join(output_dir, "OSVC_Workspaces_Layout_Mapping.xlsx")
+                excels_dir = os.path.join(output_dir, "excels")
+                os.makedirs(excels_dir, exist_ok=True)
+                ws_excel_path = os.path.join(excels_dir, "OSVC_Workspaces_Layout_Mapping.xlsx")
                 generate_workspaces_excel_report(workspaces, ws_excel_path, all_components=components, include_overview=True)
-                print(f"Workspaces Excel Layout Mapping report written -> {ws_excel_path}")
-
-                ws_no_overview_path = os.path.join(output_dir, "OSVC_Workspaces_Layout_Mapping_No_Overview.xlsx")
-                generate_workspaces_excel_report(workspaces, ws_no_overview_path, all_components=components, include_overview=False)
-                print(f"Workspaces Excel (No Overview) report written -> {ws_no_overview_path}")
+                print(f"[SUCCESS] Workspaces Excel Layout Mapping report written -> {ws_excel_path}")
             except Exception as e:
                 print(f"[WARNING] Could not generate Workspaces Excel report: {e}")
 
@@ -765,40 +759,32 @@ def main():
                     ws_components, ws_relationships, ws_orphans,
                     ws_endpoints, os.path.join(ws_out_dir, "master.json"), ws_meta, use_ai_summary=args.use_ai_summary
                 )
-                ws_json_fmt_dir = os.path.join(json_dir, "workspaces", ws_slug)
-                write_master_json(ws_components, ws_relationships, ws_orphans, ws_endpoints, os.path.join(ws_json_fmt_dir, "master.json"), ws_meta, use_ai_summary=args.use_ai_summary)
-                print("  master.json written")
-
-                ws_graph_path = build_graph_ui(ws_master_data, os.path.join(ws_out_dir, "graph"))
-                print(f"  dependency graph viewer written -> {ws_graph_path}")
-
                 md_content = generate_report_markdown(ws)
                 with open(os.path.join(ws_out_dir, "report.md"), "w", encoding="utf-8") as f:
-                    f.write(md_content)
-                ws_md_fmt_dir = os.path.join(markdown_dir, "workspaces", ws_slug)
-                os.makedirs(ws_md_fmt_dir, exist_ok=True)
-                with open(os.path.join(ws_md_fmt_dir, "report.md"), "w", encoding="utf-8") as f:
                     f.write(md_content)
                 print("  report.md written")
 
                 # Write workspace report.json
                 from src.output.json_writer import write_workspace_report_json
                 write_workspace_report_json(ws, os.path.join(ws_out_dir, "report.json"))
-                write_workspace_report_json(ws, os.path.join(ws_json_fmt_dir, "report.json"))
                 print("  report.json written")
+
+                # Write consolidated Workspaces by Object report
+                from src.output.markdown_generator import generate_workspaces_by_object_markdown
+                ws_by_obj_md = generate_workspaces_by_object_markdown(workspaces)
+                ws_by_obj_path = os.path.join(ws_dir, "report_Workspaces_by_Object.md")
+                with open(ws_by_obj_path, "w", encoding="utf-8") as f:
+                    f.write(ws_by_obj_md)
+                print(f"[SUCCESS] Workspaces by Object report written -> {ws_by_obj_path}")
 
             if multi:
                 print("\nWriting master index...")
                 index_path = generate_index_md(workspaces, output_dir, components, relationships)
-                with open(os.path.join(markdown_dir, "index.md"), "w", encoding="utf-8") as f:
-                    with open(index_path, "r", encoding="utf-8") as idx_f:
-                        f.write(idx_f.read())
-                print(f"  index.md written -> {index_path}")
+                print(f"[SUCCESS] Master Index report written -> {index_path}")
                 from src.output.json_writer import write_index_json
-                index_json_path = os.path.join(output_dir, "index.json")
+                index_json_path = os.path.join(output_dir, "report_Index.json")
                 write_index_json(workspaces, index_json_path)
-                write_index_json(workspaces, os.path.join(json_dir, "index.json"))
-                print(f"  index.json written -> {index_json_path}")
+                print(f"[SUCCESS] Master Index JSON written -> {index_json_path}")
 
         reports = components.get("reports", [])
         if reports:
@@ -814,17 +800,10 @@ def main():
                     rep_md_path = os.path.join(reports_dir, rep_filename)
                     with open(rep_md_path, "w", encoding="utf-8") as f:
                         f.write(generate_analytics_report_markdown(rep))
-                    rep_md_fmt_dir = os.path.join(markdown_dir, "reports")
-                    os.makedirs(rep_md_fmt_dir, exist_ok=True)
-                    with open(os.path.join(rep_md_fmt_dir, rep_filename), "w", encoding="utf-8") as f:
-                        f.write(generate_analytics_report_markdown(rep))
                     print(f"Report markdown written -> {rep_md_path}")
 
                     rep_json_path = os.path.join(reports_dir, rep_json_filename)
                     write_analytics_report_json(rep, rep_json_path)
-                    rep_json_fmt_dir = os.path.join(json_dir, "reports")
-                    os.makedirs(rep_json_fmt_dir, exist_ok=True)
-                    write_analytics_report_json(rep, os.path.join(rep_json_fmt_dir, rep_json_filename))
                     print(f"Report JSON written -> {rep_json_path}")
 
         cpm_items = components.get("cpm", [])
@@ -836,17 +815,10 @@ def main():
             cpm_md_path = os.path.join(cpm_dir, "report_CPM_Summary.md")
             with open(cpm_md_path, "w", encoding="utf-8") as f:
                 f.write(cpm_md_content)
-            cpm_md_fmt_dir = os.path.join(markdown_dir, "cpm")
-            os.makedirs(cpm_md_fmt_dir, exist_ok=True)
-            with open(os.path.join(cpm_md_fmt_dir, "report_CPM_Summary.md"), "w", encoding="utf-8") as f:
-                f.write(cpm_md_content)
             print(f"CPM Summary report written -> {cpm_md_path}")
 
             cpm_json_path = os.path.join(cpm_dir, "report_CPM_Summary.json")
             write_cpm_summary_json(cpm_items, orphans, components["workspaces"], cpm_json_path, use_ai_summary=args.use_ai_summary)
-            cpm_json_fmt_dir = os.path.join(json_dir, "cpm")
-            os.makedirs(cpm_json_fmt_dir, exist_ok=True)
-            write_cpm_summary_json(cpm_items, orphans, components["workspaces"], os.path.join(cpm_json_fmt_dir, "report_CPM_Summary.json"), use_ai_summary=args.use_ai_summary)
             print(f"CPM Summary JSON written -> {cpm_json_path}")
 
             # Per-Object Standalone CPM Summary Reports (Contact, Incident, etc.)
@@ -855,8 +827,6 @@ def main():
                 obj_cpm_md = generate_single_object_cpm_markdown(c_obj, cpm_items, orphans, components["workspaces"])
                 obj_cpm_md_path = os.path.join(cpm_dir, f"report_CPM_{c_obj}.md")
                 with open(obj_cpm_md_path, "w", encoding="utf-8") as f:
-                    f.write(obj_cpm_md)
-                with open(os.path.join(cpm_md_fmt_dir, f"report_CPM_{c_obj}.md"), "w", encoding="utf-8") as f:
                     f.write(obj_cpm_md)
                 print(f"Single Object CPM report written -> {obj_cpm_md_path}")
 
@@ -877,8 +847,6 @@ def main():
                 single_cpm_path = os.path.join(cpm_dir, single_cpm_filename)
                 with open(single_cpm_path, "w", encoding="utf-8") as f:
                     f.write(single_cpm_md)
-                with open(os.path.join(cpm_md_fmt_dir, single_cpm_filename), "w", encoding="utf-8") as f:
-                    f.write(single_cpm_md)
                 print(f"Single CPM Procedure report written -> {single_cpm_path}")
 
         bui_items = sorted(components.get("buiAddins", []), key=lambda x: x.get("name", "").lower())
@@ -890,17 +858,10 @@ def main():
             bui_md_path = os.path.join(bui_dir, "report_BUI_Addins.md")
             with open(bui_md_path, "w", encoding="utf-8") as f:
                 f.write(bui_md_content)
-            bui_md_fmt_dir = os.path.join(markdown_dir, "bui_addins")
-            os.makedirs(bui_md_fmt_dir, exist_ok=True)
-            with open(os.path.join(bui_md_fmt_dir, "report_BUI_Addins.md"), "w", encoding="utf-8") as f:
-                f.write(bui_md_content)
             print(f"BUI Add-In Summary report written -> {bui_md_path}")
 
             bui_json_path = os.path.join(bui_dir, "report_BUI_Addins.json")
             write_bui_addin_summary_json(bui_items, components.get("reports", []), components["workspaces"], bui_json_path)
-            bui_json_fmt_dir = os.path.join(json_dir, "bui_addins")
-            os.makedirs(bui_json_fmt_dir, exist_ok=True)
-            write_bui_addin_summary_json(bui_items, components.get("reports", []), components["workspaces"], os.path.join(bui_json_fmt_dir, "report_BUI_Addins.json"))
             print(f"BUI Add-In Summary JSON written -> {bui_json_path}")
 
             # Individual per-Add-In reports (MD + JSON)
@@ -913,16 +874,18 @@ def main():
                 single_path = os.path.join(bui_dir, single_filename)
                 with open(single_path, "w", encoding="utf-8") as f:
                     f.write(single_md)
-                with open(os.path.join(bui_md_fmt_dir, single_filename), "w", encoding="utf-8") as f:
-                    f.write(single_md)
                 print(f"Single BUI Add-In report written -> {single_path}")
 
                 single_json_path = os.path.join(bui_dir, single_json_filename)
                 write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], single_json_path)
-                write_single_bui_addin_json(bui, components.get("reports", []), components["workspaces"], os.path.join(bui_json_fmt_dir, single_json_filename))
                 print(f"Single BUI Add-In JSON written -> {single_json_path}")
 
-        script_items = components.get("customScripts", [])
+        all_script_items = components.get("customScripts", [])
+        # Separate Customer Portal MVC components from standalone custom procedural scripts
+        script_items = [
+            s for s in all_script_items
+            if not any(kw in s.get("file_path", "").replace("\\", "/") for kw in ["/models/", "/widgets/", "/views/pages/", "/views/templates/"])
+        ]
         if script_items:
             from src.output.markdown_generator import generate_custom_scripts_summary_markdown, generate_single_custom_script_markdown
             from src.output.json_writer import write_custom_scripts_summary_json, write_single_custom_script_json
@@ -931,36 +894,10 @@ def main():
             cs_md_path = os.path.join(scripts_dir, "report_Custom_Scripts.md")
             with open(cs_md_path, "w", encoding="utf-8") as f:
                 f.write(cs_md_content)
-            scripts_md_fmt_dir = os.path.join(markdown_dir, "scripts")
-            os.makedirs(scripts_md_fmt_dir, exist_ok=True)
-            with open(os.path.join(scripts_md_fmt_dir, "report_Custom_Scripts.md"), "w", encoding="utf-8") as f:
-                f.write(cs_md_content)
-            print(f"Custom Scripts Summary report written -> {cs_md_path}")
 
             cs_json_path = os.path.join(scripts_dir, "report_Custom_Scripts.json")
             write_custom_scripts_summary_json(script_items, cs_json_path)
-            scripts_json_fmt_dir = os.path.join(json_dir, "scripts")
-            os.makedirs(scripts_json_fmt_dir, exist_ok=True)
-            write_custom_scripts_summary_json(script_items, os.path.join(scripts_json_fmt_dir, "report_Custom_Scripts.json"))
-            print(f"Custom Scripts Summary JSON written -> {cs_json_path}")
-
-            for sc in script_items:
-                sname = sc.get("file_name", "script").replace(" ", "_")
-                single_md = generate_single_custom_script_markdown(sc, relationships=relationships)
-                single_filename = f"report_{sname}.md"
-                single_json_filename = f"report_{sname}.json"
-
-                single_path = os.path.join(scripts_dir, single_filename)
-                with open(single_path, "w", encoding="utf-8") as f:
-                    f.write(single_md)
-                with open(os.path.join(scripts_md_fmt_dir, single_filename), "w", encoding="utf-8") as f:
-                    f.write(single_md)
-                print(f"Single Custom Script report written -> {single_path}")
-
-                single_json_path = os.path.join(scripts_dir, single_json_filename)
-                write_single_custom_script_json(sc, single_json_path)
-                write_single_custom_script_json(sc, os.path.join(scripts_json_fmt_dir, single_json_filename))
-                print(f"Single Custom Script JSON written -> {single_json_path}")
+            print(f"[SUCCESS] Custom Scripts Consolidated Report written ({len(script_items)} Standalone Procedural Scripts) -> {cs_md_path}")
 
         rule_items = components.get("businessRules", [])
         if rule_items:
@@ -972,18 +909,11 @@ def main():
             rules_md_path = os.path.join(rules_dir, "report_Business_Rules.md")
             with open(rules_md_path, "w", encoding="utf-8") as f:
                 f.write(rules_md_content)
-            rules_md_fmt_dir = os.path.join(markdown_dir, "rules")
-            os.makedirs(rules_md_fmt_dir, exist_ok=True)
-            with open(os.path.join(rules_md_fmt_dir, "report_Business_Rules.md"), "w", encoding="utf-8") as f:
-                f.write(rules_md_content)
-            print(f"Business Rules Summary report written -> {rules_md_path}")
+            print(f"[SUCCESS] Business Rules Summary report written -> {rules_md_path}")
 
             rules_json_path = os.path.join(rules_dir, "report_Business_Rules.json")
             write_business_rules_summary_json(rule_items, rules_json_path)
-            rules_json_fmt_dir = os.path.join(json_dir, "rules")
-            os.makedirs(rules_json_fmt_dir, exist_ok=True)
-            write_business_rules_summary_json(rule_items, os.path.join(rules_json_fmt_dir, "report_Business_Rules.json"))
-            print(f"Business Rules Summary JSON written -> {rules_json_path}")
+            print(f"[SUCCESS] Business Rules Summary JSON written -> {rules_json_path}")
 
             # 2. Individual MD Files per OSVC Object
             from collections import defaultdict
@@ -1001,9 +931,74 @@ def main():
                 obj_md_path = os.path.join(rules_dir, f"report_Business_Rules_{obj_name}.md")
                 with open(obj_md_path, "w", encoding="utf-8") as f:
                     f.write(obj_md_content)
-                with open(os.path.join(rules_md_fmt_dir, f"report_Business_Rules_{obj_name}.md"), "w", encoding="utf-8") as f:
-                    f.write(obj_md_content)
-                print(f"Single Object Business Rules report written -> {obj_md_path}")
+                print(f"[SUCCESS] Single Object Business Rules report written -> {obj_md_path}")
+
+        # Generate Customer Portal Reports if CP structure detected
+        if os.path.exists(os.path.join(args.input, "widgets")) or os.path.exists(os.path.join(args.input, "controllers")) or os.path.exists(os.path.join(args.input, "models")):
+            try:
+                from src.parsers.cp_framework_parser import parse_customer_portal_dir
+                from src.output.excel_cp_generator import generate_cp_excel_report
+                from src.output.markdown_generator import (
+                    generate_customer_portal_summary_markdown,
+                    generate_cp_category_models_markdown,
+                    generate_cp_category_widgets_markdown,
+                    generate_cp_category_pages_markdown,
+                    generate_cp_category_hooks_templates_markdown,
+                )
+                from src.output.json_writer import write_customer_portal_summary_json
+
+                print("\nCustomer Portal MVC structure detected. Extracting CP Implementation matrix...")
+                cp_data = parse_customer_portal_dir(args.input)
+
+                # 1. Excel Report
+                excels_dir = os.path.join(output_dir, "excels")
+                os.makedirs(excels_dir, exist_ok=True)
+                cp_xlsx_path = os.path.join(excels_dir, "Customer_Portal_Implementation.xlsx")
+                generate_cp_excel_report(cp_data, cp_xlsx_path)
+                print(f"[SUCCESS] Customer Portal Implementation Excel written -> {cp_xlsx_path}")
+
+                # 2. Master Customer Portal Summary Markdown & JSON
+                cp_dir = os.path.join(output_dir, "customer_portal")
+                os.makedirs(cp_dir, exist_ok=True)
+
+                cp_md_content = generate_customer_portal_summary_markdown(cp_data)
+                cp_md_path = os.path.join(cp_dir, "report_Customer_Portal.md")
+                with open(cp_md_path, "w", encoding="utf-8") as f:
+                    f.write(cp_md_content)
+                print(f"[SUCCESS] Customer Portal Summary Markdown report written -> {cp_md_path}")
+
+                cp_json_path = os.path.join(cp_dir, "report_Customer_Portal.json")
+                write_customer_portal_summary_json(cp_data, cp_json_path)
+                print(f"[SUCCESS] Customer Portal Summary JSON written -> {cp_json_path}")
+
+                # 3. Category-Based Consolidated Markdown Reports
+                from src.output.markdown_generator import (
+                    generate_cp_category_models_markdown,
+                    generate_cp_category_widgets_markdown,
+                    generate_cp_category_pages_markdown,
+                    generate_cp_category_hooks_templates_markdown,
+                )
+
+                models_cat_path = os.path.join(cp_dir, "report_CP_Models.md")
+                with open(models_cat_path, "w", encoding="utf-8") as f:
+                    f.write(generate_cp_category_models_markdown(cp_data))
+
+                widgets_cat_path = os.path.join(cp_dir, "report_CP_Widgets.md")
+                with open(widgets_cat_path, "w", encoding="utf-8") as f:
+                    f.write(generate_cp_category_widgets_markdown(cp_data))
+
+                pages_cat_path = os.path.join(cp_dir, "report_CP_Pages.md")
+                with open(pages_cat_path, "w", encoding="utf-8") as f:
+                    f.write(generate_cp_category_pages_markdown(cp_data))
+
+                hooks_cat_path = os.path.join(cp_dir, "report_CP_Hooks_and_Templates.md")
+                with open(hooks_cat_path, "w", encoding="utf-8") as f:
+                    f.write(generate_cp_category_hooks_templates_markdown(cp_data))
+
+                print(f"[SUCCESS] Generated Category-Based Consolidated Reports: report_CP_Models.md, report_CP_Widgets.md, report_CP_Pages.md, report_CP_Hooks_and_Templates.md")
+
+            except Exception as cp_err:
+                print(f"[WARNING] Customer Portal parsing error: {cp_err}")
 
         # Generate Unified Master System Markdown Report
         from src.output.master_report_generator import generate_master_system_report

@@ -141,10 +141,12 @@ def generate_mermaid_for_module(mod_name, mod_nodes, degree_map):
 
 def generate_master_system_report(results_dir, master_data, components=None, orphans=None, endpoints=None, relationships=None, use_ai_summary=True):
     """
-    Generates a single, unified master system mapping markdown report (COMPLETE_SYSTEM_MAPPING.md)
+    Generates a single, unified master system mapping markdown report (system_mappings/report_Master_System_Mapping.md)
     consolidating all workspaces, objects, CPMs, scripts, BUI add-ins, and cross-component mappings.
     """
-    report_path = os.path.join(results_dir, "COMPLETE_SYSTEM_MAPPING.md")
+    mappings_dir = os.path.join(results_dir, "system_mappings")
+    os.makedirs(mappings_dir, exist_ok=True)
+    report_path = os.path.join(mappings_dir, "report_Master_System_Mapping.md")
     
     meta = master_data.get("metadata", {}) or master_data.get("meta", {})
     nodes = master_data.get("graph", {}).get("nodes", [])
@@ -244,16 +246,21 @@ def generate_master_system_report(results_dir, master_data, components=None, orp
 
     # Structured Alert Boxes
     if master_unhandled:
-        lines.append("> [!WARNING]")
-        lines.append(f"> **{len(master_unhandled)} Unhandled Schema Element(s) Captured**: Raw XML elements/attributes present in source export were preserved via universal fallback handling.")
-        lines.append("")
-        lines.append("| Component | Tag | Raw Snippet / Value |")
-        lines.append("|---|---|---|")
+        seen_master_map = {}
         for item in master_unhandled:
             comp_name = item.get("comp") or "Component"
             tag_str = item.get("tag") or "unknown"
-            snip_str = (item.get("snippet") or "").replace("\n", " ").replace("\r", "")
-            lines.append(f"| `{comp_name}` | `<{tag_str}>` | `{snip_str[:100]}` |")
+            snip_str = (item.get("snippet") or "").replace("\n", " ").replace("\r", "").strip()[:100]
+            key = (comp_name, tag_str, snip_str)
+            seen_master_map[key] = seen_master_map.get(key, 0) + 1
+
+        lines.append("> [!WARNING]")
+        lines.append(f"> **{len(seen_master_map)} Unique Unhandled Schema Element(s) Captured**: Raw XML elements/attributes present in source export were preserved via universal fallback handling.")
+        lines.append("")
+        lines.append("| Component | Tag / Attribute | Raw Snippet / Value | Occurrences |")
+        lines.append("| :--- | :--- | :--- | :---: |")
+        for (comp_name, tag_str, snip_str), count in seen_master_map.items():
+            lines.append(f"| `{comp_name}` | `<{tag_str}>` | `{snip_str}` | `{count}` |")
         lines.append("")
     if all_orphans:
         lines.append("> [!WARNING]")
@@ -512,8 +519,10 @@ def generate_single_object_master_report(obj_name, results_dir, master_data, com
     Filters all workspaces, reports, CPMs, business rules, scripts, BUI add-ins, orphans, and linkages to only include those belonging to obj_name.
     """
     clean_obj = "".join(c if c.isalnum() else "_" for c in str(obj_name))
-    report_filename = f"COMPLETE_SYSTEM_MAPPING_{clean_obj}.md"
-    report_path = os.path.join(results_dir, report_filename)
+    mappings_dir = os.path.join(results_dir, "system_mappings")
+    os.makedirs(mappings_dir, exist_ok=True)
+    report_filename = f"report_Mapping_{clean_obj}.md"
+    report_path = os.path.join(mappings_dir, report_filename)
     
     meta = master_data.get("metadata", {}) or master_data.get("meta", {})
     all_nodes = master_data.get("graph", {}).get("nodes", [])

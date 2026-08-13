@@ -147,6 +147,18 @@
             .grid-dual { grid-template-columns: 1fr; }
         }
 
+        .grid-triple {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1000px) {
+            .grid-triple { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 680px) {
+            .grid-triple { grid-template-columns: 1fr; }
+        }
+
         /* ── Cards ── */
         .card {
             background: var(--bg-card);
@@ -540,17 +552,18 @@
     </header>
 
     <main>
-        <div class="grid-dual">
+        <!-- 3-Column Upload Row -->
+        <div class="grid-triple">
             <!-- Workspace XML Upload -->
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="3" y1="9" x2="21" y2="9"></line>
                             <line x1="9" y1="21" x2="9" y2="9"></line>
                         </svg>
-                        Workspace XML Files
+                        Workspace XMLs
                     </div>
                     <span id="ws-count-badge" class="badge badge-system">0 Files</span>
                 </div>
@@ -560,8 +573,8 @@
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                     </svg>
-                    <p style="font-weight: 600; color: var(--text-primary);">Drop Workspace XML files here</p>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Select one or multiple layout export XMLs</p>
+                    <p style="font-weight: 600; font-size: 0.9rem;">Drop Workspace XML files</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Layout export XMLs</p>
                 </div>
                 <div class="file-list" id="ws-file-list"></div>
             </div>
@@ -570,10 +583,10 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2">
                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                         </svg>
-                        Object Schema XML Files
+                        Object Schema XMLs
                     </div>
                     <span id="obj-count-badge" class="badge badge-custom">0 Files</span>
                 </div>
@@ -582,10 +595,38 @@
                     <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     </svg>
-                    <p style="font-weight: 600; color: var(--text-primary);">Drop Object XML files here</p>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Select standard or custom entity schema XMLs</p>
+                    <p style="font-weight: 600; font-size: 0.9rem;">Drop Object XML files</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Standard or custom schema XMLs</p>
                 </div>
                 <div class="file-list" id="obj-file-list"></div>
+            </div>
+
+            <!-- Custom Fields Excel Upload -->
+            <div class="card" style="border-color: rgba(21,128,61,0.25);">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                        <span style="color: #15803D;">Custom Fields Excel</span>
+                    </div>
+                    <span id="cf-count-badge" class="badge" style="background: rgba(21,128,61,0.1); color: #15803D; border: 1px solid rgba(21,128,61,0.25);">0 Files</span>
+                </div>
+                <div class="dropzone" id="cf-dropzone" style="border-color: rgba(21,128,61,0.3); background: rgba(21,128,61,0.03);">
+                    <input type="file" id="cf-file-input" multiple accept=".xlsx,.xls">
+                    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <p style="font-weight: 600; font-size: 0.9rem; color: #166534;">Drop Custom Field Excel files</p>
+                    <p style="font-size: 0.75rem; color: #15803D; margin-top: 4px;"><code>Custom Fields.xlsx</code> &amp; Menu exports</p>
+                </div>
+                <div class="file-list" id="cf-file-list"></div>
             </div>
         </div>
 
@@ -756,33 +797,21 @@
         let activeMainTab = 'workspaces';
         let activeSubTabIdx = 0;
 
-        const wsFileInput = document.getElementById('ws-file-input');
+        const wsFileInput  = document.getElementById('ws-file-input');
         const objFileInput = document.getElementById('obj-file-input');
+        const cfFileInput  = document.getElementById('cf-file-input');
 
-        wsFileInput.addEventListener('change', () => updateFileList('ws'));
+        wsFileInput.addEventListener('change',  () => updateFileList('ws'));
         objFileInput.addEventListener('change', () => updateFileList('obj'));
-
-        // Auto-fill REST connection form from config.py on page load
-        async function autoFillConfig() {
-            try {
-                const res = await fetch('/api/config');
-                const cfg = await res.json();
-                if (cfg.host)     document.getElementById('rest-host').value = cfg.host;
-                if (cfg.username) document.getElementById('rest-user').value = cfg.username;
-                if (cfg.password) document.getElementById('rest-pass').value = cfg.password;
-            } catch (err) {}
-        }
-        autoFillConfig();
+        cfFileInput.addEventListener('change',  () => updateFileList('cf'));
 
         function updateFileList(type) {
             const input = document.getElementById(`${type}-file-input`);
-            const list = document.getElementById(`${type}-file-list`);
+            const list  = document.getElementById(`${type}-file-list`);
             const badge = document.getElementById(`${type}-count-badge`);
-
             list.innerHTML = '';
             const files = Array.from(input.files);
-            badge.innerText = `${files.length} Files`;
-
+            badge.innerText = `${files.length} File${files.length !== 1 ? 's' : ''}`;
             files.forEach(f => {
                 const item = document.createElement('div');
                 item.className = 'file-item';
@@ -882,18 +911,32 @@
             }
         }
 
-        async function processUploadedFiles() {
-            const wsFiles = wsFileInput.files;
-            const objFiles = objFileInput.files;
+        // Auto-fill REST connection form from config.py on page load
+        async function autoFillConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                if (cfg.host)     document.getElementById('rest-host').value = cfg.host;
+                if (cfg.username) document.getElementById('rest-user').value = cfg.username;
+                if (cfg.password) document.getElementById('rest-pass').value = cfg.password;
+            } catch (err) {}
+        }
+        autoFillConfig();
 
-            if (wsFiles.length === 0 && objFiles.length === 0) {
-                alert('Please select at least one Workspace XML or Object XML file.');
+        async function processUploadedFiles() {
+            const wsFiles  = Array.from(wsFileInput.files);
+            const objFiles = Array.from(objFileInput.files);
+            const cfFiles  = Array.from(cfFileInput.files);
+
+            if (wsFiles.length === 0 && objFiles.length === 0 && cfFiles.length === 0) {
+                alert('Please select at least one Workspace XML, Object XML, or Custom Field Excel file.');
                 return;
             }
 
             const formData = new FormData();
-            Array.from(wsFiles).forEach(f => formData.append('workspace_files', f));
-            Array.from(objFiles).forEach(f => formData.append('object_files', f));
+            wsFiles.forEach(f  => formData.append('workspace_files', f));
+            objFiles.forEach(f => formData.append('object_files', f));
+            cfFiles.forEach(f  => formData.append('custom_fields_files', f));
 
             try {
                 const res = await fetch('/api/extract', {
@@ -964,6 +1007,45 @@
             });
         }
 
+        function badgeHtml(val) {
+            if (!val || val === '-' || val === 'Unknown') {
+                return '<span class="badge badge-system">-</span>';
+            }
+            if (val === 'Yes') {
+                return '<span class="badge badge-yes">Yes</span>';
+            }
+            if (val === 'No') {
+                return '<span class="badge badge-no">No</span>';
+            }
+            return `<span class="badge badge-system">${val}</span>`;
+        }
+
+        function deprecationBadgeHtml(val) {
+            if (!val || val === '-' || val === 'Unknown') {
+                return '<span class="badge badge-system">-</span>';
+            }
+            if (val === 'Yes') {
+                return '<span class="badge badge-no">Yes</span>';
+            }
+            if (val === 'No') {
+                return '<span class="badge badge-yes">No</span>';
+            }
+            return `<span class="badge badge-system">${val}</span>`;
+        }
+
+        function systemBadgeHtml(val) {
+            if (!val || val === '-' || val === 'Unknown') {
+                return '<span class="badge badge-system">-</span>';
+            }
+            if (val === 'Yes') {
+                return '<span class="badge badge-system">Yes</span>';
+            }
+            if (val === 'No') {
+                return '<span class="badge badge-custom">No</span>';
+            }
+            return `<span class="badge badge-system">${val}</span>`;
+        }
+
         function renderTable() {
             const head = document.getElementById('table-head');
             const body = document.getElementById('table-body');
@@ -1008,7 +1090,7 @@
                     <tr>
                         <th>Bound Object</th>
                         <th>Target Object</th>
-                        <th>Object Field Name</th>
+                        <th>Field Name</th>
                         <th>Field Label</th>
                         <th>Location / Tab</th>
                         <th>Required</th>
@@ -1022,27 +1104,27 @@
                 `;
                 rows.forEach(r => {
                     const tr = document.createElement('tr');
-                    const isCustom = r.field_type.includes('Custom');
+                    const isCustom = (r.field_type || '').includes('Custom');
                     tr.innerHTML = `
-                        <td><strong>${r.bound_object}</strong></td>
-                        <td>${r.target_object}</td>
-                        <td><code>${r.object_field_name}</code></td>
-                        <td>${r.field_label}</td>
-                        <td>${r.location_tab}</td>
-                        <td>${r.required}</td>
-                        <td>${r.readonly}</td>
-                        <td>${r.data_type}</td>
-                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
-                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
-                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
-                        <td>${r.max_length}</td>
+                        <td><strong>${r.bound_object || '-'}</strong></td>
+                        <td>${r.target_object || '-'}</td>
+                        <td><code>${r.object_field_name || '-'}</code></td>
+                        <td>${r.field_label || '-'}</td>
+                        <td>${r.location_tab || '-'}</td>
+                        <td>${r.required || '-'}</td>
+                        <td>${r.readonly || '-'}</td>
+                        <td>${r.data_type || '-'}</td>
+                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type || '-'}</span></td>
+                        <td>${badgeHtml(r.is_nullable)}</td>
+                        <td>${badgeHtml(r.is_lookup)}</td>
+                        <td>${r.max_length || '-'}</td>
                     `;
                     body.appendChild(tr);
                 });
             } else if (activeMainTab === 'std_objects' || activeMainTab === 'cst_objects' || activeMainTab === 'objects') {
                 head.innerHTML = `
                     <tr>
-                        <th>Field Key</th>
+                        <th>Field Name</th>
                         <th>Field Label</th>
                         <th>Data Type</th>
                         <th>Field Type</th>
@@ -1073,17 +1155,17 @@
                         <td>${r.field_label || '-'}</td>
                         <td>${r.data_type || '-'}</td>
                         <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type || '-'}</span></td>
-                        <td><span class="badge ${r.is_system_field === 'Yes' ? 'badge-system' : 'badge-custom'}">${r.is_system_field || 'No'}</span></td>
+                        <td>${systemBadgeHtml(r.is_system_field)}</td>
                         <td>${r.package_name || '-'}</td>
-                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable || 'No'}</span></td>
-                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup || 'No'}</span></td>
-                        <td><span class="badge ${r.is_readonly === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly || 'No'}</span></td>
+                        <td>${badgeHtml(r.is_nullable)}</td>
+                        <td>${badgeHtml(r.is_lookup)}</td>
+                        <td>${badgeHtml(r.is_readonly)}</td>
                         <td>${r.max_length || '-'}</td>
                         <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
-                        <td><span class="badge ${r.is_available_get === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_available_get || 'Yes'}</span></td>
-                        <td><span class="badge ${r.is_available_post === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_available_post || 'No'}</span></td>
-                        <td><span class="badge ${r.is_available_patch === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_available_patch || 'No'}</span></td>
-                        <td><span class="badge ${r.is_deprecated === 'Yes' ? 'badge-no' : 'badge-yes'}">${r.is_deprecated || 'No'}</span></td>
+                        <td>${badgeHtml(r.is_available_get)}</td>
+                        <td>${badgeHtml(r.is_available_post)}</td>
+                        <td>${badgeHtml(r.is_available_patch)}</td>
+                        <td>${deprecationBadgeHtml(r.is_deprecated)}</td>
                         <td>${r.is_enumerable || '-'}</td>
                         <td>${r.minimum || '-'}</td>
                         <td>${r.maximum || '-'}</td>
@@ -1098,7 +1180,7 @@
                     <tr>
                         <th>Bound Object</th>
                         <th>Target Object</th>
-                        <th>Object Field Name</th>
+                        <th>Field Name</th>
                         <th>Field Label</th>
                         <th>Workspace Tab</th>
                         <th>Required (In Layout)</th>
@@ -1131,34 +1213,34 @@
                     const tr = document.createElement('tr');
                     const isCustom = (r.field_type || '').includes('Custom');
                     tr.innerHTML = `
-                        <td><strong>${r.bound_object}</strong></td>
-                        <td>${r.target_object}</td>
-                        <td><code>${r.object_field_name}</code></td>
-                        <td>${r.field_label}</td>
-                        <td>${r.workspace_tab}</td>
-                        <td>${r.required}</td>
-                        <td>${r.readonly}</td>
-                        <td>${r.data_type}</td>
-                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type}</span></td>
-                        <td><span class="badge ${r.is_system_field === 'Yes' ? 'badge-system' : 'badge-custom'}">${r.is_system_field || 'No'}</span></td>
+                        <td><strong>${r.bound_object || '-'}</strong></td>
+                        <td>${r.target_object || '-'}</td>
+                        <td><code>${r.object_field_name || '-'}</code></td>
+                        <td>${r.field_label || '-'}</td>
+                        <td>${r.workspace_tab || '-'}</td>
+                        <td>${r.required || '-'}</td>
+                        <td>${r.readonly || '-'}</td>
+                        <td>${r.data_type || '-'}</td>
+                        <td><span class="badge ${isCustom ? 'badge-custom' : 'badge-system'}">${r.field_type || '-'}</span></td>
+                        <td>${systemBadgeHtml(r.is_system_field)}</td>
                         <td>${r.package_name || '-'}</td>
-                        <td><span class="badge ${r.is_nullable === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_nullable}</span></td>
-                        <td><span class="badge ${r.is_lookup === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_lookup}</span></td>
-                        <td><span class="badge ${r.is_readonly_schema === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_readonly_schema || 'No'}</span></td>
-                        <td>${r.max_length}</td>
+                        <td>${badgeHtml(r.is_nullable)}</td>
+                        <td>${badgeHtml(r.is_lookup)}</td>
+                        <td>${badgeHtml(r.is_readonly_schema)}</td>
+                        <td>${r.max_length || '-'}</td>
                         <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${r.description || '-'}</td>
-                        <td><span class="badge ${r.avail_get === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_get || 'Yes'}</span></td>
-                        <td><span class="badge ${r.avail_post === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_post || 'No'}</span></td>
-                        <td><span class="badge ${r.avail_patch === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.avail_patch || 'No'}</span></td>
-                        <td><span class="badge ${r.is_deprecated === 'Yes' ? 'badge-no' : 'badge-yes'}">${r.is_deprecated || 'No'}</span></td>
+                        <td>${badgeHtml(r.avail_get)}</td>
+                        <td>${badgeHtml(r.avail_post)}</td>
+                        <td>${badgeHtml(r.avail_patch)}</td>
+                        <td>${deprecationBadgeHtml(r.is_deprecated)}</td>
                         <td>${r.is_enumerable || '-'}</td>
                         <td>${r.minimum || '-'}</td>
                         <td>${r.maximum || '-'}</td>
                         <td>${r.ref || '-'}</td>
                         <td>${r.items || '-'}</td>
                         <td>${r.pattern || '-'}</td>
-                        <td><span class="badge ${r.is_list === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_list || 'No'}</span></td>
-                        <td><span class="badge ${r.is_autoupdate === 'Yes' ? 'badge-yes' : 'badge-no'}">${r.is_autoupdate || 'No'}</span></td>
+                        <td>${badgeHtml(r.is_list)}</td>
+                        <td>${badgeHtml(r.is_autoupdate)}</td>
                         <td><span class="badge badge-yes">Yes</span></td>
                     `;
                     body.appendChild(tr);

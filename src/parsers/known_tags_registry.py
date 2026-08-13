@@ -6,14 +6,17 @@ Analytics Reports, CPM Event Procedures, Navigation Sets, and BUI Add-Ins.
 
 KNOWN_WORKSPACE_ATTRS = {
     "type", "uitype", "serverversion", "clientversion", "ismultiedit", "id", "name",
-    "browsercompatibilitymode", "spellcheckallowcancel", "spellcheckonsave"
+    "browsercompatibilitymode", "spellcheckallowcancel", "spellcheckonsave", "kbreportid",
+    "hiddenoption", "setfixedheight", "height", "width", "layoutlabelposition", "increment",
+    "scrollbars", "options"
 }
 
 KNOWN_WORKSPACE_CHILDREN = {
     "table", "tabset", "recordtypes", "recordtype", "info", "infoitem", "rules", "rule",
     "triggers", "trigger", "conditions", "condition", "then", "else", "action", "field",
     "menu", "browser", "relationshipitem", "report", "addinitem", "titlebar",
-    "spacer", "links", "linkitem", "flag", "quickaccesstoolbar", "ribbon", "tab", "property"
+    "spacer", "links", "linkitem", "flag", "quickaccesstoolbar", "ribbon", "tab", "property",
+    "options", "option", "chat", "createincatbegin", "focusatbegin"
 }
 
 KNOWN_TABSET_ATTRS = {
@@ -22,20 +25,21 @@ KNOWN_TABSET_ATTRS = {
 }
 KNOWN_TABSET_CHILDREN = {"tab"}
 
-KNOWN_TAB_ATTRS = {"text", "textlabelname", "id", "row", "column", "textcolor"}
+KNOWN_TAB_ATTRS = {"text", "textlabelname", "id", "row", "column", "textcolor", "margin", "padding", "height", "width"}
 KNOWN_TAB_CHILDREN = {
     "table", "field", "relationshipitem", "report", "browser", "addinitem",
-    "menu", "titlebar", "spacer", "tabset"
+    "menu", "titlebar", "spacer", "tabset", "options"
 }
 
 KNOWN_FIELD_ATTRS = {
     "objectid", "fieldid", "labeltext", "id", "row", "column", "defaultphonetype", "defaultvalue",
     "initialvalue", "value", "reportid", "readonlyoption", "hiddenoption", "requiredoption",
-    "acceptsreturn", "booleanrenderview", "height", "layoutlabelalignment", "multiline",
-    "requiredforsolved", "rowspan", "columnspan", "showparent", "spellcheck", "tabindex", "trimtextwhitespace",
-    "disableemailicon"
+    "acceptsreturn", "booleanrenderview", "height", "width", "layoutlabelalignment", "layoutlabelposition",
+    "multiline", "requiredforsolved", "rowspan", "columnspan", "showparent", "spellcheck", "tabindex",
+    "trimtextwhitespace", "disableemailicon", "kbreportid", "setfixedheight", "increment", "scrollbars",
+    "anchor", "autosize", "margin", "padding", "font", "textcolor", "backgroundcolor", "alignment", "visible"
 }
-KNOWN_FIELD_CHILDREN = set()
+KNOWN_FIELD_CHILDREN = {"options", "option", "chat", "createincatbegin", "focusatbegin", "property", "properties", "item", "items"}
 
 KNOWN_RELATIONSHIP_ATTRS = {
     "itemtype", "acid", "id", "row", "column", "executeonnew", "showreadtransactions",
@@ -48,21 +52,24 @@ KNOWN_RELATIONSHIP_ATTRS = {
     "padding", "reassignonresponse", "responsepanelcoupled", "sendresponsedefault", "showrowcount",
     "threadorientation", "thumbnailsenabled", "thumbnailsthreshold", "filteronprimarykeyonly",
     "refreshreportondatachange", "tabindex", "canusestandardtext", "hidereportcommands",
-    "layoutlabelalignment", "layoutlabelposition", "readonlyoption"
+    "layoutlabelalignment", "layoutlabelposition", "readonlyoption", "kbreportid", "setfixedheight",
+    "height", "width", "increment", "scrollbars", "hiddenoption"
 }
-KNOWN_RELATIONSHIP_CHILDREN = set()
+KNOWN_RELATIONSHIP_CHILDREN = {"options", "option", "chat", "createincatbegin", "focusatbegin"}
 
 KNOWN_BROWSER_ATTRS = {
     "url", "suppresserrors", "id", "height", "width", "row", "column", "delaypageload",
-    "sendurlaspostdata", "setfixedheight", "childbrowsers", "tabindex", "httpmethod", "postdata"
+    "sendurlaspostdata", "setfixedheight", "childbrowsers", "tabindex", "httpmethod", "postdata",
+    "layoutlabelposition", "layoutlabelalignment", "hiddenoption", "kbreportid", "scrollbars"
 }
-KNOWN_BROWSER_CHILDREN = set()
+KNOWN_BROWSER_CHILDREN = {"options", "option"}
 
 KNOWN_ADDIN_ATTRS = {
     "itemtype", "addinname", "fileid", "buiextension", "id", "row", "column", "height",
-    "width", "assemblyname", "assembly", "anchor", "autosize"
+    "width", "assemblyname", "assembly", "anchor", "autosize", "layoutlabelposition",
+    "layoutlabelalignment", "hiddenoption", "kbreportid", "scrollbars"
 }
-KNOWN_ADDIN_CHILDREN = set()
+KNOWN_ADDIN_CHILDREN = {"options", "option"}
 
 # Reconciled Business Rule schema (merged across workspace_parser and rule_parser)
 KNOWN_RULE_ATTRS = {"name", "active", "id", "notes"}

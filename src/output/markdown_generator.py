@@ -284,18 +284,30 @@ def generate_report_markdown(ws):
     unhandled_attrs = unk.get("unknown_attrs", [])
     
     if unhandled_children or unhandled_attrs:
-        total_cnt = len(unhandled_children) + len(unhandled_attrs)
-        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
-        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        seen_child_map = {}
         for item in unhandled_children:
             t_name = item.get("tag") or item.get("name") or "unknown"
-            snippet = item.get("raw") or item.get("snippet") or ""
-            clean_snip = snippet.replace("\n", " ").replace("\r", "")
-            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+            snippet = (item.get("raw") or item.get("raw_xml") or item.get("snippet") or "").replace("\n", " ").replace("\r", "").strip()
+            clean_snip = snippet[:120]
+            key = (t_name, clean_snip)
+            seen_child_map[key] = seen_child_map.get(key, 0) + 1
+
+        seen_attr_map = {}
         for item in unhandled_attrs:
             a_name = item.get("attribute") or "attr"
-            a_val = item.get("value") or ""
-            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+            a_val = str(item.get("value") or "").replace("\n", " ").replace("\r", "").strip()
+            key = (a_name, a_val)
+            seen_attr_map[key] = seen_attr_map.get(key, 0) + 1
+
+        total_cnt = len(seen_child_map) + len(seen_attr_map)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} unique raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for (t_name, clean_snip), count in seen_child_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip}`{cnt_suffix}")
+        for (a_name, a_val), count in seen_attr_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`{cnt_suffix}")
         lines.append("")
 
     lines.append("---")
@@ -316,17 +328,32 @@ def generate_report_markdown(ws):
     top_menus = ws.get("menus", [])
     all_tabs_flat = get_all_tabs_flat(ws.get("tabs", []))
     
-    if top_fields or top_menus:
+    # Aggregate all fields across root level and all tabs
+    all_workspace_fields = []
+    for f in top_fields:
+        item = dict(f)
+        item["location"] = "Root Canvas"
+        all_workspace_fields.append(item)
+        
+    for t in all_tabs_flat:
+        t_name = clean_tab_label(t.get("text"))
+        for f in t.get("fields", []):
+            item = dict(f)
+            item["location"] = f"Tab: {t_name}"
+            all_workspace_fields.append(item)
+
+    if all_workspace_fields or top_menus:
         lines.append(f"The workspace has a {col_str}:")
         lines.append("")
-        lines.append("**Left column** — Form fields:")
+        lines.append(f"**Form Fields Inventory ({len(all_workspace_fields)} Fields)**:")
         lines.append("")
-        lines.append("| Field | Notes |")
-        lines.append("|---|---|")
+        lines.append("| Field | Location | Notes |")
+        lines.append("|---|---|---|")
         
         layout_elements = []
-        for f in top_fields:
-            field_id = f.get("field_id")
+        for f in all_workspace_fields:
+            field_id = f.get("field_id") or "Unknown"
+            loc = f.get("location", "Workspace")
             notes = get_field_notes(field_id, f.get("label"), f.get("default_phone_type"))
             readonly_opt = f.get("readonly_option")
             hidden_opt = f.get("hidden_option")
@@ -344,6 +371,7 @@ def generate_report_markdown(ws):
             if constraints: notes += f" — *Constraints: {'; '.join(constraints)}*"
             layout_elements.append({
                 "name": f"`{field_id}`",
+                "location": f"`{loc}`",
                 "row": f.get("row", 0),
                 "column": f.get("column", 0),
                 "notes": notes
@@ -353,14 +381,15 @@ def generate_report_markdown(ws):
             items_str = ", ".join(f"**{val}**" for val in m.get("items", []))
             layout_elements.append({
                 "name": f"`Menu ({m.get('id')})`",
+                "location": "`Root Canvas`",
                 "row": m.get("row", 0),
                 "column": m.get("column", 0),
                 "notes": f"Custom dropdown menu with items: {items_str}"
             })
             
-        layout_elements.sort(key=lambda x: (x["column"], x["row"]))
+        layout_elements.sort(key=lambda x: (x["location"], x["column"], x["row"]))
         for el in layout_elements:
-            lines.append(f"| {el['name']} | {el['notes']} |")
+            lines.append(f"| {el['name']} | {el['location']} | {el['notes']} |")
         lines.append("")
     else:
         lines.append(f"The workspace layout is structured as a root **TabSet** containing {len(ws.get('tabs', []))} tabs.")
@@ -1206,18 +1235,30 @@ def generate_analytics_report_markdown(report):
     r_attrs = r_unk.get("unknown_attrs", [])
 
     if r_children or r_attrs:
-        total_cnt = len(r_children) + len(r_attrs)
-        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
-        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        seen_child_map = {}
         for item in r_children:
             t_name = item.get("tag") or item.get("name") or "unknown"
-            snippet = item.get("raw") or item.get("raw_xml") or item.get("snippet") or ""
-            clean_snip = snippet.replace("\n", " ").replace("\r", "")
-            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+            snippet = (item.get("raw") or item.get("raw_xml") or item.get("snippet") or "").replace("\n", " ").replace("\r", "").strip()
+            clean_snip = snippet[:120]
+            key = (t_name, clean_snip)
+            seen_child_map[key] = seen_child_map.get(key, 0) + 1
+
+        seen_attr_map = {}
         for item in r_attrs:
             a_name = item.get("attribute") or "attr"
-            a_val = item.get("value") or ""
-            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+            a_val = str(item.get("value") or "").replace("\n", " ").replace("\r", "").strip()
+            key = (a_name, a_val)
+            seen_attr_map[key] = seen_attr_map.get(key, 0) + 1
+
+        total_cnt = len(seen_child_map) + len(seen_attr_map)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} unique raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for (t_name, clean_snip), count in seen_child_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip}`{cnt_suffix}")
+        for (a_name, a_val), count in seen_attr_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`{cnt_suffix}")
         lines.append("")
 
     lines.append("---")
@@ -2471,18 +2512,30 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
     b_attrs = b_unk.get("unknown_attrs", [])
 
     if b_children or b_attrs:
-        total_cnt = len(b_children) + len(b_attrs)
-        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
-        lines.append(f"> The following {total_cnt} raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        seen_child_map = {}
         for item in b_children:
             t_name = item.get("tag") or item.get("name") or "unknown"
-            snippet = item.get("raw") or item.get("raw_xml") or item.get("snippet") or ""
-            clean_snip = snippet.replace("\n", " ").replace("\r", "")
-            lines.append(f"> - Element `<{t_name}>`: `{clean_snip[:120]}`")
+            snippet = (item.get("raw") or item.get("raw_xml") or item.get("snippet") or "").replace("\n", " ").replace("\r", "").strip()
+            clean_snip = snippet[:120]
+            key = (t_name, clean_snip)
+            seen_child_map[key] = seen_child_map.get(key, 0) + 1
+
+        seen_attr_map = {}
         for item in b_attrs:
             a_name = item.get("attribute") or "attr"
-            a_val = item.get("value") or ""
-            lines.append(f"> - Attribute `{a_name}`: `{a_val}`")
+            a_val = str(item.get("value") or "").replace("\n", " ").replace("\r", "").strip()
+            key = (a_name, a_val)
+            seen_attr_map[key] = seen_attr_map.get(key, 0) + 1
+
+        total_cnt = len(seen_child_map) + len(seen_attr_map)
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Source Export")
+        lines.append(f"> The following {total_cnt} unique raw XML element(s)/attribute(s) were present in the export and captured via fallback handling:")
+        for (t_name, clean_snip), count in seen_child_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Element `<{t_name}>`: `{clean_snip}`{cnt_suffix}")
+        for (a_name, a_val), count in seen_attr_map.items():
+            cnt_suffix = f" *(x{count})*" if count > 1 else ""
+            lines.append(f"> - Attribute `{a_name}`: `{a_val}`{cnt_suffix}")
         lines.append("")
 
     lines.append("---")
@@ -2659,24 +2712,25 @@ def generate_single_bui_addin_markdown(bui, reports=None, workspaces=None):
 
 def generate_custom_scripts_summary_markdown(scripts):
     lines = []
-    lines.append("# Custom Scripts Analysis Summary")
+    lines.append("# Custom Scripts Architecture Analysis")
+    lines.append("*Category Report: Standalone Procedural PHP / JS Scripts*")
     lines.append("")
-    lines.append(f"**Total Custom Scripts:** {len(scripts)}")
+    lines.append(f"**Total Standalone Scripts Cataloged:** {len(scripts)}")
     lines.append("")
     lines.append("## Overview Table")
     lines.append("")
-    lines.append("| Script File | Type | Internal APIs | SOAP APIs | REST APIs | Risk Flags |")
-    lines.append("| --- | --- | --- | --- | --- | --- |")
+    lines.append("| Relative Source File Path | Script Category | Internal APIs | SOAP APIs | REST APIs | Risk Audit Flags |")
+    lines.append("| :--- | :--- | :---: | :---: | :---: | :---: |")
 
     for s in scripts:
-        fname = s.get("file_name", "Unknown")
-        stype = s.get("script_type", "Script")
+        fpath = s.get("file_path") or s.get("file_name") or "script.php"
+        stype = s.get("script_type", "PHP Script")
         int_cnt = len(s.get("internal_apis", []))
         soap_cnt = len(s.get("external_soap_apis", []))
         rest_cnt = len(s.get("external_rest_apis", []))
         risks = len(s.get("risk_flags", []))
-        risk_badge = f"[RISK: {risks}]" if risks > 0 else "[OK]"
-        lines.append(f"| `{fname}` | {stype} | {int_cnt} | {soap_cnt} | {rest_cnt} | {risk_badge} |")
+        risk_badge = f"`[RISK: {risks}]`" if risks > 0 else "`[OK]`"
+        lines.append(f"| `{fpath}` | `{stype}` | `{int_cnt}` | `{soap_cnt}` | `{rest_cnt}` | {risk_badge} |")
 
     lines.append("")
     lines.append("---")
@@ -2685,17 +2739,19 @@ def generate_custom_scripts_summary_markdown(scripts):
     lines.append("")
 
     for s in scripts:
-        fname = s.get("file_name", "Unknown")
-        stype = s.get("script_type", "Script")
+        fpath = s.get("file_path") or s.get("file_name") or "script.php"
+        fname = s.get("file_name", "script.php")
+        stype = s.get("script_type", "PHP Script")
         int_cnt = len(s.get("internal_apis", []))
         soap_cnt = len(s.get("external_soap_apis", []))
         rest_cnt = len(s.get("external_rest_apis", []))
 
-        lines.append(f"### Script: `{fname}` ({stype})")
-        lines.append("")
-        lines.append(f"- **Internal APIs (ROQL/Connect):** {int_cnt}")
-        lines.append(f"- **External SOAP APIs:** {soap_cnt}")
-        lines.append(f"- **External REST APIs:** {rest_cnt}")
+        lines.append(f"### File: `{fname}`")
+        lines.append(f"- **Source Relative Path**: `{fpath}`")
+        lines.append(f"- **Script Category**: `{stype}`")
+        lines.append(f"- **Internal APIs (ROQL/Connect)**: `{int_cnt}`")
+        lines.append(f"- **External SOAP APIs**: `{soap_cnt}`")
+        lines.append(f"- **External REST APIs**: `{rest_cnt}`")
 
         if s.get("imports"):
             lines.append("- **Imports:** " + ", ".join(f"`{i}`" for i in s["imports"]))
@@ -3697,6 +3753,620 @@ def generate_single_object_business_rules_markdown(obj_name, obj_rules):
     lines.append("")
     lines.append("</details>")
     lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_customer_portal_summary_markdown(cp_data):
+    """
+    Generates a unified Customer Portal (CP3) MVC System Architecture Markdown Report
+    styled with BUI Add-In report design patterns (collapsible cards, pill badges, HTML previews).
+    """
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lines = []
+
+    models    = cp_data.get("models", [])
+    widgets   = cp_data.get("widgets", [])
+    pages     = cp_data.get("pages", [])
+    templates = cp_data.get("templates", [])
+    hooks     = cp_data.get("hooks", [])
+    community = cp_data.get("community", [])
+
+    lines.append("# OSVC Customer Portal (CP3) MVC Architecture Report")
+    lines.append(f"*Generated by Config Accelerator Engine on `{now_str}`*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append("> Comprehensive inventory of Customer Portal (CP3) MVC architecture: Custom Models, Custom Widgets, Framework Lifecycle Hooks, Page Layouts, Templates, and Community Routes.")
+    lines.append("")
+
+    # System Metrics Overview
+    lines.append("## Executive Component Metrics")
+    lines.append(f"- **Total Custom Models**: `{len(models)}`")
+    lines.append(f"- **Total Custom Widgets**: `{len(widgets)}`")
+    lines.append(f"- **Total Portal Pages / Views**: `{len(pages)}`")
+    lines.append(f"- **Total Layout Templates**: `{len(templates)}`")
+    lines.append(f"- **Total Framework Hooks**: `{len(hooks)}`")
+    lines.append(f"- **Community Forum Routes**: `{len(community)}`")
+    lines.append("")
+
+    # Unhandled Schema Safeguard Warning Block
+    cp_unhandled = []
+    for item in models + widgets + pages:
+        unk = item.get("unhandled_elements", [])
+        for ch in unk:
+            cp_unhandled.append({"component": item.get("name") or item.get("page_file"), "tag": ch.get("tag"), "raw": ch.get("raw")})
+
+    if cp_unhandled:
+        lines.append("> [!WARNING] Unhandled Schema Elements Detected in Customer Portal Config")
+        lines.append(f"> The following {len(cp_unhandled)} raw XML/PHP element(s) were present:")
+        for item in cp_unhandled:
+            clean_snip = (item.get("raw") or "").replace("\n", " ").replace("\r", "")
+            lines.append(f"> - [{item['component']}] `<{item['tag']}>`: `{clean_snip[:120]}`")
+        lines.append("")
+
+    lines.append("---")
+    lines.append("")
+
+    # Overview Table
+    lines.append("## Component Overview Table")
+    lines.append("")
+    lines.append("| Component Name | Category / Type | Extends Class / Parent | Methods / Sub-Widgets | Calling Components / Used In Pages |")
+    lines.append("| :--- | :--- | :--- | :--- | :--- |")
+
+    for m in models:
+        lines.append(f"| **{m.get('name')}** | `CP Model` | `{m.get('extends_class', 'Custom_Model')}` | {len(m.get('methods', []))} Methods | {m.get('called_by', 'Direct Model')} |")
+
+    for w in widgets:
+        lines.append(f"| **{w.get('name')}** | `CP Widget` | `{w.get('extends_class', 'BaseWidget')}` | `{w.get('file_path')}` | {w.get('used_in_pages_str', 'Global')} |")
+
+    for p in pages[:15]:
+        kw_cnt = len(p.get('key_widgets', 'None').split(', ')) if p.get('key_widgets') != 'None' else 0
+        lines.append(f"| **{p.get('page_file')}** | `CP Page View` | Template: `{p.get('template_used', 'standard.php')}` | {kw_cnt} Widgets | Login Required: `{p.get('login_required')}` |")
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    # Detailed Collapsible Cards Section
+    lines.append("## Detailed Component Breakdowns")
+    lines.append("")
+
+    # Models Breakdowns
+    lines.append("### Custom Models")
+    lines.append("")
+    for m in models:
+        mname = m.get("name", "model")
+        ext = m.get("extends_class", "Custom_Model")
+        cls = m.get("class_name", mname)
+        m_list = ", ".join(f"`{x}()`" for x in m.get("methods", [])) or "None"
+
+        lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+        lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #3b82f6; color: #3b82f6; margin-right: 8px;">CP MODEL</span><b>{mname}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Class: {cls} extends {ext})</span></summary>')
+        lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+        lines.append("")
+        lines.append(f"- **Class Name**: `{cls}`")
+        lines.append(f"- **Base Model**: `{ext}`")
+        lines.append(f"- **Public Methods ({len(m.get('methods', []))}):**: {m_list}")
+        lines.append(f"- **Callers / Linkages**: {m.get('called_by')}")
+        lines.append("  </div>")
+        lines.append("</details>")
+        lines.append("")
+
+    # Widgets Breakdowns
+    lines.append("### Custom Widgets")
+    lines.append("")
+    for w in widgets[:20]:
+        wname = w.get("name", "widget")
+        wpath = w.get("file_path", "Custom")
+        used  = w.get("used_in_pages_str", "Global")
+
+        lines.append('<details style="border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 8px; margin-bottom: 16px; padding: 12px 16px;">')
+        lines.append(f'  <summary style="font-weight: 600; font-size: 15px; cursor: pointer;"><span style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; border: 1px solid #10b981; color: #10b981; margin-right: 8px;">CP WIDGET</span><b>{wname}</b> <span style="font-size: 13px; font-weight: 400; opacity: 0.8; margin-left: 6px;">(Category: {wpath})</span></summary>')
+        lines.append('  <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(148, 163, 184, 0.25);">')
+        lines.append("")
+        lines.append(f"- **Widget Folder**: `widgets/custom/{w.get('rel_path')}`")
+        lines.append(f"- **Parent Base Class**: `{w.get('extends_class', 'BaseWidget')}`")
+        lines.append(f"- **Placed On Pages**: {used}")
+        lines.append("  </div>")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_single_cp_model_markdown(model_item):
+    """Generates a BUI-styled standalone Markdown report for an individual Custom CP Model."""
+    mname = model_item.get("name", "Model")
+    cls   = model_item.get("class_name", mname)
+    ext   = model_item.get("extends_class", "Custom_Model")
+    m_list = model_item.get("methods", [])
+
+    lines = []
+    lines.append(f"# Custom Model Report: {mname}")
+    lines.append(f"*Component Type: Customer Portal Custom Model*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Technical specification for CP Model `{mname}` (`{cls}` extending `{ext}`).")
+    lines.append("")
+
+    lines.append("## 1. Class Structure & Methods")
+    lines.append(f"- **File Path**: `models/custom/{mname}`")
+    lines.append(f"- **Class Name**: `{cls}`")
+    lines.append(f"- **Extends**: `{ext}`")
+    lines.append(f"- **Methods Count**: {len(m_list)}")
+    lines.append("")
+
+    if m_list:
+        lines.append("| Method Signature | Type | Accessibility |")
+        lines.append("| :--- | :--- | :--- |")
+        for meth in m_list:
+            mtype = "Constructor" if meth == "__construct" else "Public Function"
+            lines.append(f"| `{meth}()` | `{mtype}` | `Public` |")
+        lines.append("")
+
+    lines.append("## 2. Dependencies & Callers")
+    lines.append(f"- **Callers**: {model_item.get('called_by', 'Direct Invocation')}")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_single_cp_widget_markdown(widget_item):
+    """Generates a BUI-styled standalone Markdown report for an individual Custom CP Widget with HTML preview."""
+    wname = widget_item.get("name", "Widget")
+    wpath = widget_item.get("file_path", "Custom")
+    full_dir = widget_item.get("full_dir", "")
+    view_file = os.path.join(full_dir, "view.php")
+
+    lines = []
+    lines.append(f"# Custom Widget Report: {wname}")
+    lines.append(f"*Category: {wpath} Widget*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Custom Customer Portal widget component `{wname}`.")
+    lines.append("")
+
+    lines.append("## 1. Widget Structure")
+    lines.append(f"- **Category Path**: `{wpath}`")
+    lines.append(f"- **Relative Directory**: `widgets/custom/{widget_item.get('rel_path')}`")
+    lines.append(f"- **Parent Class**: `{widget_item.get('extends_class', 'BaseWidget')}`")
+    lines.append(f"- **Placed On Pages**: {widget_item.get('used_in_pages_str', 'Global')}")
+    lines.append("")
+
+def build_cp_html_live_preview_card(raw_text, title):
+    """
+    Builds a BUI-styled HTML live preview card block for Customer Portal page/widget views.
+    Encodes raw HTML code in base64 data-html attribute for Web UI iframe sandboxing
+    and renders escaped code inside a styled html-preview-card container.
+    """
+    if not raw_text or not raw_text.strip():
+        return ""
+
+    import html
+    raw_clean = raw_text.strip()
+    encoded = _b64.b64encode(raw_clean.encode("utf-8")).decode("ascii")
+    escaped_code = html.escape(raw_clean)
+
+    card_lines = []
+    card_lines.append(f'<div class="html-preview-pending" data-html="{encoded}" data-title="{title}">')
+    card_lines.append('  <div class="html-preview-card" style="border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 12px 0; background: #ffffff; color: #1f2328; box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">')
+    card_lines.append('    <div style="font-weight: 600; font-size: 13px; color: #57606a; border-bottom: 1px solid #d0d7de; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">')
+    card_lines.append(f'      <span>HTML Live View Preview: {title}</span>')
+    card_lines.append('      <span style="font-size: 11px; background: #f6f8fa; color: #24292f; padding: 2px 8px; border-radius: 12px; border: 1px solid #d0d7de; font-weight: 600;">View Container</span>')
+    card_lines.append('    </div>')
+    card_lines.append('    <div class="html-preview-body" style="background: #f6f8fa; color: #1f2328; font-size: 12px; line-height: 1.5; padding: 12px; border-radius: 6px; border: 1px solid #e1e4e8; overflow-x: auto;">')
+    card_lines.append(f'      <pre style="white-space: pre-wrap; word-break: break-all; margin: 0; font-family: SFMono-Regular, Consolas, monospace; font-size: 12px; color: #24292f;">{escaped_code}</pre>')
+    card_lines.append('    </div>')
+    card_lines.append('  </div>')
+    card_lines.append('</div>')
+
+    return "\n".join(card_lines)
+
+
+def generate_single_cp_widget_markdown(widget_item):
+    """Generates a BUI-styled standalone Markdown report for an individual Custom CP Widget with HTML preview card."""
+    wname = widget_item.get("name", "Widget")
+    wpath = widget_item.get("file_path", "Custom")
+    full_dir = widget_item.get("full_dir", "")
+    view_file = os.path.join(full_dir, "view.php")
+
+    lines = []
+    lines.append(f"# Custom Widget Report: {wname}")
+    lines.append(f"*Category: {wpath} Widget*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Custom Customer Portal widget component `{wname}`.")
+    lines.append("")
+
+    lines.append("## 1. Widget Structure")
+    lines.append(f"- **Category Path**: `{wpath}`")
+    lines.append(f"- **Relative Directory**: `widgets/custom/{widget_item.get('rel_path')}`")
+    lines.append(f"- **Parent Class**: `{widget_item.get('extends_class', 'BaseWidget')}`")
+    lines.append(f"- **Placed On Pages**: {widget_item.get('used_in_pages_str', 'Global')}")
+    lines.append("")
+
+    # HTML Preview Card & View Code Block
+    if os.path.exists(view_file):
+        try:
+            with open(view_file, "r", encoding="utf-8", errors="ignore") as vf:
+                v_code = vf.read()
+            if v_code.strip():
+                lines.append("## 2. HTML View Live Visual Preview")
+                lines.append("")
+                lines.append(build_cp_html_live_preview_card(v_code, f"{wname} view.php"))
+                lines.append("")
+                lines.append("### HTML View Source Code")
+                lines.append("```html")
+                v_lines = v_code.strip().split("\n")
+                snippet = "\n".join(v_lines[:60])
+                if len(v_lines) > 60:
+                    snippet += f"\n<!-- ... ({len(v_lines) - 60} additional lines truncated) ... -->"
+                lines.append(snippet)
+                lines.append("```")
+                lines.append("")
+        except Exception:
+            pass
+
+    return "\n".join(lines)
+
+
+def generate_cp_category_models_markdown(cp_data):
+    """Generates a category-based consolidated Markdown report for all Custom CP Models."""
+    models = cp_data.get("models", [])
+    lines = []
+    lines.append("# Customer Portal Architecture Report: Custom Models")
+    lines.append("*Category Report: Models Layer (`models/custom/`)*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Consolidated technical specification and method breakdown for all `{len(models)}` Custom CP Models.")
+    lines.append("")
+
+    lines.append("## 1. Custom Models Summary Matrix")
+    lines.append("")
+    lines.append("| Model File | Parent Class (`extends`) | Public Methods Count | Calling Components / Used In Pages |")
+    lines.append("| :--- | :--- | :--- | :--- |")
+
+    for m in models:
+        mname = m.get("name", "Model")
+        extends_cls = m.get("extends_class", "Custom_Model")
+        m_count = m.get("method_count", 0)
+        callers = m.get("calling_components_str", "Direct Model Invocation")
+        lines.append(f"| `{mname}` | `{extends_cls}` | `{m_count}` Methods | {callers} |")
+
+    lines.append("")
+    lines.append("## 2. Detailed Model Specifications")
+    lines.append("")
+
+    for m in models:
+        mname = m.get("name", "Model")
+        extends_cls = m.get("extends_class", "Custom_Model")
+        m_count = m.get("method_count", 0)
+        methods = m.get("methods", [])
+        callers = m.get("calling_components_str", "Direct Model Invocation")
+
+        lines.append("<details open>")
+        lines.append(f'<summary style="font-weight: bold; font-size: 15px; cursor: pointer; padding: 6px; background: #f6f8fa; border-radius: 6px; border: 1px solid #d0d7de;">')
+        lines.append(f'<span style="background: #2da44e; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 8px;">CP MODEL</span> {mname} &mdash; <code>{extends_cls}</code>')
+        lines.append('</summary>')
+        lines.append('<div style="padding: 12px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; background: #ffffff; margin-bottom: 12px;">')
+        lines.append("")
+        lines.append(f"- **Model File Path**: `models/custom/{mname}`")
+        lines.append(f"- **Extends Parent Class**: `{extends_cls}`")
+        lines.append(f"- **Public Methods Count**: `{m_count}`")
+        lines.append(f"- **Caller Invocations**: {callers}")
+        lines.append("")
+
+        if methods:
+            lines.append("#### Public Methods Inventory")
+            lines.append("| Method Signature | Visibility | Direct Invocations |")
+            lines.append("| :--- | :--- | :--- |")
+            for meth in methods:
+                lines.append(f"| `function {meth}()` | `public` | Code Execution Path |")
+            lines.append("")
+
+        lines.append("</div>")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_cp_category_widgets_markdown(cp_data):
+    """Generates a category-based consolidated Markdown report for all Custom CP Widgets."""
+    widgets = cp_data.get("widgets", [])
+    lines = []
+    lines.append("# Customer Portal Architecture Report: Custom Widgets")
+    lines.append("*Category Report: Widgets Layer (`widgets/custom/`)*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Consolidated technical specification and view HTML previews for all `{len(widgets)}` Custom CP Widgets.")
+    lines.append("")
+
+    lines.append("## 1. Custom Widgets Summary Matrix")
+    lines.append("")
+    lines.append("| Widget Name | Category Path | Extends Class | Placed On Pages / Views |")
+    lines.append("| :--- | :--- | :--- | :--- |")
+
+    for w in widgets:
+        wname = w.get("name", "Widget")
+        wpath = w.get("file_path", "Custom")
+        ext_cls = w.get("extends_class", "BaseWidget")
+        pages_str = w.get("used_in_pages_str", "Global")
+        lines.append(f"| **{wname}** | `{wpath}` | `{ext_cls}` | {pages_str} |")
+
+    lines.append("")
+    lines.append("## 2. Detailed Widget Specifications & View HTML Previews")
+    lines.append("")
+
+    for w in widgets:
+        wname = w.get("name", "Widget")
+        wpath = w.get("file_path", "Custom")
+        ext_cls = w.get("extends_class", "BaseWidget")
+        pages_str = w.get("used_in_pages_str", "Global")
+        full_dir = w.get("full_dir", "")
+        view_file = os.path.join(full_dir, "view.php")
+
+        lines.append("<details>")
+        lines.append(f'<summary style="font-weight: bold; font-size: 15px; cursor: pointer; padding: 6px; background: #f6f8fa; border-radius: 6px; border: 1px solid #d0d7de;">')
+        lines.append(f'<span style="background: #0969da; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 8px;">CP WIDGET</span> {wname} &mdash; <code>{wpath}</code>')
+        lines.append('</summary>')
+        lines.append('<div style="padding: 12px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; background: #ffffff; margin-bottom: 12px;">')
+        lines.append("")
+        lines.append(f"- **Widget Name**: `{wname}`")
+        lines.append(f"- **Category Path**: `{wpath}`")
+        lines.append(f"- **Relative Directory**: `widgets/custom/{w.get('rel_path')}`")
+        lines.append(f"- **Extends Parent Class**: `{ext_cls}`")
+        lines.append(f"- **Placed On Pages**: {pages_str}")
+        lines.append("")
+
+        if os.path.exists(view_file):
+            try:
+                with open(view_file, "r", encoding="utf-8", errors="ignore") as vf:
+                    v_code = vf.read()
+                if v_code.strip():
+                    lines.append(build_cp_html_live_preview_card(v_code, f"{wname} view.php"))
+                    lines.append("")
+            except Exception:
+                pass
+
+        lines.append("</div>")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_cp_category_pages_markdown(cp_data):
+    """Generates a category-based consolidated Markdown report for all Customer Portal Pages/Views."""
+    pages = cp_data.get("pages", [])
+    lines = []
+    lines.append("# Customer Portal Architecture Report: Pages & Views")
+    lines.append("*Category Report: Presentation Layer (`views/pages/`)*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Consolidated technical specification, layout hierarchy, embedded widgets, and form field bindings for all `{len(pages)}` Customer Portal Pages.")
+    lines.append("")
+
+    lines.append("## 1. Customer Portal Pages Summary Matrix")
+    lines.append("")
+    lines.append("| Page View File Path | Template Layout | Login Required | Embedded Widgets Count |")
+    lines.append("| :--- | :--- | :--- | :--- |")
+
+    for p in pages:
+        pfile = p.get("page_file", "Page")
+        tpl = p.get("template_used", "standard.php")
+        req_login = p.get("login_required", "No")
+        k_widgets = p.get("key_widgets", "None").split(", ")
+        w_count = len(k_widgets) if k_widgets != ["None"] else 0
+        lines.append(f"| `views/pages/{pfile}` | `{tpl}` | `{req_login}` | `{w_count}` Widgets |")
+
+    lines.append("")
+    lines.append("## 2. Detailed Page Specifications & Component Inventories")
+    lines.append("")
+
+    for p in pages:
+        pfile = p.get("page_file", "Page")
+        tpl = p.get("template_used", "standard.php")
+        req_login = p.get("login_required", "No")
+        raw_text = p.get("raw_text", "")
+        k_widgets = p.get("key_widgets", "None").split(", ")
+
+        lines.append("<details>")
+        lines.append(f'<summary style="font-weight: bold; font-size: 15px; cursor: pointer; padding: 6px; background: #f6f8fa; border-radius: 6px; border: 1px solid #d0d7de;">')
+        lines.append(f'<span style="background: #8250df; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 8px;">CP PAGE</span> {pfile}')
+        lines.append('</summary>')
+        lines.append('<div style="padding: 12px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; background: #ffffff; margin-bottom: 12px;">')
+        lines.append("")
+        lines.append(f"- **Page File Path**: `views/pages/{pfile}`")
+        lines.append(f"- **Template Layout**: `{tpl}`")
+        lines.append(f"- **Login Required**: `{req_login}`")
+        lines.append(f"- **Embedded Widgets Count**: `{len(k_widgets) if k_widgets != ['None'] else 0}`")
+        lines.append("")
+
+        # Extract embedded widgets cleanly
+        widget_tags = re.findall(r'<rn:widget\s+[^>]+>', raw_text, re.IGNORECASE)
+        if widget_tags:
+            lines.append("#### Embedded Widgets Inventory")
+            lines.append("| Widget Path / Component | Configured Attributes |")
+            lines.append("| :--- | :--- |")
+            for tag in widget_tags[:10]:  # Top 10 widgets per page
+                w_path_m = re.search(r'path=["\']([^"\']+)["\']', tag, re.IGNORECASE)
+                w_name_m = re.search(r'name=["\']([^"\']+)["\']', tag, re.IGNORECASE)
+                w_path = w_path_m.group(1) if w_path_m else (w_name_m.group(1) if w_name_m else "Widget Component")
+
+                # Extract concise attributes
+                attrs = []
+                for attr_m in re.finditer(r'(\w+)=["\']([^"\']+)["\']', tag):
+                    aname, akey = attr_m.group(1), attr_m.group(2)
+                    if aname not in ["path", "show_fields_for_ids"]:
+                        attrs.append(f"`{aname}={akey}`")
+                attr_str = ", ".join(attrs[:4]) if attrs else "Standard Component Config"
+                lines.append(f"| `{w_path}` | {attr_str} |")
+            if len(widget_tags) > 10:
+                lines.append(f"| *+ {len(widget_tags) - 10} additional embedded widgets* | *Configured on page* |")
+            lines.append("")
+
+        # Parse conditional product/category field rules cleanly
+        dyn_rules = re.findall(r'show_fields_for_ids=["\'](.*?)["\']', raw_text, re.DOTALL | re.IGNORECASE)
+        if dyn_rules:
+            lines.append("#### Dynamic Conditional Custom Field Visibility Rules")
+            lines.append("| Product / Category ID | Conditional OSVC Custom Fields Displayed |")
+            lines.append("| :--- | :--- |")
+            for block in dyn_rules:
+                for rule_part in block.split("|"):
+                    if ":" in rule_part:
+                        cat_id, fields_str = rule_part.split(":", 1)
+                        f_list = [f.strip() for f in fields_str.split(",") if f.strip()]
+                        f_formatted = ", ".join(f"`{f}`" for f in f_list[:3])
+                        if len(f_list) > 3:
+                            f_formatted += f" *(+{len(f_list)-3} more)*"
+                        lines.append(f"| Product/Category ID `{cat_id.strip()}` | {f_formatted} |")
+            lines.append("")
+
+        lines.append("</div>")
+        lines.append("</details>")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def generate_cp_category_hooks_templates_markdown(cp_data):
+    """Generates a category-based consolidated Markdown report for Templates & Framework Hooks."""
+    templates = cp_data.get("templates", [])
+    hooks = cp_data.get("hooks", [])
+
+    lines = []
+    lines.append("# Customer Portal Architecture Report: Templates & Framework Hooks")
+    lines.append("*Category Report: Infrastructure & Lifecycle Layer*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Technical inventory for `{len(templates)}` Layout Templates and `{len(hooks)}` Framework Lifecycle Hooks.")
+    lines.append("")
+
+    lines.append("## 1. Layout Templates Matrix (`views/templates/`)")
+    lines.append("")
+    lines.append("| Template File | Embedded Widgets Count | Pages Referencing Template |")
+    lines.append("| :--- | :--- | :--- |")
+
+    for t in templates:
+        tname = t.get("name", "template")
+        w_cnt = len(t.get("widgets", []))
+        used_p = t.get("used_in_pages", [])
+        p_str = ", ".join(f"`{p}`" for p in used_p[:4]) if used_p else "Global Layout"
+        lines.append(f"| `views/templates/{tname}` | `{w_cnt}` Widgets | {p_str} |")
+
+    lines.append("")
+    lines.append("## 2. Framework Lifecycle Hooks Matrix (`config/hooks.php`)")
+    lines.append("")
+    lines.append("| Hook Event Location | Target Model & Method | Class File Path | Affected Pages |")
+    lines.append("| :--- | :--- | :--- | :--- |")
+
+    for h in hooks:
+        hloc = h.get("hook_location", "pre_page_render")
+        t_mm = h.get("target_model_method", "custom_model::action")
+        fpath = h.get("filepath", "hooks/")
+        aff_p = h.get("affected_pages", "All Pages")
+        lines.append(f"| `{hloc}` | `{t_mm}` | `{fpath}` | `{aff_p}` |")
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+def generate_workspaces_by_object_markdown(workspaces):
+    """Generates a category-based consolidated Markdown report grouping all analyzed OSVC Workspaces by Object Entity."""
+    lines = []
+    lines.append("# Master Workspaces Architecture & Field Mapping Report")
+    lines.append("*Category Report: OSVC BUI / Agent Workspaces Grouped by Entity Object*")
+    lines.append("")
+
+    lines.append("> [!NOTE]")
+    lines.append(f"> Consolidated workspace inventory mapping form fields, custom fields (c$), tabsets, and rules for `{len(workspaces)}` OSVC Workspaces.")
+    lines.append("")
+
+    # Group workspaces by object entity
+    ws_by_obj = {}
+    for ws in workspaces:
+        wobj = "General"
+        wname = str(ws.get("name") or "").lower()
+        if "contact" in wname:
+            wobj = "Contact"
+        elif "incident" in wname:
+            wobj = "Incident"
+        elif "org" in wname:
+            wobj = "Organization"
+        elif "test" in wname:
+            wobj = "Test_Record"
+        else:
+            wobj = str(ws.get("object_type") or ws.get("module") or "General").capitalize()
+
+        ws_by_obj.setdefault(wobj, []).append(ws)
+
+    lines.append("## 1. Workspaces Executive Overview Matrix")
+    lines.append("")
+    lines.append("| Primary OSVC Object | Workspace Name | Tabsets Count | Rules Count | Custom Fields (c$) Count |")
+    lines.append("| :--- | :--- | :---: | :---: | :---: |")
+
+    for obj, ws_list in sorted(ws_by_obj.items()):
+        for ws in ws_list:
+            wname = ws.get("name", "Workspace")
+            tabs = len(ws.get("tabs", []))
+            rules = len(ws.get("rules", []))
+            c_fields = [f for f in ws.get("fields", []) if f.get("is_custom") or "c$" in str(f.get("field_id") or "")]
+            lines.append(f"| **{obj}** | `{wname}` | `{tabs}` Tabs | `{rules}` Rules | `{len(c_fields)}` Custom Fields |")
+
+    lines.append("")
+    lines.append("## 2. Detailed Workspace Component & Field Mapping by Entity Object")
+    lines.append("")
+
+    for obj, ws_list in sorted(ws_by_obj.items()):
+        lines.append(f"### Entity Module: {obj} ({len(ws_list)} Workspaces)")
+        lines.append("")
+
+        for ws in ws_list:
+            wname = ws.get("name", "Workspace")
+            tabs = ws.get("tabs", [])
+            rules = ws.get("rules", [])
+            fields = ws.get("fields", [])
+            c_fields = [f for f in fields if f.get("is_custom") or "c$" in str(f.get("field_id") or "")]
+
+            lines.append("<details open>")
+            lines.append(f'<summary style="font-weight: bold; font-size: 15px; cursor: pointer; padding: 6px; background: #f6f8fa; border-radius: 6px; border: 1px solid #d0d7de;">')
+            lines.append(f'<span style="background: #0969da; color: #ffffff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 8px;">WORKSPACE</span> {wname} ({obj})')
+            lines.append('</summary>')
+            lines.append('<div style="padding: 12px; border: 1px solid #d0d7de; border-top: none; border-radius: 0 0 6px 6px; background: #ffffff; margin-bottom: 12px;">')
+            lines.append("")
+            lines.append(f"- **Workspace Name**: `{wname}`")
+            lines.append(f"- **Primary Object Binding**: **{obj}**")
+            lines.append(f"- **Tabsets**: `{len(tabs)}` Tab Containers")
+            lines.append(f"- **Business Rules**: `{len(rules)}` Workspace Rules")
+            lines.append(f"- **Total Form Fields**: `{len(fields)}` (`{len(c_fields)}` Custom Fields)")
+            lines.append("")
+
+            if fields:
+                lines.append("#### Workspace Form Fields & Custom Fields (c$) Matrix")
+                lines.append("| Field Name / Label | Custom Field (c$) | Tabset Location | Field Properties |")
+                lines.append("| :--- | :---: | :--- | :--- |")
+                for f in fields[:15]:
+                    fid = f.get("field_id") or f.get("label") or "Unnamed Field"
+                    is_c = "Yes (c$)" if (f.get("is_custom") or "c$" in str(fid)) else "No"
+                    loc = f.get("location") or "Main Layout Panel"
+                    req = "Required" if f.get("required") else "Optional"
+                    lines.append(f"| `{fid}` | `{is_c}` | `{loc}` | `{req}` |")
+                if len(fields) > 15:
+                    lines.append(f"| *+ {len(fields)-15} additional form fields* | *Configured* | *Workspace Layout* | *Active* |")
+                lines.append("")
+
+            lines.append("</div>")
+            lines.append("</details>")
+            lines.append("")
 
     return "\n".join(lines)
 

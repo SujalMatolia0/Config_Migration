@@ -1914,23 +1914,23 @@ async function loadDocsAndDiagrams(node) {
   if (nType === "cpm" || nType === "asynccpm") {
     const rawLabel = node.label || (node.data && node.data.name) || "Procedure";
     const safeLabel = rawLabel.replace(/ /g, "_");
-    mdPath = `../cpm/report_CPM_${cleanMod}_${safeLabel}.md`;
+    mdPath = `/results/cpm/report_CPM_${cleanMod}_${safeLabel}.md`;
   } else if (!mdPath && node) {
     if (node.type === "category_hub") {
       const hType = node.hubType;
       if (hType === "cpm") {
-        mdPath = `../cpm/report_CPM_${cleanMod}.md`;
+        mdPath = `/results/cpm/report_CPM_${cleanMod}.md`;
       } else if (hType === "businessrule") {
-        mdPath = `../rules/report_Business_Rules_${cleanMod}.md`;
+        mdPath = `/results/rules/report_Business_Rules_${cleanMod}.md`;
       } else if (hType === "customscript") {
-        mdPath = `../scripts/report_Custom_Scripts.md`;
+        mdPath = `/results/scripts/report_Custom_Scripts.md`;
       } else if (hType === "buiaddin") {
-        mdPath = `../bui_addins/report_BUI_Addins.md`;
+        mdPath = `/results/bui_addins/report_BUI_Addins.md`;
       } else {
-        mdPath = `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`;
+        mdPath = `/results/system_mappings/report_Mapping_${cleanMod}.md`;
       }
-    } else if (node.type === "module_root") {
-      mdPath = `../COMPLETE_SYSTEM_MAPPING_${cleanMod}.md`;
+    } else if (node.type === "module_root" || node.type === "entity") {
+      mdPath = `/results/system_mappings/report_Mapping_${cleanMod}.md`;
     }
   }
 
@@ -1957,78 +1957,39 @@ async function loadDocsAndDiagrams(node) {
   let mermaidCode = null;
   let mdText = null;
 
-  if (mdPath) {
-    const cleanPath = mdPath.replace(/^\.\.\//, "");
-    const fileName = cleanPath.split("/").pop();
-    const cleanFileName = fileName.replace(/ /g, "_");
-    const spaceFileName = fileName.replace(/_/g, " ");
+  const candidateUrls = [
+    mdPath,
+    `/results/system_mappings/report_Mapping_${cleanMod}.md`,
+    `/results/system_mappings/report_Master_System_Mapping.md`,
+    `/results/workspaces/report_Workspaces_by_Object.md`,
+    `/results/customer_portal/report_Customer_Portal.md`,
+    `/results/customer_portal/report_CP_Models.md`,
+    `/results/customer_portal/report_CP_Widgets.md`,
+    `/results/customer_portal/report_CP_Pages.md`,
+    `/results/customer_portal/report_CP_Hooks_and_Templates.md`,
+    `/results/scripts/report_Custom_Scripts.md`,
+    `/results/cpm/report_CPM_${cleanMod}.md`,
+    `/results/cpm/report_CPM_Summary.md`,
+    `/results/rules/report_Business_Rules_${cleanMod}.md`,
+    `/results/rules/report_Business_Rules.md`,
+    `/results/bui_addins/report_BUI_Addins.md`
+  ].filter(Boolean);
 
-    const candidateUrls = [
-      mdPath,
-      "/results/" + cleanPath,
-      "/results/" + cleanPath.replace(/ /g, "_"),
-      "/results/markdown/" + cleanPath,
-      "/results/markdown/" + cleanPath.replace(/ /g, "_"),
-      "/results/bui_addins/" + fileName,
-      "/results/bui_addins/" + cleanFileName,
-      "/results/reports/" + fileName,
-      "/results/reports/" + cleanFileName,
-      "/results/workspaces/" + fileName,
-      "/results/workspaces/" + cleanFileName,
-      "/results/cpm/" + fileName,
-      "/results/cpm/" + cleanFileName,
-      "/results/rules/" + fileName,
-      "/results/rules/" + cleanFileName,
-      "/results/scripts/" + fileName,
-      "/results/scripts/" + cleanFileName,
-      "/results/scripts/" + spaceFileName
-    ];
-
-    for (const url of candidateUrls) {
-      try {
-        const fetchUrl = url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now();
-        const response = await fetch(fetchUrl, { signal: currentFetchController.signal });
-        if (response.ok) {
-          const txt = await response.text();
-          if (txt && txt.trim() && !txt.trim().toLowerCase().startsWith("<!doctype html>")) {
-            mdText = txt;
-            break;
-          }
+  for (const url of candidateUrls) {
+    try {
+      const fetchUrl = url + (url.includes("?") ? "&" : "?") + "_t=" + Date.now();
+      const response = await fetch(fetchUrl, { signal: currentFetchController.signal });
+      if (response.ok) {
+        const txt = await response.text();
+        if (txt && txt.trim() && !txt.trim().toLowerCase().startsWith("<!doctype html>")) {
+          mdText = txt;
+          break;
         }
-      } catch (err) {
-        if (err.name === "AbortError") return;
       }
+    } catch (err) {
+      if (err.name === "AbortError") return;
     }
   }
-
-function attachAccordionToggleBar(container) {
-  if (!container || container.querySelector(".accordion-toggle-bar")) return;
-  const detailsEls = container.querySelectorAll("details");
-  if (!detailsEls || !detailsEls.length) return;
-
-  const bar = document.createElement("div");
-  bar.className = "accordion-toggle-bar";
-  bar.style.cssText = `
-    display: flex;
-    gap: 8px;
-    margin: 0 0 14px 0;
-    align-items: center;
-  `;
-
-  bar.innerHTML = `
-    <button class="btn-expand-all" style="background: linear-gradient(180deg, #2563eb, #1d4ed8); color: #ffffff; border: 1px solid #1e40af; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;">+ Expand</button>
-    <button class="btn-collapse-all" style="background: linear-gradient(180deg, #475569, #334155); color: #ffffff; border: 1px solid #1e293b; padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12); display: inline-flex; align-items: center; gap: 4px;">&minus; Collapse</button>
-  `;
-
-  bar.querySelector(".btn-expand-all").addEventListener("click", () => {
-    container.querySelectorAll("details").forEach(d => d.open = true);
-  });
-  bar.querySelector(".btn-collapse-all").addEventListener("click", () => {
-    container.querySelectorAll("details").forEach(d => d.open = false);
-  });
-
-  container.insertBefore(bar, container.firstChild);
-}
 
   if (mdText) {
     tabDoc.innerHTML = typeof marked !== "undefined" ? marked.parse(mdText) : `<pre style="white-space:pre-wrap;">${esc(mdText)}</pre>`;
@@ -2036,17 +1997,55 @@ function attachAccordionToggleBar(container) {
     renderHtmlPreviewsInContainer(tabDoc);
     attachAccordionToggleBar(tabDoc);
     mermaidCode = extractMermaidCode(mdText, node);
-  }
-
-  if (!tabDoc.innerHTML || tabDoc.innerHTML.includes("Loading documentation")) {
-    tabDoc.innerHTML = `<div style="padding:12px; border:1px solid var(--border-subtle); border-radius:6px; background:var(--panel);">
-      <h3>${esc(node.label)}</h3>
-      <p><b>Component Type:</b> ${esc(TYPE_LABELS[node.type] || node.type)}</p>
-      <p><b>Associated Module:</b> ${esc(node.module || "General")}</p>
-      <p><b>Inbound Connections:</b> ${node.inc ? node.inc.length : 0}</p>
-      <p><b>Outbound Connections:</b> ${node.out ? node.out.length : 0}</p>
-      ${node.isOrphan ? `<div style="color:#E11D48;font-weight:700;margin-top:8px;">ORPHAN WARNING: ${esc(node.orphanReason || "Unreferenced component")}</div>` : ""}
+  } else {
+    // Generate structured Documentation panel for structural / category / entity nodes
+    let docHtml = `<div style="padding:14px; background:var(--panel2); border:1px solid var(--border-subtle); border-radius:8px; margin-bottom:14px;">
+      <h2 style="margin:0 0 8px 0; font-size:16px; color:var(--text-main);">${esc(node.label || node.id)}</h2>
+      <span class="type-chip" style="background:${TYPE_COLORS[node.type] || DEFAULT_COLOR}">${esc(TYPE_LABELS[node.type] || node.type)}</span>
+      <div style="margin-top:12px; font-size:12px; line-height:1.6; color:var(--text-main);">
+        <div><b>Associated Entity Module:</b> <code style="background:var(--panel); padding:2px 6px; border-radius:4px;">${esc(mod)}</code></div>
+        <div><b>Inbound Linkages:</b> <code>${node.inc ? node.inc.length : 0}</code></div>
+        <div><b>Outbound Linkages:</b> <code>${node.out ? node.out.length : 0}</code></div>
+        ${node.isOrphan ? `<div style="color:#ef4444; font-weight:700; margin-top:6px;">ORPHAN AUDIT FLAG: ${esc(node.orphanReason || "Unreferenced component")}</div>` : ""}
+      </div>
     </div>`;
+
+    const allConnected = [];
+    if (node.inc) {
+      node.inc.forEach(e => {
+        const srcN = nodeById[e.source];
+        if (srcN) allConnected.push({ name: srcN.label || srcN.id, type: srcN.type, dir: "Inbound", id: srcN.id });
+      });
+    }
+    if (node.out) {
+      node.out.forEach(e => {
+        const tgtN = nodeById[e.target];
+        if (tgtN) allConnected.push({ name: tgtN.label || tgtN.id, type: tgtN.type, dir: "Outbound", id: tgtN.id });
+      });
+    }
+
+    if (allConnected.length) {
+      docHtml += `<h3 style="font-size:13px; margin:14px 0 8px 0; color:var(--text-main);">Connected Component Inventory (${allConnected.length})</h3>
+      <table style="width:100%; border-collapse:collapse; font-size:12px;">
+        <thead>
+          <tr style="background:var(--panel2); text-align:left;">
+            <th style="padding:6px 8px; border:1px solid var(--border-subtle);">Component Name</th>
+            <th style="padding:6px 8px; border:1px solid var(--border-subtle);">Type</th>
+            <th style="padding:6px 8px; border:1px solid var(--border-subtle);">Direction</th>
+          </tr>
+        </thead>
+        <tbody>`;
+      allConnected.forEach(c => {
+        docHtml += `<tr style="border-bottom:1px solid var(--border-subtle);">
+          <td style="padding:6px 8px;"><b>${esc(c.name)}</b></td>
+          <td style="padding:6px 8px;"><span style="background:${TYPE_COLORS[c.type] || DEFAULT_COLOR}; color:#fff; padding:1px 6px; border-radius:4px; font-size:10px;">${esc(TYPE_LABELS[c.type] || c.type)}</span></td>
+          <td style="padding:6px 8px;"><code>${esc(c.dir)}</code></td>
+        </tr>`;
+      });
+      docHtml += `</tbody></table>`;
+    }
+
+    tabDoc.innerHTML = docHtml;
   }
 
   if (!mermaidCode) {

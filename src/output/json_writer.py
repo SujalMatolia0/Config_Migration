@@ -388,3 +388,39 @@ def write_business_rules_summary_json(rule_items, output_file):
             writer.writerow(["Object", "Action Type", "Rule Group", "Rule Name", "Status", "Condition", "Actions"])
             for row in r_rows:
                 writer.writerow([obj, atype, row["group_name"], row["rule_name"], row["status"], row["condition"], row["actions"]])
+
+
+def write_customer_portal_summary_json(cp_data, output_file):
+    """
+    Writes Customer Portal JSON report data to output_file.
+    """
+    out_dir = os.path.dirname(output_file)
+    os.makedirs(out_dir, exist_ok=True)
+    payload = {
+        "generated_at": datetime.now().isoformat(),
+        "component": "Customer Portal (CP3) MVC Framework",
+        "summary": cp_data.get("summary", []),
+        "models": cp_data.get("models", []),
+        "hooks": cp_data.get("hooks", []),
+        "templates": cp_data.get("templates", []),
+        "pages": [
+            {
+                "page_file": p.get("page_file"),
+                "key_widgets": p.get("key_widgets"),
+                "purpose": p.get("purpose"),
+                "login_required": p.get("login_required")
+            } for p in cp_data.get("pages", [])
+        ],
+        "widgets": [
+            {
+                "name": w.get("name"),
+                "file_path": w.get("file_path"),
+                "purpose": w.get("purpose"),
+                "used_in_pages": w.get("used_in_pages_str")
+            } for w in cp_data.get("widgets", [])
+        ],
+        "community": cp_data.get("community", [])
+    }
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    return output_file

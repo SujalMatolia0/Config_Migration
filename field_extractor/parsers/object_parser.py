@@ -26,12 +26,30 @@ def parse_object_xml(file_path):
         package_elem = c_obj.find("Package")
         package_name = package_elem.get("Name") if package_elem is not None else "CO"
 
+        menu_items = []
+        menu_elem = c_obj.find(".//MenuItems")
+        if menu_elem is not None:
+            for mi in menu_elem.findall("MenuItem"):
+                mi_name = mi.get("Name")
+                if mi_name:
+                    menu_items.append(mi_name)
+
+        is_menu_object = (
+            c_obj.get("IsMenu", "False").lower() in ("true", "1") or
+            c_obj.get("IsMenuOnlyClass", "False").lower() in ("true", "1") or
+            bool(menu_items)
+        )
+        co_label = c_obj.get("CoLabel") or obj_name
+
         fields = []
         for f in c_obj.findall(".//Fields/Field"):
             f_id = f.get("Id") or ""
             f_name = f.get("Name") or ""
             f_label = f.get("Label") or f_name
             data_type = f.get("DataTypeName") or f.get("DataType") or "Text"
+            if is_menu_object and f_name.lower() == "name":
+                data_type = "Menu"
+
             is_nullable = f.get("IsNullable", "True").lower() in ("true", "1")
             is_list = f.get("IsList", "False").lower() in ("true", "1")
             is_lookup = f.get("IsLookup", "False").lower() in ("true", "1")
@@ -51,7 +69,7 @@ def parse_object_xml(file_path):
             pattern = f.get("Pattern") or "-"
             usage = f.get("Usage") or "-"
 
-            fields.append({
+            field_dict = {
                 "object_name": obj_name,
                 "package_name": f_pkg,
                 "field_id": f_id,
@@ -69,12 +87,21 @@ def parse_object_xml(file_path):
                 "description": desc,
                 "pattern": pattern,
                 "usage": usage
-            })
+            }
+            if menu_items:
+                field_dict["menu_items"] = menu_items
+                field_dict["items"] = ":".join(menu_items)
+
+            fields.append(field_dict)
 
         results.append({
             "object_name": obj_name,
+            "co_label": co_label,
             "package_name": package_name,
             "total_object_fields": len(fields),
+            "is_menu_object": is_menu_object,
+            "menu_items": menu_items,
+            "menu_items_str": ":".join(menu_items),
             "fields": fields
         })
 

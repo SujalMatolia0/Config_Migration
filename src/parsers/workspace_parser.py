@@ -376,6 +376,13 @@ def parse_workspace_file(file_path, strict=False):
                     "required_option": field.get("RequiredOption"),
                     "row_span": int(field.get("RowSpan")) if field.get("RowSpan") else None,
                     "layout_label_alignment": field.get("LayoutLabelAlignment"),
+                    "layout_label_position": field.get("LayoutLabelPosition"),
+                    "kb_report_id": field.get("KBReportId"),
+                    "set_fixed_height": field.get("SetFixedHeight"),
+                    "height": field.get("Height"),
+                    "width": field.get("Width"),
+                    "increment": field.get("Increment"),
+                    "scroll_bars": field.get("ScrollBars"),
                     "required_for_solved": field.get("RequiredForSolved"),
                     "show_parent": field.get("ShowParent")
                 })
